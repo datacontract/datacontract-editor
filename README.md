@@ -1,6 +1,8 @@
 # datacontract-studio
 
 ```
+npm install
+
 npm run dev # start the development server
 
 npm run build # build the project in the dist folder
