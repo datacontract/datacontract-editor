@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "precompile": "node_modules/nunjucks/bin/precompile public/templates > public/templates.js",
-    "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
     "serve": "webpack serve --mode development  --stats-children"
   },
