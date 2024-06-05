@@ -84,9 +84,13 @@ env.addGlobal('render_partial', function (partialName, context) {
 
 document.getElementById("menu-item-clear").addEventListener("click", function () {
     editor.setValue("");
+
+    document.getElementById("menu-file").click();
 });
 
 document.getElementById("menu-item-open-file").addEventListener("click", function () {
+
+    document.getElementById("menu-file").click();
 
     // Returns a Promise of a single File object
     async function askUserToSelectFile() {
@@ -101,6 +105,8 @@ document.getElementById("menu-item-open-file").addEventListener("click", functio
 });
 
 document.getElementById("menu-item-save").addEventListener("click", function () {
+    document.getElementById("menu-file").click();
+
     const fileContent = editor.getValue()
     const bb = new Blob([fileContent ], { type: 'text/plain' });
     const a = document.createElement('a');
@@ -111,8 +117,11 @@ document.getElementById("menu-item-save").addEventListener("click", function () 
 });
 
 document.getElementById("menu-item-share").addEventListener("click", function () {
+    document.getElementById("menu-file").click();
+
     const url = "localhost:9000/?dc=" + window.btoa(editor.getValue());
     navigator.clipboard.writeText(url);
+
     alert("Copied share URL to clipboard")
 });
 
@@ -123,6 +132,7 @@ info:
   title: My Data Contract
   version: 0.0.1
 `);
+    document.getElementById("menu-file").click();
 });
 
 document.getElementById("menu-item-load-example").addEventListener("click", function () {
@@ -304,6 +314,9 @@ quality:
       - values in (order_id) must exist in orders (order_id)
       - row_count >= 5
     `);
+
+    document.getElementById("menu-file").click();
+
 });
 
 import Worker from './parser.worker.js';
