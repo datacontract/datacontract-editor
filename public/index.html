@@ -1,0 +1,260 @@
+
+<!doctype html>
+<html class="h-full bg-gray-100" lang="en">
+<head>
+  <title>Data Contract Studio</title>
+
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="description" content="Data Contract Studio is a tool to view and edit data contracts.">
+  <meta property="og:title" content="Data Contract Studio: View and edit data contracts">
+  <meta property="og:description" content="Data Contract Studio is a tool to view and edit data contracts.">
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://datacontract.com/images/datacontract-preview.png" />
+
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+<body class="h-screen w-full">
+
+<div class="flex flex-col">
+
+  <nav class="bg-white shadow-sm">
+    <div class="px-2 sm:px-4 lg:px-6">
+      <div class="flex h-16 justify-between">
+        <div class="flex">
+          <div class="flex flex-shrink-0 items-center mr-6">
+            <!--          <img src="/assets/media/logos/logo.png" width="42" class="ml-1 mr-3">-->
+            <a class="text-xl text-gray-900 font-semibold" href="/">
+              Data Contract Studio
+            </a>
+          </div>
+          <div class="hidden sm:-my-px sm:ml-3 sm:flex sm:space-x-8 text-sm">
+            <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+
+            <div class="relative inline-block text-left"
+                 x-data="{
+                        open: false,
+                        toggle() {
+                            if (this.open) {
+                                return this.close()
+                            }
+                            this.$refs.button.focus()
+                            this.open = true
+                        },
+                        close(focusAfter) {
+                            if (! this.open) return
+                            this.open = false
+                            focusAfter && focusAfter.focus()
+                        }
+                    }"
+                 x-on:keydown.escape.prevent.stop="close($refs.button)"
+                 x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                 x-id="['dropdown-button']"
+            >
+              <div class="inline-flex h-full items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                <button type="button"
+                        id="menu-button"
+                        class="inline-flex"
+                        aria-expanded="true"
+                        aria-haspopup="true"
+                        x-ref="button"
+                        x-on:click="toggle()"
+                        :aria-expanded="open"
+                        :aria-controls="$id('dropdown-button')">
+                  File
+                  <svg class="-mr-1 h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="absolute left-0 z-10 mt-2 w-32 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                   role="menu"
+                   aria-orientation="vertical"
+                   aria-labelledby="menu-button"
+                   tabindex="-1"
+                   x-ref="panel"
+                   x-cloak
+                   x-show="open"
+                   x-transition.origin.top.left
+                   x-on:click.outside="close($refs.button)"
+                   :id="$id('dropdown-button')"
+              >
+                <div class="py-1" role="none">
+                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     role="menuitem" tabindex="-1" id="menu-item-open-file">
+                    Open ...
+                  </a>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                          role="menuitem" tabindex="-1" id="menu-item-load-minimal">
+                    Load Minimal
+                  </a>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     role="menuitem" tabindex="-1" id="menu-item-load-example">
+                    Load Example
+                  </a>
+                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                          role="menuitem" tabindex="-1" id="menu-item-save">
+                    Save
+                  </button>
+                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     role="menuitem" tabindex="-1" id="menu-item-share">
+                    Share
+                  </button>
+                  <hr>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     role="menuitem" tabindex="-1" id="menu-item-clear">
+                    Clear
+                  </a>
+                </div>
+
+              </div>
+            </div>
+
+            <button class="inline-flex items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-300 hover:border-gray-300 hover:text-gray-500 cursor-not-allowed"
+                    disabled
+            >
+              Import
+            </button>
+
+            <button class="inline-flex items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-300 hover:border-gray-300 hover:text-gray-500 cursor-not-allowed"
+               disabled
+            >
+              Export
+            </button>
+
+            <div class="relative inline-block text-left"
+                 x-data="{
+                        open: false,
+                        toggle() {
+                            if (this.open) {
+                                return this.close()
+                            }
+                            this.$refs.button.focus()
+                            this.open = true
+                        },
+                        close(focusAfter) {
+                            if (! this.open) return
+                            this.open = false
+                            focusAfter && focusAfter.focus()
+                        }
+                    }"
+                 x-on:keydown.escape.prevent.stop="close($refs.button)"
+                 x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                 x-id="['dropdown-button']"
+            >
+              <div class="inline-flex h-full items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                <button type="button"
+                        id="menu-button"
+                        class="inline-flex"
+                        aria-expanded="true"
+                        aria-haspopup="true"
+                        x-ref="button"
+                        x-on:click="toggle()"
+                        :aria-expanded="open"
+                        :aria-controls="$id('dropdown-button')">
+                  About
+                  <svg class="-mr-1 h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="absolute left-0 z-10 mt-2 w-64 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                   role="menu"
+                   aria-orientation="vertical"
+                   aria-labelledby="menu-button"
+                   tabindex="-1"
+                   x-ref="panel"
+                   x-cloak
+                   x-show="open"
+                   x-transition.origin.top.left
+                   x-on:click.outside="close($refs.button)"
+                   :id="$id('dropdown-button')"
+              >
+                <div class="py-1" role="none">
+                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://github.com/datacontract/datacontract-studio"
+                     role="menuitem" tabindex="-1" id="menu-item-0">
+                    View on GitHub
+                  </a>
+
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://datacontract.com/"
+                     role="menuitem" tabindex="-1" id="menu-item-5">
+                    Data Contract Specification
+                  </a>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://cli.datacontract.com/"
+                     role="menuitem" tabindex="-1" id="menu-item-3">
+                    Data Contract CLI
+                  </a>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://gpt.datacontract.com/"
+                     role="menuitem" tabindex="-1" id="menu-item-4">
+                    Data Contract GPT
+                  </a>
+
+
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://www.innoq.com/en/impressum/"
+                     role="menuitem" tabindex="-1" id="menu-item-1">
+                    Imprint
+                  </a>
+                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
+                     href="https://www.innoq.com/en/datenschutz/"
+                     role="menuitem" tabindex="-1" id="menu-item-2">
+                    Privacy
+                  </a>
+                </div>
+
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+        <div class="hidden sm:ml-6 sm:flex sm:items-center">
+          <a href="https://datacontract.com" class="text--link text-sm font-semibold" target="_blank">datacontract.com</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div>
+    <main class="border-t border-gray-300">
+      <div class="grid grid-col-2">
+        <div class="overflow-hidden col-span-1">
+          <div class="text-sm h-screen">
+            <div id="editor" class="h-full"></div>
+            <div id="problems"></div>
+          </div>
+        </div>
+        <div class="overflow-hidden  col-span-1">
+          <div id="preview" class="overflow-y-scroll h-screen p-3">HTML Preview</div>
+        </div>
+        <div class="col-span-2">
+        </div>
+      </div>
+
+      <script src="/templates.js"></script>
+      <script src="/main.js"></script>
+
+    </main>
+  </div>
+
+</div>
+
+<!-- 100% privacy-first analytics -->
+<script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
+
+</body>
+</html>
