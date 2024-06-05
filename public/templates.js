@@ -5,11 +5,17 @@ var colno = 0;
 var output = "";
 try {
 var parentTemplate = null;
-output += "<div class=\"px-2\">\n  <div>\n    <div class=\"md:flex md:items-center md:justify-between px-4 sm:px-0\">\n      <div class=\"min-w-0 flex-1\">\n        <h2 class=\"text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight\">\n          Data Contract</h2>\n        <div class=\"mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6\">\n          ";
+if(runtime.contextOrFrameLookup(context, frame, "datacontract")) {
+output += "\n<div class=\"px-2\">\n  <div>\n    <div class=\"md:flex md:items-center md:justify-between px-4 sm:px-0\">\n      <div class=\"min-w-0 flex-1\">\n        <h2 class=\"text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight\">\n          Data Contract</h2>\n        <div class=\"mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6\">\n          ";
 output += runtime.suppressValue(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"id"), env.opts.autoescape);
-output += "\n        </div>\n      </div>\n    </div>\n  </div>\n\n  <div>\n    <div class=\"space-y-6 mt-6\">\n      <section id=\"information\">\n        ";
-output += runtime.suppressValue((lineno = 16, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_information.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
-output += "\n      </section>\n\n\n      ";
+output += "\n        </div>\n      </div>\n    </div>\n  </div>\n\n  <div>\n    <div class=\"space-y-6 mt-6\">\n      ";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"info")) {
+output += "\n      <section id=\"information\">\n        ";
+output += runtime.suppressValue((lineno = 18, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_information.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
+output += "\n      </section>\n      ";
+;
+}
+output += "\n\n\n      ";
 if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"servers")) {
 output += "\n      <section id=\"servers\">\n        <div class=\"px-4 sm:px-0\">\n          <h1 class=\"text-base font-semibold leading-6 text-gray-900\" id=\"servers\">Servers</h1>\n          <p class=\"text-sm text-gray-500\">Servers of the data contract</p>\n        </div>\n\n        <ul role=\"list\" class=\"mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg\">\n\n          ";
 frame = frame.push();
@@ -31,7 +37,7 @@ frame.set("loop.first", t_1 === 0);
 frame.set("loop.last", t_1 === t_2 - 1);
 frame.set("loop.length", t_2);
 output += "\n            ";
-output += runtime.suppressValue((lineno = 30, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/server.html",runtime.makeKeywordArgs({"server_name": t_4,"server": t_5})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 33, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/server.html",runtime.makeKeywordArgs({"server_name": t_4,"server": t_5})])), env.opts.autoescape);
 output += "\n          ";
 ;
 }
@@ -51,7 +57,7 @@ frame.set("loop.first", t_1 === 0);
 frame.set("loop.last", t_1 === t_2 - 1);
 frame.set("loop.length", t_2);
 output += "\n            ";
-output += runtime.suppressValue((lineno = 30, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/server.html",runtime.makeKeywordArgs({"server_name": t_6,"server": t_7})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 33, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/server.html",runtime.makeKeywordArgs({"server_name": t_6,"server": t_7})])), env.opts.autoescape);
 output += "\n          ";
 ;
 }
@@ -64,11 +70,13 @@ output += "\n\n        </ul>\n\n      </section>\n      ";
 output += "\n\n\n      ";
 if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"terms")) {
 output += "\n      <section id=\"terms\">\n        ";
-output += runtime.suppressValue((lineno = 41, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_terms.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 44, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_terms.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
 output += "\n      </section>\n      ";
 ;
 }
-output += "\n\n\n      <section id=\"models\">\n        <div class=\"flex justify-between\">\n          <div class=\"px-4 sm:px-0\">\n            <h1 class=\"text-base font-semibold leading-6 text-gray-900\">\n              Data Model\n            </h1>\n            <p class=\"text-sm text-gray-500\">The logical data model</p>\n          </div>\n        </div>\n\n        ";
+output += "\n\n\n      ";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"models")) {
+output += "\n      <section id=\"models\">\n        <div class=\"flex justify-between\">\n          <div class=\"px-4 sm:px-0\">\n            <h1 class=\"text-base font-semibold leading-6 text-gray-900\">\n              Data Model\n            </h1>\n            <p class=\"text-sm text-gray-500\">The logical data model</p>\n          </div>\n        </div>\n\n        ";
 frame = frame.push();
 var t_10 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"models");
 if(t_10) {t_10 = runtime.fromIterator(t_10);
@@ -113,7 +121,7 @@ frame.set("loop.first", t_13 === 0);
 frame.set("loop.last", t_13 === t_14 - 1);
 frame.set("loop.length", t_14);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 76, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_16,"field": t_17,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_16,"field": t_17,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -133,7 +141,7 @@ frame.set("loop.first", t_13 === 0);
 frame.set("loop.last", t_13 === t_14 - 1);
 frame.set("loop.length", t_14);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 76, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_18,"field": t_19,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_18,"field": t_19,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -184,7 +192,7 @@ frame.set("loop.first", t_22 === 0);
 frame.set("loop.last", t_22 === t_23 - 1);
 frame.set("loop.length", t_23);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 76, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_25,"field": t_26,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_25,"field": t_26,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -204,7 +212,7 @@ frame.set("loop.first", t_22 === 0);
 frame.set("loop.last", t_22 === t_23 - 1);
 frame.set("loop.length", t_23);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 76, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_27,"field": t_28,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_27,"field": t_28,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -217,7 +225,10 @@ output += "\n                  </tbody>\n                </table>\n             
 }
 }
 frame = frame.pop();
-output += "\n      </section>\n\n      ";
+output += "\n      </section>\n      ";
+;
+}
+output += "\n\n      ";
 if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"definitions")) {
 output += "\n      <section id=\"definitions\">\n        <div class=\"px-4 sm:px-0\">\n          <h1 class=\"text-base font-semibold leading-6 text-gray-900\">Definitions</h1>\n          <p class=\"text-sm text-gray-500\">Domain specific definitions in the data contract</p>\n        </div>\n\n        ";
 frame = frame.push();
@@ -239,7 +250,7 @@ frame.set("loop.first", t_29 === 0);
 frame.set("loop.last", t_29 === t_30 - 1);
 frame.set("loop.length", t_30);
 output += "\n        ";
-output += runtime.suppressValue((lineno = 95, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/definition.html",runtime.makeKeywordArgs({"definition_name": t_32,"definition": t_33})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 100, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/definition.html",runtime.makeKeywordArgs({"definition_name": t_32,"definition": t_33})])), env.opts.autoescape);
 output += "\n        ";
 ;
 }
@@ -259,7 +270,7 @@ frame.set("loop.first", t_29 === 0);
 frame.set("loop.last", t_29 === t_30 - 1);
 frame.set("loop.length", t_30);
 output += "\n        ";
-output += runtime.suppressValue((lineno = 95, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/definition.html",runtime.makeKeywordArgs({"definition_name": t_34,"definition": t_35})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 100, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/definition.html",runtime.makeKeywordArgs({"definition_name": t_34,"definition": t_35})])), env.opts.autoescape);
 output += "\n        ";
 ;
 }
@@ -287,7 +298,7 @@ frame.set("loop.first", t_36 === 0);
 frame.set("loop.last", t_36 === t_37 - 1);
 frame.set("loop.length", t_37);
 output += "\n          ";
-output += runtime.suppressValue((lineno = 107, colno = 27, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/example.html",runtime.makeKeywordArgs({"example": t_39})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 112, colno = 27, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/example.html",runtime.makeKeywordArgs({"example": t_39})])), env.opts.autoescape);
 output += "\n        ";
 ;
 }
@@ -299,7 +310,7 @@ output += "\n      </section>\n      ";
 output += "\n\n      ";
 if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"servicelevels")) {
 output += "\n      <section id=\"servicelevels\">\n        ";
-output += runtime.suppressValue((lineno = 114, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_servicelevels.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 119, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/datacontract_servicelevels.html",runtime.makeKeywordArgs({"datacontract": runtime.contextOrFrameLookup(context, frame, "datacontract")})])), env.opts.autoescape);
 output += "\n      </section>\n      ";
 ;
 }
@@ -313,6 +324,9 @@ output += "</code></pre>\n              </div>\n            </div>\n          </
 ;
 }
 output += "\n\n    </div>\n  </div>\n</div>\n";
+;
+}
+output += "\n";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
 } else {

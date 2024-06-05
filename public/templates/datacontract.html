@@ -1,3 +1,4 @@
+{% if datacontract %}
 <div class="px-2">
   <div>
     <div class="md:flex md:items-center md:justify-between px-4 sm:px-0">
@@ -13,9 +14,11 @@
 
   <div>
     <div class="space-y-6 mt-6">
+      {% if datacontract.info %}
       <section id="information">
         {{ render_partial('partials/datacontract_information.html', datacontract = datacontract) }}
       </section>
+      {% endif %}
 
 
       {% if datacontract.servers %}
@@ -44,6 +47,7 @@
       {% endif %}
 
 
+      {% if datacontract.models %}
       <section id="models">
         <div class="flex justify-between">
           <div class="px-4 sm:px-0">
@@ -84,6 +88,7 @@
         </div>
         {% endfor %}
       </section>
+      {% endif %}
 
       {% if datacontract.definitions %}
       <section id="definitions">
@@ -139,3 +144,4 @@
     </div>
   </div>
 </div>
+{% endif %}
