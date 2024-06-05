@@ -23,7 +23,7 @@
 
 <div class="flex flex-col">
 
-  <nav class="bg-white shadow-sm">
+  <nav class="bg-white shadow-sm"x>
     <div class="px-2 sm:px-4 lg:px-6">
       <div class="flex h-16 justify-between">
         <div class="flex">
@@ -229,18 +229,33 @@
   </nav>
 
   <div>
+    <style>
+      .split {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .gutter {
+        background-color: #eee;
+        background-repeat: no-repeat;
+        background-position: 50%;
+      }
+
+      .gutter.gutter-horizontal {
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+        cursor: col-resize;
+      }
+    </style>
     <main class="border-t border-gray-300">
-      <div class="grid grid-col-2">
-        <div class="overflow-hidden col-span-1">
+      <div class="split">
+        <div id="split-0">
           <div class="text-sm h-screen">
-            <div id="editor" class="h-full"></div>
+            <div id="editor" class="h-full w-full"></div>
             <div id="problems"></div>
           </div>
         </div>
-        <div class="overflow-hidden  col-span-1">
+        <div id="split-1">
           <div id="preview" class="overflow-y-scroll h-screen p-3">HTML Preview</div>
-        </div>
-        <div class="col-span-2">
         </div>
       </div>
 

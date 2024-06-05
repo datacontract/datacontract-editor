@@ -13,7 +13,8 @@
     "js-yaml": "^4.1.0",
     "monaco-editor": "^0.43.0",
     "monaco-yaml": "^5.1.0",
-    "nunjucks": "^3.2.4"
+    "nunjucks": "^3.2.4",
+    "split.js": "^1.6.5"
   },
   "devDependencies": {
     "css-loader": "^6.0.0",

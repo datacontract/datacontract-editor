@@ -116,6 +116,10 @@ document.getElementById("menu-item-save").addEventListener("click", function () 
     a.remove();
 });
 
+import Split from 'split.js'
+
+Split(['#split-0', '#split-1'])
+
 document.getElementById("menu-item-share").addEventListener("click", function () {
     document.getElementById("menu-file").click();
 
