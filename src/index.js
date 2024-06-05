@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor'
 import {MarkerSeverity} from 'monaco-editor'
 import {configureMonacoYaml} from 'monaco-yaml'
 import Split from 'split.js'
-import Worker from './parser.worker.js';
+import ParserWorker from './parser.worker.js';
 import renderDataContract from "./render.js";
 import {getExample, getMinimal} from "./examples.js";
 
@@ -71,7 +71,9 @@ const editor = monaco.editor.create(document.getElementById(containerMonacoEdito
     automaticLayout: true,
     minimap: {
         enabled: false
-    }
+    },
+    fixedOverflowWidgets: true,
+    scrollBeyondLastLine: false
 });
 
 
@@ -133,7 +135,7 @@ document.getElementById("menu-item-load-example").addEventListener("click", func
     document.getElementById("menu-file").click();
 });
 
-const worker = new Worker();
+const worker = new ParserWorker();
 worker.onmessage = function (message) {
     if (message.data.status === "error") {
         const htmlPreview = `<div>ERROR: ${message.data.error}</div>`

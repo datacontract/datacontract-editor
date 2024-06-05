@@ -16,7 +16,7 @@ export default {
                 type: 'asset'
             },
             {
-                test: /\.worker\.js$/,
+                test: /parser.worker\.js$/,
                 use: { loader: "worker-loader" },
             },
         ]
