@@ -1,5 +1,10 @@
 import yaml from "js-yaml";
 
+/*
+ * Parsing YAML takes time. We do not want to block the main rendering thread.
+ * That's why we do the YAML parsing in a separate worker thread.
+ */
+
 self.onmessage = function(message) {
     if (message.data.command === "parse") {
         try {
