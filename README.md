@@ -39,4 +39,10 @@ Templates are taken from the Data Contract CLI. To update the templates, do the 
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+## Credits
+
+Created by [Dr. Simon Harrer](https://www.linkedin.com/in/simonharrer/) and [Jochen Christ](https://www.linkedin.com/in/jochenchrist/).
+
+Supported by [INNOQ](https://www.innoq.com).
