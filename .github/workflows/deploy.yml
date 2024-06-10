@@ -43,6 +43,9 @@ jobs:
       - name: Copy templates
         run: cp public/templates.js dist/templates.js
 
+      - name: Copy images
+        run: cp -r images dist
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
