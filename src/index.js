@@ -6,6 +6,11 @@ import ParserWorker from './parser.worker.js';
 import renderDataContract from "./render.js";
 import {getExample, getMinimal} from "./examples.js";
 
+// init alpine
+import Alpine from 'alpinejs'
+window.Alpine = Alpine
+Alpine.start()
+
 window.MonacoEnvironment = {
     getWorker(moduleId, label) {
         switch (label) {
@@ -58,6 +63,7 @@ const urlParams = new URLSearchParams(queryString);
 if (urlParams.has("dc")) {
     const value = window.atob(urlParams.get("dc"));
     storeDataContractYaml(value);
+    window.location.search = "";
 }
 const valueFromLocalStorage = loadDataContractYaml();
 const value = valueFromLocalStorage;
@@ -138,10 +144,30 @@ document.getElementById("menu-item-load-example").addEventListener("click", func
 const worker = new ParserWorker();
 worker.onmessage = function (message) {
     if (message.data.status === "error") {
-        const htmlPreview = `<div>ERROR: ${message.data.error}</div>`
-        preview.innerHTML = htmlPreview;
+        console.log(message.data.error);
+        document.getElementById("parsing").innerHTML = `
+        <div class="rounded-md bg-red-50 p-4">
+  <div class="flex">
+    <div class="flex-shrink-0">
+      <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="ml-3">
+      <h3 class="text-sm font-medium text-red-800">YAML parsing failed</h3>
+      <div class="mt-2 text-sm text-red-700">
+        <ul role="list" class="list-disc space-y-1 pl-5">
+          <li>${message.data.error.message}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+        `;
+        preview.innerHTML = "";
     }
     if (message.data.status === "success") {
+        document.getElementById("parsing").innerHTML = "";
         preview.innerHTML = renderDataContract(message.data.json);
     }
 };
@@ -169,47 +195,70 @@ resizeObserver.observe(document.getElementById(containerMonacoEditor));
 
 function showProblems(resource) {
     const problems = document.getElementById('problems');
+
     const markers = monaco.editor.getModelMarkers({resource});
-    while (problems.lastChild) {
-        problems.lastChild.remove();
-    }
-    var errors = 0;
+    var validationErrors = [];
     for (const marker of markers) {
         if (marker.severity === MarkerSeverity.Hint) {
             continue;
         }
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('role', 'button');
-        const codicon = document.createElement('span');
-        const text = document.createElement('span');
-        wrapper.classList.add('problem');
-        if (MarkerSeverity.Warning) {
-            codicon.textContent = 'Warning' + ': ';
-            wrapper.classList.add('text-red-700');
-        } else if (MarkerSeverity.Hint) {
-            codicon.textContent = 'Hint' + ': ';
-        } else if (MarkerSeverity.Info) {
-            codicon.textContent = 'Info' + ': ';
-        } else {
-            codicon.textContent = 'Error' + ': ';
-            wrapper.classList.add('text-red-700');
-        }
-        text.classList.add('problem-text');
-        text.textContent = marker.message;
-        wrapper.append(codicon, text);
-        wrapper.addEventListener('click', function () {
-            editor.setPosition({lineNumber: marker.startLineNumber, column: marker.startColumn});
-            editor.focus();
+        validationErrors.push({
+            text: marker.message,
+            level: "ERROR",
+            lineNumber: marker.startLineNumber,
+            column: marker.startColumn
         });
-        errors++;
-        problems.append(wrapper);
     }
-    const wrapper = document.createElement('div');
 
     let schemaUrl = "https://datacontract.com/datacontract.schema.json";
+    renderProblems(schemaUrl, validationErrors);
+}
 
-    wrapper.innerHTML = `<div><a class="text--link text-semibold" href="${schemaUrl}">schema</a> validation: <span class="text-${errors === 0 ? 'green' : 'red'}-700">${errors} errors or warnings found</span></div>`;
-    problems.prepend(wrapper)
+function renderProblems(schemaUrl, validationErrors) {
+    const problems = document.getElementById('problems');
+    if (validationErrors.length === 0) {
+        problems.innerHTML = ``;
+    } else {
+        var problemItems = "";
+        for (const validationError of validationErrors) {
+            problemItems += `<li 
+class="cursor-pointer"
+data-level="${validationError.level}"
+data-lineNumber="${validationError.lineNumber}" 
+data-column="${validationError.column}">Line ${validationError.lineNumber}: ${validationError.text}</li>`
+        }
+
+        problems.innerHTML = `
+<div class="rounded-md bg-red-50 p-4">
+  <div class="flex">
+    <div class="flex-shrink-0">
+      <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="ml-3">
+      <h3 class="text-sm font-medium text-red-800">YAML <a href="${schemaUrl}">schema</a> validation failed</h3>
+      <div class="mt-2 text-sm text-red-700">
+        <ul role="list" class="list-disc space-y-1 pl-5" id="problem-list">
+            ${problemItems}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+        const problemListItems = problems.querySelectorAll('li');
+        for (const problemListItem of problemListItems) {
+            problemListItem.addEventListener('click', function (e) {
+                editor.setPosition({
+                    lineNumber: parseInt(e.target.dataset.linenumber),
+                    column: parseInt(e.target.dataset.column)
+                });
+                editor.focus();
+            });
+        }
+
+    }
 }
 
 monaco.editor.onDidChangeMarkers(function (resource) {

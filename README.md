@@ -3,7 +3,7 @@
 ```bash
 # run locally
 npm install
-npm run serve
+npm run dev
 ```
 
 ```bash

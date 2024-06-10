@@ -1,14 +1,15 @@
 {
-  "name": "datacontract-studio",
+  "name": "datacontract-editor",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "dev": "webpack serve --mode development  --stats-children",
     "precompile": "node_modules/nunjucks/bin/precompile public/templates > public/templates.js",
-    "build": "webpack --mode production",
-    "serve": "webpack serve --mode development  --stats-children"
+    "build": "webpack --mode production"
   },
   "dependencies": {
+    "alpinejs": "^3.14.0",
     "js-yaml": "^4.1.0",
     "monaco-editor": "0.49.0",
     "monaco-yaml": "5.1.1",
