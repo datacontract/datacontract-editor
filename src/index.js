@@ -53,18 +53,28 @@ let containerMonacoEditor = "editor";
 
 function storeDataContractYaml(yaml) {
     localStorage.setItem("dataContractYaml", yaml);
+    localStorage.setItem("dataContractYamlUpdated", new Date().toISOString());
 }
 function loadDataContractYaml() {
     return localStorage.getItem("dataContractYaml");
 }
+function isFirstLoadOfDataContractEditor() {
+    return localStorage.getItem("dataContractYamlUpdated") === null;
+}
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
+
 if (urlParams.has("dc")) {
     const value = window.atob(urlParams.get("dc"));
     storeDataContractYaml(value);
     window.location.search = "";
 }
+
+if (isFirstLoadOfDataContractEditor()) {
+    storeDataContractYaml(getExample());
+}
+
 const valueFromLocalStorage = loadDataContractYaml();
 const value = valueFromLocalStorage;
 let uri = "file:///datacontract.yaml";
