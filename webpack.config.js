@@ -3,6 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+
 
 export default {
     module: {
@@ -44,6 +46,9 @@ export default {
                     }
                 }
             ]
+        }),
+        new HtmlWebpackPlugin({
+            template: 'src/index.html'
         })
     ]
 }
