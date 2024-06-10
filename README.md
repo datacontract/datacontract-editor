@@ -12,6 +12,8 @@ The [Data Contract Editor](https://editor.datacontract.com) is like VS Code, but
 
 Try it out at [editor.datacontract.com](https://editor.datacontract.com).
 
+![Data Contract Editor](images/screenshot.png)
+
 ## Development Setup
 
 ```bash
