@@ -10,6 +10,6 @@ env.addGlobal('render_partial', function (partialName, context) {
     return nunjucks.render(partialName, context);
 });
 
-export default function renderDataContract(dataContract) {
+export function renderDataContract(dataContract) {
     return nunjucks.render("datacontract.html", {datacontract: dataContract});
 }

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "webpack serve --mode development  --stats-children",
     "precompile": "node_modules/nunjucks/bin/precompile templates > public/templates.js",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "lint": "eslint src/*.js"
   },
   "dependencies": {
     "alpinejs": "^3.14.0",
@@ -18,7 +19,10 @@
     "worker-loader": "3.0.8"
   },
   "devDependencies": {
+    "@eslint/js": "^9.4.0",
     "css-loader": "^6.0.0",
+    "eslint": "^9.4.0",
+    "globals": "^15.4.0",
     "html-webpack-plugin": "^5.6.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "style-loader": "^3.0.0",
