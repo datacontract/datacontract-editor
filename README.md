@@ -7,6 +7,7 @@ The [Data Contract Editor](https://editor.datacontract.com) is like VS Code, but
 - ✅ Syntax highlighting
 - ✅ Code completion
 - ✅ Error checking
+- ✅ Privacy-friendly (no data leaves your browser)
 - ✅ Live HTML preview
 - ✅ Share data contracts via URLs
 
