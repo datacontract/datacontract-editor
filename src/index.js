@@ -6,6 +6,8 @@ import ParserWorker from './parser.worker.js';
 import renderDataContract from "./render.js";
 import {getExample, getMinimal} from "./examples.js";
 
+import {isFirstLoadOfDataContractEditor, loadDataContractYaml, storeDataContractYaml} from "./storage.js";
+
 // init alpine
 import Alpine from 'alpinejs'
 window.Alpine = Alpine
@@ -51,16 +53,7 @@ configureMonacoYaml(monaco, {
 let containerMonacoEditor = "editor";
 
 
-function storeDataContractYaml(yaml) {
-    localStorage.setItem("dataContractYaml", yaml);
-    localStorage.setItem("dataContractYamlUpdated", new Date().toISOString());
-}
-function loadDataContractYaml() {
-    return localStorage.getItem("dataContractYaml");
-}
-function isFirstLoadOfDataContractEditor() {
-    return localStorage.getItem("dataContractYamlUpdated") === null;
-}
+
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
