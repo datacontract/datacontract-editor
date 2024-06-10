@@ -40,7 +40,7 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Build project
+      - name: Copy templates
         run: cp public/templates.js dist/templates.js
 
       - name: Setup Pages
