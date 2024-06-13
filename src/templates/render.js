@@ -1,8 +1,9 @@
 import nunjucks from "nunjucks";
+import './templates.js';
 
 /*
  * Rendering with nunjucks.
- * Requires "npm run precompile"
+ * Requires "npm run precompile" to have the templates available
  */
 
 const env = nunjucks.configure('templates', {autoescape: false});

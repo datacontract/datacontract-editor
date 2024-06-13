@@ -1,280 +1,41 @@
-
 <!doctype html>
 <html class="h-full bg-gray-100" lang="en">
+
 <head>
-  <title>Data Contract Editor</title>
+	<title>Data Contract Editor</title>
 
-  <meta charset="UTF-8">
-  <meta name="robots" content="noindex">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="robots" content="noindex">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="description" content="Data Contract Editor is a tool to view and edit data contracts.">
-  <meta property="og:title" content="Data Contract Editor: View and edit data contracts">
-  <meta property="og:description" content="Data Contract Editor is a tool to view and edit data contracts.">
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://editor.datacontract.com/images/screenshot.png" />
-  <script src="templates.js"></script>
-
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
-  <style>
-    [x-cloak] { display: none !important; }
-  </style>
-  <script src="https://cdn.tailwindcss.com"></script>
+	<meta name="description" content="Data Contract Editor is a tool to view and edit data contracts.">
+	<meta property="og:title" content="Data Contract Editor: View and edit data contracts">
+	<meta property="og:description" content="Data Contract Editor is a tool to view and edit data contracts.">
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="https://editor.datacontract.com/images/screenshot.png" />
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="stylesheet" href="main.css">
+	<!-- Element Scripts -->
+	<script type="module" src="ui/elements/nav-element.js"></script>
+	<script type="module" src="ui/elements/editor-element.js"></script>
+	<script type="module" src="ui/elements/error-list-element.js"></script>
+	<script type="module" src="ui/elements/preview-pane-element.js"></script>
+	<script src="index.js" type="module"></script>
 </head>
-<body class="w-full" style="max-height: 100vh; overflow: hidden;">
 
-<div class="flex flex-col h-screen">
-
-  <nav class="bg-white shadow-sm">
-    <div class="px-2 sm:px-4 lg:px-6">
-      <div class="flex h-16 justify-between">
-        <div class="flex">
-          <div class="flex flex-shrink-0 items-center mr-6">
-            <!--          <img src="/assets/media/logos/logo.png" width="42" class="ml-1 mr-3">-->
-            <a class="text-xl text-gray-900 font-semibold" href="https://editor.datacontract.com">
-              Data Contract Editor
-            </a>
-          </div>
-          <div class="hidden sm:-my-px sm:ml-3 sm:flex sm:space-x-8 text-sm">
-            <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-
-            <div class="relative inline-block text-left"
-                 x-data="{
-                        open: false,
-                        toggle() {
-                            if (this.open) {
-                                return this.close()
-                            }
-                            this.$refs.button.focus()
-                            this.open = true
-                        },
-                        close(focusAfter) {
-                            if (! this.open) return
-                            this.open = false
-                            focusAfter && focusAfter.focus()
-                        }
-                    }"
-                 x-on:keydown.escape.prevent.stop="close($refs.button)"
-                 x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                 x-id="['dropdown-button']"
-            >
-              <div class="inline-flex h-full items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <button type="button"
-                        id="menu-file"
-                        class="inline-flex"
-                        aria-expanded="true"
-                        aria-haspopup="true"
-                        x-ref="button"
-                        x-on:click="toggle()"
-                        :aria-expanded="open"
-                        :aria-controls="$id('dropdown-button')">
-                  File
-                  <svg class="-mr-1 h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-
-              <div class="absolute left-0 z-10 mt-2 w-32 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                   role="menu"
-                   aria-orientation="vertical"
-                   aria-labelledby="menu-button"
-                   tabindex="-1"
-                   x-ref="panel"
-                   x-cloak
-                   x-show="open"
-                   x-transition.origin.top.left
-                   x-on:click.outside="close($refs.button)"
-                   :id="$id('dropdown-button')"
-              >
-                <div class="py-1" role="none">
-                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     role="menuitem" tabindex="-1" id="menu-item-open-file">
-                    Open ...
-                  </button>
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                          role="menuitem" tabindex="-1" id="menu-item-load-minimal">
-                    Load Minimal
-                  </button>
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     role="menuitem" tabindex="-1" id="menu-item-load-example">
-                    Load Example
-                  </button>
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                          role="menuitem" tabindex="-1" id="menu-item-save">
-                    Save
-                  </button>
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     role="menuitem" tabindex="-1" id="menu-item-share">
-                    Share
-                  </button>
-                  <hr>
-                  <button class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     role="menuitem" tabindex="-1" id="menu-item-clear">
-                    Clear
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-            <button class="inline-flex items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-300 hover:border-gray-300 hover:text-gray-500 cursor-not-allowed"
-                    disabled
-            >
-              Import
-            </button>
-
-            <button class="inline-flex items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-300 hover:border-gray-300 hover:text-gray-500 cursor-not-allowed"
-               disabled
-            >
-              Export
-            </button>
-
-            <div class="relative inline-block text-left"
-                 x-data="{
-                        open: false,
-                        toggle() {
-                            if (this.open) {
-                                return this.close()
-                            }
-                            this.$refs.button.focus()
-                            this.open = true
-                        },
-                        close(focusAfter) {
-                            if (! this.open) return
-                            this.open = false
-                            focusAfter && focusAfter.focus()
-                        }
-                    }"
-                 x-on:keydown.escape.prevent.stop="close($refs.button)"
-                 x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                 x-id="['dropdown-button']"
-            >
-              <div class="inline-flex h-full items-center border-b-4 px-1 pt-1 font-semibold border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                <button type="button"
-                        id="menu-button"
-                        class="inline-flex"
-                        aria-expanded="true"
-                        aria-haspopup="true"
-                        x-ref="button"
-                        x-on:click="toggle()"
-                        :aria-expanded="open"
-                        :aria-controls="$id('dropdown-button')">
-                  About
-                  <svg class="-mr-1 h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-
-              <div class="absolute left-0 z-10 mt-2 w-64 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                   role="menu"
-                   aria-orientation="vertical"
-                   aria-labelledby="menu-button"
-                   tabindex="-1"
-                   x-ref="panel"
-                   x-cloak
-                   x-show="open"
-                   x-transition.origin.top.left
-                   x-on:click.outside="close($refs.button)"
-                   :id="$id('dropdown-button')"
-              >
-                <div class="py-1" role="none">
-                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://github.com/datacontract/datacontract-editor"
-                     role="menuitem" tabindex="-1" id="menu-item-0">
-                    View on GitHub
-                  </a>
-
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://datacontract.com/slack"
-                     role="menuitem" tabindex="-1" id="menu-item-9">
-                    Get support on Slack
-                  </a>
-
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://datacontract.com/"
-                     role="menuitem" tabindex="-1" id="menu-item-5">
-                    Data Contract Specification
-                  </a>
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://cli.datacontract.com/"
-                     role="menuitem" tabindex="-1" id="menu-item-3">
-                    Data Contract CLI
-                  </a>
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://gpt.datacontract.com/"
-                     role="menuitem" tabindex="-1" id="menu-item-4">
-                    Data Contract GPT
-                  </a>
-
-
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://www.innoq.com/en/impressum/"
-                     role="menuitem" tabindex="-1" id="menu-item-1">
-                    Legal Notice
-                  </a>
-                  <a class="text-gray-500 hover:text-gray-700 group flex items-center px-4 py-2 text-sm"
-                     href="https://www.innoq.com/en/datenschutz/"
-                     role="menuitem" tabindex="-1" id="menu-item-2">
-                    Privacy
-                  </a>
-                </div>
-
-              </div>
-            </div>
-
-
-          </div>
-        </div>
-        <div class="hidden sm:ml-6 sm:flex sm:items-center">
-          <a href="https://datacontract.com" class="text--link text-sm font-semibold" target="_blank">datacontract.com</a>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <div>
-    <style>
-      .split {
-        display: flex;
-        flex-direction: row;
-      }
-
-      .gutter {
-        background-color: #eee;
-        background-repeat: no-repeat;
-        background-position: 50%;
-      }
-
-      .gutter.gutter-horizontal {
-        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
-        cursor: col-resize;
-      }
-    </style>
-    <main class="border-t border-gray-300">
-      <div class="split h-svh">
-        <div id="split-0" class="text-sm flex flex-col" style="max-height: calc(100vh - 64px);">
-          <div id="editor" class="flex-1 overflow-hidden"></div>
-        </div>
-        <div id="split-1" class="text-sm flex flex-col" style="max-height: calc(100vh - 64px);">
-          <div id="problems"></div>
-          <div id="parsing"></div>
-          <div id="preview" style="width: 100%; height: 100%;" class="overflow-y-scroll p-3">HTML Preview</div>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-</div>
-
-<!-- 100% privacy-first analytics -->
-<script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
-<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
-
+<body class="w-full h-screen max-h-screen overflow-hidden">
+	<div class="grid-container">
+		<dce-nav class="border-b border-gray-300"></dce-nav>
+			<dce-editor class="overflow-hidden"></dce-editor>
+			<div class="gutter-col bg-slate-300"></div>
+			<div id="info-pane" class="text-sm flex flex-col overflow-hidden">
+				<dce-error-list></dce-error-list>
+				<dce-preview-pane class="overflow-y-scroll p-3"></dce-preview-pane>
+			</div>
+	</div>
+	<!-- 100% privacy-first analytics -->
+	<script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+	<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
 </body>
+
 </html>
