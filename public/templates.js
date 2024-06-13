@@ -121,7 +121,7 @@ frame.set("loop.first", t_13 === 0);
 frame.set("loop.last", t_13 === t_14 - 1);
 frame.set("loop.length", t_14);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_16,"field": t_17,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_16,"field": t_17,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -141,7 +141,7 @@ frame.set("loop.first", t_13 === 0);
 frame.set("loop.last", t_13 === t_14 - 1);
 frame.set("loop.length", t_14);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_18,"field": t_19,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_18,"field": t_19,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -192,7 +192,7 @@ frame.set("loop.first", t_22 === 0);
 frame.set("loop.last", t_22 === t_23 - 1);
 frame.set("loop.length", t_23);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_25,"field": t_26,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_25,"field": t_26,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -212,7 +212,7 @@ frame.set("loop.first", t_22 === 0);
 frame.set("loop.last", t_22 === t_23 - 1);
 frame.set("loop.length", t_23);
 output += "\n                    ";
-output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "False"),"field_name": t_27,"field": t_28,"level": 0})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 80, colno = 37, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_27,"field": t_28,"level": 0})])), env.opts.autoescape);
 output += "\n                  ";
 ;
 }
@@ -1078,7 +1078,7 @@ output += "\n    </div>\n  </td>\n</tr>\n\n";
 if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields")) {
 output += "\n";
 frame = frame.push();
-var t_7 = (lineno = 90, colno = 46, runtime.callWrap(runtime.memberLookup((runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields")),"items"), "field[\"fields\"][\"items\"]", context, []));
+var t_7 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields");
 if(t_7) {t_7 = runtime.fromIterator(t_7);
 var t_5;
 if(runtime.isArray(t_7)) {
@@ -1096,7 +1096,7 @@ frame.set("loop.first", t_5 === 0);
 frame.set("loop.last", t_5 === t_6 - 1);
 frame.set("loop.length", t_6);
 output += "\n  ";
-output += runtime.suppressValue((lineno = 91, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "True"),"field_name": t_8,"field": t_9,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 91, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": true,"field_name": t_8,"field": t_9,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
 output += "\n";
 ;
 }
@@ -1116,7 +1116,7 @@ frame.set("loop.first", t_5 === 0);
 frame.set("loop.last", t_5 === t_6 - 1);
 frame.set("loop.length", t_6);
 output += "\n  ";
-output += runtime.suppressValue((lineno = 91, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": runtime.contextOrFrameLookup(context, frame, "True"),"field_name": t_10,"field": t_11,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
+output += runtime.suppressValue((lineno = 91, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": true,"field_name": t_10,"field": t_11,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
 output += "\n";
 ;
 }
@@ -1126,6 +1126,7 @@ frame = frame.pop();
 output += "\n<!-- Mark the end of the contained fields -->\n<tr style=\"--tw-divide-y-reverse: 2\">\n</tr>\n";
 ;
 }
+output += "\n";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
 } else {

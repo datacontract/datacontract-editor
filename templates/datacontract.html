@@ -78,7 +78,7 @@
                   </thead>
                   <tbody class="divide-y divide-gray-200 bg-white">
                   {% for field_name, field in model.fields %}
-                    {{ render_partial('partials/model_field.html', nested = False, field_name=field_name, field = field, level = 0) }}
+                    {{ render_partial('partials/model_field.html', nested = false, field_name=field_name, field = field, level = 0) }}
                   {% endfor %}
                   </tbody>
                 </table>

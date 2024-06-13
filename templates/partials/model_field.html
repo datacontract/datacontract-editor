@@ -88,8 +88,8 @@
 </tr>
 
 {% if field.fields %}
-{% for field_name, field in field.fields.items() %}
-  {{ render_partial('partials/model_field.html', nested = True, field_name=field_name, field = field, level = level + 1) }}
+{% for field_name, field in field.fields %}
+  {{ render_partial('partials/model_field.html', nested = true, field_name=field_name, field = field, level = level + 1) }}
 {% endfor %}
 <!-- Mark the end of the contained fields -->
 <tr style="--tw-divide-y-reverse: 2">
