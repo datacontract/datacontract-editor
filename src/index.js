@@ -132,8 +132,10 @@ document.getElementById("menu-item-save").addEventListener("click", function () 
 document.getElementById("menu-item-share").addEventListener("click", function () {
     document.getElementById("menu-file").click();
 
-    const url = "https://editor.datacontract.com/?dc=" + window.btoa(editor.getValue().toString);
-    navigator.clipboard.writeText(url);
+    let yamlCode = editor.getValue().toString();
+    const shareUrl = location.protocol + "//" + location.host + "/?dc=" + window.btoa(yamlCode);
+    console.log("Share URL: " + shareUrl);
+    navigator.clipboard.writeText(shareUrl);
 
     alert("Copied share URL to clipboard")
 });
