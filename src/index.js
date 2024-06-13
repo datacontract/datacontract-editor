@@ -132,7 +132,7 @@ document.getElementById("menu-item-save").addEventListener("click", function () 
 document.getElementById("menu-item-share").addEventListener("click", function () {
     document.getElementById("menu-file").click();
 
-    const url = "localhost:9000/?dc=" + window.btoa(editor.getValue().toString);
+    const url = "https://editor.datacontract.com/?dc=" + window.btoa(editor.getValue().toString);
     navigator.clipboard.writeText(url);
 
     alert("Copied share URL to clipboard")
