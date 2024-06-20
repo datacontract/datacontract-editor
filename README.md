@@ -20,17 +20,18 @@ Try it out at [editor.datacontract.com](https://editor.datacontract.com).
 ```bash
 # run locally
 npm install
+npm run precompile # optional, only needed if you change the templates
 npm run dev
 ```
 
 ```bash
 # build for production
 npm install
+npm run precompile
 npm run build
-cp public/templates.js dist/templates.js
 # deploy dist folder
 ```
- 
+
 ## How to update the templates
 
 Templates are taken from the Data Contract CLI. To update the templates, do the following:
