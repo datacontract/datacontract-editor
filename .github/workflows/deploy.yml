@@ -40,9 +40,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Copy templates
-        run: cp public/templates.js dist/templates.js
-
       - name: Copy images
         run: cp -r images dist
 
