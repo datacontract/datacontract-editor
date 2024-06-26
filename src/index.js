@@ -29,3 +29,5 @@ editor.addEventListener('editor-content-changed', (e) => {
 	const document = e.detail.content;
 	previewPane.document = document;
 });
+// now that everything is wired up make the editor spit put the content for a first render
+document.dispatchEvent(new CustomEvent('request-document'));

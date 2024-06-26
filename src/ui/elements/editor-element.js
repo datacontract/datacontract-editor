@@ -44,8 +44,12 @@ export class EditorElement extends LitElement {
 		editor.onDidChangeModelContent(() => {
 			const content = editor.getValue();
 			storeDataContractYaml(content);
-			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail:  { content } }));
+			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail: { content } }));
 		});
+
+		document.addEventListener('request-document', () => {
+			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail: { content: editor.getValue() }}));
+		})
 
 		// set up to detect editor errors and emit them
 		monaco.editor.onDidChangeMarkers((resource) => {
@@ -59,7 +63,7 @@ export class EditorElement extends LitElement {
             column: marker.startColumn
         }))
 
-			this.dispatchEvent(new CustomEvent('editor-errors', { detail:  { validationErrors } }));
+			this.dispatchEvent(new CustomEvent('editor-errors', { detail: { validationErrors } }));
     });
 
 
@@ -68,9 +72,6 @@ export class EditorElement extends LitElement {
 			editor.layout();
 		});
 		resizeObserver.observe(this.editor);
-
-		// emit current content for a first render
-		this.dispatchEvent(new CustomEvent('editor-content-changed', { detail:  { content: editor.getValue() } }));
 	}
 }
 customElements.define("dce-editor", EditorElement);
