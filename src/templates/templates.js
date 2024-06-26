@@ -1180,9 +1180,9 @@ output += "</span><br>\n      ";
 }
 output += "\n      <span class=\"font-mono flex\">";
 output += runtime.suppressValue(runtime.contextOrFrameLookup(context, frame, "field_name"), env.opts.autoescape);
-if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"ref")) {
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"$ref")) {
 output += " <a href=\"";
-output += runtime.suppressValue(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"ref"), env.opts.autoescape);
+output += runtime.suppressValue(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"$ref"), env.opts.autoescape);
 output += "\">\n        <svg title=\"Definition\" class=\"mr-1.5 h-5 w-5 flex-shrink-0\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.75 -0.75 24 24\"><defs></defs><path d=\"M3.046875 5.15625h16.40625s0.9375 0 0.9375 0.9375v10.3125s0 0.9375 -0.9375 0.9375H3.046875s-0.9375 0 -0.9375 -0.9375v-10.3125s0 -0.9375 0.9375 -0.9375\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"></path><path d=\"m12.568125 10.3125 4.6875 0\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"></path><path d=\"m12.568125 13.125 4.6875 0\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"></path><path d=\"M5.068124999999999 8.4375h4.6875v4.6875h-4.6875Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"></path></svg>\n      </a>";
 ;
 }

@@ -8,6 +8,7 @@ function updateTemplateCode(template) {
     .replace(/\.items\(\)/gm, '')
     .replace(/True/gm, 'true')
     .replace(/False/gm, 'false')
+    .replace(/\.ref/gm, '.$ref')
     .replace(/cli\.datacontract\.com/gm, 'editor.datacontract.com')
     .replace(/Data Contract CLI/gm, 'Data Contract Editor');
 	return updated_template;
