@@ -34,13 +34,8 @@ npm run build
 
 ## How to update the templates
 
-Templates are taken from the Data Contract CLI. To update the templates, do the following:
-
-1. Copy the templates from `/datacontract-cli/datacontract/templates` to `public`: cp -r ../datacontract-cli/datacontract/templates public
-2. remove .items() everywhere (in all templates)
-3. replace "True" with "true", replace "False" with "false"
-3. Fix datacontract.html so that it does not contain all the wrapper stuff around it
-4. `npm run precompile`
+Templates are taken from the Data Contract CLI and are fetched directly from the repository.
+If you want to update them locally run `npm run update-templates`, whic will also be automatically run in the build.
 
 ## License
 

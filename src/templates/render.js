@@ -1,4 +1,6 @@
 import nunjucks from "nunjucks";
+import { version } from '../../package.json';
+
 import './templates.js';
 
 /*
@@ -15,5 +17,6 @@ env.addGlobal('range', function (from, to) {
 });
 
 export function renderDataContract(dataContract) {
-    return nunjucks.render("datacontract.html", {datacontract: dataContract});
+	const local_date = new Date().toLocaleDateString();
+    return nunjucks.render("datacontract.html", { datacontract: dataContract, formatted_date: local_date, datacontract_cli_version: version });
 }

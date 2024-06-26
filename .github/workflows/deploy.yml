@@ -37,8 +37,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Precompile templates
-        run: npm run precompile
+      - name: Fetch, process and precompile HTML templates
+        run: npm run update-templates
 
       - name: Build project
         run: npm run build
