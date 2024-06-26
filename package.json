@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite src",
-    "precompile": "node_modules/nunjucks/bin/precompile templates > src/templates/templates.js",
     "build": "vite build src --outDir ../dist --emptyOutDir",
+		"update-templates": "npm run load-templates && npm run precompile-templates",
+		"load-templates": "node scripts/load_templates.js",
+    "precompile-templates": "node_modules/nunjucks/bin/precompile templates > src/templates/templates.js",
     "lint": "eslint"
   },
   "dependencies": {
