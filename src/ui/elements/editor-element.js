@@ -47,10 +47,6 @@ export class EditorElement extends LitElement {
 			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail: { content } }));
 		});
 
-		document.addEventListener('request-document', () => {
-			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail: { content: editor.getValue() }}));
-		})
-
 		// set up to detect editor errors and emit them
 		monaco.editor.onDidChangeMarkers((resource) => {
 			const markers = monaco.editor.getModelMarkers({resource});
@@ -72,6 +68,11 @@ export class EditorElement extends LitElement {
 			editor.layout();
 		});
 		resizeObserver.observe(this.editor);
+
+		// do an initial dispatch of content
+		setTimeout(() => {
+			this.dispatchEvent(new CustomEvent('editor-content-changed', { detail: { content: editor.getValue() } }));
+		}, 200);
 	}
 }
 customElements.define("dce-editor", EditorElement);
