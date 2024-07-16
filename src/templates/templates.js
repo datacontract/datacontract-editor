@@ -546,6 +546,178 @@ root: root
 
 })();
 })();
+(function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["partials/datacontract_models.html"] = (function() {
+function root(env, context, frame, runtime, cb) {
+var lineno = 0;
+var colno = 0;
+var output = "";
+try {
+var parentTemplate = null;
+output += "<div class=\"flex justify-between\">\n  <div class=\"px-4 sm:px-0\">\n    <h1 class=\"text-base font-semibold leading-6 text-gray-900\">\n      Data Model\n    </h1>\n    <p class=\"text-sm text-gray-500\">The logical data model</p>\n  </div>\n</div>\n\n";
+frame = frame.push();
+var t_3 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "datacontract")),"models");
+if(t_3) {t_3 = runtime.fromIterator(t_3);
+var t_1;
+if(runtime.isArray(t_3)) {
+var t_2 = t_3.length;
+for(t_1=0; t_1 < t_3.length; t_1++) {
+var t_4 = t_3[t_1][0];
+frame.set("[object Object]", t_3[t_1][0]);
+var t_5 = t_3[t_1][1];
+frame.set("[object Object]", t_3[t_1][1]);
+frame.set("loop.index", t_1 + 1);
+frame.set("loop.index0", t_1);
+frame.set("loop.revindex", t_2 - t_1);
+frame.set("loop.revindex0", t_2 - t_1 - 1);
+frame.set("loop.first", t_1 === 0);
+frame.set("loop.last", t_1 === t_2 - 1);
+frame.set("loop.length", t_2);
+output += "\n\n<div class=\"mt-3 flow-root\">\n  <div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\">\n    <div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\">\n      <div class=\"overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg\">\n\n        <table class=\"min-w-full divide-y divide-gray-300\">\n          <thead class=\"bg-gray-50\">\n          <tr>\n            <th scope=\"colgroup\" colspan=\"3\" class=\"py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6\">\n              <span>";
+output += runtime.suppressValue(t_4, env.opts.autoescape);
+output += "</span>\n              <span class=\"inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10\">";
+output += runtime.suppressValue(runtime.memberLookup((t_5),"type"), env.opts.autoescape);
+output += "</span>\n              <div class=\"text-sm font-medium text-gray-500\">";
+output += runtime.suppressValue(runtime.memberLookup((t_5),"description"), env.opts.autoescape);
+output += "</div>\n            </th>\n\n          </tr>\n          </thead>\n          <tbody class=\"divide-y divide-gray-200 bg-white\">\n          ";
+frame = frame.push();
+var t_8 = runtime.memberLookup((t_5),"fields");
+if(t_8) {t_8 = runtime.fromIterator(t_8);
+var t_6;
+if(runtime.isArray(t_8)) {
+var t_7 = t_8.length;
+for(t_6=0; t_6 < t_8.length; t_6++) {
+var t_9 = t_8[t_6][0];
+frame.set("[object Object]", t_8[t_6][0]);
+var t_10 = t_8[t_6][1];
+frame.set("[object Object]", t_8[t_6][1]);
+frame.set("loop.index", t_6 + 1);
+frame.set("loop.index0", t_6);
+frame.set("loop.revindex", t_7 - t_6);
+frame.set("loop.revindex0", t_7 - t_6 - 1);
+frame.set("loop.first", t_6 === 0);
+frame.set("loop.last", t_6 === t_7 - 1);
+frame.set("loop.length", t_7);
+output += "\n            ";
+output += runtime.suppressValue((lineno = 29, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_9,"field": t_10,"level": 0})])), env.opts.autoescape);
+output += "\n          ";
+;
+}
+} else {
+t_6 = -1;
+var t_7 = runtime.keys(t_8).length;
+for(var t_11 in t_8) {
+t_6++;
+var t_12 = t_8[t_11];
+frame.set("field_name", t_11);
+frame.set("field", t_12);
+frame.set("loop.index", t_6 + 1);
+frame.set("loop.index0", t_6);
+frame.set("loop.revindex", t_7 - t_6);
+frame.set("loop.revindex0", t_7 - t_6 - 1);
+frame.set("loop.first", t_6 === 0);
+frame.set("loop.last", t_6 === t_7 - 1);
+frame.set("loop.length", t_7);
+output += "\n            ";
+output += runtime.suppressValue((lineno = 29, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_11,"field": t_12,"level": 0})])), env.opts.autoescape);
+output += "\n          ";
+;
+}
+}
+}
+frame = frame.pop();
+output += "\n          </tbody>\n        </table>\n      </div>\n    </div>\n  </div>\n</div>\n";
+;
+}
+} else {
+t_1 = -1;
+var t_2 = runtime.keys(t_3).length;
+for(var t_13 in t_3) {
+t_1++;
+var t_14 = t_3[t_13];
+frame.set("model_name", t_13);
+frame.set("model", t_14);
+frame.set("loop.index", t_1 + 1);
+frame.set("loop.index0", t_1);
+frame.set("loop.revindex", t_2 - t_1);
+frame.set("loop.revindex0", t_2 - t_1 - 1);
+frame.set("loop.first", t_1 === 0);
+frame.set("loop.last", t_1 === t_2 - 1);
+frame.set("loop.length", t_2);
+output += "\n\n<div class=\"mt-3 flow-root\">\n  <div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\">\n    <div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\">\n      <div class=\"overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg\">\n\n        <table class=\"min-w-full divide-y divide-gray-300\">\n          <thead class=\"bg-gray-50\">\n          <tr>\n            <th scope=\"colgroup\" colspan=\"3\" class=\"py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6\">\n              <span>";
+output += runtime.suppressValue(t_13, env.opts.autoescape);
+output += "</span>\n              <span class=\"inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10\">";
+output += runtime.suppressValue(runtime.memberLookup((t_14),"type"), env.opts.autoescape);
+output += "</span>\n              <div class=\"text-sm font-medium text-gray-500\">";
+output += runtime.suppressValue(runtime.memberLookup((t_14),"description"), env.opts.autoescape);
+output += "</div>\n            </th>\n\n          </tr>\n          </thead>\n          <tbody class=\"divide-y divide-gray-200 bg-white\">\n          ";
+frame = frame.push();
+var t_17 = runtime.memberLookup((t_14),"fields");
+if(t_17) {t_17 = runtime.fromIterator(t_17);
+var t_15;
+if(runtime.isArray(t_17)) {
+var t_16 = t_17.length;
+for(t_15=0; t_15 < t_17.length; t_15++) {
+var t_18 = t_17[t_15][0];
+frame.set("[object Object]", t_17[t_15][0]);
+var t_19 = t_17[t_15][1];
+frame.set("[object Object]", t_17[t_15][1]);
+frame.set("loop.index", t_15 + 1);
+frame.set("loop.index0", t_15);
+frame.set("loop.revindex", t_16 - t_15);
+frame.set("loop.revindex0", t_16 - t_15 - 1);
+frame.set("loop.first", t_15 === 0);
+frame.set("loop.last", t_15 === t_16 - 1);
+frame.set("loop.length", t_16);
+output += "\n            ";
+output += runtime.suppressValue((lineno = 29, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_18,"field": t_19,"level": 0})])), env.opts.autoescape);
+output += "\n          ";
+;
+}
+} else {
+t_15 = -1;
+var t_16 = runtime.keys(t_17).length;
+for(var t_20 in t_17) {
+t_15++;
+var t_21 = t_17[t_20];
+frame.set("field_name", t_20);
+frame.set("field", t_21);
+frame.set("loop.index", t_15 + 1);
+frame.set("loop.index0", t_15);
+frame.set("loop.revindex", t_16 - t_15);
+frame.set("loop.revindex0", t_16 - t_15 - 1);
+frame.set("loop.first", t_15 === 0);
+frame.set("loop.last", t_15 === t_16 - 1);
+frame.set("loop.length", t_16);
+output += "\n            ";
+output += runtime.suppressValue((lineno = 29, colno = 29, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": false,"field_name": t_20,"field": t_21,"level": 0})])), env.opts.autoescape);
+output += "\n          ";
+;
+}
+}
+}
+frame = frame.pop();
+output += "\n          </tbody>\n        </table>\n      </div>\n    </div>\n  </div>\n</div>\n";
+;
+}
+}
+}
+frame = frame.pop();
+if(parentTemplate) {
+parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
+} else {
+cb(null, output);
+}
+;
+} catch (e) {
+  cb(runtime.handleError(e, lineno, colno));
+}
+}
+return {
+root: root
+};
+
+})();
+})();
 (function() {(window.nunjucksPrecompiled = window.nunjucksPrecompiled || {})["partials/datacontract_servicelevels.html"] = (function() {
 function root(env, context, frame, runtime, cb) {
 var lineno = 0;
@@ -1086,6 +1258,62 @@ output += "</span>\n                  ";
 }
 }
 frame = frame.pop();
+output += "\n                  ";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "definition")),"links")) {
+output += "\n                    ";
+frame = frame.push();
+var t_18 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "definition")),"links");
+if(t_18) {t_18 = runtime.fromIterator(t_18);
+var t_16;
+if(runtime.isArray(t_18)) {
+var t_17 = t_18.length;
+for(t_16=0; t_16 < t_18.length; t_16++) {
+var t_19 = t_18[t_16][0];
+frame.set("[object Object]", t_18[t_16][0]);
+var t_20 = t_18[t_16][1];
+frame.set("[object Object]", t_18[t_16][1]);
+frame.set("loop.index", t_16 + 1);
+frame.set("loop.index0", t_16);
+frame.set("loop.revindex", t_17 - t_16);
+frame.set("loop.revindex0", t_17 - t_16 - 1);
+frame.set("loop.first", t_16 === 0);
+frame.set("loop.last", t_16 === t_17 - 1);
+frame.set("loop.length", t_17);
+output += "\n                    <a href=\"";
+output += runtime.suppressValue(t_20, env.opts.autoescape);
+output += "\" class=\"inline-flex items-center px-1 py-1 mr-1 mt-1 text-sky-500 hover:text-gray-700 text-xs font-semibold\">";
+output += runtime.suppressValue(t_19, env.opts.autoescape);
+output += "</a>\n                    ";
+;
+}
+} else {
+t_16 = -1;
+var t_17 = runtime.keys(t_18).length;
+for(var t_21 in t_18) {
+t_16++;
+var t_22 = t_18[t_21];
+frame.set("name", t_21);
+frame.set("href", t_22);
+frame.set("loop.index", t_16 + 1);
+frame.set("loop.index0", t_16);
+frame.set("loop.revindex", t_17 - t_16);
+frame.set("loop.revindex0", t_17 - t_16 - 1);
+frame.set("loop.first", t_16 === 0);
+frame.set("loop.last", t_16 === t_17 - 1);
+frame.set("loop.length", t_17);
+output += "\n                    <a href=\"";
+output += runtime.suppressValue(t_22, env.opts.autoescape);
+output += "\" class=\"inline-flex items-center px-1 py-1 mr-1 mt-1 text-sky-500 hover:text-gray-700 text-xs font-semibold\">";
+output += runtime.suppressValue(t_21, env.opts.autoescape);
+output += "</a>\n                    ";
+;
+}
+}
+}
+frame = frame.pop();
+output += "\n                  ";
+;
+}
 output += "\n                </div>\n              </td>\n\n            </tr>\n          </tbody>\n        </table>\n      </div>\n    </div>\n  </div>\n</div>";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
@@ -1359,11 +1587,11 @@ output += "</span>\n      ";
 }
 }
 frame = frame.pop();
-output += "\n    </div>\n  </td>\n</tr>\n\n";
-if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields")) {
-output += "\n";
+output += "\n      ";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"links")) {
+output += "\n      ";
 frame = frame.push();
-var t_14 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields");
+var t_14 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"links");
 if(t_14) {t_14 = runtime.fromIterator(t_14);
 var t_12;
 if(runtime.isArray(t_14)) {
@@ -1380,9 +1608,11 @@ frame.set("loop.revindex0", t_13 - t_12 - 1);
 frame.set("loop.first", t_12 === 0);
 frame.set("loop.last", t_12 === t_13 - 1);
 frame.set("loop.length", t_13);
-output += "\n  ";
-output += runtime.suppressValue((lineno = 96, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": true,"field_name": t_15,"field": t_16,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
-output += "\n";
+output += "\n      <a href=\"";
+output += runtime.suppressValue(t_16, env.opts.autoescape);
+output += "\" class=\"inline-flex items-center px-1 py-1 mr-1 mt-1 text-sky-500 hover:text-gray-700 text-xs font-semibold\">";
+output += runtime.suppressValue(t_15, env.opts.autoescape);
+output += "</a>\n      ";
 ;
 }
 } else {
@@ -1391,8 +1621,8 @@ var t_13 = runtime.keys(t_14).length;
 for(var t_17 in t_14) {
 t_12++;
 var t_18 = t_14[t_17];
-frame.set("field_name", t_17);
-frame.set("field", t_18);
+frame.set("name", t_17);
+frame.set("href", t_18);
 frame.set("loop.index", t_12 + 1);
 frame.set("loop.index0", t_12);
 frame.set("loop.revindex", t_13 - t_12);
@@ -1400,15 +1630,98 @@ frame.set("loop.revindex0", t_13 - t_12 - 1);
 frame.set("loop.first", t_12 === 0);
 frame.set("loop.last", t_12 === t_13 - 1);
 frame.set("loop.length", t_13);
-output += "\n  ";
-output += runtime.suppressValue((lineno = 96, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": true,"field_name": t_17,"field": t_18,"level": runtime.contextOrFrameLookup(context, frame, "level") + 1})])), env.opts.autoescape);
+output += "\n      <a href=\"";
+output += runtime.suppressValue(t_18, env.opts.autoescape);
+output += "\" class=\"inline-flex items-center px-1 py-1 mr-1 mt-1 text-sky-500 hover:text-gray-700 text-xs font-semibold\">";
+output += runtime.suppressValue(t_17, env.opts.autoescape);
+output += "</a>\n      ";
+;
+}
+}
+}
+frame = frame.pop();
+output += "\n      ";
+;
+}
+output += "\n    </div>\n  </td>\n</tr>\n\n";
+var macro_t_19 = runtime.makeMacro(
+["field_name", "field", "level"], 
+[], 
+function (l_field_name, l_field, l_level, kwargs) {
+var callerFrame = frame;
+frame = new runtime.Frame();
+kwargs = kwargs || {};
+if (Object.prototype.hasOwnProperty.call(kwargs, "caller")) {
+frame.set("caller", kwargs.caller); }
+frame.set("field_name", l_field_name);
+frame.set("field", l_field);
+frame.set("level", l_level);
+var t_20 = "";t_20 += "\n";
+t_20 += runtime.suppressValue((lineno = 100, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "render_partial"), "render_partial", context, ["partials/model_field.html",runtime.makeKeywordArgs({"nested": true,"field_name": l_field_name,"field": l_field,"level": l_level + 1})])), env.opts.autoescape);
+t_20 += "\n<!-- Mark the end of the contained fields -->\n<tr style=\"--tw-divide-y-reverse: 2\"></tr>\n";
+;
+frame = callerFrame;
+return new runtime.SafeString(t_20);
+});
+context.addExport("render_nested_partial");
+context.setVariable("render_nested_partial", macro_t_19);
+output += "\n\n";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields")) {
+output += "\n";
+frame = frame.push();
+var t_23 = runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"fields");
+if(t_23) {t_23 = runtime.fromIterator(t_23);
+var t_21;
+if(runtime.isArray(t_23)) {
+var t_22 = t_23.length;
+for(t_21=0; t_21 < t_23.length; t_21++) {
+var t_24 = t_23[t_21][0];
+frame.set("[object Object]", t_23[t_21][0]);
+var t_25 = t_23[t_21][1];
+frame.set("[object Object]", t_23[t_21][1]);
+frame.set("loop.index", t_21 + 1);
+frame.set("loop.index0", t_21);
+frame.set("loop.revindex", t_22 - t_21);
+frame.set("loop.revindex0", t_22 - t_21 - 1);
+frame.set("loop.first", t_21 === 0);
+frame.set("loop.last", t_21 === t_22 - 1);
+frame.set("loop.length", t_22);
+output += "\n";
+output += runtime.suppressValue((lineno = 107, colno = 24, runtime.callWrap(macro_t_19, "render_nested_partial", context, [t_24,t_25,runtime.contextOrFrameLookup(context, frame, "level")])), env.opts.autoescape);
+output += "\n";
+;
+}
+} else {
+t_21 = -1;
+var t_22 = runtime.keys(t_23).length;
+for(var t_26 in t_23) {
+t_21++;
+var t_27 = t_23[t_26];
+frame.set("field_name", t_26);
+frame.set("field", t_27);
+frame.set("loop.index", t_21 + 1);
+frame.set("loop.index0", t_21);
+frame.set("loop.revindex", t_22 - t_21);
+frame.set("loop.revindex0", t_22 - t_21 - 1);
+frame.set("loop.first", t_21 === 0);
+frame.set("loop.last", t_21 === t_22 - 1);
+frame.set("loop.length", t_22);
+output += "\n";
+output += runtime.suppressValue((lineno = 107, colno = 24, runtime.callWrap(macro_t_19, "render_nested_partial", context, [t_26,t_27,runtime.contextOrFrameLookup(context, frame, "level")])), env.opts.autoescape);
 output += "\n";
 ;
 }
 }
 }
 frame = frame.pop();
-output += "\n<!-- Mark the end of the contained fields -->\n<tr style=\"--tw-divide-y-reverse: 2\">\n</tr>\n";
+output += "\n";
+;
+}
+output += "\n\n";
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"items")) {
+output += "\n";
+output += runtime.suppressValue((lineno = 112, colno = 24, runtime.callWrap(macro_t_19, "render_nested_partial", context, ["item",runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "field")),"items"),runtime.contextOrFrameLookup(context, frame, "level")])), env.opts.autoescape);
+output += "\n";
 ;
 }
 if(parentTemplate) {

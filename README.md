@@ -1,6 +1,6 @@
 # Data Contract Editor
 
-The [Data Contract Editor](https://editor.datacontract.com) is like VS Code, but for [data contracts](https://datacontract.com). It's enterprise-friendly as it stores your data contracts in your browser. 
+The [Data Contract Editor](https://editor.datacontract.com) is like VS Code, but for [data contracts](https://datacontract.com). It's enterprise-friendly as it stores your data contracts in your browser.
 
 **Features**
 
@@ -34,8 +34,15 @@ npm run build
 
 ## How to update the templates
 
-Templates are taken from the Data Contract CLI and are fetched directly from the repository.
-If you want to update them locally run `npm run update-templates`, whic will also be automatically run in the build.
+Templates are taken from the Data Contract CLI and are fetched directly from the repository.  
+If you want to update them locally run `npm run update-templates`, which will also be automatically run in the build.
+
+Optionally, you can specify a location to the templates folder of a local datacontract-cli repository (or any other location).  
+Combined with `npm run dev`, the templates will be live reloaded.
+
+```
+npm run update-templates --datacontract-template-source="/my/path/to/datacontract-cli/datacontract/templates/"
+```
 
 ## License
 

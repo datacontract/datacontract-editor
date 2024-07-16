@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite src",
     "build": "vite build src --outDir ../dist --emptyOutDir",
-		"update-templates": "npm run load-templates && npm run precompile-templates",
-		"load-templates": "node scripts/load_templates.js",
+		"update-templates": "npm run load-templates %npm_config_datacontract-template-source% && npm run precompile-templates",
+		"load-templates": "node scripts/load_templates.js %npm_config_datacontract-template-source%",
     "precompile-templates": "node_modules/nunjucks/bin/precompile templates > src/templates/templates.js",
     "lint": "eslint"
   },
