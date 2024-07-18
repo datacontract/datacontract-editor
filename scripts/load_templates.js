@@ -1,6 +1,17 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 
 /** Utility functions */
+
+async function loadTemplate(sub_path) {
+	// eslint-disable-next-line no-undef
+	let base_path = process.env['npm_config_datacontract_template_source'] || 'https://raw.githubusercontent.com/datacontract/datacontract-cli/main/datacontract/templates/';
+	let path = base_path + sub_path;
+	if (path.startsWith('http')) {
+		// eslint-disable-next-line no-undef
+		return await (await fetch(path)).text();
+	}
+	return readFileSync(path) + '';
+}
 
 // handle the replacement of all Python constructs into the JS equivalent
 function updateTemplateCode(template) {
@@ -21,11 +32,7 @@ function storeTemplate(path, content) {
 
 // download and process a partial
 async function processPartial(partial_name) {
-	const base_path = 'https://raw.githubusercontent.com/datacontract/datacontract-cli/main/datacontract/templates/';
-	const url = `${base_path}${partial_name}`;
-	// eslint-disable-next-line no-undef
-	const raw_template = await fetch(url);
-	const template = await raw_template.text();
+	const template = await loadTemplate(partial_name);
 	const processed_template = updateTemplateCode(template);
 	return processed_template;
 }
@@ -33,9 +40,8 @@ async function processPartial(partial_name) {
 /** Main loop */
 
 // fetch the main template, all other work is based on that
-// eslint-disable-next-line no-undef
-const raw_template = await fetch('https://raw.githubusercontent.com/datacontract/datacontract-cli/main/datacontract/templates/datacontract.html');
-const full_main_template = await raw_template.text();
+const full_main_template = await loadTemplate('datacontract.html');
+// const full_main_template = await raw_template.text();
 // cut out the relevant part of the template (which is inside the <main> element)
 // note: this is a bit crude, but since this is a template we can't parse it as HTML
 const main_template = full_main_template.match(/<main .+>.*<\/main>/s)[0];
