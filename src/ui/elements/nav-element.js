@@ -2,6 +2,7 @@ import { LitElement, html } from "lit";
 import * as monaco from "monaco-editor";
 
 import { getExample, getMinimal } from "../../templates/examples.js";
+import {encodeYamlCode} from "../../sharing/encoding.js";
 
 export class NavElement extends LitElement {
 
@@ -501,11 +502,14 @@ export class NavElement extends LitElement {
 	}
 
   handleShare() {
-		const yamlCode = this.editor.getValue();
-    const shareUrl = location.protocol + "//" + location.host + "/?dc=" + window.btoa(yamlCode);
-    navigator.clipboard.writeText(shareUrl);
-		this.toggleFileMenu();
-		this.notifyUser('Sharing prepared', 'Sharelink copied to Clipboard');
+
+
+		encodeYamlCode(this.editor.getValue()).then((encodedYaml) => {
+			const shareUrl = `${location.protocol}//${location.host}/?dc=${encodedYaml}`;
+			navigator.clipboard.writeText(shareUrl);
+			this.toggleFileMenu();
+			this.notifyUser('Sharing prepared', 'Sharelink copied to Clipboard');
+		});
 	}
 
   handleClear() {

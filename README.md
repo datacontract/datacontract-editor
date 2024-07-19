@@ -11,7 +11,7 @@ The [Data Contract Editor](https://editor.datacontract.com) is like VS Code, but
 - ✅ Live HTML preview
 - ✅ Share data contracts via URLs
 
-Try it out at [editor.datacontract.com](https://editor.datacontract.com).
+Try it out at [editor.datacontract.com](https://editor.datacontract.com). And if you like it, please star the repository.
 
 ![Data Contract Editor](images/screenshot.png)
 
