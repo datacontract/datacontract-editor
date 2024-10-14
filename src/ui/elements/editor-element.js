@@ -26,7 +26,7 @@ export class EditorElement extends LitElement {
 		// create a model and the editor
 		const model = monaco.editor.createModel(
 			value,
-			undefined,
+			"yaml",
 			monaco.Uri.parse("file:///datacontract.yaml")
 		);
 		const editor = monaco.editor.create(this.editor, {
