@@ -1,10 +1,8 @@
 import Split from 'split-grid';
 
 // Setup Editor Infrastructure
-import './monaco/configure-yaml.js';
+import { setupMonacoYaml } from "./monaco/configure-yaml.js";
 import './workers/monaco.workers.js';
-import {setupMonacoYaml} from "./monaco/configure-yaml.js";
-
 setupMonacoYaml();
 
 // Init the movable split
