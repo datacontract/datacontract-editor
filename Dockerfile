@@ -12,6 +12,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci && npm cache clean --force
 COPY ./src ./src
 COPY ./scripts ./scripts
+COPY ./*js ./
 USER root
 RUN npm install
 RUN npm run update-templates
