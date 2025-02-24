@@ -32,6 +32,12 @@ npm run build
 # deploy dist folder
 ```
 
+```bash
+# To run the dockerfile
+docker build . -t datacontract-editor
+docker run -it -p 8080:80 datacontract-editor
+```
+
 ## How to update the templates
 
 Templates are taken from the Data Contract CLI and are fetched directly from the repository.  
