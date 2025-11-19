@@ -365,7 +365,6 @@ const SchemaNode = ({ data, id }) => {
               <div
                 className="px-3 py-2 hover:bg-gray-50 group relative cursor-pointer"
                 onContextMenu={(e) => handlePropertyContextMenu(e, index)}
-                onMouseEnter={() => handlePropertyHover(index)}
                 onClick={() => {
                 // Cancel any pending hover timeout when clicking
                 if (propertyHoverTimeoutRef.current) {

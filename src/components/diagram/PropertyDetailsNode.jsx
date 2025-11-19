@@ -4,6 +4,7 @@ import PropertyDetailsPanel from './PropertyDetailsPanel.jsx';
 const PropertyDetailsNode = ({ data }) => {
   const { property, onUpdate, onDelete, onClose, openMethod, onPinnedChange, initialPinned } = data;
   const closeTimeoutRef = useRef(null);
+  const panelRef = useRef(null);
   const [isPinned, setIsPinned] = useState(initialPinned !== undefined ? initialPinned : (openMethod === 'click'));
   const [isInteracting, setIsInteracting] = useState(false);
 
@@ -15,6 +16,23 @@ const PropertyDetailsNode = ({ data }) => {
       }
     };
   }, []);
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      // Cleanup event listener
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   // Sync local pinned state with parent's initialPinned prop when it changes
   useEffect(() => {
@@ -61,6 +79,7 @@ const PropertyDetailsNode = ({ data }) => {
 
   return (
     <div
+      ref={panelRef}
       className={`bg-white rounded-lg shadow-xl border-1 ${isPinned ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-400 ring-1 ring-gray-400'} w-96 max-h-[80vh] overflow-hidden flex flex-col nodrag nopan`}
       style={{ pointerEvents: 'all' }}
       role="dialog"
