@@ -502,6 +502,279 @@ const SchemaNode = ({ data, id }) => {
               </div>
             </div>
 
+            {/* Render array items if they exist */}
+            {prop.logicalType === 'array' && prop.items && (
+              <>
+                <div
+                  className="pl-8 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer bg-gray-50/50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const node = getNode(id);
+                    if (!node) return;
+                    const headerHeight = 40;
+                    const propertyRowHeight = 42;
+                    const itemsRowHeight = 30;
+                    const propertyOffset = headerHeight + (index * propertyRowHeight) + itemsRowHeight;
+                    data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
+                  }}
+                >
+                  <div className="flex justify-between items-center text-xs">
+                    {/* Left side: Name with [] */}
+                    <div className="flex items-center gap-1 flex-1 min-w-0">
+                      <span className="text-gray-600 font-medium">
+                        {prop.name}[]
+                      </span>
+                    </div>
+
+                    {/* Right side: Items Type */}
+                    <div className="flex items-center gap-2 ml-2">
+                      {editingPropertyType === `${index}-items` ? (
+                        <select
+                          value={prop.items.logicalType || ''}
+                          onChange={(e) => {
+                            const newValue = e.target.value || undefined;
+                            handleUpdateProperty(index, {
+                              items: { ...prop.items, logicalType: newValue }
+                            });
+                            setEditingPropertyType(null);
+                          }}
+                          onBlur={() => setEditingPropertyType(null)}
+                          className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="">Select...</option>
+                          {logicalTypeOptions.map((type) => (
+                            <option key={type} value={type}>
+                              {type}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
+                            !prop.items.logicalType ? 'italic text-gray-400' : ''
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingPropertyType(`${index}-items`);
+                          }}
+                          title="Click to edit item type"
+                        >
+                          {prop.items.logicalType || 'no type'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Render nested properties within array items if items is an object */}
+                {prop.items.properties && prop.items.properties.length > 0 && (
+                  prop.items.properties.map((itemProp, itemPropIndex) => (
+                    <div
+                      key={`${index}-items-${itemPropIndex}`}
+                      className="pl-12 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const node = getNode(id);
+                        if (!node) return;
+                        const headerHeight = 40;
+                        const propertyRowHeight = 42;
+                        const itemsRowHeight = 30;
+                        const nestedPropertyRowHeight = 30;
+                        const propertyOffset = headerHeight + (index * propertyRowHeight) + itemsRowHeight + ((itemPropIndex + 1) * nestedPropertyRowHeight);
+                        data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click', `items-${itemPropIndex}`);
+                      }}
+                    >
+                      <div className="flex justify-between items-center text-xs">
+                        {/* Left side: Name */}
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {editingNestedProperty?.parentIndex === index &&
+                           editingNestedProperty?.nestedIndex === `items-${itemPropIndex}` &&
+                           editingNestedProperty?.field === 'name' ? (
+                            <input
+                              type="text"
+                              value={editedNestedValue}
+                              onChange={(e) => setEditedNestedValue(e.target.value)}
+                              onBlur={() => {
+                                const trimmedValue = editedNestedValue.trim();
+                                const updatedItems = { ...prop.items };
+                                const updatedItemProperties = [...(updatedItems.properties || [])];
+                                updatedItemProperties[itemPropIndex] = {
+                                  ...updatedItemProperties[itemPropIndex],
+                                  name: trimmedValue || undefined
+                                };
+                                updatedItems.properties = updatedItemProperties;
+                                handleUpdateProperty(index, { items: updatedItems });
+                                setEditingNestedProperty(null);
+                                setEditedNestedValue('');
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const trimmedValue = editedNestedValue.trim();
+                                  const updatedItems = { ...prop.items };
+                                  const updatedItemProperties = [...(updatedItems.properties || [])];
+                                  updatedItemProperties[itemPropIndex] = {
+                                    ...updatedItemProperties[itemPropIndex],
+                                    name: trimmedValue || undefined
+                                  };
+                                  updatedItems.properties = updatedItemProperties;
+                                  handleUpdateProperty(index, { items: updatedItems });
+                                  setEditingNestedProperty(null);
+                                  setEditedNestedValue('');
+                                } else if (e.key === 'Escape') {
+                                  e.preventDefault();
+                                  setEditingNestedProperty(null);
+                                  setEditedNestedValue('');
+                                }
+                              }}
+                              className="flex-1 px-1 py-0.5 text-xs bg-white text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500"
+                              placeholder="property name"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          ) : (
+                            <span
+                              className={`text-gray-600 truncate cursor-pointer hover:text-indigo-600 ${
+                                !itemProp.name || itemProp.name.trim() === '' ? 'italic text-gray-400' : ''
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingNestedProperty({ parentIndex: index, nestedIndex: `items-${itemPropIndex}`, field: 'name' });
+                                setEditedNestedValue(itemProp.name || '');
+                              }}
+                              title="Click to edit"
+                            >
+                              {itemProp.name || 'unnamed'}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Right side: Type */}
+                        <div className="flex items-center gap-2 ml-2">
+                          {editingNestedProperty?.parentIndex === index &&
+                           editingNestedProperty?.nestedIndex === `items-${itemPropIndex}` &&
+                           editingNestedProperty?.field === 'logicalType' ? (
+                            <select
+                              value={editedNestedValue || ''}
+                              onChange={(e) => {
+                                setEditedNestedValue(e.target.value);
+                                const updatedItems = { ...prop.items };
+                                const updatedItemProperties = [...(updatedItems.properties || [])];
+                                updatedItemProperties[itemPropIndex] = {
+                                  ...updatedItemProperties[itemPropIndex],
+                                  logicalType: e.target.value || undefined
+                                };
+                                updatedItems.properties = updatedItemProperties;
+                                handleUpdateProperty(index, { items: updatedItems });
+                                setEditingNestedProperty(null);
+                              }}
+                              onBlur={() => setEditingNestedProperty(null)}
+                              className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="">Select...</option>
+                              {logicalTypeOptions.map((type) => (
+                                <option key={type} value={type}>
+                                  {type}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span
+                              className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
+                                !itemProp.logicalType ? 'italic text-gray-400' : ''
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingNestedProperty({ parentIndex: index, nestedIndex: `items-${itemPropIndex}`, field: 'logicalType' });
+                                setEditedNestedValue(itemProp.logicalType || '');
+                              }}
+                              title="Click to edit type"
+                            >
+                              {itemProp.logicalType || 'no type'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+
+                {/* Render nested array items if items is also an array (e.g., array of arrays) */}
+                {prop.items.logicalType === 'array' && prop.items.items && (
+                  <div
+                    className="pl-12 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer bg-gray-50/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const node = getNode(id);
+                      if (!node) return;
+                      const headerHeight = 40;
+                      const propertyRowHeight = 42;
+                      const itemsRowHeight = 30;
+                      const nestedItemsRowHeight = 30;
+                      const propertyOffset = headerHeight + (index * propertyRowHeight) + itemsRowHeight + nestedItemsRowHeight;
+                      data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
+                    }}
+                  >
+                    <div className="flex justify-between items-center text-xs">
+                      {/* Left side: Name with [][] */}
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        <span className="text-gray-600 font-medium">
+                          {prop.name}[][]
+                        </span>
+                      </div>
+
+                      {/* Right side: Nested Items Type */}
+                      <div className="flex items-center gap-2 ml-2">
+                        {editingPropertyType === `${index}-items-items` ? (
+                          <select
+                            value={prop.items.items.logicalType || ''}
+                            onChange={(e) => {
+                              const newValue = e.target.value || undefined;
+                              handleUpdateProperty(index, {
+                                items: {
+                                  ...prop.items,
+                                  items: { ...prop.items.items, logicalType: newValue }
+                                }
+                              });
+                              setEditingPropertyType(null);
+                            }}
+                            onBlur={() => setEditingPropertyType(null)}
+                            className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <option value="">Select...</option>
+                            {logicalTypeOptions.map((type) => (
+                              <option key={type} value={type}>
+                                {type}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span
+                            className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
+                              !prop.items.items.logicalType ? 'italic text-gray-400' : ''
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingPropertyType(`${index}-items-items`);
+                            }}
+                            title="Click to edit nested item type"
+                          >
+                            {prop.items.items.logicalType || 'no type'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
             {/* Render nested properties if they exist */}
             {prop.properties && prop.properties.length > 0 && (
               prop.properties.map((nestedProp, nestedIndex) => (

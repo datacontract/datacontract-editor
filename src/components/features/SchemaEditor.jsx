@@ -144,10 +144,15 @@ const ItemsRow = ({
                 {/* Main row for items node */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {/* Array icon - using a list icon */}
-                        <svg className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
+                        {/* Logical Type Icon */}
+                        {(() => {
+                            const IconComponent = getLogicalTypeIcon(items?.logicalType);
+                            return IconComponent ? (
+                                <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                            ) : (
+                                <div className="h-3.5 w-3.5 flex-shrink-0" />
+                            );
+                        })()}
 
                         {/* Items label - showing parent property name with [] */}
                         <span className="px-1 py-0.5 text-sm text-gray-700 font-medium flex-shrink-0">
