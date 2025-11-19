@@ -117,17 +117,17 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               {/* Examples */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Examples</label>
-                <input
-                  type="text"
-                  value={property.examples?.join(', ') || ''}
+                <textarea
+                  value={property.examples?.join('\n') || ''}
                   onChange={(e) => {
-                    const examples = e.target.value.split(',').map(ex => ex.trim()).filter(ex => ex);
+                    const examples = e.target.value.split('\n').map(ex => ex.trim()).filter(ex => ex);
                     updateField('examples', examples.length > 0 ? examples : undefined);
                   }}
+                  rows={3}
                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="example1, example2, example3"
+                  placeholder="example1&#10;example2&#10;example3"
                 />
-                <p className="mt-1 text-xs text-gray-500">Comma-separated list of example values</p>
+                <p className="mt-1 text-xs text-gray-500">One example per line</p>
               </div>
             </DisclosurePanel>
           </>
@@ -689,12 +689,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         )}
       </Disclosure>
 
-      {/* References & Documentation Section */}
+      {/* Authoritative Definitions Section */}
       <Disclosure>
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>References & Documentation</span>
+              <span>Authoritative Definitions</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -769,7 +769,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         <div className="pt-3 border-t border-gray-200">
           <button
             onClick={onDelete}
-            className="w-full px-4 py-2 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+            className="px-2 py-1 text-xs text-red-600 bg-white border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
