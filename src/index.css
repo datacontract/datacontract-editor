@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer components {
+    .btn--primary {
+        @apply bg-indigo-600 text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+    }
+
+    .btn--secondary {
+        @apply inline-flex items-center rounded-md bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:bg-gray-50 cursor-pointer;
+    }
+}

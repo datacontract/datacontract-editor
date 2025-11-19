@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - Basic Embed Example</title>
+    <link rel="stylesheet" href="../dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        #editor {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="editor"></div>
+
+<script src="../dist/datacontract-editor.umd.js"></script>
+<script>
+    // Initialize the editor with default configuration
+    const editor = DataContractEditor.init({
+        container: '#editor',
+        yaml: `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: my-first-contract
+version: "1.0.0"
+status: draft
+info:
+  title: My First Data Contract
+  description: This is a simple example data contract
+  owner: Data Team
+`,
+        schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
+        initialView: 'yaml',
+        showPreview: true
+    });
+
+    // Log when YAML changes
+    editor.subscribe((state) => {
+        console.log('Editor state changed:', state);
+    });
+</script>
+</body>
+</html>

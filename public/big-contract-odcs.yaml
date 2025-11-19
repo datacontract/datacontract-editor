@@ -1,0 +1,2601 @@
+apiVersion: v3.0.0
+kind: DataContract
+id: urn:datacontract:starburst-uat01sep_ice_views_zone_ffdap_ff_ngxdbo_customsbrokerage_cal-fdc5058f-3b6e-4c06-b607-e22dc91948f8
+name: starburst-uat01.sep_ice_views_zone_ff.dap_ff_ngxdbo_customsbrokerage_cal
+version: 0.0.1
+domain: governance-group
+status: draft
+schema:
+- name: starburst-uat01_rep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoice_v001
+  physicalName: starburst-uat01_rep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoice_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: jz_pk
+    logicalType: string
+    physicalType: varchar
+  - name: jz_je
+    logicalType: string
+    physicalType: varchar
+  - name: jz_cu
+    logicalType: string
+    physicalType: varchar
+  - name: jz_oh_supplier
+    logicalType: string
+    physicalType: varchar
+  - name: jz_oh_buyer
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: branch
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: suppliergid
+    logicalType: string
+    physicalType: varchar
+  - name: suppliername
+    logicalType: string
+    physicalType: varchar
+  - name: buyergid
+    logicalType: string
+    physicalType: varchar
+  - name: buyername
+    logicalType: string
+    physicalType: varchar
+  - name: incoterm
+    logicalType: string
+    physicalType: varchar
+  - name: incotermnamedport
+    logicalType: string
+    physicalType: varchar
+  - name: defaultorigin
+    logicalType: string
+    physicalType: varchar
+  - name: packs
+    logicalType: number
+    physicalType: decimal
+  - name: volume
+    logicalType: number
+    physicalType: decimal
+  - name: unitofvolume
+    logicalType: string
+    physicalType: varchar
+  - name: weight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofweight
+    logicalType: string
+    physicalType: varchar
+  - name: netweight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofnetweight
+    logicalType: string
+    physicalType: varchar
+  - name: valuationdateoverride
+    logicalType: date
+    physicalType: timestamp
+  - name: invoicenumber
+    logicalType: string
+    physicalType: varchar
+  - name: invoicedate
+    logicalType: date
+    physicalType: timestamp
+  - name: invoiceamount
+    logicalType: number
+    physicalType: decimal
+  - name: invoicecurrency
+    logicalType: string
+    physicalType: varchar
+  - name: exchangerate
+    logicalType: number
+    physicalType: decimal
+  - name: exchangeratetype
+    logicalType: string
+    physicalType: varchar
+  - name: landedcostexchangerate
+    logicalType: number
+    physicalType: decimal
+  - name: overridefob
+    logicalType: boolean
+    physicalType: boolean
+  - name: fobvalue
+    logicalType: number
+    physicalType: decimal
+  - name: addinfo
+    logicalType: string
+    physicalType: varchar
+  - name: invoicedisplaysequence
+    logicalType: integer
+    physicalType: int
+  - name: paymentnumber
+    logicalType: string
+    physicalType: varchar
+  - name: paymentamount
+    logicalType: number
+    physicalType: decimal
+  - name: paymentexchangerate
+    logicalType: number
+    physicalType: decimal
+  - name: paymentdate
+    logicalType: date
+    physicalType: timestamp
+  - name: housebill
+    logicalType: string
+    physicalType: varchar
+  - name: entrysubmitteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: entryauthorizationdate
+    logicalType: date
+    physicalType: timestamp
+  - name: messagestatus
+    logicalType: string
+    physicalType: varchar
+  - name: factcommercialinvoicecreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: gff
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohl
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohldeclarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: jz_oa_manufacturer
+    logicalType: string
+    physicalType: varchar
+  - name: manufacturergid
+    logicalType: string
+    physicalType: varchar
+  - name: manufacturername
+    logicalType: string
+    physicalType: varchar
+  - name: usmanufacturersidentificationcode
+    logicalType: string
+    physicalType: varchar
+  - name: usactualnondutiablecharges
+    logicalType: number
+    physicalType: decimal
+  - name: usnondutiablefees
+    logicalType: number
+    physicalType: decimal
+  - name: usnondutiablediscount
+    logicalType: number
+    physicalType: decimal
+  - name: usnondutiablecharges
+    logicalType: number
+    physicalType: decimal
+  - name: usdutiablecharges
+    logicalType: number
+    physicalType: decimal
+  - name: usbalancetomarket
+    logicalType: number
+    physicalType: decimal
+  - name: usdiscount
+    logicalType: number
+    physicalType: decimal
+  - name: systemcreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: systemcreateuser
+    logicalType: string
+    physicalType: varchar
+  - name: systemcreateemail
+    logicalType: string
+    physicalType: varchar
+  - name: systemlasteditdate
+    logicalType: date
+    physicalType: timestamp
+  - name: systemlastedituser
+    logicalType: string
+    physicalType: varchar
+  - name: systemlasteditemail
+    logicalType: string
+    physicalType: varchar
+  - name: usenteredvalue
+    logicalType: number
+    physicalType: decimal
+  - name: jz_oh_consignee
+    logicalType: string
+    physicalType: varchar
+  - name: jz_oh_sellingagent
+    logicalType: string
+    physicalType: varchar
+  - name: jz_oh_buyeragent
+    logicalType: string
+    physicalType: varchar
+  - name: consigneegid
+    logicalType: string
+    physicalType: varchar
+  - name: consigneename
+    logicalType: string
+    physicalType: varchar
+  - name: sellingagentgid
+    logicalType: string
+    physicalType: varchar
+  - name: sellingagentname
+    logicalType: string
+    physicalType: varchar
+  - name: buyeragentgid
+    logicalType: string
+    physicalType: varchar
+  - name: buyeragentname
+    logicalType: string
+    physicalType: varchar
+  - name: addinfojson
+    logicalType: string
+    physicalType: varchar
+  - name: bookingtype
+    logicalType: string
+    physicalType: varchar
+  - name: bookingsource
+    logicalType: string
+    physicalType: varchar
+  - name: shipmenttype
+    logicalType: string
+    physicalType: varchar
+  - name: customscurrency
+    logicalType: string
+    physicalType: varchar
+  - name: usimportentryno
+    logicalType: string
+    physicalType: varchar
+  - name: usforeigntradezone
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_customsentryline_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_customsentryline_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: cl_pk
+    logicalType: string
+    physicalType: varchar
+  - name: ch_pk
+    logicalType: string
+    physicalType: varchar
+  - name: je_pk
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: branch
+    logicalType: string
+    physicalType: varchar
+  - name: entrysubmitteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: entryreleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: entrystatus
+    logicalType: string
+    physicalType: varchar
+  - name: linenumber
+    logicalType: integer
+    physicalType: int
+  - name: customspostedstatus
+    logicalType: string
+    physicalType: varchar
+  - name: advaloremtariff
+    logicalType: string
+    physicalType: varchar
+  - name: customsvalue
+    logicalType: number
+    physicalType: decimal
+  - name: whsunitvalue
+    logicalType: number
+    physicalType: decimal
+  - name: dutypercent
+    logicalType: number
+    physicalType: decimal
+  - name: flatamount
+    logicalType: number
+    physicalType: decimal
+  - name: unitofflatamount
+    logicalType: string
+    physicalType: varchar
+  - name: description
+    logicalType: string
+    physicalType: varchar
+  - name: additionalinfo
+    logicalType: string
+    physicalType: varchar
+  - name: parenttrailer
+    logicalType: string
+    physicalType: varchar
+  - name: '016'
+    logicalType: number
+    physicalType: decimal
+  - name: '017'
+    logicalType: number
+    physicalType: decimal
+  - name: 018
+    logicalType: number
+    physicalType: decimal
+  - name: '022'
+    logicalType: number
+    physicalType: decimal
+  - name: '053'
+    logicalType: number
+    physicalType: decimal
+  - name: '054'
+    logicalType: number
+    physicalType: decimal
+  - name: '055'
+    logicalType: number
+    physicalType: decimal
+  - name: '056'
+    logicalType: number
+    physicalType: decimal
+  - name: '057'
+    logicalType: number
+    physicalType: decimal
+  - name: 090
+    logicalType: number
+    physicalType: decimal
+  - name: '106'
+    logicalType: number
+    physicalType: decimal
+  - name: '107'
+    logicalType: number
+    physicalType: decimal
+  - name: '108'
+    logicalType: number
+    physicalType: decimal
+  - name: '110'
+    logicalType: number
+    physicalType: decimal
+  - name: '499'
+    logicalType: number
+    physicalType: decimal
+  - name: '501'
+    logicalType: number
+    physicalType: decimal
+  - name: acr
+    logicalType: number
+    physicalType: decimal
+  - name: add
+    logicalType: number
+    physicalType: decimal
+  - name: alc
+    logicalType: number
+    physicalType: decimal
+  - name: cvc
+    logicalType: number
+    physicalType: decimal
+  - name: cvd
+    logicalType: number
+    physicalType: decimal
+  - name: cvt
+    logicalType: number
+    physicalType: decimal
+  - name: ddb
+    logicalType: number
+    physicalType: decimal
+  - name: dmp
+    logicalType: number
+    physicalType: decimal
+  - name: dt1
+    logicalType: number
+    physicalType: decimal
+  - name: dty
+    logicalType: number
+    physicalType: decimal
+  - name: exc
+    logicalType: number
+    physicalType: decimal
+  - name: exs
+    logicalType: number
+    physicalType: decimal
+  - name: gcr
+    logicalType: number
+    physicalType: decimal
+  - name: gsd
+    logicalType: number
+    physicalType: decimal
+  - name: gst
+    logicalType: number
+    physicalType: decimal
+  - name: her
+    logicalType: number
+    physicalType: decimal
+  - name: lct
+    logicalType: number
+    physicalType: decimal
+  - name: sec
+    logicalType: number
+    physicalType: decimal
+  - name: sel
+    logicalType: number
+    physicalType: decimal
+  - name: sgg
+    logicalType: number
+    physicalType: decimal
+  - name: tdt
+    logicalType: number
+    physicalType: decimal
+  - name: wet
+    logicalType: number
+    physicalType: decimal
+  - name: factcustomsentrylinecreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: 079
+    logicalType: number
+    physicalType: decimal
+  - name: '102'
+    logicalType: number
+    physicalType: decimal
+  - name: '103'
+    logicalType: number
+    physicalType: decimal
+  - name: '104'
+    logicalType: number
+    physicalType: decimal
+  - name: '105'
+    logicalType: number
+    physicalType: decimal
+  - name: '109'
+    logicalType: number
+    physicalType: decimal
+  - name: '311'
+    logicalType: number
+    physicalType: decimal
+  - name: '496'
+    logicalType: number
+    physicalType: decimal
+  - name: '500'
+    logicalType: number
+    physicalType: decimal
+  - name: '672'
+    logicalType: number
+    physicalType: decimal
+  - name: ustotaltax
+    logicalType: number
+    physicalType: decimal
+  - name: ustotalfees
+    logicalType: number
+    physicalType: decimal
+  - name: a00
+    logicalType: number
+    physicalType: decimal
+  - name: b00
+    logicalType: number
+    physicalType: decimal
+  - name: vat
+    logicalType: number
+    physicalType: decimal
+  - name: statisticalvalue
+    logicalType: number
+    physicalType: decimal
+  - name: valueforvat
+    logicalType: number
+    physicalType: decimal
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoicelinecost_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoicelinecost_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: j7_pk
+    logicalType: string
+    physicalType: varchar
+  - name: j7_jz
+    logicalType: string
+    physicalType: varchar
+  - name: j7_je
+    logicalType: string
+    physicalType: varchar
+  - name: j7_jd
+    logicalType: string
+    physicalType: varchar
+  - name: parent_pk
+    logicalType: string
+    physicalType: varchar
+  - name: parenttable
+    logicalType: string
+    physicalType: varchar
+  - name: issystem
+    logicalType: boolean
+    physicalType: boolean
+  - name: invoicenumber
+    logicalType: string
+    physicalType: varchar
+  - name: invoicedate
+    logicalType: date
+    physicalType: timestamp
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: ordernumber
+    logicalType: string
+    physicalType: varchar
+  - name: chargetype
+    logicalType: string
+    physicalType: varchar
+  - name: chargedescription
+    logicalType: string
+    physicalType: varchar
+  - name: fullorpartialapportionment
+    logicalType: string
+    physicalType: varchar
+  - name: amount
+    logicalType: number
+    physicalType: decimal
+  - name: currency
+    logicalType: string
+    physicalType: varchar
+  - name: currencyexchangerate
+    logicalType: number
+    physicalType: decimal
+  - name: currencyexchangeratetype
+    logicalType: string
+    physicalType: varchar
+  - name: isdutiable
+    logicalType: boolean
+    physicalType: boolean
+  - name: isgstapplicable
+    logicalType: boolean
+    physicalType: boolean
+  - name: isincludedinitot
+    logicalType: boolean
+    physicalType: boolean
+  - name: isnotincludedininvoice
+    logicalType: boolean
+    physicalType: boolean
+  - name: isapportionedcharge
+    logicalType: boolean
+    physicalType: boolean
+  - name: prepaidorcollect
+    logicalType: string
+    physicalType: varchar
+  - name: percentage
+    logicalType: number
+    physicalType: decimal
+  - name: distributedby
+    logicalType: string
+    physicalType: varchar
+  - name: adjustedcharge
+    logicalType: boolean
+    physicalType: boolean
+  - name: factcommercialinvoicelinecostcreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: gff
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohl
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohldeclarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_declarationbill_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_declarationbill_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: cu_pk
+    logicalType: string
+    physicalType: varchar
+  - name: js_pk
+    logicalType: string
+    physicalType: varchar
+  - name: je_pk
+    logicalType: string
+    physicalType: varchar
+  - name: cu_cu_parentbill
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: shipmentno
+    logicalType: string
+    physicalType: varchar
+  - name: billnumber
+    logicalType: string
+    physicalType: varchar
+  - name: billtype
+    logicalType: string
+    physicalType: varchar
+  - name: parentbill
+    logicalType: string
+    physicalType: varchar
+  - name: packs
+    logicalType: number
+    physicalType: decimal
+  - name: packsunit
+    logicalType: string
+    physicalType: varchar
+  - name: issuedate
+    logicalType: date
+    physicalType: timestamp
+  - name: billissuerscac
+    logicalType: string
+    physicalType: varchar
+  - name: issplit
+    logicalType: boolean
+    physicalType: boolean
+  - name: inbondquantity
+    logicalType: integer
+    physicalType: int
+  - name: amscarrierindicator
+    logicalType: boolean
+    physicalType: boolean
+  - name: weight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofweight
+    logicalType: string
+    physicalType: varchar
+  - name: goodsvalueinlocalcurrency
+    logicalType: number
+    physicalType: decimal
+  - name: goodsvalueestimated
+    logicalType: boolean
+    physicalType: boolean
+  - name: inbondarrivaldate
+    logicalType: date
+    physicalType: timestamp
+  - name: factdeclarationbillcreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: isfbillnumber
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoiceline_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoiceline_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: ji_pk
+    logicalType: string
+    physicalType: varchar
+  - name: ji_jz
+    logicalType: string
+    physicalType: varchar
+  - name: ji_cl
+    logicalType: string
+    physicalType: varchar
+  - name: ji_co
+    logicalType: string
+    physicalType: varchar
+  - name: ji_op
+    logicalType: string
+    physicalType: varchar
+  - name: ji_jo
+    logicalType: string
+    physicalType: varchar
+  - name: ji_cc
+    logicalType: string
+    physicalType: varchar
+  - name: ji_oa_manufactureraddress
+    logicalType: string
+    physicalType: varchar
+  - name: ji_oa_soldtopartyaddress
+    logicalType: string
+    physicalType: varchar
+  - name: manufacturercode
+    logicalType: string
+    physicalType: varchar
+  - name: manufacturername
+    logicalType: string
+    physicalType: varchar
+  - name: manufactureraddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: usmanufacturersidentificationcode
+    logicalType: string
+    physicalType: varchar
+  - name: soldtopartycode
+    logicalType: string
+    physicalType: varchar
+  - name: soldtopartyname
+    logicalType: string
+    physicalType: varchar
+  - name: soldtopartyaddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: linenumber
+    logicalType: integer
+    physicalType: int
+  - name: partnumber
+    logicalType: string
+    physicalType: varchar
+  - name: ordernumber
+    logicalType: string
+    physicalType: varchar
+  - name: partattribute1
+    logicalType: string
+    physicalType: varchar
+  - name: partattribute2
+    logicalType: string
+    physicalType: varchar
+  - name: partattribute3
+    logicalType: string
+    physicalType: varchar
+  - name: description
+    logicalType: string
+    physicalType: varchar
+  - name: invoicenumber
+    logicalType: string
+    physicalType: varchar
+  - name: invoicedate
+    logicalType: date
+    physicalType: timestamp
+  - name: invoicequantity
+    logicalType: number
+    physicalType: decimal
+  - name: unitofinvoicequantity
+    logicalType: string
+    physicalType: varchar
+  - name: lineprice
+    logicalType: number
+    physicalType: decimal
+  - name: dutypercent
+    logicalType: number
+    physicalType: decimal
+  - name: customsvalue
+    logicalType: number
+    physicalType: decimal
+  - name: volume
+    logicalType: number
+    physicalType: decimal
+  - name: unitofvolume
+    logicalType: string
+    physicalType: varchar
+  - name: weight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofweight
+    logicalType: string
+    physicalType: varchar
+  - name: netweight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofnetweight
+    logicalType: string
+    physicalType: varchar
+  - name: customsquantity
+    logicalType: number
+    physicalType: decimal
+  - name: unitofcustomsquantity
+    logicalType: string
+    physicalType: varchar
+  - name: bondedwarehousequantity
+    logicalType: number
+    physicalType: decimal
+  - name: unitofbondedwarehousequantity
+    logicalType: string
+    physicalType: varchar
+  - name: isparent
+    logicalType: boolean
+    physicalType: boolean
+  - name: parentline
+    logicalType: integer
+    physicalType: int
+  - name: tariffnumber
+    logicalType: string
+    physicalType: varchar
+  - name: classificationlookupcode
+    logicalType: string
+    physicalType: varchar
+  - name: classificationtype
+    logicalType: string
+    physicalType: varchar
+  - name: classificationdescription
+    logicalType: string
+    physicalType: varchar
+  - name: classificationcountry
+    logicalType: string
+    physicalType: varchar
+  - name: countryoforigin
+    logicalType: string
+    physicalType: varchar
+  - name: countryofexport
+    logicalType: string
+    physicalType: varchar
+  - name: concessionorder
+    logicalType: string
+    physicalType: varchar
+  - name: additionalinfo
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute1
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute2
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute3
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute4
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute5
+    logicalType: string
+    physicalType: varchar
+  - name: customattribute6
+    logicalType: string
+    physicalType: varchar
+  - name: customtext
+    logicalType: string
+    physicalType: varchar
+  - name: customdate1
+    logicalType: date
+    physicalType: timestamp
+  - name: customdate2
+    logicalType: date
+    physicalType: timestamp
+  - name: customdate3
+    logicalType: date
+    physicalType: timestamp
+  - name: customdate4
+    logicalType: date
+    physicalType: timestamp
+  - name: customdate5
+    logicalType: date
+    physicalType: timestamp
+  - name: customflag1
+    logicalType: boolean
+    physicalType: boolean
+  - name: customflag2
+    logicalType: boolean
+    physicalType: boolean
+  - name: customflag3
+    logicalType: boolean
+    physicalType: boolean
+  - name: customflag4
+    logicalType: boolean
+    physicalType: boolean
+  - name: customflag5
+    logicalType: boolean
+    physicalType: boolean
+  - name: customdecimal1
+    logicalType: number
+    physicalType: decimal
+  - name: customdecimal2
+    logicalType: number
+    physicalType: decimal
+  - name: customdecimal3
+    logicalType: number
+    physicalType: decimal
+  - name: customdecimal4
+    logicalType: number
+    physicalType: decimal
+  - name: customdecimal5
+    logicalType: number
+    physicalType: decimal
+  - name: hazmatcode
+    logicalType: string
+    physicalType: varchar
+  - name: hazmatcodequalifier
+    logicalType: string
+    physicalType: varchar
+  - name: extrainfoforclassification
+    logicalType: string
+    physicalType: varchar
+  - name: commoditycode
+    logicalType: string
+    physicalType: varchar
+  - name: containernumber
+    logicalType: string
+    physicalType: varchar
+  - name: containersize
+    logicalType: string
+    physicalType: varchar
+  - name: containertype
+    logicalType: string
+    physicalType: varchar
+  - name: containermode
+    logicalType: string
+    physicalType: varchar
+  - name: sealnumber
+    logicalType: string
+    physicalType: varchar
+  - name: customssecondquantity
+    logicalType: number
+    physicalType: decimal
+  - name: customssecondunitqty
+    logicalType: string
+    physicalType: varchar
+  - name: customsthirdquantity
+    logicalType: number
+    physicalType: decimal
+  - name: customsthirdunitqty
+    logicalType: string
+    physicalType: varchar
+  - name: nzpref
+    logicalType: string
+    physicalType: varchar
+  - name: nzprefgroup
+    logicalType: string
+    physicalType: varchar
+  - name: auprefschemetype
+    logicalType: string
+    physicalType: varchar
+  - name: aupreforigin
+    logicalType: string
+    physicalType: varchar
+  - name: auprefruletype
+    logicalType: string
+    physicalType: varchar
+  - name: usexportdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usduty
+    logicalType: number
+    physicalType: decimal
+  - name: ussupduty
+    logicalType: number
+    physicalType: decimal
+  - name: ussuptariff
+    logicalType: string
+    physicalType: varchar
+  - name: usaddrateindicator
+    logicalType: string
+    physicalType: varchar
+  - name: usaddcaseno
+    logicalType: string
+    physicalType: varchar
+  - name: usadduty
+    logicalType: number
+    physicalType: decimal
+  - name: uscvdrateindicator
+    logicalType: string
+    physicalType: varchar
+  - name: uscvdcaseno
+    logicalType: string
+    physicalType: varchar
+  - name: uscvduty
+    logicalType: number
+    physicalType: decimal
+  - name: usvisaqty
+    logicalType: number
+    physicalType: decimal
+  - name: usadcvdstat
+    logicalType: string
+    physicalType: varchar
+  - name: uspermitslicenses
+    logicalType: string
+    physicalType: varchar
+  - name: factcommercialinvoicelinecreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: gff
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohl
+    logicalType: boolean
+    physicalType: boolean
+  - name: ustransactionsrelated
+    logicalType: boolean
+    physicalType: boolean
+  - name: ussetindicator
+    logicalType: string
+    physicalType: varchar
+  - name: ustextilecategoryno
+    logicalType: string
+    physicalType: varchar
+  - name: usvisano
+    logicalType: string
+    physicalType: varchar
+  - name: uscottonfeeexempt
+    logicalType: boolean
+    physicalType: boolean
+  - name: uspirprulingno
+    logicalType: string
+    physicalType: varchar
+  - name: usdutiablecharges
+    logicalType: number
+    physicalType: decimal
+  - name: usschdloading
+    logicalType: string
+    physicalType: varchar
+  - name: usschdloadingportname
+    logicalType: string
+    physicalType: varchar
+  - name: ushmf
+    logicalType: number
+    physicalType: decimal
+  - name: usmpfcalculated
+    logicalType: number
+    physicalType: decimal
+  - name: usmpfpayable
+    logicalType: number
+    physicalType: decimal
+  - name: ustotalfees
+    logicalType: number
+    physicalType: decimal
+  - name: us9802goodsvalue
+    logicalType: number
+    physicalType: decimal
+  - name: ustotaldutiesfees
+    logicalType: number
+    physicalType: decimal
+  - name: us9802unitprice
+    logicalType: number
+    physicalType: decimal
+  - name: addinfojson
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: preferencecode
+    logicalType: string
+    physicalType: varchar
+  - name: customsprocedurecode
+    logicalType: string
+    physicalType: varchar
+  - name: usmpfrate
+    logicalType: number
+    physicalType: decimal
+  - name: usaddrate
+    logicalType: number
+    physicalType: decimal
+  - name: uscvdrate
+    logicalType: number
+    physicalType: decimal
+  - name: parent_pk
+    logicalType: string
+    physicalType: varchar
+  - name: ustariffnumber
+    logicalType: string
+    physicalType: varchar
+  - name: ustariffdescription
+    logicalType: string
+    physicalType: varchar
+  - name: ushmfrate
+    logicalType: number
+    physicalType: decimal
+  - name: unitprice
+    logicalType: number
+    physicalType: decimal
+  - name: usinternalrevenuetaxes
+    logicalType: number
+    physicalType: decimal
+  - name: usotherfeecode
+    logicalType: string
+    physicalType: varchar
+  - name: localpartinfojson
+    logicalType: string
+    physicalType: varchar
+  - name: usdutycalculationdesc
+    logicalType: string
+    physicalType: varchar
+  - name: duty
+    logicalType: number
+    physicalType: decimal
+  - name: vat
+    logicalType: number
+    physicalType: decimal
+  - name: statisticalvalue
+    logicalType: number
+    physicalType: decimal
+  - name: ustarifftype
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoicelinetax_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_commercialinvoicelinetax_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: jlt_pk
+    logicalType: string
+    physicalType: varchar
+  - name: jlt_ji
+    logicalType: string
+    physicalType: varchar
+  - name: taxtype
+    logicalType: string
+    physicalType: varchar
+  - name: baseamount
+    logicalType: number
+    physicalType: decimal
+  - name: basequantity
+    logicalType: number
+    physicalType: decimal
+  - name: basequantityunit
+    logicalType: string
+    physicalType: varchar
+  - name: amount
+    logicalType: number
+    physicalType: decimal
+  - name: methodofpaymentcode
+    logicalType: string
+    physicalType: varchar
+  - name: ratecode
+    logicalType: string
+    physicalType: varchar
+  - name: suspensioncode
+    logicalType: string
+    physicalType: varchar
+  - name: overridereasoncode
+    logicalType: string
+    physicalType: varchar
+  - name: calculatedpercentage
+    logicalType: number
+    physicalType: decimal
+  - name: factcommercialinvoicelinetaxcreatedate
+    logicalType: date
+    physicalType: timestamp
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_milestone_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_milestone_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: p9_pk
+    logicalType: string
+    physicalType: varchar
+  - name: parent_pk
+    logicalType: string
+    physicalType: varchar
+  - name: jw_pk
+    logicalType: string
+    physicalType: varchar
+  - name: sl_pk
+    logicalType: string
+    physicalType: varchar
+  - name: shipmentno
+    logicalType: string
+    physicalType: varchar
+  - name: consolno
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: orderno
+    logicalType: string
+    physicalType: varchar
+  - name: containerno
+    logicalType: string
+    physicalType: varchar
+  - name: docketid
+    logicalType: string
+    physicalType: varchar
+  - name: sequenceno
+    logicalType: integer
+    physicalType: int
+  - name: eventcode
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: description
+    logicalType: string
+    physicalType: varchar
+  - name: notes
+    logicalType: string
+    physicalType: varchar
+  - name: deviationcode
+    logicalType: integer
+    physicalType: int
+  - name: deviationreasoncode
+    logicalType: integer
+    physicalType: int
+  - name: published
+    logicalType: boolean
+    physicalType: boolean
+  - name: scheduleddate
+    logicalType: date
+    physicalType: timestamp
+  - name: scheduleddateutc
+    logicalType: date
+    physicalType: timestamp
+  - name: originallocaldate
+    logicalType: date
+    physicalType: timestamp
+  - name: originalscheduleddateutc
+    logicalType: date
+    physicalType: timestamp
+  - name: actualdate
+    logicalType: date
+    physicalType: timestamp
+  - name: actualdateutc
+    logicalType: date
+    physicalType: timestamp
+  - name: eventdateutc
+    logicalType: date
+    physicalType: timestamp
+  - name: locationcode
+    logicalType: string
+    physicalType: varchar
+  - name: registeredintime
+    logicalType: boolean
+    physicalType: boolean
+  - name: coordinates
+    logicalType: string
+    physicalType: varchar
+  - name: isgpscoordinates
+    logicalType: boolean
+    physicalType: boolean
+  - name: factmilestonecreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: eventusercode
+    logicalType: string
+    physicalType: varchar
+  - name: isfjobnumber
+    logicalType: string
+    physicalType: varchar
+  - name: hasedievent
+    logicalType: boolean
+    physicalType: boolean
+  - name: milestoneeventtimediff
+    logicalType: integer
+    physicalType: int
+  - name: lsp_id
+    logicalType: integer
+    physicalType: int
+  - name: triggerfiredcountdown
+    logicalType: integer
+    physicalType: int
+  - name: quotenumber
+    logicalType: string
+    physicalType: varchar
+  - name: bookingid
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_customsentry_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_customsentry_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: ch_pk
+    logicalType: string
+    physicalType: varchar
+  - name: ch_je
+    logicalType: string
+    physicalType: varchar
+  - name: ch_ch_primeentry
+    logicalType: string
+    physicalType: varchar
+  - name: ch_je_primeentry
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: primarydeclarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: branch
+    logicalType: string
+    physicalType: varchar
+  - name: importergid
+    logicalType: string
+    physicalType: varchar
+  - name: importername
+    logicalType: string
+    physicalType: varchar
+  - name: suppliergid
+    logicalType: string
+    physicalType: varchar
+  - name: suppliername
+    logicalType: string
+    physicalType: varchar
+  - name: applicationcode
+    logicalType: string
+    physicalType: varchar
+  - name: messagetype
+    logicalType: string
+    physicalType: varchar
+  - name: messagestatus
+    logicalType: string
+    physicalType: varchar
+  - name: entrystatus
+    logicalType: string
+    physicalType: varchar
+  - name: bgmreference
+    logicalType: string
+    physicalType: varchar
+  - name: totalpaid
+    logicalType: number
+    physicalType: decimal
+  - name: highestlinenumber
+    logicalType: integer
+    physicalType: int
+  - name: additionalinfo
+    logicalType: string
+    physicalType: varchar
+  - name: entrysubmitteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: entryreleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: '016'
+    logicalType: number
+    physicalType: decimal
+  - name: '017'
+    logicalType: number
+    physicalType: decimal
+  - name: 018
+    logicalType: number
+    physicalType: decimal
+  - name: '022'
+    logicalType: number
+    physicalType: decimal
+  - name: '053'
+    logicalType: number
+    physicalType: decimal
+  - name: '054'
+    logicalType: number
+    physicalType: decimal
+  - name: '055'
+    logicalType: number
+    physicalType: decimal
+  - name: '056'
+    logicalType: number
+    physicalType: decimal
+  - name: '057'
+    logicalType: number
+    physicalType: decimal
+  - name: 079
+    logicalType: number
+    physicalType: decimal
+  - name: 090
+    logicalType: number
+    physicalType: decimal
+  - name: '102'
+    logicalType: number
+    physicalType: decimal
+  - name: '103'
+    logicalType: number
+    physicalType: decimal
+  - name: '104'
+    logicalType: number
+    physicalType: decimal
+  - name: '105'
+    logicalType: number
+    physicalType: decimal
+  - name: '106'
+    logicalType: number
+    physicalType: decimal
+  - name: '107'
+    logicalType: number
+    physicalType: decimal
+  - name: '108'
+    logicalType: number
+    physicalType: decimal
+  - name: '109'
+    logicalType: number
+    physicalType: decimal
+  - name: '110'
+    logicalType: number
+    physicalType: decimal
+  - name: '311'
+    logicalType: number
+    physicalType: decimal
+  - name: '496'
+    logicalType: number
+    physicalType: decimal
+  - name: '499'
+    logicalType: number
+    physicalType: decimal
+  - name: '501'
+    logicalType: number
+    physicalType: decimal
+  - name: '500'
+    logicalType: number
+    physicalType: decimal
+  - name: '672'
+    logicalType: number
+    physicalType: decimal
+  - name: acc
+    logicalType: number
+    physicalType: decimal
+  - name: apc
+    logicalType: number
+    physicalType: decimal
+  - name: ars
+    logicalType: number
+    physicalType: decimal
+  - name: asp
+    logicalType: number
+    physicalType: decimal
+  - name: dpc
+    logicalType: number
+    physicalType: decimal
+  - name: dty
+    logicalType: number
+    physicalType: decimal
+  - name: efg
+    logicalType: number
+    physicalType: decimal
+  - name: enf
+    logicalType: number
+    physicalType: decimal
+  - name: wdl
+    logicalType: number
+    physicalType: decimal
+  - name: customsvalue
+    logicalType: number
+    physicalType: decimal
+  - name: 499sumoflines
+    logicalType: number
+    physicalType: decimal
+  - name: ustotaltax
+    logicalType: number
+    physicalType: decimal
+  - name: ustotalfees
+    logicalType: number
+    physicalType: decimal
+  - name: factcustomsentrycreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: gff
+    logicalType: boolean
+    physicalType: boolean
+  - name: ohl
+    logicalType: boolean
+    physicalType: boolean
+  - name: add
+    logicalType: number
+    physicalType: decimal
+  - name: cvd
+    logicalType: number
+    physicalType: decimal
+  - name: supduty
+    logicalType: number
+    physicalType: decimal
+  - name: paymentinfojson
+    logicalType: string
+    physicalType: varchar
+  - name: entrystatusdescription
+    logicalType: string
+    physicalType: varchar
+- name: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_declaration_v001
+  physicalName: starburst-uat01_sep_ice_views_zone_ff_dap_ff_ngxdbo_customsbrokerage_cal_v_fact_declaration_v001
+  logicalType: object
+  physicalType: table
+  properties:
+  - name: je_pk
+    logicalType: string
+    physicalType: varchar
+  - name: je_js
+    logicalType: string
+    physicalType: varchar
+  - name: je_jp
+    logicalType: string
+    physicalType: varchar
+  - name: declarationreference
+    logicalType: string
+    physicalType: varchar
+  - name: shipmentno
+    logicalType: string
+    physicalType: varchar
+  - name: masterbill
+    logicalType: string
+    physicalType: varchar
+  - name: housebill
+    logicalType: string
+    physicalType: varchar
+  - name: ownerreference
+    logicalType: string
+    physicalType: varchar
+  - name: entrynumbers
+    logicalType: string
+    physicalType: varchar
+  - name: itnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: masterbills
+    logicalType: string
+    physicalType: varchar
+  - name: housebills
+    logicalType: string
+    physicalType: varchar
+  - name: ordernumbers
+    logicalType: string
+    physicalType: varchar
+  - name: commercialinvoicenumbers
+    logicalType: string
+    physicalType: varchar
+  - name: commercialinvoicelineordernumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderconfirmationnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderinvoicenumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderlineconfirmationnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderlineinvoicenumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderlinecontainernumbers
+    logicalType: string
+    physicalType: varchar
+  - name: orderlinepartnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: interimreceiptreference
+    logicalType: string
+    physicalType: varchar
+  - name: company
+    logicalType: string
+    physicalType: varchar
+  - name: branch
+    logicalType: string
+    physicalType: varchar
+  - name: forwardergid
+    logicalType: string
+    physicalType: varchar
+  - name: forwarder
+    logicalType: string
+    physicalType: varchar
+  - name: importergid
+    logicalType: string
+    physicalType: varchar
+  - name: importer
+    logicalType: string
+    physicalType: varchar
+  - name: importeraddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: importeraddress1
+    logicalType: string
+    physicalType: varchar
+  - name: importeraddress2
+    logicalType: string
+    physicalType: varchar
+  - name: importercountry
+    logicalType: string
+    physicalType: varchar
+  - name: importerstate
+    logicalType: string
+    physicalType: varchar
+  - name: importercity
+    logicalType: string
+    physicalType: varchar
+  - name: importerpostcode
+    logicalType: string
+    physicalType: varchar
+  - name: importerlocationcode
+    logicalType: string
+    physicalType: varchar
+  - name: suppliergid
+    logicalType: string
+    physicalType: varchar
+  - name: supplier
+    logicalType: string
+    physicalType: varchar
+  - name: supplieraddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: supplieraddress1
+    logicalType: string
+    physicalType: varchar
+  - name: supplieraddress2
+    logicalType: string
+    physicalType: varchar
+  - name: suppliercountry
+    logicalType: string
+    physicalType: varchar
+  - name: supplierstate
+    logicalType: string
+    physicalType: varchar
+  - name: suppliercity
+    logicalType: string
+    physicalType: varchar
+  - name: supplierpostcode
+    logicalType: string
+    physicalType: varchar
+  - name: supplierlocationcode
+    logicalType: string
+    physicalType: varchar
+  - name: carriergid
+    logicalType: string
+    physicalType: varchar
+  - name: carrier
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartygid
+    logicalType: string
+    physicalType: varchar
+  - name: pickupparty
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartyaddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartyaddress1
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartyaddress2
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartycountry
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartystate
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartycity
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartypostcode
+    logicalType: string
+    physicalType: varchar
+  - name: pickuppartylocationcode
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartygid
+    logicalType: string
+    physicalType: varchar
+  - name: deliveryparty
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartyaddresscode
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartyaddress1
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartyaddress2
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartycountry
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartystate
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartycity
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartypostcode
+    logicalType: string
+    physicalType: varchar
+  - name: deliverypartylocationcode
+    logicalType: string
+    physicalType: varchar
+  - name: pickupagentgid
+    logicalType: string
+    physicalType: varchar
+  - name: pickupagent
+    logicalType: string
+    physicalType: varchar
+  - name: deliveryagentgid
+    logicalType: string
+    physicalType: varchar
+  - name: deliveryagent
+    logicalType: string
+    physicalType: varchar
+  - name: exportbrokergid
+    logicalType: string
+    physicalType: varchar
+  - name: exportbroker
+    logicalType: string
+    physicalType: varchar
+  - name: importbrokergid
+    logicalType: string
+    physicalType: varchar
+  - name: importbroker
+    logicalType: string
+    physicalType: varchar
+  - name: pickuptransportcompanygid
+    logicalType: string
+    physicalType: varchar
+  - name: pickuptransportcompany
+    logicalType: string
+    physicalType: varchar
+  - name: deliverytransportcompanygid
+    logicalType: string
+    physicalType: varchar
+  - name: deliverytransportcompany
+    logicalType: string
+    physicalType: varchar
+  - name: customsagent
+    logicalType: string
+    physicalType: varchar
+  - name: customsagentname
+    logicalType: string
+    physicalType: varchar
+  - name: vessel
+    logicalType: string
+    physicalType: varchar
+  - name: voyageflight
+    logicalType: string
+    physicalType: varchar
+  - name: legs
+    logicalType: integer
+    physicalType: int
+  - name: servicelevel
+    logicalType: string
+    physicalType: varchar
+  - name: serviceleveldescription
+    logicalType: string
+    physicalType: varchar
+  - name: screeningstatus
+    logicalType: string
+    physicalType: varchar
+  - name: transportmode
+    logicalType: string
+    physicalType: varchar
+  - name: goodsdescription
+    logicalType: string
+    physicalType: varchar
+  - name: goodstype
+    logicalType: string
+    physicalType: varchar
+  - name: incoterm
+    logicalType: string
+    physicalType: varchar
+  - name: containermode
+    logicalType: string
+    physicalType: varchar
+  - name: containercount
+    logicalType: integer
+    physicalType: int
+  - name: containernumbers
+    logicalType: string
+    physicalType: varchar
+  - name: containertypes
+    logicalType: string
+    physicalType: varchar
+  - name: containerteu
+    logicalType: number
+    physicalType: decimal
+  - name: containerweight
+    logicalType: number
+    physicalType: decimal
+  - name: containerweight20ft
+    logicalType: number
+    physicalType: decimal
+  - name: containerweight40ft
+    logicalType: number
+    physicalType: decimal
+  - name: container20ft
+    logicalType: integer
+    physicalType: int
+  - name: container40ft
+    logicalType: integer
+    physicalType: int
+  - name: pickupequipmentneeded
+    logicalType: string
+    physicalType: varchar
+  - name: packs
+    logicalType: integer
+    physicalType: int
+  - name: packsunit
+    logicalType: string
+    physicalType: varchar
+  - name: actualweight
+    logicalType: number
+    physicalType: decimal
+  - name: unitofweight
+    logicalType: string
+    physicalType: varchar
+  - name: actualvolume
+    logicalType: number
+    physicalType: decimal
+  - name: unitofvolume
+    logicalType: string
+    physicalType: varchar
+  - name: hasdangerousgoods
+    logicalType: boolean
+    physicalType: boolean
+  - name: origin
+    logicalType: string
+    physicalType: varchar
+  - name: origincity
+    logicalType: string
+    physicalType: varchar
+  - name: origincountry
+    logicalType: string
+    physicalType: varchar
+  - name: destination
+    logicalType: string
+    physicalType: varchar
+  - name: destinationcity
+    logicalType: string
+    physicalType: varchar
+  - name: destinationcountry
+    logicalType: string
+    physicalType: varchar
+  - name: portofloading
+    logicalType: string
+    physicalType: varchar
+  - name: portoffirstarrival
+    logicalType: string
+    physicalType: varchar
+  - name: portofarrival
+    logicalType: string
+    physicalType: varchar
+  - name: portofdischarge
+    logicalType: string
+    physicalType: varchar
+  - name: etd
+    logicalType: date
+    physicalType: timestamp
+  - name: eta
+    logicalType: date
+    physicalType: timestamp
+  - name: atd
+    logicalType: date
+    physicalType: timestamp
+  - name: ata
+    logicalType: date
+    physicalType: timestamp
+  - name: dateatorigin
+    logicalType: date
+    physicalType: date
+  - name: exportdate
+    logicalType: date
+    physicalType: date
+  - name: dateoffirstarrival
+    logicalType: date
+    physicalType: date
+  - name: dateofarrival
+    logicalType: date
+    physicalType: date
+  - name: entrysubmitteddate
+    logicalType: date
+    physicalType: date
+  - name: entryauthorisationdate
+    logicalType: date
+    physicalType: date
+  - name: dateatfinaldestination
+    logicalType: date
+    physicalType: date
+  - name: requestedpickup
+    logicalType: date
+    physicalType: date
+  - name: plannedpickup
+    logicalType: date
+    physicalType: date
+  - name: actualpickup
+    logicalType: date
+    physicalType: date
+  - name: estimateddelivery
+    logicalType: date
+    physicalType: date
+  - name: deliveryrequiredby
+    logicalType: date
+    physicalType: date
+  - name: deliverycartageadvised
+    logicalType: date
+    physicalType: date
+  - name: deliverycartagecompleted
+    logicalType: date
+    physicalType: date
+  - name: fclstoragecommences
+    logicalType: date
+    physicalType: timestamp
+  - name: lclstoragecommences
+    logicalType: date
+    physicalType: timestamp
+  - name: fclavailabledate
+    logicalType: date
+    physicalType: timestamp
+  - name: lclavailabledate
+    logicalType: date
+    physicalType: timestamp
+  - name: customscleareddate
+    logicalType: date
+    physicalType: timestamp
+  - name: dor_sentdate
+    logicalType: date
+    physicalType: timestamp
+  - name: invheaders
+    logicalType: integer
+    physicalType: int
+  - name: invlines
+    logicalType: integer
+    physicalType: int
+  - name: applicationcode
+    logicalType: string
+    physicalType: varchar
+  - name: messagetype
+    logicalType: string
+    physicalType: varchar
+  - name: messagesubtype
+    logicalType: string
+    physicalType: varchar
+  - name: messagestatus
+    logicalType: string
+    physicalType: varchar
+  - name: entrystatus
+    logicalType: string
+    physicalType: varchar
+  - name: cu
+    logicalType: string
+    physicalType: varchar
+  - name: cr
+    logicalType: string
+    physicalType: varchar
+  - name: srn
+    logicalType: string
+    physicalType: varchar
+  - name: 'on'
+    logicalType: string
+    physicalType: varchar
+  - name: aao
+    logicalType: string
+    physicalType: varchar
+  - name: aak
+    logicalType: string
+    physicalType: varchar
+  - name: iv
+    logicalType: string
+    physicalType: varchar
+  - name: ada
+    logicalType: string
+    physicalType: varchar
+  - name: ss
+    logicalType: string
+    physicalType: varchar
+  - name: dq
+    logicalType: string
+    physicalType: varchar
+  - name: aep
+    logicalType: string
+    physicalType: varchar
+  - name: pc
+    logicalType: string
+    physicalType: varchar
+  - name: vn
+    logicalType: string
+    physicalType: varchar
+  - name: aed
+    logicalType: string
+    physicalType: varchar
+  - name: ff
+    logicalType: string
+    physicalType: varchar
+  - name: xc
+    logicalType: string
+    physicalType: varchar
+  - name: ccn
+    logicalType: string
+    physicalType: varchar
+  - name: vrn
+    logicalType: string
+    physicalType: varchar
+  - name: cw
+    logicalType: string
+    physicalType: varchar
+  - name: bn
+    logicalType: string
+    physicalType: varchar
+  - name: abu
+    logicalType: string
+    physicalType: varchar
+  - name: mf
+    logicalType: string
+    physicalType: varchar
+  - name: shp
+    logicalType: string
+    physicalType: varchar
+  - name: usfdasubmitter
+    logicalType: string
+    physicalType: varchar
+  - name: usfdasubmittergid
+    logicalType: string
+    physicalType: varchar
+  - name: usior
+    logicalType: string
+    physicalType: varchar
+  - name: usiorgid
+    logicalType: string
+    physicalType: varchar
+  - name: usultimateconsignee
+    logicalType: string
+    physicalType: varchar
+  - name: usultimateconsigneegid
+    logicalType: string
+    physicalType: varchar
+  - name: usoriginstate
+    logicalType: string
+    physicalType: varchar
+  - name: usdestinationstate
+    logicalType: string
+    physicalType: varchar
+  - name: usschdarrivalport
+    logicalType: string
+    physicalType: varchar
+  - name: usschdentryport
+    logicalType: string
+    physicalType: varchar
+  - name: usschdloadingport
+    logicalType: string
+    physicalType: varchar
+  - name: uscountryofexport
+    logicalType: string
+    physicalType: varchar
+  - name: uscarrierscac
+    logicalType: string
+    physicalType: varchar
+  - name: usentryfilercode
+    logicalType: string
+    physicalType: varchar
+  - name: usentrytype
+    logicalType: string
+    physicalType: varchar
+  - name: uslocationofgoods
+    logicalType: string
+    physicalType: varchar
+  - name: uscertificationrequesteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrydate
+    logicalType: date
+    physicalType: timestamp
+  - name: usestimatedentrydate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspaymentdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspaymentduedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usprocessdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspayauthorizationdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usperiodicstatementdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspreliminarystatementprintdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usoneusgdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscondreleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usintensivedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usintensiveremoveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspaperlessentrydate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrydocsrequireddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usoverridetogeneraldate
+    logicalType: date
+    physicalType: timestamp
+  - name: usliquidationdatechangeddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfurtherdocreviewrequireddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usreleaseremoveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfurtherdocreviewcompletedate
+    logicalType: date
+    physicalType: timestamp
+  - name: uspendingcustomsreviewdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uselectronicinvoicerequireddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrydeletedbycustomsdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfirstreleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfirstreleasereceiveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrycancelleddate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscustomsapprovalrequireddate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscustomsholddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usagricultureholddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usotherholddate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscustomsholdremoveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usagricultureholdremoveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usotherholdremoveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usamsairlinecfsnotifieddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usincompleteamsairwaybilldate
+    logicalType: date
+    physicalType: timestamp
+  - name: usamsflightnotdepartedarriveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usinbondportdiscrepancydate
+    logicalType: date
+    physicalType: timestamp
+  - name: ussplitshipmentreleasependingdate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscorrectionrequestrejecteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: uscancellationrequestrejecteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentryreplaceddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrysummaryportdiscrepancydate
+    logicalType: date
+    physicalType: timestamp
+  - name: usundercustomsreviewdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usnobillmatchdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usacasbillonfiledate
+    logicalType: date
+    physicalType: timestamp
+  - name: usbilldeparteddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usbillarriveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usdocumentrequireddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usadmissibledate
+    logicalType: date
+    physicalType: timestamp
+  - name: usreleaseddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usreleasesuspendeddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfdaexamdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfdaholddate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfdaholdremoveddate
+    logicalType: date
+    physicalType: date
+  - name: usfdalines
+    logicalType: integer
+    physicalType: int
+  - name: usfdastatus
+    logicalType: string
+    physicalType: varchar
+  - name: usreleasestatus
+    logicalType: string
+    physicalType: varchar
+  - name: usflagaairequested
+    logicalType: string
+    physicalType: varchar
+  - name: uscargoreleasetype
+    logicalType: string
+    physicalType: varchar
+  - name: usbondtype
+    logicalType: integer
+    physicalType: int
+  - name: usstatementnumber
+    logicalType: string
+    physicalType: varchar
+  - name: uspaymenttype
+    logicalType: string
+    physicalType: varchar
+  - name: uspaymentstatus
+    logicalType: string
+    physicalType: varchar
+  - name: usstatementstatus
+    logicalType: string
+    physicalType: varchar
+  - name: cacarriercode
+    logicalType: string
+    physicalType: varchar
+  - name: cacarriername
+    logicalType: string
+    physicalType: varchar
+  - name: caportofclearance
+    logicalType: string
+    physicalType: varchar
+  - name: careleaseoffice
+    logicalType: string
+    physicalType: varchar
+  - name: caunladingoffice
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationdutypaid
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationtaxpaid
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationliquidatedduty
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationliquidatedtax
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationchangereasoncode
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationbrokerreferenceno
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationcustomsdocumentfilinglocation
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationtype
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationentrydate
+    logicalType: date
+    physicalType: timestamp
+  - name: liquidationtotalpaidantidumpingduty
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationinterestamount
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationextensionsuspensioncode
+    logicalType: string
+    physicalType: varchar
+  - name: liquidationnoofsuspensions
+    logicalType: integer
+    physicalType: int
+  - name: liquidationextensionsuspensiondate
+    logicalType: date
+    physicalType: timestamp
+  - name: liquidationtotalpaidcountervailingduty
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationtotalliquidatedcountervailingduty
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationtotalliquidatedantidumpingduty
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationtotalpaidfees
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationtotalliquidatedfees
+    logicalType: number
+    physicalType: decimal
+  - name: liquidationdate
+    logicalType: date
+    physicalType: timestamp
+  - name: anticipatedliquidationdate
+    logicalType: date
+    physicalType: timestamp
+  - name: joboperatorcode
+    logicalType: string
+    physicalType: varchar
+  - name: joboperatorname
+    logicalType: string
+    physicalType: varchar
+  - name: joboperatoremail
+    logicalType: string
+    physicalType: varchar
+  - name: systemlasteditdate
+    logicalType: date
+    physicalType: date
+  - name: systemlastedituser
+    logicalType: string
+    physicalType: varchar
+  - name: systemlasteditemail
+    logicalType: string
+    physicalType: varchar
+  - name: systemcreatedate
+    logicalType: date
+    physicalType: date
+  - name: systemcreateuser
+    logicalType: string
+    physicalType: varchar
+  - name: systemcreateemail
+    logicalType: string
+    physicalType: varchar
+  - name: factdeclarationcreatedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfirmsname
+    logicalType: string
+    physicalType: varchar
+  - name: usfirmsaddress
+    logicalType: string
+    physicalType: varchar
+  - name: usfirmscity
+    logicalType: string
+    physicalType: varchar
+  - name: usfirmsstate
+    logicalType: string
+    physicalType: varchar
+  - name: usfirmszipcode
+    logicalType: string
+    physicalType: varchar
+  - name: usfirmscountry
+    logicalType: string
+    physicalType: varchar
+  - name: uspresentationdate
+    logicalType: date
+    physicalType: timestamp
+  - name: usfdareleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: usentrydateelectioncode
+    logicalType: string
+    physicalType: varchar
+  - name: ussuretycode
+    logicalType: string
+    physicalType: varchar
+  - name: usotherreconindicator
+    logicalType: string
+    physicalType: varchar
+  - name: usnaftareconindicator
+    logicalType: string
+    physicalType: varchar
+  - name: usrecondeclarationreferences
+    logicalType: string
+    physicalType: varchar
+  - name: mergeby
+    logicalType: string
+    physicalType: varchar
+  - name: usschdarrivalportname
+    logicalType: string
+    physicalType: varchar
+  - name: usschdentryportname
+    logicalType: string
+    physicalType: varchar
+  - name: usdeleteflag
+    logicalType: boolean
+    physicalType: boolean
+  - name: liquidationtotalpaid
+    logicalType: number
+    physicalType: decimal
+  - name: usnhtprogramcodes
+    logicalType: string
+    physicalType: varchar
+  - name: coc
+    logicalType: string
+    physicalType: varchar
+  - name: agentsreference
+    logicalType: string
+    physicalType: varchar
+  - name: deviationcode
+    logicalType: integer
+    physicalType: int
+  - name: deviationreasoncode
+    logicalType: string
+    physicalType: varchar
+  - name: deviationtext
+    logicalType: string
+    physicalType: varchar
+  - name: deviationcreateddate
+    logicalType: date
+    physicalType: timestamp
+  - name: localpartnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: addinfojson
+    logicalType: string
+    physicalType: varchar
+  - name: std
+    logicalType: date
+    physicalType: timestamp
+  - name: sta
+    logicalType: date
+    physicalType: timestamp
+  - name: etd_original
+    logicalType: date
+    physicalType: timestamp
+  - name: eta_original
+    logicalType: date
+    physicalType: timestamp
+  - name: eta_originalutc
+    logicalType: date
+    physicalType: timestamp
+  - name: adt
+    logicalType: string
+    physicalType: varchar
+  - name: cap
+    logicalType: string
+    physicalType: varchar
+  - name: irisstatusdescription
+    logicalType: string
+    physicalType: varchar
+  - name: irisnote
+    logicalType: string
+    physicalType: varchar
+  - name: declarantgid
+    logicalType: string
+    physicalType: varchar
+  - name: declarant
+    logicalType: string
+    physicalType: varchar
+  - name: sellergid
+    logicalType: string
+    physicalType: varchar
+  - name: seller
+    logicalType: string
+    physicalType: varchar
+  - name: catransactionnumber
+    logicalType: string
+    physicalType: varchar
+  - name: abw
+    logicalType: string
+    physicalType: varchar
+  - name: adl
+    logicalType: string
+    physicalType: varchar
+  - name: commercialinvoicelinepartnumbers
+    logicalType: string
+    physicalType: varchar
+  - name: arinvoicenumbers
+    logicalType: string
+    physicalType: varchar
+  - name: afb
+    logicalType: string
+    physicalType: varchar
+  - name: auaqisheld
+    logicalType: boolean
+    physicalType: boolean
+  - name: allexportdocumentsreceiveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: allexportdocumentscorrectdate
+    logicalType: date
+    physicalType: timestamp
+  - name: exportcustomsdatasenttocsp
+    logicalType: date
+    physicalType: timestamp
+  - name: exportcustomscommenceddate
+    logicalType: date
+    physicalType: timestamp
+  - name: exportdocsinspectiondate
+    logicalType: date
+    physicalType: timestamp
+  - name: exportphysicalinspectiondate
+    logicalType: date
+    physicalType: timestamp
+  - name: exportcustomscleared
+    logicalType: date
+    physicalType: timestamp
+  - name: confirmationofexit
+    logicalType: date
+    physicalType: timestamp
+  - name: importcustomsdatasenttocsp
+    logicalType: date
+    physicalType: timestamp
+  - name: importcustomscommenceddate
+    logicalType: date
+    physicalType: timestamp
+  - name: allimportdocumentsreceiveddate
+    logicalType: date
+    physicalType: timestamp
+  - name: allimportdocumentscorrectdate
+    logicalType: date
+    physicalType: timestamp
+  - name: importdocsinspectiondate
+    logicalType: date
+    physicalType: timestamp
+  - name: importphysicalinspectiondate
+    logicalType: date
+    physicalType: timestamp
+  - name: importprereleasedate
+    logicalType: date
+    physicalType: timestamp
+  - name: importcustomscleared
+    logicalType: date
+    physicalType: timestamp
+  - name: auunderbonddate
+    logicalType: date
+    physicalType: timestamp
+  - name: szb
+    logicalType: string
+    physicalType: varchar
+  - name: shiptopartygid
+    logicalType: string
+    physicalType: varchar
+  - name: shiptoparty
+    logicalType: string
+    physicalType: varchar
+  - name: usdeliveryorderprepaidcollect
+    logicalType: string
+    physicalType: varchar
+  - name: controllingcustomergid
+    logicalType: string
+    physicalType: varchar
+  - name: controllingcustomer
+    logicalType: string
+    physicalType: varchar
+  - name: controllingagentgid
+    logicalType: string
+    physicalType: varchar
+  - name: controllingagent
+    logicalType: string
+    physicalType: varchar
+  - name: zct
+    logicalType: string
+    physicalType: varchar
+  - name: exportergid
+    logicalType: string
+    physicalType: varchar
+  - name: exporter
+    logicalType: string
+    physicalType: varchar
+  - name: exportercountry
+    logicalType: string
+    physicalType: varchar
+  - name: exporterlocationcode
+    logicalType: string
+    physicalType: varchar
+  - name: bookingtype
+    logicalType: string
+    physicalType: varchar
+  - name: bookingsource
+    logicalType: string
+    physicalType: varchar
+  - name: sealogis
+    logicalType: boolean
+    physicalType: boolean
+  - name: usdrawbacktotalclaimed
+    logicalType: number
+    physicalType: decimal
+  - name: editedbyuser
+    logicalType: boolean
+    physicalType: boolean
+  - name: eucustomsofficejson
+    logicalType: string
+    physicalType: varchar
+  - name: cusentryinstructionjson
+    logicalType: string
+    physicalType: varchar
+

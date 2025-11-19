@@ -1,0 +1,266 @@
+import {create} from 'zustand'
+import {persist, createJSONStorage} from 'zustand/middleware'
+import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
+import * as Yaml from "yaml";
+
+// Storage backend instance - can be set via setFileStorageBackend
+let fileStorageBackend = new LocalFileStorageBackend();
+
+/**
+ * Set the file storage backend to use for the editor
+ * @param {FileStorageBackend} backend - The storage backend instance
+ */
+export const setFileStorageBackend = (backend) => {
+    fileStorageBackend = backend;
+};
+
+/**
+ * Get the current file storage backend
+ * @returns {FileStorageBackend}
+ */
+export const getFileStorageBackend = () => {
+    return fileStorageBackend;
+};
+
+// Create central zustand store for app state
+export const useEditorStore = create()(
+    persist((set, get) => {
+        // Define action functions to ensure stable references
+        const actions = {
+            setYaml: (newYaml) => set({yaml: newYaml, isDirty: true}),
+            loadYaml: (newYaml) => set({yaml: newYaml, isDirty: false}),
+            markClean: () => set({isDirty: false}),
+            clearSaveInfo: () => set({lastSaveInfo: null}),
+            addNotification: (notification) => {
+                const id = Date.now() + Math.random();
+                const newNotification = {
+                    id,
+                    type: 'info',
+                    duration: 3000,
+                    ...notification,
+                };
+                set((state) => ({
+                    notifications: [...state.notifications, newNotification]
+                }));
+
+                // Auto-remove notification after duration
+                if (newNotification.duration > 0) {
+                    setTimeout(() => {
+                        set((state) => ({
+                            notifications: state.notifications.filter(n => n.id !== id)
+                        }));
+                    }, newNotification.duration);
+                }
+
+                return id;
+            },
+            removeNotification: (id) => set((state) => ({
+                notifications: state.notifications.filter(n => n.id !== id)
+            })),
+            togglePreview: () => set((state) => ({
+                isPreviewVisible: !state.isPreviewVisible,
+                isWarningsVisible: state.isPreviewVisible ? false : false, // Close warnings when opening preview
+                isTestResultsVisible: state.isPreviewVisible ? false : false, // Close test results when opening preview
+            })),
+            toggleWarnings: () => set((state) => ({
+                isWarningsVisible: !state.isWarningsVisible,
+                isPreviewVisible: state.isWarningsVisible ? false : false, // Close preview when opening warnings
+                isTestResultsVisible: state.isWarningsVisible ? false : false, // Close test results when opening warnings
+            })),
+            toggleTestResults: () => set((state) => ({
+                isTestResultsVisible: !state.isTestResultsVisible,
+                isPreviewVisible: state.isTestResultsVisible ? false : false, // Close preview when opening test results
+                isWarningsVisible: state.isTestResultsVisible ? false : false, // Close warnings when opening test results
+            })),
+            runTest: async (server) => {
+                const { yaml } = get();
+                set({ isTestRunning: true });
+                try {
+                    const url = server ? `/test?server=${encodeURIComponent(server)}` : '/test';
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body: yaml,
+                    });
+
+                    // Check if response status is OK
+                    if (!response.ok) {
+                        let errorMessage = `Server returned error: ${response.status} ${response.statusText}`;
+
+                        // Try to parse error response as JSON
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            } else if (errorData.error) {
+                                errorMessage = errorData.error;
+                            }
+                        } catch {
+                            // If JSON parsing fails, try to get text
+                            try {
+                                const errorText = await response.text();
+                                if (errorText) {
+                                    errorMessage = errorText;
+                                }
+                            } catch {
+                                // Keep the default error message
+                            }
+                        }
+
+                        throw new Error(errorMessage);
+                    }
+
+                    // Parse successful response
+                    const result = await response.json();
+
+                    // Determine success from response data's result field
+                    let success = false;
+                    if (result.result) {
+                        // Use the result field from the response
+                        success = result.result === 'passed' || result.result === 'pass';
+                    } else if (Array.isArray(result.checks)) {
+                        // Fallback: check if any checks failed
+                        const hasFailures = result.checks.some(check =>
+                            check.result === 'failed' || check.result === 'fail' || check.result === false
+                        );
+                        success = !hasFailures;
+                    }
+
+                    const newResult = {
+                        timestamp: new Date().toISOString(),
+                        success: success,
+                        data: result,
+                    };
+
+                    // Keep only the current result (no history)
+                    set({ testResults: [newResult], isTestRunning: false });
+
+                    return newResult;
+                } catch (error) {
+                    // Provide better error messages for common issues
+                    let errorMessage = error.message;
+                    let isConnectionError = false;
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = 'Cannot connect to Data Contract CLI at http://localhost:4242.';
+                        isConnectionError = true;
+                    } else if (error.message === 'Unexpected end of JSON input' || error.message.includes('JSON')) {
+                        errorMessage = 'Test server returned an invalid response. The server may be misconfigured or not responding correctly.';
+                    }
+
+                    const errorResult = {
+                        timestamp: new Date().toISOString(),
+                        success: false,
+                        error: errorMessage,
+                        isConnectionError: isConnectionError,
+                    };
+
+                    // Keep only the current result (no history)
+                    set({ testResults: [errorResult], isTestRunning: false });
+
+                    throw error;
+                }
+            },
+            clearTestResults: () => set({ testResults: [] }),
+            setMarkers: (markers) => set({markers}),
+            setView: (view) => set({currentView: view}),
+            setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
+            loadFromFile: async (filename = null) => {
+                try {
+                    const yamlContent = await fileStorageBackend.loadYamlFile(filename);
+
+                    // Try to parse the YAML to get the contract name
+                    let contractName = 'untitled';
+                    try {
+                        const parsed = Yaml.parse(yamlContent);
+                        contractName = parsed.name || 'untitled';
+                    } catch {
+                        // If parsing fails, use default
+                    }
+
+                    // Set the loaded file info so subsequent saves update the same file
+                    set({
+                        yaml: yamlContent,
+                        isDirty: false,
+                        lastSaveInfo: filename ? {
+                            filename: filename,
+                            timestamp: new Date().toISOString(),
+                            contractName: contractName
+                        } : null
+                    });
+                    return yamlContent;
+                } catch (error) {
+                    if (error.message !== 'File selection cancelled') {
+                        throw error;
+                    }
+                }
+            },
+            saveToFile: async (suggestedName) => {
+                const { yaml, lastSaveInfo } = get();
+                const dataContract = Yaml.parse(yaml);
+
+                // Validate required fundamental fields
+                const requiredFields = ['name', 'version', 'status', 'id'];
+                const missingFields = requiredFields.filter(field => !dataContract[field] || dataContract[field].trim() === '');
+
+                if (missingFields.length > 0) {
+                    const missingFieldsList = missingFields.join(', ');
+                    throw new Error(`Cannot save: Missing required fields: ${missingFieldsList}`);
+                }
+
+                const dataContractName = dataContract.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+                const suggestedFilename = `${dataContractName}.yaml`;
+
+                // If we have a previous save, pass the filename to update the existing file
+                const existingFilename = lastSaveInfo?.filename;
+                const result = await fileStorageBackend.saveYamlFile(
+                    yaml,
+                    suggestedFilename,
+                    existingFilename
+                );
+
+                // Update save status
+                set({
+                    isDirty: false,
+                    lastSaveInfo: {
+                        filename: result?.filename || suggestedFilename,
+                        timestamp: new Date().toISOString(),
+                        contractName: dataContract.name
+                    }
+                });
+
+                // Show success notification
+                const { addNotification } = get();
+                addNotification({
+                    type: 'success',
+                    title: 'Saved successfully',
+                    message: `${result?.filename || suggestedFilename} has been saved`,
+                    duration: 3000
+                });
+            },
+        };
+
+        return {
+            yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n',
+            isDirty: false,
+            isPreviewVisible: true,
+            isWarningsVisible: false,
+            isTestResultsVisible: false,
+            isTestRunning: false,
+            testResults: [],
+            markers: [],
+            currentView: 'yaml', // 'yaml' or 'form'
+            schemaUrl: null,
+            schemaData: null,
+            yamlCursorLine: 1,
+            lastSaveInfo: null, // { filename, timestamp, contractName }
+            notifications: [], // { id, type, message, duration }
+            ...actions,
+        };
+    }, {
+        name: 'editor-store',
+        storage: createJSONStorage(() => localStorage),
+    }),
+)

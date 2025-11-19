@@ -1,0 +1,222 @@
+apiVersion: v3.1.0
+kind: DataContract
+name: orders_data_contract
+id: urn:datacontract:orders:v1
+version: 1.0.0
+status: active
+domain: sales
+tenant: example-org
+tags:
+- demo
+description:
+  purpose: Provides order and line item data for analytics and reporting
+  usage: Used by analytics team for sales analysis and business intelligence
+  limitations: Contains only the last 2 years of data
+  customProperties:
+    - property: sensitivity
+      value: secret
+      description: Data contains personally identifiable information
+  authoritativeDefinitions:
+    - url: https://entropy-data.com/policies/gdpr-compliance
+      type: businessDefinition
+      description: GDPR compliance policy for handling customer data
+support:
+  - channel: "#sales-data-support"
+    tool: teams
+    url: https://teams.microsoft.com/l/channel/sales-data-support
+    scope: interactive
+    description: Teams channel for data contract support and questions
+  - channel: "#data-contracts"
+    tool: slack
+    url: https://entropy-data.slack.com/archives/C123456789
+    invitationUrl: https://entropy-data.slack.com/join/shared_invite/abc123xyz
+    scope: interactive
+    description: Slack channel for real-time support and collaboration
+  - channel: SALES Board
+    tool: ticket
+    url: https://entropy-data.atlassian.net/jira/software/projects/SALES/boards/1
+    scope: issues
+    description: Jira board for requesting new data products or submitting bugs
+team:
+  name: Sales Analytics Team
+  description: Team responsible for managing and maintaining sales order data
+  members:
+    - username: sarah.chen@entropy-data.com
+      name: Sarah Chen
+      role: Data Product Owner
+      description: Responsible for the overall data product strategy and roadmap
+      dateIn: "2022-01-15"
+    - username: mike.johnson@entropy-data.com
+      name: Mike Johnson
+      role: Data Steward
+      description: Ensures data quality and maintains data governance standards
+      dateIn: "2022-03-20"
+    - username: lisa.martinez@entropy-data.com
+      name: Lisa Martinez
+      role: Data Engineer
+      description: Manages data pipelines and technical implementation
+      dateIn: "2023-06-01"
+slaProperties:
+  - property: freshness
+    value: 24
+    unit: hours
+    element: orders.order_date
+    driver: operational
+    description: Order data is refreshed within 24 hours of order placement
+  - property: retention
+    value: 10
+    unit: years
+    driver: regulatory
+    description: Order and line item data retained for 10 years for compliance purposes
+servers:
+  - server: production
+    type: snowflake
+    account: example-org
+    database: SALES_PROD
+    schema: ORDERS_V1
+    environment: prod
+    roles:
+      - role: sales-prod-orders-v1-read
+        access: read
+        description: Read-only access to production orders data
+  - server: test
+    type: snowflake
+    account: example-org
+    database: SALES_TEST
+    schema: ORDERS_V1
+    environment: test
+    roles:
+      - role: sales-test-orders-v1-read
+        access: read
+        description: Read-only access to test orders data
+schema:
+  - name: orders
+    logicalType: object
+    physicalType: table
+    description: Customer orders with order header information
+    quality:
+      - type: text
+        name: SAP Order Verification
+        description: All orders are double checked with the SAP order module
+        dimension: accuracy
+    properties:
+      - name: order_id
+        businessName: Order Identifier
+        logicalType: string
+        physicalType: VARCHAR(50)
+        description: Unique order identifier
+        required: true
+        primaryKey: true
+        classification: public
+      - name: customer_id
+        businessName: Customer Identifier
+        logicalType: string
+        physicalType: VARCHAR(50)
+        description: Reference to customer who placed the order
+        required: true
+        classification: restricted
+      - name: customer_email
+        businessName: Customer Email Address
+        logicalType: string
+        physicalType: VARCHAR(100)
+        description: Email address of the customer
+        required: false
+        tags:
+          - pii
+      - name: order_date
+        businessName: Order Date
+        logicalType: timestamp
+        physicalType: TIMESTAMP
+        description: Date and time when order was placed
+        required: true
+        partitioned: true
+        partitionKeyPosition: 1
+        classification: public
+      - name: order_status
+        businessName: Order Status
+        logicalType: string
+        physicalType: VARCHAR(20)
+        description: Current status of the order
+        required: true
+        classification: public
+        enum:
+          - SHIPPED
+          - CANCELLED
+          - ORDERED
+        quality:
+          - type: library
+            metric: invalidValues
+            name: Valid Order Status Check
+            description: Ensures order_status contains only valid values (SHIPPED, CANCELLED, or ORDERED)
+            dimension: conformity
+            arguments:
+              validValues:
+                - SHIPPED
+                - CANCELLED
+                - ORDERED
+            mustBe: 0
+      - name: total_amount
+        businessName: Total Order Amount
+        logicalType: number
+        physicalType: DECIMAL(10,2)
+        description: Total order amount in USD
+        required: true
+        classification: public
+  - name: line_items
+    logicalType: object
+    physicalType: table
+    description: Individual line items within each order
+    properties:
+      - name: line_item_id
+        businessName: Line Item Identifier
+        logicalType: string
+        physicalType: VARCHAR(50)
+        description: Unique line item identifier
+        required: true
+        primaryKey: true
+        classification: public
+      - name: order_id
+        businessName: Order Identifier
+        logicalType: string
+        physicalType: VARCHAR(50)
+        description: Reference to the parent order
+        required: true
+        classification: public
+        relationships:
+          - to: orders.order_id
+            type: foreignKey
+      - name: product_id
+        businessName: Product Identifier
+        logicalType: string
+        physicalType: VARCHAR(50)
+        description: Reference to the product
+        required: true
+        classification: public
+      - name: quantity
+        businessName: Quantity
+        logicalType: integer
+        physicalType: INTEGER
+        description: Quantity of the product ordered
+        required: true
+        classification: public
+        quality:
+          - type: library
+            metric: invalidValues
+            name: Positive Quantity Check
+            description: Ensures quantity is always greater than zero
+            dimension: accuracy
+            mustBeGreaterThan: 0
+      - name: unit_price
+        businessName: Unit Price
+        logicalType: number
+        physicalType: DECIMAL(10,2)
+        description: Price per unit in USD
+        required: true
+        classification: public
+      - name: line_total
+        businessName: Line Total
+        logicalType: number
+        physicalType: DECIMAL(10,2)
+        description: Total for this line item (quantity * unit_price)
+        required: true
+        classification: public

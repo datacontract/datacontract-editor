@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - ESM Example</title>
+    <link rel="stylesheet" href="../dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        #editor {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="editor"></div>
+
+<script type="module">
+    // Import the ESM build (for modern browsers and build tools)
+    import { init } from '../dist/datacontract-editor.es.js';
+
+    // Initialize the editor
+    const editor = init({
+        container: '#editor',
+        yaml: `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: esm-example
+version: "1.0.0"
+status: draft
+info:
+  title: ESM Example
+  description: Using ES modules for modern browsers
+`,
+        initialView: 'yaml'
+    });
+
+    // Example: Auto-save on changes
+    let saveTimeout;
+    editor.subscribe((state) => {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            console.log('Auto-saving...');
+            // Your auto-save logic here
+        }, 2000);
+    });
+</script>
+</body>
+</html>

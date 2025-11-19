@@ -1,0 +1,15 @@
+/* Make selected edges more visible */
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #4f46e5 !important;
+  stroke-width: 3px !important;
+}
+
+/* Increase hit area for edge selection */
+.react-flow__edge-path {
+  cursor: pointer;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #4f46e5 !important;
+  stroke-width: 2.5px !important;
+}

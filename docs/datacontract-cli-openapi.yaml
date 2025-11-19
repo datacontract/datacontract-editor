@@ -1,0 +1,768 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Data Contract CLI API",
+    "summary": "You can use the API to test, export, and lint your data contracts.",
+    "contact": {
+      "name": "Data Contract CLI",
+      "url": "https://cli.datacontract.com/"
+    },
+    "license": {
+      "name": "MIT License",
+      "identifier": "MIT"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/test": {
+      "post": {
+        "tags": [
+          "test"
+        ],
+        "summary": "Run data contract tests",
+        "description": "Run schema and quality tests. Data Contract CLI connects to the data sources configured in the server section.\n              This usually requires credentials to access the data sources.\n              Credentials must be provided via environment variables when running the web server.\n              POST the data contract YAML as payload.",
+        "operationId": "test_test_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "server",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The server name to test. Optional, if there is only one server.",
+              "examples": [
+                "production"
+              ],
+              "title": "Server"
+            },
+            "description": "The server name to test. Optional, if there is only one server."
+          },
+          {
+            "name": "publish_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "URL to publish test results. Optional, if you want to publish the test results to a Data Mesh Manager or Data Contract Manager. Example: https://api.datamesh-manager.com/api/test-results",
+              "examples": [
+                "https://api.datamesh-manager.com/api/test-results"
+              ],
+              "title": "Publish Url"
+            },
+            "description": "URL to publish test results. Optional, if you want to publish the test results to a Data Mesh Manager or Data Contract Manager. Example: https://api.datamesh-manager.com/api/test-results"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/yaml": {
+              "schema": {
+                "type": "string",
+                "title": "Data Contract YAML",
+                "examples": [
+                  "dataContractSpecification: 1.2.1\nid: urn:datacontract:checkout:orders-latest\ninfo:\n  title: Orders Latest\n  version: 2.0.0\n  owner: Sales Team\nservers:\n  production:\n    type: s3\n    location: s3://datacontract-example-orders-latest/v2/{model}/*.json\n    format: json\n    delimiter: new_line\nmodels:\n  orders:\n    description: One record per order. Includes cancelled and deleted orders.\n    type: table\n    fields:\n      order_id:\n        type: string\n        primaryKey: true\n      order_timestamp:\n        description: The business timestamp in UTC when the order was successfully registered in the source system and the payment was successful.\n        type: timestamp\n        required: true\n        examples:\n          - \"2024-09-09T08:30:00Z\"\n      order_total:\n        description: Total amount the smallest monetary unit (e.g., cents).\n        type: long\n        required: true\n        examples:\n          - 9999\n        quality:\n          - type: sql\n            description: 95% of all order total values are expected to be between 10 and 499 EUR.\n            query: |\n              SELECT quantile_cont(order_total, 0.95) AS percentile_95\n              FROM orders\n            mustBeBetween: [1000, 99900]\n      customer_id:\n        description: Unique identifier for the customer.\n        type: text\n        minLength: 10\n        maxLength: 20\n"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (when an environment variable DATACONTRACT_CLI_API_KEY is configured).",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "api_key_missing": {
+                    "summary": "API key Missing",
+                    "value": {
+                      "detail": "Missing API key. Use Header 'x-api-key' to provide the API key."
+                    }
+                  },
+                  "api_key_wrong": {
+                    "summary": "API key Wrong",
+                    "value": {
+                      "detail": "The provided API key is not correct."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lint": {
+      "post": {
+        "tags": [
+          "lint"
+        ],
+        "summary": "Validate that the datacontract.yaml is correctly formatted.",
+        "description": "Validate that the datacontract.yaml is correctly formatted.",
+        "operationId": "lint_lint_post",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The schema to use for validation. This must be a URL.",
+              "examples": [
+                "https://datacontract.com/datacontract.schema.json"
+              ],
+              "title": "Schema"
+            },
+            "description": "The schema to use for validation. This must be a URL."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/yaml": {
+              "schema": {
+                "type": "string",
+                "title": "Data Contract YAML",
+                "examples": [
+                  "dataContractSpecification: 1.2.1\nid: urn:datacontract:checkout:orders-latest\ninfo:\n  title: Orders Latest\n  version: 2.0.0\n  owner: Sales Team\nservers:\n  production:\n    type: s3\n    location: s3://datacontract-example-orders-latest/v2/{model}/*.json\n    format: json\n    delimiter: new_line\nmodels:\n  orders:\n    description: One record per order. Includes cancelled and deleted orders.\n    type: table\n    fields:\n      order_id:\n        type: string\n        primaryKey: true\n      order_timestamp:\n        description: The business timestamp in UTC when the order was successfully registered in the source system and the payment was successful.\n        type: timestamp\n        required: true\n        examples:\n          - \"2024-09-09T08:30:00Z\"\n      order_total:\n        description: Total amount the smallest monetary unit (e.g., cents).\n        type: long\n        required: true\n        examples:\n          - 9999\n        quality:\n          - type: sql\n            description: 95% of all order total values are expected to be between 10 and 499 EUR.\n            query: |\n              SELECT quantile_cont(order_total, 0.95) AS percentile_95\n              FROM orders\n            mustBeBetween: [1000, 99900]\n      customer_id:\n        description: Unique identifier for the customer.\n        type: text\n        minLength: 10\n        maxLength: 20\n"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export": {
+      "post": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Convert data contract to a specific format.",
+        "operationId": "export_export_post",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ExportFormat"
+            }
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The server name to export. Optional, if there is only one server.",
+              "examples": [
+                "production"
+              ],
+              "title": "Server"
+            },
+            "description": "The server name to export. Optional, if there is only one server."
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Use the key of the model in the data contract yaml file to refer to a model, e.g., `orders`, or `all` for all models (default).",
+              "default": "all",
+              "title": "Model"
+            },
+            "description": "Use the key of the model in the data contract yaml file to refer to a model, e.g., `orders`, or `all` for all models (default)."
+          },
+          {
+            "name": "rdf_base",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rdf Base"
+            }
+          },
+          {
+            "name": "sql_server_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "[sql] The server type to determine the sql dialect. By default, it uses 'auto' to automatically detect the sql dialect via the specified servers in the data contract.",
+              "title": "Sql Server Type"
+            },
+            "description": "[sql] The server type to determine the sql dialect. By default, it uses 'auto' to automatically detect the sql dialect via the specified servers in the data contract."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/yaml": {
+              "schema": {
+                "type": "string",
+                "title": "Data Contract YAML",
+                "examples": [
+                  "dataContractSpecification: 1.2.1\nid: urn:datacontract:checkout:orders-latest\ninfo:\n  title: Orders Latest\n  version: 2.0.0\n  owner: Sales Team\nservers:\n  production:\n    type: s3\n    location: s3://datacontract-example-orders-latest/v2/{model}/*.json\n    format: json\n    delimiter: new_line\nmodels:\n  orders:\n    description: One record per order. Includes cancelled and deleted orders.\n    type: table\n    fields:\n      order_id:\n        type: string\n        primaryKey: true\n      order_timestamp:\n        description: The business timestamp in UTC when the order was successfully registered in the source system and the payment was successful.\n        type: timestamp\n        required: true\n        examples:\n          - \"2024-09-09T08:30:00Z\"\n      order_total:\n        description: Total amount the smallest monetary unit (e.g., cents).\n        type: long\n        required: true\n        examples:\n          - 9999\n        quality:\n          - type: sql\n            description: 95% of all order total values are expected to be between 10 and 499 EUR.\n            query: |\n              SELECT quantile_cont(order_total, 0.95) AS percentile_95\n              FROM orders\n            mustBeBetween: [1000, 99900]\n      customer_id:\n        description: Unique identifier for the customer.\n        type: text\n        minLength: 10\n        maxLength: 20\n"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Check": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "engine": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "implementation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implementation"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResultEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "Check"
+      },
+      "ExportFormat": {
+        "type": "string",
+        "enum": [
+          "jsonschema",
+          "pydantic-model",
+          "sodacl",
+          "dbt",
+          "dbt-sources",
+          "dbt-staging-sql",
+          "odcs",
+          "rdf",
+          "avro",
+          "protobuf",
+          "great-expectations",
+          "terraform",
+          "avro-idl",
+          "sql",
+          "sql-query",
+          "mermaid",
+          "html",
+          "go",
+          "bigquery",
+          "dbml",
+          "spark",
+          "sqlalchemy",
+          "data-caterer",
+          "dcs",
+          "markdown",
+          "iceberg",
+          "custom",
+          "excel",
+          "dqx"
+        ],
+        "title": "ExportFormat"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Log": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "message",
+          "timestamp"
+        ],
+        "title": "Log"
+      },
+      "ResultEnum": {
+        "type": "string",
+        "enum": [
+          "passed",
+          "warning",
+          "failed",
+          "error",
+          "info",
+          "unknown"
+        ],
+        "title": "ResultEnum"
+      },
+      "Run": {
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Runid"
+          },
+          "dataContractId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datacontractid"
+          },
+          "dataContractVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datacontractversion"
+          },
+          "dataProductId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataproductid"
+          },
+          "outputPortId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputportid"
+          },
+          "server": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server"
+          },
+          "timestampStart": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestampstart"
+          },
+          "timestampEnd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestampend"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ResultEnum",
+            "default": "unknown"
+          },
+          "checks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Check"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checks"
+          },
+          "logs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Log"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "runId",
+          "timestampStart",
+          "timestampEnd",
+          "checks",
+          "logs"
+        ],
+        "title": "Run"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "test",
+      "externalDocs": {
+        "description": "Documentation",
+        "url": "https://cli.datacontract.com/#test"
+      }
+    },
+    {
+      "name": "lint",
+      "externalDocs": {
+        "description": "Documentation",
+        "url": "https://cli.datacontract.com/#lint"
+      }
+    },
+    {
+      "name": "export",
+      "externalDocs": {
+        "description": "Documentation",
+        "url": "https://cli.datacontract.com/#export"
+      }
+    }
+  ]
+}
