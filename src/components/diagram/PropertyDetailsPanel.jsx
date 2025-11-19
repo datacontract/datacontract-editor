@@ -90,6 +90,22 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
               />
 
+              {/* Array Item Type - only shown when logical type is array */}
+              {property.logicalType === 'array' && (
+                <EnumField
+                  propertyPath="logicalType"
+                  context="property"
+                  value={property.items?.logicalType || ''}
+                  onChange={(value) => {
+                    const items = property.items || {};
+                    updateField('items', { ...items, logicalType: value || undefined });
+                  }}
+                  label="Array Item Type"
+                  placeholder="Select item type..."
+                  fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
+                />
+              )}
+
               {/* Physical Type */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Physical Type</label>

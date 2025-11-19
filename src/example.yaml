@@ -162,6 +162,57 @@ schema:
         description: Total order amount in USD
         required: true
         classification: public
+      - name: order_tags
+        businessName: Order Tags
+        logicalType: array
+        description: Tags associated with this order for categorization
+        required: false
+        classification: public
+        logicalTypeOptions:
+          minItems: 0
+          maxItems: 10
+          uniqueItems: true
+        items:
+          logicalType: string
+          description: Individual tag value
+      - name: shipping_addresses
+        businessName: Shipping Addresses
+        logicalType: array
+        description: One or more shipping addresses for this order
+        required: false
+        classification: restricted
+        tags:
+          - pii
+        logicalTypeOptions:
+          minItems: 1
+        items:
+          logicalType: object
+          description: Shipping address information
+          properties:
+            - name: address_type
+              logicalType: string
+              description: Type of address (e.g., residential, commercial)
+              required: true
+            - name: street_line_1
+              logicalType: string
+              description: First line of street address
+              required: true
+            - name: street_line_2
+              logicalType: string
+              description: Second line of street address (apt, suite, etc.)
+              required: false
+            - name: city
+              logicalType: string
+              description: City name
+              required: true
+            - name: postal_code
+              logicalType: string
+              description: Postal or ZIP code
+              required: true
+            - name: country
+              logicalType: string
+              description: Country code (ISO 3166-1 alpha-2)
+              required: true
   - name: line_items
     logicalType: object
     physicalType: table

@@ -105,6 +105,280 @@ const PropertyIndicators = ({property}) => {
     ) : null;
 };
 
+// Component to render array items as a special node
+const ItemsRow = ({
+                      items,
+                      parentPropertyName,
+                      schemaIdx,
+                      depth = 0,
+                      propPath = [],
+                      togglePropertyExpansion,
+                      updateItems,
+                      updateProperty,
+                      addSubProperty,
+                      removeProperty,
+                      expandedProperties,
+                      yaml,
+                      setYaml
+                  }) => {
+    const [editingItemsType, setEditingItemsType] = useState(false);
+    const jsonSchema = useEditorStore((state) => state.schemaData);
+
+    // Get logical type options dynamically from schema
+    const logicalTypeOptions = useMemo(() => {
+        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
+        return schemaEnums || fallbackLogicalTypeOptions;
+    }, [jsonSchema]);
+
+    const pathKey = `${schemaIdx}-${propPath.join('-')}-items`;
+    const isExpanded = expandedProperties.has(pathKey);
+    const isObject = items?.logicalType === 'object';
+    const hasSubProperties = items?.properties && items.properties.length > 0;
+
+    return (
+        <>
+            <div
+                className="border-t border-gray-100 hover:bg-gray-50 group"
+                style={{paddingLeft: `${depth * 1.5}rem`}}
+            >
+                {/* Main row for items node */}
+                <div className="flex items-center justify-between px-2 pr-2 py-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {/* Array icon - using a list icon */}
+                        <svg className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+
+                        {/* Items label - showing parent property name with [] */}
+                        <span className="px-1 py-0.5 text-sm text-gray-700 font-medium flex-shrink-0">
+                            {parentPropertyName}[]
+                        </span>
+
+                        {/* Items Type - inline select */}
+                        <div className="text-xs text-gray-600 flex items-center">
+                            {editingItemsType ? (
+                                <select
+                                    value={items?.logicalType || ''}
+                                    onChange={(e) => {
+                                        updateItems('logicalType', e.target.value || undefined);
+                                        setEditingItemsType(false);
+                                    }}
+                                    onBlur={() => setEditingItemsType(false)}
+                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <option value="">Select...</option>
+                                    {logicalTypeOptions.map((type) => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <span
+                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingItemsType(true);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setEditingItemsType(true);
+                                        }
+                                    }}
+                                    tabIndex={0}
+                                    role="button"
+                                    aria-label="Edit items type"
+                                    title="Click or press Enter to edit items type"
+                                >
+                                    {items?.logicalType || <span className="text-gray-400 italic">type</span>}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Description hint */}
+                        {items?.description && (
+                            <span className="text-xs text-gray-500 truncate" title={items.description}>
+                                {items.description}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Action Icons */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isObject && (
+                            <Tooltip content="Add property to items">
+                                <button
+                                    onClick={() => addSubProperty(schemaIdx, propPath, true)}
+                                    className="p-1.5 rounded-full hover:bg-indigo-50"
+                                    title="Add property to items"
+                                >
+                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                              d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                        )}
+                        {/* Expand/Collapse Button */}
+                        <button
+                            onClick={() => togglePropertyExpansion(pathKey)}
+                            className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
+                        >
+                            <ChevronRightIcon
+                                className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                            />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Expandable Details Section for items */}
+            {isExpanded && (
+                <div
+                    className="border-t border-gray-100 bg-blue-50/20 py-3 px-2"
+                    style={{paddingLeft: `${0.5 + depth * 1.5}rem`}}
+                >
+                    <PropertyDetailsPanel
+                        property={items || {}}
+                        onUpdate={(updatedItems) => {
+                            try {
+                                let parsed = {};
+                                if (yaml?.trim()) {
+                                    try {
+                                        parsed = YAML.parse(yaml) || {};
+                                    } catch {
+                                        parsed = {};
+                                    }
+                                }
+
+                                if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
+                                    return;
+                                }
+
+                                // Navigate to the parent property using propPath
+                                let targetProp = parsed.schema[schemaIdx].properties;
+                                for (let i = 0; i < propPath.length; i++) {
+                                    if (propPath[i] === 'items') {
+                                        targetProp = targetProp.items;
+                                        if (i < propPath.length - 1 && !targetProp.properties) {
+                                            targetProp.properties = [];
+                                        }
+                                        if (i < propPath.length - 1) {
+                                            targetProp = targetProp.properties;
+                                        }
+                                    } else if (i < propPath.length - 1) {
+                                        targetProp = targetProp[propPath[i]];
+                                        if (propPath[i + 1] !== 'items') {
+                                            targetProp = targetProp.properties;
+                                        }
+                                    } else {
+                                        targetProp = targetProp[propPath[i]];
+                                    }
+                                }
+
+                                // Update items
+                                targetProp.items = updatedItems;
+
+                                const newYaml = YAML.stringify(parsed);
+                                setYaml(newYaml);
+                            } catch (error) {
+                                console.error('Error updating items:', error);
+                            }
+                        }}
+                        onDelete={null} // Items cannot be deleted, only the parent array property can be deleted
+                    />
+                </div>
+            )}
+
+            {/* Render items' sub-properties recursively if items is an object */}
+            {hasSubProperties && (
+                <>
+                    {items.properties.map((subProp, subPropIndex) => (
+                        <PropertyRow
+                            key={subPropIndex}
+                            property={subProp}
+                            propIndex={subPropIndex}
+                            schemaIdx={schemaIdx}
+                            depth={depth + 1}
+                            propPath={[...propPath, 'items']}
+                            togglePropertyExpansion={togglePropertyExpansion}
+                            updateProperty={updateProperty}
+                            addSubProperty={addSubProperty}
+                            removeProperty={removeProperty}
+                            expandedProperties={expandedProperties}
+                            yaml={yaml}
+                            setYaml={setYaml}
+                        />
+                    ))}
+                </>
+            )}
+
+            {/* Render nested items if items is also an array */}
+            {items?.logicalType === 'array' && items.items && (
+                <ItemsRow
+                    items={items.items}
+                    parentPropertyName={parentPropertyName + '[]'}
+                    schemaIdx={schemaIdx}
+                    depth={depth + 1}
+                    propPath={[...propPath, 'items']}
+                    togglePropertyExpansion={togglePropertyExpansion}
+                    updateItems={(field, value) => {
+                        try {
+                            let parsed = {};
+                            if (yaml?.trim()) {
+                                try {
+                                    parsed = YAML.parse(yaml) || {};
+                                } catch {
+                                    parsed = {};
+                                }
+                            }
+
+                            if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
+                                return;
+                            }
+
+                            // Navigate to the parent property
+                            let targetProp = parsed.schema[schemaIdx].properties;
+                            for (let i = 0; i < propPath.length; i++) {
+                                if (i < propPath.length - 1) {
+                                    targetProp = targetProp[propPath[i]].properties;
+                                } else {
+                                    targetProp = targetProp[propPath[i]];
+                                }
+                            }
+
+                            // Update nested items.items
+                            if (!targetProp.items) {
+                                targetProp.items = {};
+                            }
+                            if (!targetProp.items.items) {
+                                targetProp.items.items = {};
+                            }
+                            targetProp.items.items[field] = value;
+
+                            const newYaml = YAML.stringify(parsed);
+                            setYaml(newYaml);
+                        } catch (error) {
+                            console.error('Error updating nested items:', error);
+                        }
+                    }}
+                    updateProperty={updateProperty}
+                    addSubProperty={addSubProperty}
+                    removeProperty={removeProperty}
+                    expandedProperties={expandedProperties}
+                    yaml={yaml}
+                    setYaml={setYaml}
+                />
+            )}
+        </>
+    );
+};
+
 // Recursive component to render a property and its sub-properties
 const PropertyRow = ({
                          property,
@@ -133,7 +407,9 @@ const PropertyRow = ({
     const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
     const isExpanded = expandedProperties.has(pathKey);
     const isObject = property.logicalType === 'object';
+    const isArray = property.logicalType === 'array';
     const hasSubProperties = property.properties && property.properties.length > 0;
+    const hasItems = property.items;
 
     return (
         <>
@@ -159,7 +435,7 @@ const PropertyRow = ({
                             type="text"
                             value={property.name || ''}
                             onChange={(e) => updateProperty(schemaIdx, currentPath, 'name', e.target.value)}
-                            className="border-0 border-b border-transparent bg-transparent px-1 py-0.5 text-sm text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:border-indigo-400 focus:bg-indigo-50 hover:border-gray-300 hover:bg-gray-50 w-32 flex-shrink-0 rounded transition-colors cursor-text"
+                            className="border-0 border-b border-transparent bg-transparent px-1 py-0.5 font-medium text-sm text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:border-indigo-400 focus:bg-indigo-50 hover:border-gray-300 hover:bg-gray-50 w-32 flex-shrink-0 rounded transition-colors cursor-text"
                             placeholder="name"
                             title="Click to edit property name"
                         />
@@ -270,8 +546,15 @@ const PropertyRow = ({
                                 // Navigate to the target property using currentPath
                                 let targetProp = parsed.schema[schemaIdx].properties;
                                 for (let i = 0; i < currentPath.length; i++) {
-                                    if (i < currentPath.length - 1) {
-                                        targetProp = targetProp[currentPath[i]].properties;
+                                    // Check if current path segment is 'items'
+                                    if (currentPath[i] === 'items') {
+                                        targetProp = targetProp.items;
+                                    } else if (i < currentPath.length - 1) {
+                                        targetProp = targetProp[currentPath[i]];
+                                        // Only navigate to properties if next segment is not 'items'
+                                        if (currentPath[i + 1] !== 'items') {
+                                            targetProp = targetProp.properties;
+                                        }
                                     } else {
                                         targetProp = targetProp[currentPath[i]];
                                     }
@@ -312,6 +595,61 @@ const PropertyRow = ({
                         />
                     ))}
                 </>
+            )}
+
+            {/* Render items node for array properties */}
+            {isArray && hasItems && (
+                <ItemsRow
+                    items={property.items}
+                    parentPropertyName={property.name}
+                    schemaIdx={schemaIdx}
+                    depth={depth + 1}
+                    propPath={currentPath}
+                    togglePropertyExpansion={togglePropertyExpansion}
+                    updateItems={(field, value) => {
+                        try {
+                            let parsed = {};
+                            if (yaml?.trim()) {
+                                try {
+                                    parsed = YAML.parse(yaml) || {};
+                                } catch {
+                                    parsed = {};
+                                }
+                            }
+
+                            if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
+                                return;
+                            }
+
+                            // Navigate to the target property using currentPath
+                            let targetProp = parsed.schema[schemaIdx].properties;
+                            for (let i = 0; i < currentPath.length; i++) {
+                                if (i < currentPath.length - 1) {
+                                    targetProp = targetProp[currentPath[i]].properties;
+                                } else {
+                                    targetProp = targetProp[currentPath[i]];
+                                }
+                            }
+
+                            // Update items field
+                            if (!targetProp.items) {
+                                targetProp.items = {};
+                            }
+                            targetProp.items[field] = value;
+
+                            const newYaml = YAML.stringify(parsed);
+                            setYaml(newYaml);
+                        } catch (error) {
+                            console.error('Error updating items field:', error);
+                        }
+                    }}
+                    updateProperty={updateProperty}
+                    addSubProperty={addSubProperty}
+                    removeProperty={removeProperty}
+                    expandedProperties={expandedProperties}
+                    yaml={yaml}
+                    setYaml={setYaml}
+                />
             )}
         </>
     );
@@ -508,8 +846,23 @@ const SchemaEditor = ({schemaIndex}) => {
             } else {
                 // New behavior: propPath is an array
                 for (let i = 0; i < propPath.length; i++) {
-                    if (i < propPath.length - 1) {
-                        targetProp = targetProp[propPath[i]].properties;
+                    // Check if current path segment is 'items'
+                    if (propPath[i] === 'items') {
+                        targetProp = targetProp.items;
+                        // Initialize properties array if needed and this is not the last segment
+                        if (i < propPath.length - 1 && !targetProp.properties) {
+                            targetProp.properties = [];
+                        }
+                        // Move to properties array if there are more segments
+                        if (i < propPath.length - 1) {
+                            targetProp = targetProp.properties;
+                        }
+                    } else if (i < propPath.length - 1) {
+                        targetProp = targetProp[propPath[i]];
+                        // Only navigate to properties if next segment is not 'items'
+                        if (propPath[i + 1] !== 'items') {
+                            targetProp = targetProp.properties;
+                        }
                     } else {
                         targetProp = targetProp[propPath[i]];
                     }
@@ -557,8 +910,8 @@ const SchemaEditor = ({schemaIndex}) => {
         }
     };
 
-    // Add sub-property to a property (for nested objects)
-    const addSubProperty = (schemaIdx, propPath) => {
+    // Add sub-property to a property (for nested objects or items)
+    const addSubProperty = (schemaIdx, propPath, isItems = false) => {
         try {
             let parsed = {};
             if (yaml?.trim()) {
@@ -582,22 +935,42 @@ const SchemaEditor = ({schemaIndex}) => {
             // Navigate to the property using propPath array
             let targetProp = parsed.schema[schemaIndex].properties;
             for (let i = 0; i < propPath.length; i++) {
-                targetProp = targetProp[propPath[i]];
-                if (i < propPath.length - 1) {
-                    targetProp = targetProp.properties;
+                // Check if current path segment is 'items'
+                if (propPath[i] === 'items') {
+                    targetProp = targetProp.items;
+                } else {
+                    targetProp = targetProp[propPath[i]];
+                    if (i < propPath.length - 1 && propPath[i + 1] !== 'items') {
+                        targetProp = targetProp.properties;
+                    }
                 }
             }
 
-            // Initialize properties array if it doesn't exist
-            if (!targetProp.properties) {
-                targetProp.properties = [];
-            }
+            // If isItems, we're adding to items.properties
+            if (isItems) {
+                if (!targetProp.items) {
+                    targetProp.items = {};
+                }
+                if (!targetProp.items.properties) {
+                    targetProp.items.properties = [];
+                }
+                targetProp.items.properties.push({
+                    name: '',
+                    logicalType: '',
+                    description: ''
+                });
+            } else {
+                // Initialize properties array if it doesn't exist
+                if (!targetProp.properties) {
+                    targetProp.properties = [];
+                }
 
-            targetProp.properties.push({
-                name: '',
-                logicalType: '',
-                description: ''
-            });
+                targetProp.properties.push({
+                    name: '',
+                    logicalType: '',
+                    description: ''
+                });
+            }
 
             const newYaml = YAML.stringify(parsed);
             setYaml(newYaml);
