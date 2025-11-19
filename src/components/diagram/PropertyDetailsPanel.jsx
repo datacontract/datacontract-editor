@@ -150,12 +150,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         )}
       </Disclosure>
 
-      {/* Type Constraints Section */}
+      {/* Logical Type Options Section */}
       <Disclosure>
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Type Constraints</span>
+              <span>Logical Type Options</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
