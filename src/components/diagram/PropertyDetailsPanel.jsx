@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
+import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
 import ArrayInput from '../ui/ArrayInput.jsx';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
@@ -250,25 +251,25 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Exclusive Minimum</label>
                       <input
-                        type="checkbox"
-                        id="exclusiveMinimum"
-                        checked={property.logicalTypeOptions?.exclusiveMinimum || false}
-                        onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, exclusiveMinimum: e.target.checked || undefined })}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
+                        type="number"
+                        value={property.logicalTypeOptions?.exclusiveMinimum ?? ''}
+                        onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, exclusiveMinimum: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                        step="any"
                       />
-                      <label htmlFor="exclusiveMinimum" className="ml-2 text-sm text-gray-700">Exclusive Minimum</label>
                     </div>
-                    <div className="flex items-center">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Exclusive Maximum</label>
                       <input
-                        type="checkbox"
-                        id="exclusiveMaximum"
-                        checked={property.logicalTypeOptions?.exclusiveMaximum || false}
-                        onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, exclusiveMaximum: e.target.checked || undefined })}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
+                        type="number"
+                        value={property.logicalTypeOptions?.exclusiveMaximum ?? ''}
+                        onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, exclusiveMaximum: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                        step="any"
                       />
-                      <label htmlFor="exclusiveMaximum" className="ml-2 text-sm text-gray-700">Exclusive Maximum</label>
                     </div>
                   </div>
                   <div>
@@ -349,15 +350,27 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       />
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="uniqueItems"
-                      checked={property.logicalTypeOptions?.uniqueItems || false}
-                      onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, uniqueItems: e.target.checked || undefined })}
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                    />
-                    <label htmlFor="uniqueItems" className="ml-2 text-sm text-gray-700">Unique Items</label>
+                  <div>
+                    <label htmlFor="uniqueItems" className="block text-xs font-medium text-gray-700 mb-1">Unique Items</label>
+                    <div className="grid grid-cols-1">
+                      <select
+                        id="uniqueItems"
+                        value={property.logicalTypeOptions?.uniqueItems === true ? 'true' : property.logicalTypeOptions?.uniqueItems === false ? 'false' : ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                          updateField('logicalTypeOptions', { ...property.logicalTypeOptions, uniqueItems: newValue });
+                        }}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">Not set</option>
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
                   </div>
                 </>
               )}
@@ -384,51 +397,99 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               <div className="grid grid-cols-2 gap-3">
                 {/* Required */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="required"
-                    checked={property.required || false}
-                    onChange={(e) => updateField('required', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                  />
-                  <label htmlFor="required" className="ml-2 text-sm text-gray-700">Required</label>
+                <div>
+                  <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">Required</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="required"
+                      value={property.required === true ? 'true' : property.required === false ? 'false' : ''}
+                      onChange={(e) => {
+                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                        updateField('required', newValue);
+                      }}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                    >
+                      <option value="">Not set</option>
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Unique */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="unique"
-                    checked={property.unique || false}
-                    onChange={(e) => updateField('unique', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                  />
-                  <label htmlFor="unique" className="ml-2 text-sm text-gray-700">Unique</label>
+                <div>
+                  <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">Unique</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="unique"
+                      value={property.unique === true ? 'true' : property.unique === false ? 'false' : ''}
+                      onChange={(e) => {
+                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                        updateField('unique', newValue);
+                      }}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                    >
+                      <option value="">Not set</option>
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Primary Key */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="primaryKey"
-                    checked={property.primaryKey || false}
-                    onChange={(e) => updateField('primaryKey', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                  />
-                  <label htmlFor="primaryKey" className="ml-2 text-sm text-gray-700">Primary Key</label>
+                <div>
+                  <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">Primary Key</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="primaryKey"
+                      value={property.primaryKey === true ? 'true' : property.primaryKey === false ? 'false' : ''}
+                      onChange={(e) => {
+                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                        updateField('primaryKey', newValue);
+                      }}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                    >
+                      <option value="">Not set</option>
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Partitioned */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="partitioned"
-                    checked={property.partitioned || false}
-                    onChange={(e) => updateField('partitioned', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                  />
-                  <label htmlFor="partitioned" className="ml-2 text-sm text-gray-700">Partitioned</label>
+                <div>
+                  <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">Partitioned</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="partitioned"
+                      value={property.partitioned === true ? 'true' : property.partitioned === false ? 'false' : ''}
+                      onChange={(e) => {
+                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                        updateField('partitioned', newValue);
+                      }}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                    >
+                      <option value="">Not set</option>
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -500,17 +561,27 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               </div>
 
               {/* Critical Data Element */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="criticalDataElement"
-                  checked={property.criticalDataElement || false}
-                  onChange={(e) => updateField('criticalDataElement', e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-0"
-                />
-                <label htmlFor="criticalDataElement" className="ml-2 text-sm text-gray-700">
-                  Critical Data Element
-                </label>
+              <div>
+                <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">Critical Data Element</label>
+                <div className="grid grid-cols-1">
+                  <select
+                    id="criticalDataElement"
+                    value={property.criticalDataElement === true ? 'true' : property.criticalDataElement === false ? 'false' : ''}
+                    onChange={(e) => {
+                      const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                      updateField('criticalDataElement', newValue);
+                    }}
+                    className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                  >
+                    <option value="">Not set</option>
+                    <option value="false">False</option>
+                    <option value="true">True</option>
+                  </select>
+                  <ChevronDownIcon
+                    aria-hidden="true"
+                    className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                  />
+                </div>
               </div>
 
               {/* Encrypted Name */}

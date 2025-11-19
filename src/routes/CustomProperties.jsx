@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
+import ChevronDownIcon from '../components/ui/icons/ChevronDownIcon.jsx';
 import * as YAML from 'yaml';
 
 const CustomProperties = () => {
@@ -52,7 +53,9 @@ const CustomProperties = () => {
         const num = parseFloat(valueStr);
         return isNaN(num) ? undefined : num;
       case 'boolean':
-        return valueStr === 'true' || valueStr === true;
+        if (valueStr === 'true' || valueStr === true) return true;
+        if (valueStr === 'false' || valueStr === false) return false;
+        return undefined;
       case 'array':
         try {
           const parsed = JSON.parse(valueStr);
@@ -121,7 +124,7 @@ const CustomProperties = () => {
         } else if (value === 'number') {
           convertedValue = 0;
         } else if (value === 'boolean') {
-          convertedValue = false;
+          convertedValue = undefined;
         } else if (value === 'array') {
           convertedValue = [];
         } else if (value === 'object') {
@@ -173,7 +176,9 @@ const CustomProperties = () => {
       return JSON.stringify(prop.value, null, 2);
     }
     if (type === 'boolean') {
-      return prop.value?.toString() || 'false';
+      if (prop.value === true) return 'true';
+      if (prop.value === false) return 'false';
+      return '';
     }
     return prop.value?.toString() || '';
   };
@@ -273,14 +278,21 @@ const CustomProperties = () => {
                               <span className="text-xs leading-4 text-gray-500">Required</span>
                             </div>
                             {type === 'boolean' ? (
-                              <select
-                                value={prop.value?.toString() || 'false'}
-                                onChange={(e) => updateProperty(index, 'value', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                              >
-                                <option value="false">false</option>
-                                <option value="true">true</option>
-                              </select>
+                              <div className="grid grid-cols-1">
+                                <select
+                                  value={prop.value === true ? 'true' : prop.value === false ? 'false' : ''}
+                                  onChange={(e) => updateProperty(index, 'value', e.target.value)}
+                                  className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                >
+                                  <option value="">Not set</option>
+                                  <option value="false">false</option>
+                                  <option value="true">true</option>
+                                </select>
+                                <ChevronDownIcon
+                                  aria-hidden="true"
+                                  className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                                />
+                              </div>
                             ) : type === 'array' || type === 'object' ? (
                               <textarea
                                 rows={4}

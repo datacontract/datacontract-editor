@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useEditorStore } from '../../store';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor';
 import Combobox from './Combobox';
+import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
 
 /**
  * A smart field component that dynamically renders enum-based dropdowns
@@ -87,24 +88,30 @@ const EnumField = ({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium leading-4 text-gray-900">
+        <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
           {label}
         </label>
       )}
-      <select
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
-        {...props}
-      >
-        <option value="">{placeholder || 'Select...'}</option>
-        {enumValues.map((enumValue) => (
-          <option key={enumValue} value={enumValue}>
-            {enumValue}
-          </option>
-        ))}
-      </select>
+      <div className="grid grid-cols-1">
+        <select
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+          {...props}
+        >
+          <option value="">{placeholder || 'Select...'}</option>
+          {enumValues.map((enumValue) => (
+            <option key={enumValue} value={enumValue}>
+              {enumValue}
+            </option>
+          ))}
+        </select>
+        <ChevronDownIcon
+          aria-hidden="true"
+          className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+        />
+      </div>
     </div>
   );
 };
