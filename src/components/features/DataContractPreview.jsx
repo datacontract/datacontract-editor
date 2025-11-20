@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import {Fragment, useMemo} from 'react';
 import * as YAML from 'yaml';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import supportIcons from '../../assets/support-icons/supportIcons.jsx';
@@ -6,6 +6,7 @@ import LinkIcon from '../ui/icons/LinkIcon.jsx';
 import { getQualityCheckIcon } from '../ui/icons/QualityCheckIcons.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
 import DescriptionPreview from '../ui/DescriptionPreview.jsx';
+import { IconResolver } from '../ui/IconResolver.jsx';
 
 const DataContractPreview = ({ yamlContent }) => {
   const parsedData = useMemo(() => {
@@ -238,6 +239,28 @@ const DataContractPreview = ({ yamlContent }) => {
             <div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">
               <div className="px-4 py-4 sm:px-6">
 
+                {/* Authoritative Definitions Section */}
+                {authoritativeDefinitions && authoritativeDefinitions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {authoritativeDefinitions.map((def, index) => (
+                      <a
+                        key={index}
+                        href={def.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col text-center rounded-md bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:ring-indigo-300 transition-colors"
+                        style={{ minWidth: '120px' }}
+                        title={def.description}
+                      >
+                        <div className="mx-auto w-8 h-8 mb-2 text-gray-500">
+                          <IconResolver url={def.url} type={def.type} className="w-full h-full" />
+                        </div>
+                        <div className="text-xs font-medium">{def.type}</div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
                 {/* Links Section */}
                 {links && links.length > 0 && (
                   <div className="flex flex-wrap gap-3 print:hidden mb-6">
@@ -310,39 +333,6 @@ const DataContractPreview = ({ yamlContent }) => {
                       </dd>
                     </div>
                   )}
-
-                  {authoritativeDefinitions && authoritativeDefinitions.length > 0 && (
-                    <div className="sm:col-span-2">
-                      <dt className="text-sm font-medium text-gray-500 mb-2">Authoritative Definitions</dt>
-                    </div>
-                  )}
-                  {authoritativeDefinitions && authoritativeDefinitions.map((def, index) => (
-                    <div key={index} className="sm:col-span-1">
-                      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
-                        {def.type}
-                        {def.description && (
-                          <Tooltip content={def.description}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400 cursor-help">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                            </svg>
-                          </Tooltip>
-                        )}
-                      </dt>
-                      <dd className="mt-1 text-sm text-gray-900">
-                        <a
-                          href={def.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 hover:text-indigo-500 inline-flex items-center gap-x-1"
-                        >
-                          {def.url}
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                          </svg>
-                        </a>
-                      </dd>
-                    </div>
-                  ))}
                 </dl>
               </div>
             </div>
@@ -368,8 +358,8 @@ const DataContractPreview = ({ yamlContent }) => {
                   const hasChildren = property.properties && Object.keys(property.properties).length > 0;
 
                   return (
-                    <>
-                      <tr key={propertyName} className="print:break-inside-avoid-page">
+                    <Fragment key={`${modelName}-${propertyName}`}>
+                      <tr key={`${modelName}-${propertyName}`} className="print:break-inside-avoid-page">
                         <td className="py-2 pl-4 pr-2 text-sm font-medium text-gray-900 sm:pl-6 w-fit flex">
                           <span>
                             {indent > 0 && indentSpaces}
@@ -493,7 +483,7 @@ const DataContractPreview = ({ yamlContent }) => {
                       {hasChildren && Object.entries(property.properties).map(([childName, childProp]) =>
                         renderProperty(childProp, childName, indent + 1)
                       )}
-                    </>
+                    </Fragment>
                   );
                 };
 
@@ -733,6 +723,28 @@ const DataContractPreview = ({ yamlContent }) => {
               {/* Team Info */}
               <div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">
                 <div className="px-4 py-4 sm:px-6">
+                  {/* Authoritative Definitions Section */}
+                  {team.authoritativeDefinitions && Array.isArray(team.authoritativeDefinitions) && team.authoritativeDefinitions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {team.authoritativeDefinitions.map((def, index) => (
+                        <a
+                          key={index}
+                          href={def.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-col text-center rounded-md bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:ring-indigo-300 transition-colors"
+                          style={{ minWidth: '120px' }}
+                          title={def.description}
+                        >
+                          <div className="mx-auto w-8 h-8 mb-2 text-gray-500">
+                            <IconResolver url={def.url} type={def.type} className="w-full h-full" />
+                          </div>
+                          <div className="text-xs font-medium">{def.type}</div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-3">
                     {team.name && (
                       <div>
@@ -782,41 +794,6 @@ const DataContractPreview = ({ yamlContent }) => {
                               </dt>
                               <dd className="text-sm text-gray-900">
                                 <span className="whitespace-pre-wrap">{customProp.value}</span>
-                              </dd>
-                            </div>
-                          ))}
-                        </dd>
-                      </div>
-                    )}
-
-                    {team.authoritativeDefinitions && Array.isArray(team.authoritativeDefinitions) && team.authoritativeDefinitions.length > 0 && (
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500 mb-2">Authoritative Definitions</dt>
-                        <dd className="flex flex-wrap gap-x-4 gap-y-2">
-                          {team.authoritativeDefinitions.map((def, index) => (
-                            <div key={index} className="min-w-0">
-                              <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
-                                {def.type}
-                                {def.description && (
-                                  <Tooltip content={def.description}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400 cursor-help">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                                    </svg>
-                                  </Tooltip>
-                                )}
-                              </dt>
-                              <dd className="text-sm text-gray-900">
-                                <a
-                                  href={def.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-indigo-600 hover:text-indigo-500 inline-flex items-center gap-x-1"
-                                >
-                                  {def.url}
-                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                  </svg>
-                                </a>
                               </dd>
                             </div>
                           ))}
