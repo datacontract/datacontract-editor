@@ -742,11 +742,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 onChange={(value) => updateField('relationships', value)}
                 fields={[
                   { name: 'type', label: 'Relationship Type', type: 'select', options: relationshipTypeOptions },
-                  { name: 'dataset', label: 'Target Dataset', type: 'text', placeholder: 'dataset_name' },
-                  { name: 'field', label: 'Target Field', type: 'text', placeholder: 'field_name' },
+                  { name: 'to', label: 'To', type: 'text', placeholder: 'schema.property or schema/table/properties/property' },
                   { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the relationship...' }
                 ]}
-                helpText="Define relationships to other properties (e.g., foreign keys)"
+                helpText="Define relationships to other properties (use 'to' field with format: schema.property)"
               />
             </DisclosurePanel>
           </>
