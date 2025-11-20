@@ -471,22 +471,22 @@ description:
 
                 <div className="flex flex-row flex-1 pr-0 justify-end items-center gap-2 text-xs">
                     {isEmbeddedMode ? (
-                        // Embedded mode: Cancel, Delete, Save (primary)
+                        // Embedded mode: Cancel link, Delete, Save (primary)
                         <>
                             <button
-                                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                className="text-sm font-semibold text-gray-900 hover:text-gray-700 hover:cursor-pointer"
                                 onClick={handleCancel}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-xs ring-1 ring-inset ring-red-300 hover:bg-red-50"
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-xs ring-1 ring-inset ring-red-300 hover:bg-red-50 hover:cursor-pointer"
                                 onClick={handleDelete}
                             >
                                 Delete
                             </button>
                             <button
-                                className="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500 hover:cursor-pointer"
                                 onClick={handleSave}
                             >
                                 Save
