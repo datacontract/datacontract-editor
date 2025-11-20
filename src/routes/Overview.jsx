@@ -9,6 +9,7 @@ import * as YAML from 'yaml';
 const Overview = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
+  const editorConfig = useEditorStore((state) => state.editorConfig);
 
   // Status options for the combobox
   const statusOptions = [
@@ -243,15 +244,32 @@ const Overview = () => {
                       </svg>
                     </Tooltip>
                   </div>
-                  <input
-                    type="text"
-                    name="domain"
-                    id="domain"
-                    value={formData.domain}
-                    onChange={(e) => updateField('domain', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
-                    placeholder="e.g., logistics, finance"
-                  />
+                  {editorConfig?.domains && editorConfig.domains.length > 0 ? (
+                    <select
+                      name="domain"
+                      id="domain"
+                      value={formData.domain}
+                      onChange={(e) => updateField('domain', e.target.value)}
+                      className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+                    >
+                      <option value="">Select a domain...</option>
+                      {editorConfig.domains.map((domain) => (
+                        <option key={domain.id} value={domain.id}>
+                          {domain.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      name="domain"
+                      id="domain"
+                      value={formData.domain}
+                      onChange={(e) => updateField('domain', e.target.value)}
+                      className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+                      placeholder="e.g., logistics, finance"
+                    />
+                  )}
                 </div>
 
                 {/* Tags Field */}

@@ -280,6 +280,8 @@ const defaultEditorStore = create()(
                 mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
                 onCancel: null,
                 onDelete: null,
+                teams: null,
+                domains: null,
             },
             ...actions,
         };

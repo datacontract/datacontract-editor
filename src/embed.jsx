@@ -58,7 +58,10 @@ const DEFAULT_CONFIG = {
   onSave: null,        // (yaml) => void
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
-  lookupTeamName: null, // (id) => Promise<string>
+
+  // Optional lists for dropdowns (if not provided, text fields are used)
+  teams: null,         // Array of {id: string, name: string} or null
+  domains: null,       // Array of {id: string, name: string} or null
 
   // Custom backend
   backend: null,
@@ -253,6 +256,8 @@ function createConfiguredStore(config) {
         mode: config.mode,
         onCancel: config.onCancel,
         onDelete: config.onDelete,
+        teams: config.teams,
+        domains: config.domains,
       },
       ...actions,
     };

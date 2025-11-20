@@ -47,12 +47,19 @@ servers:
 `;
     }
 
-    // Team lookup mock data (for demonstration)
-    const teams = {
-        'team-1': 'Data Engineering Team',
-        'team-2': 'Analytics Team',
-        'team-3': 'Platform Team'
-    };
+    // Team and domain lists (for demonstration)
+    const teams = [
+        { id: 'team-1', name: 'Data Engineering Team' },
+        { id: 'team-2', name: 'Analytics Team' },
+        { id: 'team-3', name: 'Platform Team' }
+    ];
+
+    const domains = [
+        { id: 'logistics', name: 'Logistics' },
+        { id: 'finance', name: 'Finance' },
+        { id: 'sales', name: 'Sales' },
+        { id: 'marketing', name: 'Marketing' }
+    ];
 
     // Load the initial YAML and initialize the editor
     const initialYaml = await loadInitialYaml();
@@ -101,12 +108,9 @@ servers:
             // In a real app, send DELETE request to backend
         },
 
-        // Team name lookup (optional)
-        lookupTeamName: async (teamId) => {
-            console.log('Looking up team:', teamId);
-            // In a real app, fetch from your backend
-            return teams[teamId] || `Team ${teamId}`;
-        },
+        // Optional teams and domains lists (if provided, dropdowns are used instead of text fields)
+        teams: teams,
+        domains: domains,
 
         // Disable localStorage persistence (use your own backend)
         enablePersistence: false

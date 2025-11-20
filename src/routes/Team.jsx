@@ -11,6 +11,7 @@ const Team = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const currentView = useEditorStore((state) => state.currentView);
+  const editorConfig = useEditorStore((state) => state.editorConfig);
 
   // Parse current YAML to extract form values
   const formData = useMemo(() => {
@@ -142,13 +143,28 @@ const Team = () => {
                 <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                   Team Name
                 </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => updateTeamField('name', e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                  placeholder="Data Engineering Team"
-                />
+                {editorConfig?.teams && editorConfig.teams.length > 0 ? (
+                  <select
+                    value={formData.name}
+                    onChange={(e) => updateTeamField('name', e.target.value)}
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                  >
+                    <option value="">Select a team...</option>
+                    {editorConfig.teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => updateTeamField('name', e.target.value)}
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    placeholder="Data Engineering Team"
+                  />
+                )}
               </div>
 
               {/* Team Description */}
