@@ -264,15 +264,9 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
                   <textarea
                     value={rule.arguments?.missingValues?.join('\n') || ''}
                     onChange={(e) => {
-                      const values = e.target.value.split('\n').filter(v => v.trim() !== '');
-                      const updatedArguments = values.length > 0 ? { ...rule.arguments, missingValues: values } : undefined;
+                      const values = e.target.value.split('\n');
+                      const updatedArguments = values.length > 0 && values.some(v => v.trim() !== '') ? { ...rule.arguments, missingValues: values } : undefined;
                       onUpdate(index, 'arguments', updatedArguments);
-                    }}
-                    onKeyDown={(e) => {
-                      // Prevent parent handlers from intercepting Enter
-                      if (e.key === 'Enter') {
-                        e.stopPropagation();
-                      }
                     }}
                     rows={3}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
@@ -291,21 +285,15 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
                     <textarea
                       value={rule.arguments?.validValues?.join('\n') || ''}
                       onChange={(e) => {
-                        const values = e.target.value.split('\n').filter(v => v.trim() !== '');
+                        const values = e.target.value.split('\n');
                         let updatedArguments = { ...rule.arguments };
-                        if (values.length > 0) {
+                        if (values.length > 0 && values.some(v => v.trim() !== '')) {
                           updatedArguments.validValues = values;
                           delete updatedArguments.pattern;
                         } else {
                           delete updatedArguments.validValues;
                         }
                         onUpdate(index, 'arguments', Object.keys(updatedArguments).length > 0 ? updatedArguments : undefined);
-                      }}
-                      onKeyDown={(e) => {
-                        // Prevent parent handlers from intercepting Enter
-                        if (e.key === 'Enter') {
-                          e.stopPropagation();
-                        }
                       }}
                       rows={3}
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
@@ -344,15 +332,9 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
                   <textarea
                     value={rule.arguments?.properties?.join('\n') || ''}
                     onChange={(e) => {
-                      const values = e.target.value.split('\n').filter(v => v.trim() !== '');
-                      const updatedArguments = values.length > 0 ? { ...rule.arguments, properties: values } : undefined;
+                      const values = e.target.value.split('\n');
+                      const updatedArguments = values.length > 0 && values.some(v => v.trim() !== '') ? { ...rule.arguments, properties: values } : undefined;
                       onUpdate(index, 'arguments', updatedArguments);
-                    }}
-                    onKeyDown={(e) => {
-                      // Prevent parent handlers from intercepting Enter
-                      if (e.key === 'Enter') {
-                        e.stopPropagation();
-                      }
                     }}
                     rows={3}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
@@ -428,7 +410,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
                   <label className="block text-xs font-medium text-gray-600 mb-1">Value</label>
                   <input
                     type="number"
-                    value={selectedOperator ? (rule[selectedOperator] || '') : ''}
+                    value={selectedOperator ? (rule[selectedOperator] ?? '') : ''}
                     onChange={(e) => handleOperatorValueChange(e.target.value ? Number(e.target.value) : undefined)}
                     disabled={!selectedOperator}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed text-xs"
