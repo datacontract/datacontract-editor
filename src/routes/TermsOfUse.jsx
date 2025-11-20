@@ -5,7 +5,7 @@ import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import * as YAML from 'yaml';
 
-const TermsAndConditions = () => {
+const TermsOfUse = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
 
@@ -92,9 +92,9 @@ const TermsAndConditions = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
 
-          {/* Terms and Conditions Section */}
+          {/* Terms of Use Section */}
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Terms and Conditions</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Terms of Use</h3>
             <p className="text-sm text-gray-500 mb-4">High level description of the dataset including purpose, usage guidelines, and limitations.</p>
             <div className="space-y-3">
               {/* Purpose Field */}
@@ -197,4 +197,4 @@ const TermsAndConditions = () => {
   );
 };
 
-export default TermsAndConditions;
+export default TermsOfUse;

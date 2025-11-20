@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useRef } from 'react';
 import { YamlEditor, DataContractPreview, TestResultsPanel } from "../components/features/index.js";
 import WarningsPanel from "../components/features/WarningsPanel.jsx";
-import { Overview, TermsAndConditions, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
+import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
 import { useEditorStore } from "../store.js";
 
 const MainContent = () => {
@@ -80,7 +80,7 @@ const MainContent = () => {
             <Routes>
               <Route path="/" element={<Overview />} />
               <Route path="/overview" element={<Overview />} />
-              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/terms-of-use" element={<TermsOfUse />} />
               <Route path="/schemas" element={<Schemas />} />
               <Route path="/schemas/:schemaId" element={<Schema />} />
               <Route path="/pricing" element={<Pricing />} />

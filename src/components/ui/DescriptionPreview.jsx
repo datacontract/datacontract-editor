@@ -12,7 +12,7 @@ const DescriptionPreview = ({ description }) => {
   return (
     <section>
       <div className="px-4 sm:px-0">
-        <h1 className="text-base font-semibold leading-6 text-gray-900" id="terms-and-conditions">Terms and Conditions</h1>
+        <h1 className="text-base font-semibold leading-6 text-gray-900" id="terms-of-use">Terms of Use</h1>
         <p className="text-sm text-gray-500">High level description of the dataset including purpose, usage guidelines, and limitations</p>
       </div>
       <div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">

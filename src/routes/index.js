@@ -1,5 +1,5 @@
 export { default as Overview } from './Overview.jsx';
-export { default as TermsAndConditions } from './TermsAndConditions.jsx';
+export { default as TermsOfUse } from './TermsOfUse.jsx';
 export { default as Schemas } from './Schemas.jsx';
 export { default as Schema } from './Schema.jsx';
 export { default as Diagram } from './Diagram.jsx';
