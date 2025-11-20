@@ -48,8 +48,16 @@ const DEFAULT_CONFIG = {
   // Test endpoint configuration
   testEndpoint: '/test',
 
+  // Editor mode: 'SERVER' (default), 'DESKTOP', or 'EMBEDDED'
+  // - SERVER: Server mode with full menu
+  // - DESKTOP: Desktop mode with file operations in menu
+  // - EMBEDDED: Embedded mode with Cancel/Delete/Save buttons, no menu
+  mode: 'SERVER',
+
   // Callbacks
   onSave: null,        // (yaml) => void
+  onCancel: null,      // () => void - only for EMBEDDED mode
+  onDelete: null,      // () => void - only for EMBEDDED mode
   lookupTeamName: null, // (id) => Promise<string>
 
   // Custom backend
@@ -240,6 +248,12 @@ function createConfiguredStore(config) {
       yamlCursorLine: 1,
       lastSaveInfo: null,
       notifications: [],
+      // Store editor config for components to access
+      editorConfig: {
+        mode: config.mode,
+        onCancel: config.onCancel,
+        onDelete: config.onDelete,
+      },
       ...actions,
     };
   };

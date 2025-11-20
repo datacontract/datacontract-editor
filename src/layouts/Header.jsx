@@ -24,10 +24,15 @@ const Header = () => {
     const yaml = useEditorStore((state) => state.yaml);
     const yamlCursorLine = useEditorStore((state) => state.yamlCursorLine);
     const isDirty = useEditorStore((state) => state.isDirty);
+    const editorConfig = useEditorStore((state) => state.editorConfig);
 
     // Check if we're in server mode
     const backend = getFileStorageBackend();
     const isServerMode = backend.getBackendName() === 'Server Storage';
+
+    // Get editor mode from config
+    const editorMode = editorConfig?.mode || 'SERVER';
+    const isEmbeddedMode = editorMode === 'EMBEDDED';
 
     // Calculate problem count
     const totalCount = markers.length;
@@ -93,6 +98,20 @@ const Header = () => {
             }
             console.error('Error saving file:', error);
             alert(`Failed to save file: ${error.message}`);
+        }
+    };
+
+    const handleCancel = () => {
+        if (editorConfig?.onCancel) {
+            editorConfig.onCancel();
+        }
+    };
+
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this data contract? This action cannot be undone.')) {
+            if (editorConfig?.onDelete) {
+                editorConfig.onDelete();
+            }
         }
     };
 
@@ -451,74 +470,101 @@ description:
 
 
                 <div className="flex flex-row flex-1 pr-0 justify-end items-center gap-2 text-xs">
-                    <button
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
-                        onClick={handleSave}
-                    >
-                        Save
-                    </button>
-                    {!isServerMode && (
-                        <Menu as="div" className="relative inline-block">
-                          <MenuButton className="inline-flex items-center justify-center rounded-md bg-white px-3 py-1.5 text-xs font-semibold shadow-xs text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                          </MenuButton>
+                    {isEmbeddedMode ? (
+                        // Embedded mode: Cancel, Delete, Save (primary)
+                        <>
+                            <button
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-xs ring-1 ring-inset ring-red-300 hover:bg-red-50"
+                                onClick={handleDelete}
+                            >
+                                Delete
+                            </button>
+                            <button
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
+                                onClick={handleSave}
+                            >
+                                Save
+                            </button>
+                        </>
+                    ) : (
+                        // Server/Desktop mode: Save button + burger menu
+                        <>
+                            <button
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
+                                onClick={handleSave}
+                            >
+                                Save
+                            </button>
+                            {!isServerMode && (
+                                <Menu as="div" className="relative inline-block">
+                                  <MenuButton className="inline-flex items-center justify-center rounded-md bg-white px-3 py-1.5 text-xs font-semibold shadow-xs text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                  </MenuButton>
 
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg outline outline-1 outline-black/5 transition data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <div className="py-1">
-                              <MenuItem>
-                                <button
-                                  onClick={handleNew}
-                                  className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
-                                >
-                                  <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                  </svg>
-                                  New
-                                </button>
-                              </MenuItem>
-                              <MenuItem>
-                                <button
-                                  onClick={handleExample}
-                                  className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
-                                >
-                                  <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                  </svg>
-                                  Example
-                                </button>
-                              </MenuItem>
-                            </div>
-                            <div className="py-1">
-                              <MenuItem>
-                                <button
-                                  onClick={handleOpen}
-                                  className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
-                                >
-                                  <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
-                                  </svg>
-                                  Open
-                                </button>
-                              </MenuItem>
-                              <MenuItem>
-                                <button
-                                  onClick={handleSave}
-                                  className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
-                                >
-                                  <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                  </svg>
-                                  Save
-                                </button>
-                              </MenuItem>
-                            </div>
-                          </MenuItems>
-                        </Menu>
+                                  <MenuItems
+                                    transition
+                                    className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg outline outline-1 outline-black/5 transition data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                                  >
+                                    <div className="py-1">
+                                      <MenuItem>
+                                        <button
+                                          onClick={handleNew}
+                                          className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                                        >
+                                          <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                          </svg>
+                                          New
+                                        </button>
+                                      </MenuItem>
+                                      <MenuItem>
+                                        <button
+                                          onClick={handleExample}
+                                          className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                                        >
+                                          <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                          </svg>
+                                          Example
+                                        </button>
+                                      </MenuItem>
+                                    </div>
+                                    <div className="py-1">
+                                      <MenuItem>
+                                        <button
+                                          onClick={handleOpen}
+                                          className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                                        >
+                                          <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+                                          </svg>
+                                          Open
+                                        </button>
+                                      </MenuItem>
+                                      <MenuItem>
+                                        <button
+                                          onClick={handleSave}
+                                          className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                                        >
+                                          <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                          </svg>
+                                          Save
+                                        </button>
+                                      </MenuItem>
+                                    </div>
+                                  </MenuItems>
+                                </Menu>
+                            )}
+                        </>
                     )}
                 </div>
                 </div>

@@ -276,6 +276,11 @@ const defaultEditorStore = create()(
             yamlCursorLine: 1,
             lastSaveInfo: null, // { filename, timestamp, contractName }
             notifications: [], // { id, type, message, duration }
+            editorConfig: {
+                mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
+                onCancel: null,
+                onDelete: null,
+            },
             ...actions,
         };
     }, {
