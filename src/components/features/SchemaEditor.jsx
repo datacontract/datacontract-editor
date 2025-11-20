@@ -1355,10 +1355,16 @@ const SchemaEditor = ({schemaIndex}) => {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="px-4 py-8 text-center rounded-b-md">
+                                                <div
+                                                    className="px-4 py-8 text-center rounded-b-md cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => addProperty()}
+                                                >
                                                     <p className="text-sm text-gray-400 mb-2">No properties defined</p>
                                                     <button
-                                                        onClick={() => addProperty()}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            addProperty();
+                                                        }}
                                                         className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor"

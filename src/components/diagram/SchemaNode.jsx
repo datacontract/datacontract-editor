@@ -878,7 +878,12 @@ const SchemaNode = ({ data, id }) => {
           </Fragment>
           ))
         ) : (
-          <div className="px-4 py-3 text-xs text-gray-400 italic">No properties defined</div>
+          <div
+            className="px-4 py-3 text-xs text-gray-400 italic cursor-pointer hover:bg-gray-50"
+            onClick={handleAddProperty}
+          >
+            No properties defined
+          </div>
         )}
       </div>
 
