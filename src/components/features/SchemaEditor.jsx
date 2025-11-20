@@ -23,6 +23,7 @@ import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import QualityEditor from '../ui/QualityEditor.jsx';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 
 // Fallback logical type options (used if schema not loaded)
@@ -729,7 +730,17 @@ const SchemaEditor = ({schemaIndex}) => {
     // Dynamically get enum values from schema for schema-level KeyValueEditor fields
     const qualityDimensionOptions = useMemo(() => {
         return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'schema') ||
-               ['completeness', 'accuracy', 'consistency', 'validity', 'timeliness', 'uniqueness'];
+               ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
+    }, [jsonSchema]);
+
+    const qualityTypeOptions = useMemo(() => {
+        return getSchemaEnumValues(jsonSchema, 'quality.type', 'schema') ||
+               ['library', 'text', 'sql', 'custom'];
+    }, [jsonSchema]);
+
+    const qualityMetricOptions = useMemo(() => {
+        return getSchemaEnumValues(jsonSchema, 'quality.metric', 'schema') ||
+               ['nullValues', 'missingValues', 'invalidValues', 'duplicateValues', 'rowCount'];
     }, [jsonSchema]);
 
     const relationshipTypeOptions = useMemo(() => {
@@ -1289,18 +1300,10 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         {/* Data Quality Section */}
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Data Quality</h4>
-                                                            <KeyValueEditor
-                                                                label="Quality Rule"
+                                                            <QualityEditor
                                                                 value={schemaData.schema.quality}
                                                                 onChange={(value) => updateSchema(schemaIndex, 'quality', value)}
-                                                                fields={[
-                                                                    { name: 'code', label: 'Rule Code', type: 'text', placeholder: 'e.g., NOT_NULL' },
-                                                                    { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the quality expectation...' },
-                                                                    { name: 'toolName', label: 'Tool Name', type: 'text', placeholder: 'e.g., Soda, Great Expectations' },
-                                                                    { name: 'toolRuleName', label: 'Tool Rule Name', type: 'text', placeholder: 'Tool-specific rule identifier' },
-                                                                    { name: 'dimension', label: 'Quality Dimension', type: 'select', options: qualityDimensionOptions }
-                                                                ]}
-                                                                helpText="Define data quality rules and expectations for this schema"
+                                                                context="schema"
                                                             />
                                                         </div>
 

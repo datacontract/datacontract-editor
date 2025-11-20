@@ -7,6 +7,7 @@ import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
+import QualityEditor from '../ui/QualityEditor.jsx';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 
@@ -16,7 +17,17 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   // Dynamically get enum values from schema for KeyValueEditor fields
   const qualityDimensionOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'property') ||
-           ['completeness', 'accuracy', 'consistency', 'validity', 'timeliness', 'uniqueness'];
+           ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
+  }, [jsonSchema]);
+
+  const qualityTypeOptions = useMemo(() => {
+    return getSchemaEnumValues(jsonSchema, 'quality.type', 'property') ||
+           ['library', 'text', 'sql', 'custom'];
+  }, [jsonSchema]);
+
+  const qualityMetricOptions = useMemo(() => {
+    return getSchemaEnumValues(jsonSchema, 'quality.metric', 'property') ||
+           ['nullValues', 'missingValues', 'invalidValues', 'duplicateValues', 'rowCount'];
   }, [jsonSchema]);
 
   const relationshipTypeOptions = useMemo(() => {
@@ -687,18 +698,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               />
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
-              <KeyValueEditor
-                label="Quality Rule"
+              <QualityEditor
                 value={property.quality}
                 onChange={(value) => updateField('quality', value)}
-                fields={[
-                  { name: 'code', label: 'Rule Code', type: 'text', placeholder: 'e.g., NOT_NULL' },
-                  { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the quality expectation...' },
-                  { name: 'toolName', label: 'Tool Name', type: 'text', placeholder: 'e.g., Soda, Great Expectations' },
-                  { name: 'toolRuleName', label: 'Tool Rule Name', type: 'text', placeholder: 'Tool-specific rule identifier' },
-                  { name: 'dimension', label: 'Quality Dimension', type: 'select', options: qualityDimensionOptions }
-                ]}
-                helpText="Define data quality rules and expectations"
+                context="property"
               />
             </DisclosurePanel>
           </>
