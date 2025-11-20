@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - ODCS Custom Schema Example</title>
+    <link rel="stylesheet" href="./dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        #editor {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="editor"></div>
+
+<script type="module">
+    // Import the ESM build
+    import { init } from './dist/datacontract-editor.es.js';
+
+    // Function to load initial YAML content (ODCS compliant)
+    async function loadInitialYaml() {
+        return `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: embed-custom-schema-example
+version: "1.0.0"
+status: draft
+info:
+  title: ODCS Custom Schema Example
+  description: This example demonstrates ODCS compliance with custom status enum validation
+  owner: Platform Team
+  contact:
+    name: Data Platform
+    email: platform@example.com
+servers:
+  production:
+    type: snowflake
+    account: my-account
+    database: ANALYTICS_DB
+    schema: PUBLIC
+schemas:
+  users:
+    type: object
+    description: User data
+    fields:
+      - name: user_id
+        type: string
+        description: Unique user identifier
+        required: true
+      - name: email
+        type: string
+        description: User email address
+        required: true
+      - name: created_at
+        type: timestamp
+        description: Account creation timestamp
+        required: true
+`;
+    }
+
+    // Load initial YAML
+    const initialYaml = await loadInitialYaml();
+
+    // Initialize the editor with custom ODCS schema URL
+    const editor = init({
+        container: '#editor',
+
+        // Initial YAML content
+        yaml: initialYaml,
+
+        // Use custom ODCS schema with status enum (local file)
+        schemaUrl: './odcs-custom-schema.json',
+
+        // Start in YAML view
+        initialView: 'yaml',
+
+        // Custom save callback
+        onSave: (yaml) => {
+            console.log('Save triggered with ODCS custom schema!');
+            console.log('YAML content:', yaml);
+
+            // In a real application, you would send this to your backend:
+            // fetch('/api/contracts/save', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/yaml' },
+            //     body: yaml
+            // });
+        },
+
+        // Disable localStorage persistence (use your own backend)
+        enablePersistence: false
+    });
+
+    console.log('Editor initialized with ODCS custom schema from:', './odcs-custom-schema.json');
+</script>
+</body>
+</html>

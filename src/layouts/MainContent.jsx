@@ -6,9 +6,6 @@ import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support,
 import { useEditorStore } from "../store.js";
 
 const MainContent = () => {
-  // Hardcoded schema URL for validation
-  const schemaUrl = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json';
-
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const isPreviewVisible = useEditorStore((state) => state.isPreviewVisible);
@@ -16,6 +13,10 @@ const MainContent = () => {
   const isTestResultsVisible = useEditorStore((state) => state.isTestResultsVisible);
   const currentView = useEditorStore((state) => state.currentView);
   const setView = useEditorStore((state) => state.setView);
+
+  // Use schema URL from store if provided (e.g., from embed config), otherwise use default
+  const schemaUrl = useEditorStore((state) => state.schemaUrl) ||
+    'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json';
 
   // Reference to the YAML editor to call its methods
   const editorRef = useRef(null);

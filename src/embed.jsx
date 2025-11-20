@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
+import { useEditorStore } from './store.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -254,6 +255,11 @@ export function init(userConfig = {}) {
 
   // Create the store with configuration
   globalEditorStore = createConfiguredStore(config);
+
+  // Set schemaUrl in the shared store if provided (for standalone editor components to use)
+  if (config.schemaUrl) {
+    useEditorStore.setState({ schemaUrl: config.schemaUrl });
+  }
 
   // Create root and render
   const root = createRoot(containerElement);
