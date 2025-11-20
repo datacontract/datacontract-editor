@@ -313,7 +313,17 @@ description:
                 <div className="w-full px-4">
                     <div className="flex w-full h-16 justify-between items-center">
                         <div className="flex flex-row flex-1 justify-start items-center gap-2">
-                    <img src="/logo_fuchsia_v2.svg" alt="Logo" className="h-8 w-auto"/>
+                    <svg className="h-8 w-auto" viewBox="0 0 530 587" xmlns="http://www.w3.org/2000/svg" style={{fillRule:"evenodd",clipRule:"evenodd",strokeLinejoin:"round",strokeMiterlimit:2}}>
+                        <path d="M508.5,119.94L307.4,3.84C288.5,-7.06 264.9,6.54 264.9,28.34L264.9,132.14L376.1,196.34C389.3,203.94 397.4,217.94 397.4,233.14L397.4,514.44L508.6,450.24C521.8,442.64 529.9,428.64 529.9,413.44L529.9,156.64C529.9,141.44 521.8,127.44 508.6,119.84L508.5,119.94Z" style={{fill:"url(#_Linear1)",fillRule:"nonzero"}}/>
+                        <path d="M376,196.44L174.9,80.34C156,69.44 132.4,83.04 132.4,104.84L132.4,208.64L206,251.14L243.6,272.84C245.2,273.74 246.8,274.84 248.3,275.94C249.8,277.04 251.2,278.34 252.5,279.64C260.3,287.54 264.9,298.24 264.9,309.64L264.9,586.54C269.8,586.54 274.7,585.24 279.1,582.74L397.4,514.44L397.4,233.14C397.4,217.94 389.3,203.94 376.1,196.34L376,196.44Z" style={{fill:"url(#_Linear2)",fillRule:"nonzero"}}/>
+                        <path d="M262.9,586.54C261.3,586.44 259.6,586.14 258,585.74C259.6,586.14 261.2,586.44 262.9,586.54Z" style={{fill:"rgb(77,155,58)",fillRule:"nonzero"}}/>
+                        <path d="M264.9,309.74C264.9,298.34 260.3,287.64 252.5,279.74C251.2,278.44 249.8,277.24 248.3,276.04C246.8,274.84 245.3,273.84 243.6,272.94L206,251.24L42.5,156.84C23.6,145.94 0,159.54 0,181.34L0,413.54C0,428.74 8.1,442.74 21.3,450.34L132.5,514.54L250.8,582.84C255.2,585.34 260.1,586.64 265,586.64L265,309.74L264.9,309.74Z" style={{fill:"url(#_Linear3)",fillRule:"nonzero"}}/>
+                        <defs>
+                            <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.15004e-14,-514.44,514.44,3.15004e-14,397.4,514.44)"><stop offset="0" style={{stopColor:"rgb(134,25,143)",stopOpacity:1}}/><stop offset="1" style={{stopColor:"rgb(134,25,143)",stopOpacity:1}}/></linearGradient>
+                            <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.12309e-14,-510.04,510.04,3.12309e-14,264.9,586.54)"><stop offset="0" style={{stopColor:"rgb(192,38,211)",stopOpacity:1}}/><stop offset="1" style={{stopColor:"rgb(217,70,239)",stopOpacity:1}}/></linearGradient>
+                            <linearGradient id="_Linear3" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(2.65528e-14,-433.64,433.64,2.65528e-14,132.5,586.64)"><stop offset="0" style={{stopColor:"rgb(217,70,239)",stopOpacity:1}}/><stop offset="0.39" style={{stopColor:"rgb(229,112,247)",stopOpacity:1}}/><stop offset="1" style={{stopColor:"rgb(232,121,249)",stopOpacity:1}}/></linearGradient>
+                        </defs>
+                    </svg>
                     <span className="text-md leading-tight text-gray-900">
                         Data Contract Editor
                     </span>

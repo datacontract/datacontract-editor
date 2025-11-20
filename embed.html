@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - Embed Example</title>
+    <link rel="stylesheet" href="./dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        #editor {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="editor"></div>
+
+<script type="module">
+    // Import the ESM build
+    import { init } from './dist/datacontract-editor.es.js';
+
+    // Function to load initial YAML content
+    // In a real application, this would fetch from your backend
+    async function loadInitialYaml() {
+        // Example: Load from backend
+        // const response = await fetch('/api/contracts/latest');
+        // return await response.text();
+
+        // For this example, return a default contract
+        return `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: embed-example
+version: "1.0.0"
+status: draft
+info:
+  title: Embedded Data Contract Editor
+  description: This example demonstrates how to embed the Data Contract Editor in your application
+  owner: Platform Team
+  contact:
+    name: Data Platform
+    email: platform@example.com
+servers:
+  production:
+    type: snowflake
+    account: my-account
+    database: ANALYTICS_DB
+    schema: PUBLIC
+schemas:
+  users:
+    type: object
+    description: User data
+    fields:
+      - name: user_id
+        type: string
+        description: Unique user identifier
+        required: true
+      - name: email
+        type: string
+        description: User email address
+        required: true
+      - name: created_at
+        type: timestamp
+        description: Account creation timestamp
+        required: true
+`;
+    }
+
+    // Team lookup mock data (for demonstration)
+    const teams = {
+        'team-1': 'Data Engineering Team',
+        'team-2': 'Analytics Team',
+        'team-3': 'Platform Team'
+    };
+
+    // Load the initial YAML and initialize the editor
+    const initialYaml = await loadInitialYaml();
+
+    // Initialize the editor
+    const editor = init({
+        container: '#editor',
+
+        // Initial YAML content from the load function
+        yaml: initialYaml,
+
+        // Schema URL for validation
+        schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
+
+        // Start in YAML view
+        initialView: 'yaml',
+
+        // Custom save callback
+        onSave: (yaml) => {
+            console.log('Save triggered!');
+            console.log('YAML content:', yaml);
+
+            // In a real application, you would send this to your backend:
+            // fetch('/api/contracts/save', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/yaml' },
+            //     body: yaml
+            // });
+        },
+
+        // Team name lookup (optional)
+        lookupTeamName: async (teamId) => {
+            console.log('Looking up team:', teamId);
+            // In a real app, fetch from your backend
+            return teams[teamId] || `Team ${teamId}`;
+        },
+
+        // Disable localStorage persistence (use your own backend)
+        enablePersistence: false
+    });
+
+    // Example: Subscribe to state changes for debugging (optional)
+    // editor.subscribe(() => {
+    //     console.log('Editor state changed');
+    //     console.log('- Current view:', editor.getView());
+    //     console.log('- Has unsaved changes:', editor.isDirty());
+    //     console.log('- Validation errors:', editor.getMarkers().length);
+    // });
+
+    // Auto-save example (commented out by default)
+    // let saveTimeout;
+    // editor.subscribe((state) => {
+    //     clearTimeout(saveTimeout);
+    //     saveTimeout = setTimeout(() => {
+    //         if (editor.isDirty()) {
+    //             console.log('Auto-saving...');
+    //             const yaml = editor.getYaml();
+    //             // Send to your backend here
+    //         }
+    //     }, 2000);
+    // });
+</script>
+</body>
+</html>

@@ -21,24 +21,12 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/embed.jsx'),
       name: 'DataContractEditor',
-      formats: ['es', 'umd'],
-      fileName: (format) => `datacontract-editor.${format}.js`
+      formats: ['es'],
+      fileName: () => `datacontract-editor.es.js`
     },
     rollupOptions: {
-      // Externalize dependencies for ESM build
-      // For UMD, we bundle everything
-      external: (id) => {
-        // Don't externalize anything for UMD build
-        return false;
-      },
       output: {
-        // Use named exports only
         exports: 'named',
-        // Provide global variables for UMD build
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') return 'datacontract-editor.css';
           return assetInfo.name;
