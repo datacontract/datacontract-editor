@@ -156,7 +156,10 @@ const ItemsRow = ({
                         })()}
 
                         {/* Items label - showing parent property name with [] */}
-                        <span className="px-1 py-0.5 text-sm text-gray-700 font-medium flex-shrink-0">
+                        <span
+                            className="px-1 py-0.5 text-sm text-gray-700 font-medium min-w-32 max-w-xs truncate"
+                            title={`${parentPropertyName}[]`}
+                        >
                             {parentPropertyName}[]
                         </span>
 
@@ -406,6 +409,8 @@ const PropertyRow = ({
                          yaml,
                          setYaml
                      }) => {
+    const [editingPropertyName, setEditingPropertyName] = useState(false);
+    const [editedPropertyName, setEditedPropertyName] = useState('');
     const [editingPropertyType, setEditingPropertyType] = useState(false);
     const jsonSchema = useEditorStore((state) => state.schemaData);
 
@@ -432,7 +437,7 @@ const PropertyRow = ({
             >
                 {/* Main row with name, type, description */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
                         {/* Logical Type Icon */}
                         {(() => {
                             const IconComponent = getLogicalTypeIcon(property.logicalType);
@@ -444,18 +449,51 @@ const PropertyRow = ({
                         })()}
 
                         {/* Property Name */}
-                        <input
-                            type="text"
-                            value={property.name || ''}
-                            onChange={(e) => updateProperty(schemaIdx, currentPath, 'name', e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="border-0 border-b border-transparent bg-transparent px-1 py-0.5 font-medium text-sm text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:border-indigo-400 focus:bg-indigo-50 hover:border-gray-300 hover:bg-gray-50 w-32 flex-shrink-0 rounded transition-colors cursor-text"
-                            placeholder="name"
-                            title="Click to edit property name"
-                        />
+                        {editingPropertyName ? (
+                            <input
+                                type="text"
+                                value={editedPropertyName}
+                                onChange={(e) => setEditedPropertyName(e.target.value)}
+                                onBlur={() => {
+                                    updateProperty(schemaIdx, currentPath, 'name', editedPropertyName.trim());
+                                    setEditingPropertyName(false);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        updateProperty(schemaIdx, currentPath, 'name', editedPropertyName.trim());
+                                        setEditingPropertyName(false);
+                                    } else if (e.key === 'Escape') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setEditingPropertyName(false);
+                                    }
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="border-0 bg-white px-2 py-1 text-sm text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-32 flex-1"
+                                placeholder="property name"
+                                style={{maxWidth: '20rem'}}
+                                autoFocus
+                            />
+                        ) : (
+                            <span
+                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 ${
+                                    !property.name || property.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
+                                }`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditedPropertyName(property.name || '');
+                                    setEditingPropertyName(true);
+                                }}
+                                title={property.name || "Click to edit"}
+                            >
+                                {!property.name || property.name.trim() === '' ? 'unnamed property' : property.name}
+                            </span>
+                        )}
 
                         {/* Property Type - inline select like diagram editor */}
-                        <div className="text-xs text-gray-600 flex items-center">
+                        <div className="text-xs text-gray-600 flex items-center flex-shrink-0">
                             {editingPropertyType ? (
                                 <select
                                     value={property.logicalType || ''}
@@ -477,7 +515,7 @@ const PropertyRow = ({
                                 </select>
                             ) : (
                                 <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200"
+                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setEditingPropertyType(true);
