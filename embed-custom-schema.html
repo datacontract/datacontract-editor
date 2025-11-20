@@ -32,36 +32,6 @@ kind: "DataContract"
 id: embed-custom-schema-example
 version: "1.0.0"
 status: draft
-info:
-  title: ODCS Custom Schema Example
-  description: This example demonstrates ODCS compliance with custom status enum validation
-  owner: Platform Team
-  contact:
-    name: Data Platform
-    email: platform@example.com
-servers:
-  production:
-    type: snowflake
-    account: my-account
-    database: ANALYTICS_DB
-    schema: PUBLIC
-schemas:
-  users:
-    type: object
-    description: User data
-    fields:
-      - name: user_id
-        type: string
-        description: Unique user identifier
-        required: true
-      - name: email
-        type: string
-        description: User email address
-        required: true
-      - name: created_at
-        type: timestamp
-        description: Account creation timestamp
-        required: true
 `;
     }
 
@@ -76,7 +46,7 @@ schemas:
         yaml: initialYaml,
 
         // Use custom ODCS schema with status enum (local file)
-        schemaUrl: './odcs-custom-schema.json',
+        schemaUrl: '/odcs-custom-schema.json',
 
         // Start in YAML view
         initialView: 'yaml',

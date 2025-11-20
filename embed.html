@@ -38,36 +38,12 @@ kind: "DataContract"
 id: embed-example
 version: "1.0.0"
 status: draft
-info:
-  title: Embedded Data Contract Editor
-  description: This example demonstrates how to embed the Data Contract Editor in your application
-  owner: Platform Team
-  contact:
-    name: Data Platform
-    email: platform@example.com
 servers:
-  production:
+  - server: production
     type: snowflake
     account: my-account
     database: ANALYTICS_DB
     schema: PUBLIC
-schemas:
-  users:
-    type: object
-    description: User data
-    fields:
-      - name: user_id
-        type: string
-        description: Unique user identifier
-        required: true
-      - name: email
-        type: string
-        description: User email address
-        required: true
-      - name: created_at
-        type: timestamp
-        description: Account creation timestamp
-        required: true
 `;
     }
 
@@ -96,8 +72,9 @@ schemas:
 
         // Custom save callback
         onSave: (yaml) => {
-            console.log('Save triggered!');
+            console.log('✅ ✅ ✅ CUSTOM ONSAVE TRIGGERED! ✅ ✅ ✅');
             console.log('YAML content:', yaml);
+            alert('Custom onSave was called! Config is working!');
 
             // In a real application, you would send this to your backend:
             // fetch('/api/contracts/save', {
@@ -117,6 +94,18 @@ schemas:
         // Disable localStorage persistence (use your own backend)
         enablePersistence: false
     });
+
+    // Debug: Check if config was applied
+    console.log('🔍 DEBUG: Editor initialized');
+    console.log('🔍 Current YAML:', editor.getYaml());
+    console.log('🔍 Should contain "embed-example" ID');
+
+    // Verify the YAML contains our custom content
+    if (editor.getYaml().includes('embed-example')) {
+        console.log('✅ ✅ ✅ CONFIG IS WORKING! ✅ ✅ ✅');
+    } else {
+        console.error('❌ ❌ ❌ CONFIG NOT APPLIED - Using default YAML! ❌ ❌ ❌');
+    }
 
     // Example: Subscribe to state changes for debugging (optional)
     // editor.subscribe(() => {

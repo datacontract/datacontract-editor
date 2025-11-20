@@ -4,7 +4,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
-import { useEditorStore } from './store.js'
+import { useEditorStore, setOverrideStore } from './store.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -76,6 +76,32 @@ function createConfiguredStore(config) {
       },
       loadYaml: (newYaml) => set({ yaml: newYaml, isDirty: false }),
       markClean: () => set({ isDirty: false }),
+      clearSaveInfo: () => set({ lastSaveInfo: null }),
+      addNotification: (notification) => {
+        const id = Date.now() + Math.random();
+        const newNotification = {
+          id,
+          type: 'info',
+          duration: 3000,
+          ...notification,
+        };
+        set((state) => ({
+          notifications: [...state.notifications, newNotification]
+        }));
+
+        if (newNotification.duration > 0) {
+          setTimeout(() => {
+            set((state) => ({
+              notifications: state.notifications.filter(n => n.id !== id)
+            }));
+          }, newNotification.duration);
+        }
+
+        return id;
+      },
+      removeNotification: (id) => set((state) => ({
+        notifications: state.notifications.filter(n => n.id !== id)
+      })),
       togglePreview: () => set((state) => ({
         isPreviewVisible: !state.isPreviewVisible,
         isWarningsVisible: state.isPreviewVisible ? false : false,
@@ -212,6 +238,8 @@ function createConfiguredStore(config) {
       schemaUrl: config.schemaUrl,
       schemaData: null,
       yamlCursorLine: 1,
+      lastSaveInfo: null,
+      notifications: [],
       ...actions,
     };
   };
@@ -264,10 +292,8 @@ export function init(userConfig = {}) {
   // Create the store with configuration
   globalEditorStore = createConfiguredStore(config);
 
-  // Set schemaUrl in the shared store if provided (for standalone editor components to use)
-  if (config.schemaUrl) {
-    useEditorStore.setState({ schemaUrl: config.schemaUrl });
-  }
+  // Inject the configured store so all components will use it
+  setOverrideStore(globalEditorStore);
 
   // Create root and render
   const root = createRoot(containerElement);
@@ -344,6 +370,7 @@ export function init(userConfig = {}) {
      */
     destroy() {
       root.unmount();
+      setOverrideStore(null);
       activeEditorInstance = null;
       globalEditorStore = null;
       globalBackend = null;

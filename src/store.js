@@ -22,8 +22,27 @@ export const getFileStorageBackend = () => {
     return fileStorageBackend;
 };
 
+// Override store - when set, useEditorStore will use this instead of the default store
+let overrideStore = null;
+
+/**
+ * Set the override store for embedded mode
+ * @param {Object} store - The zustand store instance to use
+ */
+export const setOverrideStore = (store) => {
+    overrideStore = store;
+};
+
+/**
+ * Get the override store
+ * @returns {Object|null}
+ */
+export const getOverrideStore = () => {
+    return overrideStore;
+};
+
 // Create central zustand store for app state
-export const useEditorStore = create()(
+const defaultEditorStore = create()(
     persist((set, get) => {
         // Define action functions to ensure stable references
         const actions = {
@@ -264,3 +283,12 @@ export const useEditorStore = create()(
         storage: createJSONStorage(() => localStorage),
     }),
 )
+
+/**
+ * Hook that returns either the override store (when embedded) or the default store
+ * This allows embedded mode to inject a configured store while maintaining backward compatibility
+ */
+export const useEditorStore = (selector) => {
+    const store = overrideStore || defaultEditorStore;
+    return store(selector);
+};
