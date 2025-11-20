@@ -138,8 +138,9 @@ const ItemsRow = ({
     return (
         <>
             <div
-                className="border-t border-gray-100 hover:bg-gray-50 group"
+                className="border-t border-gray-100 hover:bg-gray-50 group cursor-pointer"
                 style={{paddingLeft: `${depth * 1.5}rem`}}
+                onClick={() => togglePropertyExpansion(pathKey)}
             >
                 {/* Main row for items node */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
@@ -217,7 +218,10 @@ const ItemsRow = ({
                         {isObject && (
                             <Tooltip content="Add property to items">
                                 <button
-                                    onClick={() => addSubProperty(schemaIdx, propPath, true)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        addSubProperty(schemaIdx, propPath, true);
+                                    }}
                                     className="p-1.5 rounded-full hover:bg-indigo-50"
                                     title="Add property to items"
                                 >
@@ -231,7 +235,10 @@ const ItemsRow = ({
                         )}
                         {/* Expand/Collapse Button */}
                         <button
-                            onClick={() => togglePropertyExpansion(pathKey)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                togglePropertyExpansion(pathKey);
+                            }}
                             className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
                         >
                             <ChevronRightIcon
@@ -419,8 +426,9 @@ const PropertyRow = ({
     return (
         <>
             <div
-                className="border-t border-gray-100 hover:bg-gray-50 group"
+                className="border-t border-gray-100 hover:bg-gray-50 group cursor-pointer"
                 style={{paddingLeft: `${depth * 1.5}rem`}}
+                onClick={() => togglePropertyExpansion(pathKey)}
             >
                 {/* Main row with name, type, description */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
@@ -440,6 +448,7 @@ const PropertyRow = ({
                             type="text"
                             value={property.name || ''}
                             onChange={(e) => updateProperty(schemaIdx, currentPath, 'name', e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
                             className="border-0 border-b border-transparent bg-transparent px-1 py-0.5 font-medium text-sm text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:border-indigo-400 focus:bg-indigo-50 hover:border-gray-300 hover:bg-gray-50 w-32 flex-shrink-0 rounded transition-colors cursor-text"
                             placeholder="name"
                             title="Click to edit property name"
@@ -499,7 +508,10 @@ const PropertyRow = ({
                         {isObject && (
                             <Tooltip content="Add sub-property">
                                 <button
-                                    onClick={() => addSubProperty(schemaIdx, currentPath)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        addSubProperty(schemaIdx, currentPath);
+                                    }}
                                     className="p-1.5 rounded-full hover:bg-indigo-50"
                                     title="Add sub-property"
                                 >
@@ -513,7 +525,10 @@ const PropertyRow = ({
                         )}
                         {/* Expand/Collapse Button */}
                         <button
-                            onClick={() => togglePropertyExpansion(pathKey)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                togglePropertyExpansion(pathKey);
+                            }}
                             className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
                         >
                             <ChevronRightIcon
