@@ -267,7 +267,7 @@ const SidebarNavigation = () => {
 
     return (
         <div
-            className="w-64 min-h-[calc(100vh-4.1rem)] overflow-y-auto border-r border-gray-300 bg-gray-50 p-4 shrink-0 text-gray-700 font-medium flex flex-col">
+            className="w-56 min-h-[calc(100vh-4.1rem)] overflow-y-auto border-r border-gray-300 bg-gray-50 p-4 shrink-0 text-gray-700 font-medium flex flex-col">
             <nav className="flex mt-2 w-full" aria-label="Progress">
                 <ol role="list" className="space-y-3 w-full">
                     {navigationItems.map((item) => (
