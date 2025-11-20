@@ -57,6 +57,9 @@ const DEFAULT_CONFIG = {
 
   // Enable/disable localStorage persistence
   enablePersistence: false,
+
+  // Base path for assets (workers, etc.) - auto-detected if not provided
+  basePath: null,
 };
 
 /**
@@ -234,6 +237,11 @@ function createConfiguredStore(config) {
 export function init(userConfig = {}) {
   // Merge user config with defaults
   const config = { ...DEFAULT_CONFIG, ...userConfig };
+
+  // Set up base path for workers if provided
+  if (config.basePath && typeof window !== 'undefined') {
+    window.__DATACONTRACT_EDITOR_BASE_PATH__ = config.basePath;
+  }
 
   // Get container element
   let containerElement;

@@ -42,9 +42,22 @@ info:
 
 3. Serve your files via HTTP (ES modules require HTTP, not file://)
 
-## Live Example
+## Context Paths
 
-See `embed.html` in the root directory for a complete working example with interactive controls.
+The editor **automatically works with context paths** (e.g., `/my-app/`, `/admin/tools/`, etc.). Worker files are resolved relative to the script location using `import.meta.url`, so no special configuration is needed when serving from a subdirectory.
+
+**Example deployment scenarios:**
+- Root path: `https://example.com/` ✅
+- Context path: `https://example.com/my-app/` ✅
+- Deep path: `https://example.com/admin/tools/contracts/` ✅
+
+See `embed-context-path-example.html` for a demonstration.
+
+## Live Examples
+
+- `embed.html` - Complete working example with interactive controls
+- `embed-custom-schema.html` - Example with custom ODCS schema
+- `embed-context-path-example.html` - Context path deployment example
 
 ## Configuration Options
 

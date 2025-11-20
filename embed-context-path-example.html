@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - Context Path Example</title>
+    <!--
+        This example demonstrates how to use the editor when served from a context path
+        (e.g., /my-app/ instead of /)
+
+        The workers will now automatically resolve relative to the script location,
+        so no special configuration is needed!
+    -->
+    <link rel="stylesheet" href="./dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        #editor {
+            height: 100vh;
+            width: 100%;
+        }
+        .info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<div class="info">
+    <div>Context Path: <span id="context-path"></span></div>
+    <div>Worker paths are resolved automatically!</div>
+</div>
+<div id="editor"></div>
+
+<script type="module">
+    // Import the ESM build
+    import { init } from './dist/datacontract-editor.es.js';
+
+    // Display current context path
+    document.getElementById('context-path').textContent = window.location.pathname;
+
+    // Initialize the editor
+    const editor = init({
+        container: '#editor',
+
+        yaml: `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: context-path-example
+version: "1.0.0"
+status: draft
+info:
+  title: Context Path Example
+  description: This editor works correctly even when served from a context path like /my-app/
+  owner: Platform Team
+servers:
+  production:
+    type: snowflake
+    account: my-account
+    database: ANALYTICS_DB
+    schema: PUBLIC
+schemas:
+  users:
+    type: object
+    description: User data
+    fields:
+      - name: user_id
+        type: string
+        required: true
+`,
+
+        schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
+        initialView: 'yaml',
+        enablePersistence: false
+    });
+
+    console.log('Editor initialized successfully!');
+    console.log('Context path:', window.location.pathname);
+</script>
+</body>
+</html>
