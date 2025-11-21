@@ -141,7 +141,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     type="text"
                     value={roleItem.access || ''}
                     onChange={(e) => updateRole(index, 'access', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="read"
                   />
                 </div>
@@ -158,7 +158,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     rows={2}
                     value={roleItem.description || ''}
                     onChange={(e) => updateRole(index, 'description', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="Permission scope explanation..."
                   />
                 </div>
@@ -175,7 +175,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     type="text"
                     value={roleItem.firstLevelApprovers || ''}
                     onChange={(e) => updateRole(index, 'firstLevelApprovers', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="manager@example.com"
                     data-1p-ignore
                   />
@@ -193,7 +193,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     type="text"
                     value={roleItem.secondLevelApprovers || ''}
                     onChange={(e) => updateRole(index, 'secondLevelApprovers', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="director@example.com"
                     data-1p-ignore
                   />

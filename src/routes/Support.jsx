@@ -154,7 +154,7 @@ const Support = () => {
                             type="text"
                             value={item.url || ''}
                             onChange={(e) => updateSupportItem(index, 'url', e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="https://slack.com/channels/support"
                           />
                         </div>
@@ -213,7 +213,7 @@ const Support = () => {
                             rows={2}
                             value={item.description || ''}
                             onChange={(e) => updateSupportItem(index, 'description', e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="Channel details for users..."
                           />
                         </div>
@@ -225,7 +225,7 @@ const Support = () => {
                             type="text"
                             value={item.invitationUrl || ''}
                             onChange={(e) => updateSupportItem(index, 'invitationUrl', e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="https://invite-link.com"
                           />
                         </div>
