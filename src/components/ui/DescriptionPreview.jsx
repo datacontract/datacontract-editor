@@ -71,11 +71,11 @@ const DescriptionPreview = ({ description }) => {
 
             {description.customProperties && Array.isArray(description.customProperties) && description.customProperties.length > 0 && (
               <div>
-                <dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
-                <dd className="flex flex-wrap gap-x-4 gap-y-2">
+                <div className="text-sm font-medium text-gray-500 mb-2">Custom Properties</div>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {description.customProperties.map((customProp, index) => (
                     <div key={index} className="min-w-0">
-                      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
+                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
                         {customProp.property}
                         {customProp.description && (
                           <Tooltip content={customProp.description}>
@@ -84,13 +84,15 @@ const DescriptionPreview = ({ description }) => {
                             </svg>
                           </Tooltip>
                         )}
-                      </dt>
-                      <dd className="text-sm text-gray-900">
-                        <span className="whitespace-pre-wrap">{customProp.value}</span>
-                      </dd>
+                      </div>
+                      <div className="text-sm text-gray-900">
+                        <span className="whitespace-pre-wrap">
+                          {typeof customProp.value === 'object' ? JSON.stringify(customProp.value) : String(customProp.value ?? '')}
+                        </span>
+                      </div>
                     </div>
                   ))}
-                </dd>
+                </div>
               </div>
             )}
           </div>
