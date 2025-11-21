@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
-import { Combobox, Tooltip } from '../components/ui/index.js';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import ChevronDownIcon from '../components/ui/icons/ChevronDownIcon.jsx';
 import * as YAML from 'yaml';
 
 const CustomProperties = () => {
@@ -194,155 +191,97 @@ const CustomProperties = () => {
             </p>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-medium leading-4 text-gray-900">
-                  Properties
-                </label>
-                <button
-                  type="button"
-                  onClick={addProperty}
-                  className="inline-flex items-center rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Add Property
-                </button>
-              </div>
+              <label className="block text-xs font-medium leading-4 text-gray-900 mb-2">
+                Properties
+              </label>
 
-              {formData.customProperties.length === 0 ? (
-                <div className="text-center py-4 text-xs text-gray-500 bg-gray-50 rounded-md border border-gray-200">
-                  No custom properties added yet. Click "Add Property" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
+              {formData.customProperties.length > 0 && (
+                <div className="mb-2 space-y-2">
                   {formData.customProperties.map((prop, index) => {
                     const type = prop._type || detectType(prop.value);
+                    const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
                     return (
-                      <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs font-medium text-gray-700">Property {index + 1}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeProperty(index)}
-                            className="text-xs text-red-600 hover:text-red-800"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          <div>
-                            <div className="flex justify-between mb-1">
-                              <div className="flex items-center gap-1">
-                                <label className="block text-xs font-medium leading-4 text-gray-900">
-                                  Property Name
-                                </label>
-                                <Tooltip content="The name of the key (use camelCase)">
-                                  <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
-                                </Tooltip>
-                              </div>
-                              <span className="text-xs leading-4 text-gray-500">Required</span>
-                            </div>
+                      <div key={index} className="bg-gray-50 rounded-lg p-3 space-y-1.5 border border-gray-200">
+                        {/* Property, Value, and Remove button in one line */}
+                        <div className="grid grid-cols-12 gap-2 items-end">
+                          <div className="col-span-4">
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Property</label>
                             <input
                               type="text"
                               value={prop.property || ''}
                               onChange={(e) => updateProperty(index, 'property', e.target.value)}
-                              className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                              className={inputClasses}
                               placeholder="myCustomProperty"
                             />
                           </div>
-                          <div>
-                            <Combobox
-                              label={
-                                <div className="flex items-center gap-1">
-                                  <span>Type</span>
-                                  <Tooltip content="Data type of the value">
-                                    <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
-                                  </Tooltip>
-                                </div>
-                              }
-                              options={typeOptions}
-                              value={type}
-                              onChange={(selectedValue) => updateProperty(index, 'type', selectedValue || 'string')}
-                              placeholder="Select type..."
-                              acceptAnyInput={false}
-                            />
-                          </div>
-                          <div className="sm:col-span-2">
-                            <div className="flex justify-between mb-1">
-                              <div className="flex items-center gap-1">
-                                <label className="block text-xs font-medium leading-4 text-gray-900">
-                                  Value
-                                </label>
-                                <Tooltip content={type === 'array' || type === 'object' ? 'Enter valid JSON' : 'Enter the value'}>
-                                  <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
-                                </Tooltip>
-                              </div>
-                              <span className="text-xs leading-4 text-gray-500">Required</span>
-                            </div>
+                          <div className="col-span-7">
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Value</label>
                             {type === 'boolean' ? (
-                              <div className="grid grid-cols-1">
-                                <select
-                                  value={prop.value === true ? 'true' : prop.value === false ? 'false' : ''}
-                                  onChange={(e) => updateProperty(index, 'value', e.target.value)}
-                                  className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                >
-                                  <option value="">Not set</option>
-                                  <option value="false">false</option>
-                                  <option value="true">true</option>
-                                </select>
-                                <ChevronDownIcon
-                                  aria-hidden="true"
-                                  className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                                />
-                              </div>
-                            ) : type === 'array' || type === 'object' ? (
-                              <textarea
-                                rows={4}
-                                value={getValueString(prop)}
+                              <select
+                                value={prop.value === true ? 'true' : prop.value === false ? 'false' : ''}
                                 onChange={(e) => updateProperty(index, 'value', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4 font-mono"
-                                placeholder={type === 'array' ? '["value1", "value2"]' : '{"key": "value"}'}
-                              />
+                                className={inputClasses}
+                              >
+                                <option value="">Not set</option>
+                                <option value="false">false</option>
+                                <option value="true">true</option>
+                              </select>
                             ) : type === 'number' ? (
                               <input
                                 type="number"
                                 step="any"
                                 value={prop.value ?? ''}
                                 onChange={(e) => updateProperty(index, 'value', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                className={inputClasses}
                                 placeholder="123"
                               />
                             ) : (
                               <input
                                 type="text"
-                                value={prop.value || ''}
+                                value={type === 'array' || type === 'object' ? JSON.stringify(prop.value) : (prop.value || '')}
                                 onChange={(e) => updateProperty(index, 'value', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                className={inputClasses}
                                 placeholder="Enter value..."
                               />
                             )}
                           </div>
-                          <div className="sm:col-span-2">
-                            <div className="flex items-center gap-1 mb-1">
-                              <label className="block text-xs font-medium leading-4 text-gray-900">
-                                Description
-                              </label>
-                              <Tooltip content="Description of the custom property">
-                                <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
-                              </Tooltip>
-                            </div>
-                            <textarea
-                              rows={2}
-                              value={prop.description || ''}
-                              onChange={(e) => updateProperty(index, 'description', e.target.value)}
-                              className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                              placeholder="Describe this property..."
-                            />
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeProperty(index)}
+                            className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
+                            title="Remove"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Description field */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-0.5">Description</label>
+                          <textarea
+                            value={prop.description || ''}
+                            onChange={(e) => updateProperty(index, 'description', e.target.value)}
+                            className={inputClasses}
+                            placeholder="Describe this property..."
+                            rows={2}
+                          />
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
+
+              {/* Always show add button */}
+              <button
+                type="button"
+                onClick={addProperty}
+                className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+              >
+                + Add Property
+              </button>
             </div>
           </div>
         </div>

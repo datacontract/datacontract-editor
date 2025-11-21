@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Tooltip } from '../ui/index.js';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 
 const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) => {
@@ -198,15 +199,10 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <KeyValueEditor
-                    label="Custom Properties"
+                  <CustomPropertiesEditor
                     value={roleItem.customProperties || []}
                     onChange={(customProperties) => updateRole(index, 'customProperties', customProperties)}
-                    fields={[
-                      { name: 'property', label: 'Property', type: 'text', placeholder: 'myCustomProperty' },
-                      { name: 'value', label: 'Value', type: 'text', placeholder: 'value' },
-                      { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Optional description...' }
-                    ]}
+                    showDescription={true}
                     helpText="Add custom key-value properties for role-specific metadata"
                   />
                 </div>

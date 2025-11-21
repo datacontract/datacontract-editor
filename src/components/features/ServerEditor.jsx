@@ -3,6 +3,7 @@ import { useEditorStore } from '../../store.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
@@ -1440,15 +1441,10 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {/* Custom Properties */}
                 <div className="sm:col-span-2">
-                  <KeyValueEditor
-                    label="Custom Properties"
+                  <CustomPropertiesEditor
                     value={server.customProperties || []}
                     onChange={(customProperties) => updateServer('customProperties', customProperties)}
-                    fields={[
-                      { name: 'property', label: 'Property', type: 'text', placeholder: 'myCustomProperty' },
-                      { name: 'value', label: 'Value', type: 'text', placeholder: 'value' },
-                      { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Optional description...' }
-                    ]}
+                    showDescription={true}
                     helpText="Add custom key-value properties for server-specific metadata"
                   />
                 </div>

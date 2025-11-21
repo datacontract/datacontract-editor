@@ -3,6 +3,7 @@ import { useEditorStore } from '../store.js';
 import { Tooltip } from '../components/ui/index.js';
 import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
+import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import * as YAML from 'yaml';
 
 const TermsOfUse = () => {
@@ -176,15 +177,10 @@ const TermsOfUse = () => {
 
               {/* Custom Properties Field */}
               <div>
-                <KeyValueEditor
-                  label="Custom Properties"
+                <CustomPropertiesEditor
                   value={formData.description.customProperties}
                   onChange={(value) => updateField('description.customProperties', value)}
-                  fields={[
-                    { name: 'property', label: 'Property', type: 'text', placeholder: 'myCustomProperty' },
-                    { name: 'value', label: 'Value', type: 'text', placeholder: 'value' },
-                    { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Optional description...' }
-                  ]}
+                  showDescription={true}
                   helpText="Add custom key-value properties for description-specific metadata"
                 />
               </div>

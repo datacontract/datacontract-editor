@@ -3,6 +3,7 @@ import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
+import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import * as YAML from 'yaml';
 
@@ -231,15 +232,10 @@ const ServiceLevelAgreement = () => {
                           />
                         </div>
                         <div className="sm:col-span-2">
-                          <KeyValueEditor
-                            label="Custom Properties"
+                          <CustomPropertiesEditor
                             value={sla.customProperties || []}
                             onChange={(customProperties) => updateSLA(index, 'customProperties', customProperties)}
-                            fields={[
-                              { name: 'property', label: 'Property', type: 'text', placeholder: 'myCustomProperty' },
-                              { name: 'value', label: 'Value', type: 'text', placeholder: 'value' },
-                              { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Optional description...' }
-                            ]}
+                            showDescription={true}
                             helpText="Add custom key-value properties for SLA-specific metadata"
                           />
                         </div>

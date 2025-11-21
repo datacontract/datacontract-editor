@@ -5,6 +5,7 @@ import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIco
 import Tags from '../components/ui/Tags.jsx';
 import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
+import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import * as YAML from 'yaml';
 
 const Team = () => {
@@ -190,14 +191,9 @@ const Team = () => {
               />
 
               {/* Team Custom Properties */}
-              <KeyValueEditor
-                label="Custom Properties"
+              <CustomPropertiesEditor
                 value={formData.customProperties}
                 onChange={(value) => updateTeamField('customProperties', value)}
-                fields={[
-                  { name: 'property', label: 'Property', type: 'text', placeholder: 'Property name' },
-                  { name: 'value', label: 'Value', type: 'text', placeholder: 'Property value' }
-                ]}
                 helpText="Custom key-value properties for this team"
               />
 
@@ -347,14 +343,9 @@ const Team = () => {
                           />
 
                           {/* Custom Properties */}
-                          <KeyValueEditor
-                            label="Custom Properties"
+                          <CustomPropertiesEditor
                             value={member.customProperties || []}
                             onChange={(value) => updateMember(index, 'customProperties', value)}
-                            fields={[
-                              { name: 'property', label: 'Property', type: 'text', placeholder: 'Property name' },
-                              { name: 'value', label: 'Value', type: 'text', placeholder: 'Property value' }
-                            ]}
                             helpText="Custom key-value properties for this team member"
                           />
 

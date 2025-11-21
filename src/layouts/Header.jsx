@@ -351,7 +351,7 @@ description:
               <span className="isolate inline-flex rounded-md shadow-xs">
                 <button type="button"
                         onClick={() => setView('diagram')}
-                        className={`relative inline-flex items-center gap-1.5 rounded-l-md px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus:z-10 ${
+                        className={`relative inline-flex items-center gap-1.5 rounded-l-md px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 ${
                           currentView === 'diagram'
                             ? 'bg-gray-100'
                             : 'bg-white'
@@ -362,7 +362,7 @@ description:
                 </button>
                 <button type="button"
                         onClick={handleFormViewSwitch}
-                        className={`relative -ml-px inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus:z-10 ${
+                        className={`relative -ml-px inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 ${
                           currentView === 'form'
                             ? 'bg-gray-100'
                             : 'bg-white'
@@ -374,7 +374,7 @@ description:
                 </button>
                 <button type="button"
                         onClick={handleYamlViewSwitch}
-                        className={`relative -ml-px inline-flex items-center gap-1.5 rounded-r-md px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus:z-10 ${
+                        className={`relative -ml-px inline-flex items-center gap-1.5 rounded-r-md px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 ${
                           currentView === 'yaml'
                             ? 'bg-gray-100 '
                             : 'bg-white'

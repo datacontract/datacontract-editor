@@ -21,6 +21,7 @@ import ArrayIcon from "../ui/icons/ArrayIcon.jsx";
 import BooleanIcon from "../ui/icons/BooleanIcon.jsx";
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
+import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
@@ -1335,15 +1336,10 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         {/* Custom Properties Section */}
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Custom Properties</h4>
-                                                            <KeyValueEditor
-                                                                label="Custom Property"
+                                                            <CustomPropertiesEditor
                                                                 value={schemaData.schema.customProperties}
                                                                 onChange={(value) => updateSchema(schemaIndex, 'customProperties', value)}
-                                                                fields={[
-                                                                    { name: 'property', label: 'Property Name', type: 'text', placeholder: 'custom_property_name' },
-                                                                    { name: 'value', label: 'Value', type: 'text', placeholder: 'property value' },
-                                                                    { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe this custom property...' }
-                                                                ]}
+                                                                showDescription={true}
                                                                 helpText="Organization-specific custom metadata extensions"
                                                             />
                                                         </div>

@@ -5,6 +5,7 @@ import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
 import ArrayInput from '../ui/ArrayInput.jsx';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
+import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
@@ -766,15 +767,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               />
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
-              <KeyValueEditor
-                label="Custom Property"
+              <CustomPropertiesEditor
                 value={property.customProperties}
                 onChange={(value) => updateField('customProperties', value)}
-                fields={[
-                  { name: 'property', label: 'Property Name', type: 'text', placeholder: 'custom_property_name' },
-                  { name: 'value', label: 'Value', type: 'text', placeholder: 'property value' },
-                  { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe this custom property...' }
-                ]}
+                showDescription={true}
                 helpText="Organization-specific custom metadata extensions"
               />
             </DisclosurePanel>
