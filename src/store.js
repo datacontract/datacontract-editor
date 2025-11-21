@@ -299,3 +299,14 @@ export const useEditorStore = (selector) => {
     const store = overrideStore || defaultEditorStore;
     return store(selector);
 };
+
+// Expose setState for direct state updates (needed for event handlers)
+useEditorStore.setState = (state) => {
+    const store = overrideStore || defaultEditorStore;
+    return store.setState(state);
+};
+
+useEditorStore.getState = () => {
+    const store = overrideStore || defaultEditorStore;
+    return store.getState();
+};
