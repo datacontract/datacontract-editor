@@ -473,9 +473,9 @@ const PropertyRow = ({
                                     }
                                 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="border-0 bg-white px-2 py-1 text-sm text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-32 flex-1"
+                                className="bg-white px-2 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[8rem]"
                                 placeholder="property name"
-                                style={{maxWidth: '20rem'}}
+                                size={editedPropertyName ? editedPropertyName.length : 16}
                                 autoFocus
                             />
                         ) : (
