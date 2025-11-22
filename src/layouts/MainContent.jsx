@@ -4,6 +4,7 @@ import { YamlEditor, DataContractPreview, TestResultsPanel } from "../components
 import WarningsPanel from "../components/features/WarningsPanel.jsx";
 import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
 import { useEditorStore } from "../store.js";
+import { PreviewErrorBoundary, DiagramErrorBoundary, FormPageErrorBoundary, ErrorBoundary } from "../components/error/index.js";
 
 const MainContent = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -76,38 +77,100 @@ const MainContent = () => {
               schemaUrl={schemaUrl}
             />
           </div>
-          {currentView === 'diagram' && <Diagram />}
+          {currentView === 'diagram' && (
+            <DiagramErrorBoundary>
+              <Diagram />
+            </DiagramErrorBoundary>
+          )}
           {currentView === 'form' && (
             <Routes>
-              <Route path="/" element={<Overview />} />
-              <Route path="/overview" element={<Overview />} />
-              <Route path="/terms-of-use" element={<TermsOfUse />} />
-              <Route path="/schemas" element={<Schemas />} />
-              <Route path="/schemas/:schemaId" element={<Schema />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/servers" element={<Servers />} />
-              <Route path="/servers/:serverId" element={<Server />} />
-              <Route path="/roles" element={<Roles />} />
-              <Route path="/sla" element={<ServiceLevelAgreement />} />
-              <Route path="/custom-properties" element={<CustomProperties />} />
+              <Route path="/" element={
+                <FormPageErrorBoundary pageName="Overview">
+                  <Overview />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/overview" element={
+                <FormPageErrorBoundary pageName="Overview">
+                  <Overview />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/terms-of-use" element={
+                <FormPageErrorBoundary pageName="Terms of Use">
+                  <TermsOfUse />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/schemas" element={
+                <FormPageErrorBoundary pageName="Schemas">
+                  <Schemas />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/schemas/:schemaId" element={
+                <FormPageErrorBoundary pageName="Schema">
+                  <Schema />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/pricing" element={
+                <FormPageErrorBoundary pageName="Pricing">
+                  <Pricing />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/team" element={
+                <FormPageErrorBoundary pageName="Team">
+                  <Team />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/support" element={
+                <FormPageErrorBoundary pageName="Support">
+                  <Support />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/servers" element={
+                <FormPageErrorBoundary pageName="Servers">
+                  <Servers />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/servers/:serverId" element={
+                <FormPageErrorBoundary pageName="Server">
+                  <Server />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/roles" element={
+                <FormPageErrorBoundary pageName="Roles">
+                  <Roles />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/sla" element={
+                <FormPageErrorBoundary pageName="Service Level Agreement">
+                  <ServiceLevelAgreement />
+                </FormPageErrorBoundary>
+              } />
+              <Route path="/custom-properties" element={
+                <FormPageErrorBoundary pageName="Custom Properties">
+                  <CustomProperties />
+                </FormPageErrorBoundary>
+              } />
             </Routes>
           )}
         </div>
         {isPreviewVisible && (
           <div className="w-1/2 h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50">
-            <DataContractPreview yamlContent={yaml} />
+            <PreviewErrorBoundary yamlContent={yaml}>
+              <DataContractPreview yamlContent={yaml} />
+            </PreviewErrorBoundary>
           </div>
         )}
         {isWarningsVisible && (
           <div className="w-1/2 h-full border-l border-gray-300">
-            <WarningsPanel onMarkerClick={handleMarkerClick} />
+            <ErrorBoundary>
+              <WarningsPanel onMarkerClick={handleMarkerClick} />
+            </ErrorBoundary>
           </div>
         )}
         {isTestResultsVisible && (
           <div className="w-1/2 h-full border-l border-gray-300">
-            <TestResultsPanel onCheckClick={handleCheckClick} />
+            <ErrorBoundary>
+              <TestResultsPanel onCheckClick={handleCheckClick} />
+            </ErrorBoundary>
           </div>
         )}
       </div>
