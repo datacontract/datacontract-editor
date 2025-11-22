@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "engines": {
-    "node": "24"
+    "node": "22"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
