@@ -288,10 +288,31 @@ const DataContractPreview = ({ yamlContent }) => {
                 )}
 
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                  {parsedData.dataProduct && (
+                  {parsedData.name && (
                     <div className="sm:col-span-1">
-                      <dt className="text-sm font-medium text-gray-500">Data Product</dt>
-                      <dd className="mt-1 text-sm text-gray-900">{parsedData.dataProduct}</dd>
+                      <dt className="text-sm font-medium text-gray-500">Name</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{parsedData.name}</dd>
+                    </div>
+                  )}
+
+                  {parsedData.version && (
+                    <div className="sm:col-span-1">
+                      <dt className="text-sm font-medium text-gray-500">Version</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{parsedData.version}</dd>
+                    </div>
+                  )}
+
+                  {parsedData.id && (
+                    <div className="sm:col-span-1">
+                      <dt className="text-sm font-medium text-gray-500">ID</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{parsedData.id}</dd>
+                    </div>
+                  )}
+
+                  {parsedData.status && (
+                    <div className="sm:col-span-1">
+                      <dt className="text-sm font-medium text-gray-500">Status</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{parsedData.status}</dd>
                     </div>
                   )}
 
@@ -306,6 +327,13 @@ const DataContractPreview = ({ yamlContent }) => {
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Domain</dt>
                       <dd className="mt-1 text-sm text-gray-900">{domain}</dd>
+                    </div>
+                  )}
+
+                  {parsedData.dataProduct && (
+                    <div className="sm:col-span-1">
+                      <dt className="text-sm font-medium text-gray-500">Data Product</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{parsedData.dataProduct}</dd>
                     </div>
                   )}
 
