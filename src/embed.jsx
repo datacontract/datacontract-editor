@@ -209,6 +209,7 @@ function createConfiguredStore(config) {
       clearTestResults: () => set({ testResults: [] }),
       setMarkers: (markers) => set({ markers }),
       setView: (view) => set({ currentView: view }),
+      setSelectedDiagramSchemaIndex: (index) => set({ selectedDiagramSchemaIndex: index }),
       setSchemaInfo: (schemaUrl, schemaData) => set({ schemaUrl, schemaData }),
       loadFromFile: async () => {
         try {
@@ -251,6 +252,7 @@ function createConfiguredStore(config) {
       yamlCursorLine: 1,
       lastSaveInfo: null,
       notifications: [],
+      selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
       // Store editor config for components to access
       editorConfig: {
         mode: config.mode,
