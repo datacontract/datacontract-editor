@@ -732,14 +732,11 @@ const DiagramViewInner = () => {
             <div className="bg-blue-50 border border-blue-200 rounded text-xs space-y-2 p-3">
               <div className="font-semibold text-blue-900">Quick Tips:</div>
               <ul className="text-blue-800 space-y-1 list-disc list-inside">
-                <li>Double-click schema/property names to edit</li>
+                <li>Click on schema or property names to edit</li>
                 <li>Hover over properties to see connection handles</li>
                 <li>Drag from right handle to left handle to link properties</li>
-                <li>Select a connection and press Delete/Backspace to remove it</li>
-                <li>Click PK/* buttons to toggle flags</li>
                 <li>Drag nodes to reposition</li>
                 <li>Use mouse wheel to zoom</li>
-                <li>Click "Auto Layout" for organized view</li>
               </ul>
             </div>
           </Panel>
