@@ -86,6 +86,7 @@ const SchemaNode = ({ data, id }) => {
   const handleAddProperty = () => {
     data.onAddProperty(id, {
       name: '',
+      logicalType: 'string',
       required: false,
       primaryKey: false
     });
@@ -171,6 +172,7 @@ const SchemaNode = ({ data, id }) => {
       // Add the new property
       updatedProperties.push({
         name: '',
+        logicalType: 'string',
         required: false,
         primaryKey: false
       });

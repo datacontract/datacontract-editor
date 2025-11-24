@@ -113,7 +113,7 @@ const DiagramViewInner = () => {
           ...property.properties,
           {
             name: '',
-            logicalType: '',
+            logicalType: 'string',
             description: ''
           }
         ];
@@ -383,7 +383,7 @@ const DiagramViewInner = () => {
     if (reactFlowInstance) {
       setTimeout(() => {
         reactFlowInstance.fitView({
-          padding: 0.2,
+          padding: 0.5,
           duration: 800,
         });
       }, 50);
@@ -688,9 +688,9 @@ const DiagramViewInner = () => {
         }}
         fitView
         fitViewOptions={{
-          padding: 0.2,
+          padding: 0.5,
           minZoom: 0.1,
-          maxZoom: 1.5
+          maxZoom: 1.0
         }}
         attributionPosition="bottom-right"
         edgesReconnectable={false}
