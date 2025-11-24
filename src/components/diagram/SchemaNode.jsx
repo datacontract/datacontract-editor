@@ -34,6 +34,7 @@ const SchemaNode = ({ data, id }) => {
   const hoverTimeoutRef = useRef(null);
   const propertyRowsRef = useRef([]);
   const propertyHoverTimeoutRef = useRef(null);
+  const openPropertyDetails = data.openPropertyDetails;
 
   // Cleanup hover timeout on unmount
   useEffect(() => {
@@ -360,10 +361,15 @@ const SchemaNode = ({ data, id }) => {
       {/* Properties List */}
       <div className="divide-y divide-gray-200">
         {data.schema.properties && data.schema.properties.length > 0 ? (
-          data.schema.properties.map((prop, index) => (
+          data.schema.properties.map((prop, index) => {
+            const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
+                                          openPropertyDetails?.nestedIndex == null;
+            return (
             <Fragment key={index}>
               <div
-                className="px-3 py-2 hover:bg-gray-50 group relative cursor-pointer"
+                className={`px-3 py-2 hover:bg-gray-50 group relative cursor-pointer ${
+                  isPropertyDetailsOpen ? 'bg-blue-50' : ''
+                }`}
                 onContextMenu={(e) => handlePropertyContextMenu(e, index)}
                 onClick={() => {
                 // Cancel any pending hover timeout when clicking
@@ -569,10 +575,15 @@ const SchemaNode = ({ data, id }) => {
 
                 {/* Render nested properties within array items if items is an object */}
                 {prop.items.properties && prop.items.properties.length > 0 && (
-                  prop.items.properties.map((itemProp, itemPropIndex) => (
+                  prop.items.properties.map((itemProp, itemPropIndex) => {
+                    const isItemPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
+                                                       openPropertyDetails?.nestedIndex === `items-${itemPropIndex}`;
+                    return (
                     <div
                       key={`${index}-items-${itemPropIndex}`}
-                      className="pl-12 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer"
+                      className={`pl-12 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer ${
+                        isItemPropertyDetailsOpen ? 'bg-blue-50' : ''
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         const node = getNode(id);
@@ -699,7 +710,8 @@ const SchemaNode = ({ data, id }) => {
                         </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
 
                 {/* Render nested array items if items is also an array (e.g., array of arrays) */}
@@ -776,10 +788,15 @@ const SchemaNode = ({ data, id }) => {
 
             {/* Render nested properties if they exist */}
             {prop.properties && prop.properties.length > 0 && (
-              prop.properties.map((nestedProp, nestedIndex) => (
+              prop.properties.map((nestedProp, nestedIndex) => {
+                const isNestedPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
+                                                     openPropertyDetails?.nestedIndex === nestedIndex;
+                return (
                 <div
                   key={`${index}-${nestedIndex}`}
-                  className="pl-8 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer"
+                  className={`pl-8 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer ${
+                    isNestedPropertyDetailsOpen ? 'bg-blue-50' : ''
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     const node = getNode(id);
@@ -873,10 +890,12 @@ const SchemaNode = ({ data, id }) => {
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </Fragment>
-          ))
+          );
+          })
         ) : (
           <div
             className="px-4 py-3 text-xs text-gray-400 italic cursor-pointer hover:bg-gray-50"

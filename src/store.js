@@ -185,6 +185,7 @@ const defaultEditorStore = create()(
             clearTestResults: () => set({ testResults: [] }),
             setMarkers: (markers) => set({markers}),
             setView: (view) => set({currentView: view}),
+            setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
             setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
             loadFromFile: async (filename = null) => {
                 try {
@@ -276,6 +277,7 @@ const defaultEditorStore = create()(
             yamlCursorLine: 1,
             lastSaveInfo: null, // { filename, timestamp, contractName }
             notifications: [], // { id, type, message, duration }
+            selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
             editorConfig: {
                 mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
                 onCancel: null,

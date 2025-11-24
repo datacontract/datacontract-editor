@@ -9,6 +9,7 @@ const SidebarNavigation = () => {
     const setYaml = useEditorStore((state) => state.setYaml);
     const setView = useEditorStore((state) => state.setView);
     const currentView = useEditorStore((state) => state.currentView);
+    const selectedDiagramSchemaIndex = useEditorStore((state) => state.selectedDiagramSchemaIndex);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -129,9 +130,27 @@ const SidebarNavigation = () => {
                 }
                 break;
             case 'diagram':
-                // Switch to form view
-                setView('form');
-                navigate(item.path);
+                // For schemas section, handle differently
+                if (item.yamlProperty === 'schema') {
+                    // Check if this is the parent "Schemas" item or a specific schema
+                    const schemaIndexMatch = item.path.match(/^\/schemas\/(\d+)$/);
+                    if (schemaIndexMatch) {
+                        // Navigate to diagram with focus on specific schema
+                        const schemaIndex = parseInt(schemaIndexMatch[1], 10);
+                        navigate('/diagram', { state: { focusSchemaIndex: schemaIndex } });
+                    } else if (item.path === '/schemas') {
+                        // Clicking parent "Schemas" - navigate to diagram and fit all
+                        navigate('/diagram');
+                    } else {
+                        // Fallback to form view for unexpected paths
+                        setView('form');
+                        navigate(item.path);
+                    }
+                } else {
+                    // For non-schema items, switch to form view
+                    setView('form');
+                    navigate(item.path);
+                }
                 break;
             default:
                 // Default to form view
@@ -296,7 +315,9 @@ const SidebarNavigation = () => {
                                                             yamlProperty: 'schema'
                                                         })}
                                                         className={`flex items-center text-sm py-1 transition-colors -mx-4 pl-10 pr-4 border-l-2 ${
-                                                            location.pathname === `/schemas/${index}`
+                                                            (currentView === 'diagram'
+                                                                ? selectedDiagramSchemaIndex === index
+                                                                : location.pathname === `/schemas/${index}`)
                                                                 ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
                                                                 : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
                                                         }`}

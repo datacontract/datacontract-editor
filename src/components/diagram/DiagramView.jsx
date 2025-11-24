@@ -26,6 +26,7 @@ const DiagramViewInner = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const currentView = useEditorStore((state) => state.currentView);
+  const setSelectedDiagramSchemaIndex = useEditorStore((state) => state.setSelectedDiagramSchemaIndex);
 
   // Memoize nodeTypes to prevent recreation on each render
   const nodeTypes = useMemo(() => ({
@@ -411,6 +412,7 @@ const DiagramViewInner = () => {
           onUpdateSchema: handleUpdateSchema,
           onDeleteSchema: handleDeleteSchema,
           onShowPropertyDetails: handleShowPropertyDetails,
+          openPropertyDetails: openPropertyDetails?.nodeId === `schema-${index}` ? openPropertyDetails : null,
         },
       }));
 
@@ -623,6 +625,9 @@ const DiagramViewInner = () => {
       if (node) {
         lastFocusedIndexRef.current = focusSchemaIndex;
 
+        // Update the selected schema in the store
+        setSelectedDiagramSchemaIndex(focusSchemaIndex);
+
         // Small delay to ensure ReactFlow is fully rendered
         setTimeout(() => {
           // Focus on the node
@@ -642,7 +647,15 @@ const DiagramViewInner = () => {
         }, 100);
       }
     }
-  }, [location.state?.focusSchemaIndex, reactFlowInstance, nodes, setNodes]);
+  }, [location.state?.focusSchemaIndex, reactFlowInstance, nodes, setNodes, setSelectedDiagramSchemaIndex]);
+
+  // Clear selected schema when leaving diagram view
+  useEffect(() => {
+    return () => {
+      // Cleanup: clear selected schema when component unmounts (leaving diagram view)
+      setSelectedDiagramSchemaIndex(null);
+    };
+  }, [setSelectedDiagramSchemaIndex]);
 
   if (!parsedData) {
     return (
