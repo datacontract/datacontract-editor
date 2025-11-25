@@ -45,19 +45,6 @@ npx datacontract-editor@latest
 
 
 
+## License
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Build as library for embedding
-npm run build:lib
-```
+This project is maintained by [Entropy Data](https://entropy-data.com) and licensed under the [MIT LICENSE](LICENSE).

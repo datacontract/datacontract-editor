@@ -1,20 +1,30 @@
 {
   "name": "datacontract-editor",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "A visual editor for data contracts using the Open Data Contract Standard (ODCS)",
   "type": "module",
+  "bin": {
+    "datacontract-editor": "./bin/datacontract-editor.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:lib": "vite build --config vite.config.lib.js",
     "build:all": "npm run build && npm run build:lib",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",
+    "start": "node bin/datacontract-editor.js"
   },
   "engines": {
     "node": "22"
   },
   "dependencies": {
+    "open": "^10.1.0",
     "@headlessui/react": "^2.2.9",
     "@monaco-editor/react": "^4.7.0",
     "@xyflow/react": "^12.9.0",
