@@ -14,15 +14,9 @@ The app runs at http://localhost:5173
 
 ## Build
 
+Builds the ES module and the standalone app for production to the `dist` folder.
 ```bash
-# Build for production
 npm run build
-
-# Build embeddable library
-npm run build:lib
-
-# Build both
-npm run build:all
 ```
 
 ## Standalone
