@@ -271,7 +271,7 @@ const defaultEditorStore = create()(
             isTestRunning: false,
             testResults: [],
             markers: [],
-            currentView: 'yaml', // 'yaml' or 'form'
+            currentView: 'form', // 'yaml' or 'form'
             schemaUrl: null,
             schemaData: null,
             yamlCursorLine: 1,
