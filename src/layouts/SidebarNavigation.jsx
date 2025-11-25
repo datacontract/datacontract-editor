@@ -306,7 +306,7 @@ const SidebarNavigation = () => {
                                     </Link>
                                     {schemas.length > 0 && (
                                         <ol className="mt-1 space-y-0.5">
-                                            {schemas.map((schema, index) => (
+                                            {schemas.filter(schema => schema).map((schema, index) => (
                                                 <li key={index}>
                                                     <Link
                                                         to={`/schemas/${index}`}
