@@ -13,8 +13,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:lib": "vite build --config vite.config.lib.js",
-    "build:all": "npm run build && npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
