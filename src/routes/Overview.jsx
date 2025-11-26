@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
-import { Combobox, Tooltip } from '../components/ui/index.js';
+import { ValidatedCombobox } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
+import Tooltip from '../components/ui/Tooltip.jsx';
 import Tags from '../components/ui/Tags.jsx';
 import * as YAML from 'yaml';
 
@@ -188,26 +189,18 @@ const Overview = () => {
                 />
 
                 {/* Status Field */}
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      Status
-                    </label>
-                    <Tooltip content="Current status of the data contract">
-                      <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                      </svg>
-                    </Tooltip>
-                    <span className="ml-auto text-xs leading-4 text-gray-500">Required</span>
-                  </div>
-                  <Combobox
-                    options={statusOptions}
-                    value={formData.status}
-                    onChange={(selectedValue) => updateField('status', selectedValue || '')}
-                    placeholder="Select a status..."
-                    acceptAnyInput={true}
-                  />
-                </div>
+                <ValidatedCombobox
+                  name="status"
+                  label="Status"
+                  options={statusOptions}
+                  value={formData.status}
+                  onChange={(selectedValue) => updateField('status', selectedValue || '')}
+                  placeholder="Select a status..."
+                  acceptAnyInput={true}
+                  required={true}
+                  tooltip="Current status of the data contract"
+                  externalErrors={[]}
+                />
 
                 {/* Tenant Field */}
                 <div>

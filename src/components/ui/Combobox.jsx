@@ -22,6 +22,7 @@ const ComboboxComponent = ({
   acceptAnyInput = true, // New prop to allow any text input
   className = '',
   disabled = false,
+  hasError = false, // New prop for error state
   ...props
 }) => {
   const [query, setQuery] = useState('')
@@ -75,7 +76,7 @@ const ComboboxComponent = ({
           </div>
         )}
         <ComboboxInput
-          className={`mt-1 block w-full rounded-md border-0 py-1.5 ${renderSelectedIcon && value ? 'pl-9' : 'pl-2'} pr-8 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4`}
+          className={`mt-1 block w-full rounded-md border-0 py-1.5 ${renderSelectedIcon && value ? 'pl-9' : 'pl-2'} pr-8 text-gray-900 bg-white shadow-sm ring-1 ring-inset ${hasError ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4`}
           onChange={handleInputChange}
           onBlur={() => setQuery('')}
           displayValue={acceptAnyInput ? (item) => item || '' : displayValue}

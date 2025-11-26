@@ -18,10 +18,9 @@ const ValidatedInput = forwardRef(({
   externalErrors = [],
   ...props
 }, ref) => {
-  const [touched, setTouched] = useState(false);
 
   // Internal validation - check if required field is empty
-  const hasInternalError = required && touched && (!value || value.trim() === '');
+  const hasInternalError = required && (!value || value.trim() === '');
 
   // Combine internal and external errors
   const hasError = hasInternalError || externalErrors.length > 0;
@@ -37,10 +36,6 @@ const ValidatedInput = forwardRef(({
   const ringClass = hasError
     ? 'ring-red-300 focus:ring-red-500'
     : 'ring-gray-300 focus:ring-indigo-600';
-
-  const handleBlur = () => {
-    setTouched(true);
-  };
 
   return (
     <div>
@@ -66,7 +61,6 @@ const ValidatedInput = forwardRef(({
         id={name}
         value={value}
         onChange={onChange}
-        onBlur={handleBlur}
         className={`mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ${ringClass} placeholder:text-gray-400 focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4 ${className}`}
         placeholder={placeholder}
         aria-invalid={hasError}
