@@ -214,48 +214,64 @@ description:
             'customProperties': '/custom-properties'
         };
 
-        // If cursor is in a schema array item, try to determine which schema
+        // If cursor is in schema section, find which schema by scanning upward
         if (currentSection === 'schema') {
-            try {
-                const parsed = YAML.parse(yaml);
-                const schemas = parsed.schema || [];
-
-                // Find which schema the cursor is in by counting array items
-                let schemaIndex = 0;
-                let inSchemaSection = false;
-                let arrayItemCount = 0;
-
-                for (let i = 0; i < Math.min(lineNumber, lines.length); i++) {
-                    const line = lines[i];
-                    const trimmedLine = line.trim();
-
-                    if (trimmedLine.startsWith('schema:')) {
-                        inSchemaSection = true;
-                        continue;
-                    }
-
-                    if (inSchemaSection) {
-                        // Check for array items (lines starting with -)
-                        if (line.match(/^\s*-\s/)) {
-                            if (i < lineNumber - 1) {
-                                arrayItemCount++;
-                            }
-                        }
-
-                        // If we hit a new top-level property, exit
-                        const indent = line.search(/\S/);
-                        if (indent === 0 && trimmedLine.includes(':') && !trimmedLine.startsWith('schema:')) {
-                            break;
-                        }
-                    }
+            // Scan upward from cursor to find the nearest `- name:` line (start of current schema)
+            let itemStartLine = -1;
+            let schemaName = '';
+            for (let i = lineNumber - 1; i >= 0; i--) {
+                const line = lines[i];
+                if (line.match(/^\s*- name:\s/)) {
+                    itemStartLine = i;
+                    schemaName = line.split(':')[1].trim();
+                    break;
                 }
-
-                schemaIndex = Math.min(arrayItemCount, schemas.length - 1);
-                return `/schemas/${Math.max(0, schemaIndex)}`;
-            } catch (error) {
-                console.error('Error parsing schemas:', error);
-                return '/schemas/0';
+                // Stop if we hit the section header
+                if (line.trim().startsWith('schema:')) {
+                    break;
+                }
             }
+
+            const parsed = YAML.parse(yaml);
+            let schemaIndex = 0;
+            for (let i = 0; i < parsed?.schema?.length; i++) {
+                if (parsed.schema[i].name === schemaName) {
+                    schemaIndex = i;
+                    break;
+                }
+            }
+
+            return `/schemas/${schemaIndex}`;
+        }
+
+        // If cursor is in servers section, find which server by scanning upward
+        if (currentSection === 'servers') {
+            // Scan upward from cursor to find the nearest `- ` line (start of current item)
+            let itemStartLine = -1;
+						let serverName = '';
+            for (let i = lineNumber - 1; i >= 0; i--) {
+                const line = lines[i];
+                if (line.match(/^\s*- server:\s/)) {
+                    itemStartLine = i;
+										serverName = line.split(':')[1].trim();
+                    break;
+                }
+                // Stop if we hit the section header
+                if (line.trim().startsWith('servers:')) {
+                    break;
+                }
+            }
+						const parsed = YAML.parse(yaml);
+						console.log(parsed);
+						console.log(serverName);
+						let serverIndex = 0;
+						for(let i = 0;i<parsed?.servers.length;i++){
+							if(parsed.servers[i].server === serverName) {
+								serverIndex = i;
+							}
+						}
+
+            return `/servers/${serverIndex}`;
         }
 
         return sectionToRoute[currentSection] || '/overview';
@@ -265,6 +281,10 @@ description:
         if (currentView === 'yaml') {
             // Determine which form to open based on cursor position
             const formRoute = determineFormFromYamlLine(yamlCursorLine);
+            console.log('[Header] YAML→Form navigation:', {
+                cursorLine: yamlCursorLine,
+                targetRoute: formRoute
+            });
             setView('form');
             navigate(formRoute);
         } else {
@@ -291,6 +311,46 @@ description:
         return 1; // Default to first line if not found
     };
 
+    // Find the line number for a specific array item in a section
+    const findYamlArrayItemLine = (sectionName, itemIndex) => {
+        if (!yaml) return 1;
+
+        const lines = yaml.split('\n');
+        let inSection = false;
+        let arrayItemCount = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            const indent = line.search(/\S/);
+
+            // Check if we're entering the section
+            if (indent === 0 && trimmedLine.startsWith(sectionName + ':')) {
+                inSection = true;
+                continue;
+            }
+
+            // If we're in the section
+            if (inSection) {
+                // Check for array items (lines starting with -)
+                if (line.match(/^\s*-\s/)) {
+                    if (arrayItemCount === itemIndex) {
+                        return i + 1; // Found the item, return line number
+                    }
+                    arrayItemCount++;
+                }
+
+                // If we hit another top-level property, exit
+                if (indent === 0 && trimmedLine.includes(':') && !trimmedLine.startsWith(sectionName + ':')) {
+                    break;
+                }
+            }
+        }
+
+        // Fallback to section start if item not found
+        return findYamlSectionLine(sectionName);
+    };
+
     const handleYamlViewSwitch = () => {
         if (currentView === 'form') {
             // Determine which YAML section to scroll to based on current route
@@ -301,7 +361,14 @@ description:
             if (path.includes('/overview')) {
                 scrollToLine = findYamlSectionLine('info');
             } else if (path.includes('/schemas')) {
-                scrollToLine = findYamlSectionLine('schema');
+                // Check if we're on a specific schema
+                const schemaMatch = path.match(/\/schemas\/(\d+)/);
+                if (schemaMatch) {
+                    const schemaIndex = parseInt(schemaMatch[1], 10);
+                    scrollToLine = findYamlArrayItemLine('schema', schemaIndex);
+                } else {
+                    scrollToLine = findYamlSectionLine('schema');
+                }
             } else if (path.includes('/support')) {
                 scrollToLine = findYamlSectionLine('support');
             } else if (path.includes('/team')) {
@@ -309,7 +376,14 @@ description:
             } else if (path.includes('/roles')) {
                 scrollToLine = findYamlSectionLine('roles');
             } else if (path.includes('/servers')) {
-                scrollToLine = findYamlSectionLine('servers');
+                // Check if we're on a specific server
+                const serverMatch = path.match(/\/servers\/(\d+)/);
+                if (serverMatch) {
+                    const serverIndex = parseInt(serverMatch[1], 10);
+                    scrollToLine = findYamlArrayItemLine('servers', serverIndex);
+                } else {
+                    scrollToLine = findYamlSectionLine('servers');
+                }
             } else if (path.includes('/pricing')) {
                 scrollToLine = findYamlSectionLine('pricing');
             } else if (path.includes('/sla')) {
