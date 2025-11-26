@@ -8,8 +8,19 @@ import { createStorageBackend } from './config/storage.js'
 const storageBackendSlug = "standalone"
 const storageBackend = createStorageBackend(storageBackendSlug);
 
+// Editor configuration
+// Configure the Data Contract CLI API server URL for running tests
+// Set to null to use relative /test endpoint (default for server mode)
+// Set to a URL like 'https://api.datacontract.com' for remote API
+const editorConfig = {
+  tests: {
+    enabled: true,
+    dataContractCliApiServerUrl: null, // e.g., 'https://api.datacontract.com'
+  },
+};
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App storageBackend={storageBackend} />
+    <App storageBackend={storageBackend} editorConfig={editorConfig} />
   </StrictMode>
 )

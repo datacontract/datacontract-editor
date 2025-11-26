@@ -45,8 +45,11 @@ const DEFAULT_CONFIG = {
   // Initial view
   initialView: 'yaml',
 
-  // Test endpoint configuration
-  testEndpoint: '/test',
+  // Test configuration
+  tests: {
+    enabled: true,
+    dataContractCliApiServerUrl: null, // null means use relative /test endpoint
+  },
 
   // Editor mode: 'SERVER' (default), 'DESKTOP', or 'EMBEDDED'
   // - SERVER: Server mode with full menu
@@ -132,9 +135,12 @@ function createConfiguredStore(config) {
         const { yaml } = get();
         set({ isTestRunning: true });
         try {
+          // Build the test endpoint URL
+          const baseUrl = config.tests?.dataContractCliApiServerUrl || '';
+          const testEndpoint = `${baseUrl}/test`;
           const url = server
-            ? `${config.testEndpoint}?server=${encodeURIComponent(server)}`
-            : config.testEndpoint;
+            ? `${testEndpoint}?server=${encodeURIComponent(server)}`
+            : testEndpoint;
           const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -260,6 +266,7 @@ function createConfiguredStore(config) {
         onDelete: config.onDelete,
         teams: config.teams,
         domains: config.domains,
+        tests: config.tests,
       },
       ...actions,
     };

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Header, SidebarNavigation, MainContent } from './layouts/index.js';
 import { HashRouter } from 'react-router-dom'
-import { useEditorStore, setFileStorageBackend } from './store.js';
+import { useEditorStore, setFileStorageBackend, setEditorConfig } from './store.js';
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js';
 import { ToastContainer } from './components/ui/Toast.jsx';
 import { ErrorBoundary } from './components/error/index.js';
@@ -10,8 +10,9 @@ import { ErrorBoundary } from './components/error/index.js';
  * Main App component for the Data Contract Editor
  * @param {Object} props
  * @param {FileStorageBackend} [props.storageBackend] - Optional storage backend to use (defaults to LocalFileStorageBackend)
+ * @param {Object} [props.editorConfig] - Optional editor configuration (tests, mode, etc.)
  */
-function App({ storageBackend = null }) {
+function App({ storageBackend = null, editorConfig = null }) {
     const setYaml = useEditorStore((state) => state.setYaml);
 
     useEffect(() => {
@@ -25,6 +26,14 @@ function App({ storageBackend = null }) {
             console.log('Using default storage backend: Local File Storage');
         }
     }, [storageBackend]);
+
+    useEffect(() => {
+        // Apply editor configuration if provided
+        if (editorConfig) {
+            setEditorConfig(editorConfig);
+            console.log('Applied editor configuration:', editorConfig);
+        }
+    }, [editorConfig]);
 
     useEffect(() => {
         // Check if there's a shared data contract in the URL

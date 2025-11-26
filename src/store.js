@@ -92,10 +92,13 @@ const defaultEditorStore = create()(
                 isWarningsVisible: state.isTestResultsVisible ? false : false, // Close warnings when opening test results
             })),
             runTest: async (server) => {
-                const { yaml } = get();
+                const { yaml, editorConfig } = get();
                 set({ isTestRunning: true });
                 try {
-                    const url = server ? `/test?server=${encodeURIComponent(server)}` : '/test';
+                    // Build the test endpoint URL
+                    const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || '';
+                    const testEndpoint = `${baseUrl}/test`;
+                    const url = server ? `${testEndpoint}?server=${encodeURIComponent(server)}` : testEndpoint;
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -163,7 +166,8 @@ const defaultEditorStore = create()(
                     let isConnectionError = false;
 
                     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                        errorMessage = 'Cannot connect to Data Contract CLI at http://localhost:4242.';
+                        const displayUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'http://localhost:4242';
+                        errorMessage = `Cannot connect to Data Contract CLI at ${displayUrl}.`;
                         isConnectionError = true;
                     } else if (error.message === 'Unexpected end of JSON input' || error.message.includes('JSON')) {
                         errorMessage = 'Test server returned an invalid response. The server may be misconfigured or not responding correctly.';
@@ -284,6 +288,10 @@ const defaultEditorStore = create()(
                 onDelete: null,
                 teams: null,
                 domains: null,
+                tests: {
+                    enabled: true,
+                    dataContractCliApiServerUrl: null, // null means use relative /test endpoint
+                },
             },
             ...actions,
         };
@@ -311,4 +319,24 @@ useEditorStore.setState = (state) => {
 useEditorStore.getState = () => {
     const store = overrideStore || defaultEditorStore;
     return store.getState();
+};
+
+/**
+ * Update the editor configuration
+ * @param {Object} config - Configuration object to merge with existing config
+ */
+export const setEditorConfig = (config) => {
+    const store = overrideStore || defaultEditorStore;
+    const currentConfig = store.getState().editorConfig;
+    store.setState({
+        editorConfig: {
+            ...currentConfig,
+            ...config,
+            // Deep merge the tests object if provided
+            tests: config.tests ? {
+                ...currentConfig.tests,
+                ...config.tests,
+            } : currentConfig.tests,
+        },
+    });
 };
