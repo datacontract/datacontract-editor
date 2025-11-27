@@ -216,14 +216,14 @@ description:
 
         // If cursor is in schema section, find which schema by scanning upward
         if (currentSection === 'schema') {
-            // Scan upward from cursor to find the nearest `- name:` line (start of current schema)
+            // Scan upward from cursor to find the nearest `- ` line (start of current item)
             let itemStartLine = -1;
             let schemaName = '';
             for (let i = lineNumber - 1; i >= 0; i--) {
                 const line = lines[i];
                 if (line.match(/^\s*- name:\s/)) {
                     itemStartLine = i;
-                    schemaName = line.split(':')[1].trim();
+                    schemaName = line.split(':').slice(1).join(':').trim();
                     break;
                 }
                 // Stop if we hit the section header
@@ -231,13 +231,11 @@ description:
                     break;
                 }
             }
-
             const parsed = YAML.parse(yaml);
             let schemaIndex = 0;
-            for (let i = 0; i < parsed?.schema?.length; i++) {
-                if (parsed.schema[i].name === schemaName) {
+            for(let i = 0; i < parsed?.schema?.length; i++){
+                if(parsed.schema[i].name === schemaName) {
                     schemaIndex = i;
-                    break;
                 }
             }
 
@@ -253,7 +251,7 @@ description:
                 const line = lines[i];
                 if (line.match(/^\s*- server:\s/)) {
                     itemStartLine = i;
-										serverName = line.split(':')[1].trim();
+										serverName = line.split(':').slice(1).join(':').trim();
                     break;
                 }
                 // Stop if we hit the section header
@@ -268,6 +266,7 @@ description:
 						for(let i = 0;i<parsed?.servers.length;i++){
 							if(parsed.servers[i].server === serverName) {
 								serverIndex = i;
+								break;
 							}
 						}
 
