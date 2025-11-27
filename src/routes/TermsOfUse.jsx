@@ -181,7 +181,6 @@ const TermsOfUse = () => {
                   value={formData.description.customProperties}
                   onChange={(value) => updateField('description.customProperties', value)}
                   showDescription={true}
-                  helpText="Add custom key-value properties for description-specific metadata"
                 />
               </div>
             </div>

@@ -1082,7 +1082,6 @@ const ServerEditor = ({ serverIndex }) => {
                     value={server.customProperties || []}
                     onChange={(customProperties) => updateServer('customProperties', customProperties)}
                     showDescription={true}
-                    helpText="Add custom key-value properties for server-specific metadata"
                   />
                 </div>
               </div>

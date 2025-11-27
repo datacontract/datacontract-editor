@@ -4,13 +4,12 @@ import { useState } from 'react';
  * KeyValueEditor component for editing arrays of objects
  * Supports custom field configurations
  *
- * @param {string} label - Label for the editor
  * @param {Array} value - Array of objects to edit
  * @param {Function} onChange - Callback when array changes
  * @param {Array} fields - Field configuration array: [{name, label, type, placeholder, options}]
- * @param {string} helpText - Optional help text
+ * @param {string} addButtonLabel - Label for the add button (e.g., "Add relationship")
  */
-const KeyValueEditor = ({ label, value = [], onChange, fields = [], helpText }) => {
+const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'Add' }) => {
   const [newItem, setNewItem] = useState({});
   const [isNewItemDirty, setIsNewItemDirty] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -99,8 +98,6 @@ const KeyValueEditor = ({ label, value = [], onChange, fields = [], helpText }) 
 
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
-
       {/* Display existing items */}
       {value.length > 0 && (
         <div className="mb-1 space-y-1">
@@ -161,10 +158,8 @@ const KeyValueEditor = ({ label, value = [], onChange, fields = [], helpText }) 
         onClick={() => setShowAddForm(true)}
         className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
       >
-        + Add
+        + {addButtonLabel}
       </button>
-
-      {helpText && <p className="mt-1 text-xs text-gray-500">{helpText}</p>}
     </div>
   );
 };

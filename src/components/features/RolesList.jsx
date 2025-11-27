@@ -203,7 +203,6 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     value={roleItem.customProperties || []}
                     onChange={(customProperties) => updateRole(index, 'customProperties', customProperties)}
                     showDescription={true}
-                    helpText="Add custom key-value properties for role-specific metadata"
                   />
                 </div>
               </div>

@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
-import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
-import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import * as YAML from 'yaml';
 
@@ -229,14 +227,6 @@ const ServiceLevelAgreement = () => {
                             onChange={(e) => updateSLA(index, 'description', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="Human-readable explanation..."
-                          />
-                        </div>
-                        <div className="sm:col-span-2">
-                          <CustomPropertiesEditor
-                            value={sla.customProperties || []}
-                            onChange={(customProperties) => updateSLA(index, 'customProperties', customProperties)}
-                            showDescription={true}
-                            helpText="Add custom key-value properties for SLA-specific metadata"
                           />
                         </div>
                       </div>

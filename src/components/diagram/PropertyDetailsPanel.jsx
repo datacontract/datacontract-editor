@@ -3,7 +3,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
 import ArrayInput from '../ui/ArrayInput.jsx';
-import KeyValueEditor from '../ui/KeyValueEditor.jsx';
+import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
@@ -15,7 +15,7 @@ import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
 
-  // Dynamically get enum values from schema for KeyValueEditor fields
+  // Dynamically get enum values from schema
   const qualityDimensionOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'property') ||
            ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
@@ -740,16 +740,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               />
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
-              <KeyValueEditor
-                label="Relationship"
+              <RelationshipEditor
                 value={property.relationships}
                 onChange={(value) => updateField('relationships', value)}
-                fields={[
-                  { name: 'type', label: 'Relationship Type', type: 'select', options: relationshipTypeOptions },
-                  { name: 'to', label: 'To', type: 'text', placeholder: 'schema.property or schema/table/properties/property' },
-                  { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the relationship...' }
-                ]}
-                helpText="Define relationships to other properties (use 'to' field with format: schema.property)"
+                relationshipTypeOptions={relationshipTypeOptions}
               />
             </DisclosurePanel>
           </>
@@ -771,7 +765,6 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 value={property.customProperties}
                 onChange={(value) => updateField('customProperties', value)}
                 showDescription={true}
-                helpText="Organization-specific custom metadata extensions"
               />
             </DisclosurePanel>
           </>

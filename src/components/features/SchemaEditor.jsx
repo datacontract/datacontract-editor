@@ -20,7 +20,7 @@ import ObjectIcon from "../ui/icons/ObjectIcon.jsx";
 import ArrayIcon from "../ui/icons/ArrayIcon.jsx";
 import BooleanIcon from "../ui/icons/BooleanIcon.jsx";
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
-import KeyValueEditor from '../ui/KeyValueEditor.jsx';
+import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -1327,17 +1327,11 @@ const SchemaEditor = ({schemaIndex}) => {
 
                                                         {/* Relationships Section */}
                                                         <div className="mt-6">
-                                                            <h4 className="text-xs font-medium text-gray-900 mb-3">Relationships</h4>
-                                                            <KeyValueEditor
-                                                                label="Relationship"
+                                                            <RelationshipEditor
                                                                 value={schemaData.schema.relationships}
                                                                 onChange={(value) => updateSchema(schemaIndex, 'relationships', value)}
-                                                                fields={[
-                                                                    { name: 'type', label: 'Relationship Type', type: 'select', options: relationshipTypeOptions },
-                                                                    { name: 'to', label: 'To', type: 'text', placeholder: 'schema.property or schema/table/properties/property' },
-                                                                    { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the relationship...' }
-                                                                ]}
-                                                                helpText="Define relationships to other schemas (use 'to' field with format: schema.property)"
+                                                                relationshipTypeOptions={relationshipTypeOptions}
+                                                                showFrom={true}
                                                             />
                                                         </div>
 
@@ -1348,7 +1342,6 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                 value={schemaData.schema.customProperties}
                                                                 onChange={(value) => updateSchema(schemaIndex, 'customProperties', value)}
                                                                 showDescription={true}
-                                                                helpText="Organization-specific custom metadata extensions"
                                                             />
                                                         </div>
                                                     </DisclosurePanel>

@@ -194,7 +194,6 @@ const Team = () => {
               <CustomPropertiesEditor
                 value={formData.customProperties}
                 onChange={(value) => updateTeamField('customProperties', value)}
-                helpText="Custom key-value properties for this team"
               />
 
               {/* Team Authoritative Definitions */}

@@ -135,7 +135,6 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           value={member.customProperties || []}
           onChange={(value) => onUpdate(index, 'customProperties', value)}
           showDescription={true}
-          helpText="Add custom key-value properties for member-specific metadata"
         />
 
         {/* Authoritative Definitions */}
