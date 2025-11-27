@@ -19,7 +19,7 @@
     "start": "node bin/datacontract-editor.js"
   },
   "engines": {
-    "node": "22"
+    "node": "24"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

@@ -8,6 +8,8 @@ import Tooltip from '../ui/Tooltip.jsx';
 import DescriptionPreview from '../ui/DescriptionPreview.jsx';
 import {IconResolver} from '../ui/IconResolver.jsx';
 import PropertyValueRenderer from '../ui/PropertyValueRenderer.jsx';
+import AuthoritativeDefinitionsPreview from '../ui/AuthoritativeDefinitionsPreview.jsx';
+import CustomPropertiesPreview from '../ui/CustomPropertiesPreview.jsx';
 
 const DataContractPreview = ({yamlContent}) => {
 	const parsedData = useMemo(() => {
@@ -169,9 +171,49 @@ const DataContractPreview = ({yamlContent}) => {
 		return supportIcons[type];
 	};
 
+	// Check if we have any meaningful data to display
+	const hasAnyData = info.title ||
+		parsedData.id ||
+		parsedData.name ||
+		parsedData.version ||
+		parsedData.status ||
+		parsedData.tenant ||
+		domain ||
+		parsedData.dataProduct ||
+		contractCreatedTs ||
+		(parsedData.tags && Array.isArray(parsedData.tags) && parsedData.tags.length > 0) ||
+		(authoritativeDefinitions && authoritativeDefinitions.length > 0) ||
+		(links && links.length > 0) ||
+		description?.purpose ||
+		description?.usage ||
+		description?.limitations ||
+		Object.keys(models).length > 0 ||
+		(servers && servers.length > 0) ||
+		(team.name || team.description || teamMembers.length > 0 || (team.tags && team.tags.length > 0)) ||
+		(support && support.length > 0) ||
+		(roles && roles.length > 0) ||
+		price ||
+		(slaProperties && slaProperties.length > 0) ||
+		(customProperties && customProperties.length > 0);
+
+	// Helper function to check if a team member has any data
+	const hasTeamMemberData = (teamMember) => {
+		return teamMember.username ||
+			teamMember.name ||
+			teamMember.role ||
+			teamMember.description ||
+			teamMember.dateIn ||
+			teamMember.dateOut ||
+			teamMember.replacedByUsername ||
+			(teamMember.tags && Array.isArray(teamMember.tags) && teamMember.tags.length > 0) ||
+			(teamMember.authoritativeDefinitions && Array.isArray(teamMember.authoritativeDefinitions) && teamMember.authoritativeDefinitions.length > 0) ||
+			(teamMember.customProperties && Array.isArray(teamMember.customProperties) && teamMember.customProperties.length > 0);
+	};
+
 	return (
 		<div className="space-y-6" id="docs-content">
 			{/* Header Section */}
+			{hasAnyData && (
 			<div className="min-w-0">
 				<div className="flex gap-2">
 					<i
@@ -245,8 +287,10 @@ const DataContractPreview = ({yamlContent}) => {
 					</a>
 				</div>
 			</div>
+			)}
 
 			{/* Main Column */}
+			{hasAnyData && (
 			<div className="space-y-6" id="datacontract-content">
 
 				{/* 1. Fundamentals Section */}
@@ -938,8 +982,10 @@ const DataContractPreview = ({yamlContent}) => {
 											<dt className="text-sm font-medium text-gray-500 mb-2">Members</dt>
 											<dd>
 												<div className="space-y-3">
-													{teamMembers.map((teamMember, index) => (
-														<div key={index} className="border-l-2 border-gray-200 pl-3 py-1">
+													{teamMembers.map((teamMember, index) => {
+														const hasMemberData = hasTeamMemberData(teamMember);
+														return (
+														<div key={index} className={hasMemberData ? "border-l-2 border-gray-200 pl-3 py-1" : "pl-0 py-1"}>
 															<div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
 																{teamMember.username && (
 																	<span className="text-gray-900 font-medium">{teamMember.username}</span>
@@ -978,8 +1024,19 @@ const DataContractPreview = ({yamlContent}) => {
 																	))}
 																</div>
 															)}
+															{(teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0) || (teamMember.customProperties && teamMember.customProperties.length > 0) ? (
+																<div className="flex flex-wrap gap-2 mt-2">
+																	{teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0 && (
+																		<AuthoritativeDefinitionsPreview definitions={teamMember.authoritativeDefinitions} />
+																	)}
+																	{teamMember.customProperties && teamMember.customProperties.length > 0 && (
+																		<CustomPropertiesPreview properties={teamMember.customProperties} />
+																	)}
+																</div>
+															) : null}
 														</div>
-													))}
+														);
+													})}
 												</div>
 											</dd>
 										</div>
@@ -1263,6 +1320,7 @@ const DataContractPreview = ({yamlContent}) => {
 				)}
 
 			</div>
+			)}
 		</div>
 	);
 };

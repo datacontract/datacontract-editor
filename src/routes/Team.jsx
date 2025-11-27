@@ -6,6 +6,7 @@ import Tags from '../components/ui/Tags.jsx';
 import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
+import TeamMember from '../components/features/TeamMember.jsx';
 import * as YAML from 'yaml';
 
 const Team = () => {
@@ -148,7 +149,7 @@ const Team = () => {
                   <select
                     value={formData.name}
                     onChange={(e) => updateTeamField('name', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                   >
                     <option value="">Select a team...</option>
                     {editorConfig.teams.map((team) => (
@@ -162,7 +163,7 @@ const Team = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => updateTeamField('name', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="Data Engineering Team"
                   />
                 )}
@@ -176,7 +177,7 @@ const Team = () => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => updateTeamField('description', e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                  className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                   placeholder="Description of the team..."
                   rows={3}
                 />
@@ -205,160 +206,33 @@ const Team = () => {
 
               {/* Team Members */}
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-xs font-medium leading-4 text-gray-900">
-                    Team Members
-                  </label>
-                  <button
-                    type="button"
-                    onClick={addMember}
-                    className="inline-flex items-center rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Add Member
-                  </button>
-                </div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Team Members
+                </label>
 
-                {formData.members.length === 0 ? (
-                  <div className="text-center py-4 text-xs text-gray-500 bg-gray-50 rounded-md border border-gray-200">
-                    No team members added yet. Click "Add Member" to get started.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
+                {/* Display existing members */}
+                {formData.members.length > 0 && (
+                  <div className="space-y-3 mb-2">
                     {formData.members.map((member, index) => (
-                      <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs font-medium text-gray-700">Member {index + 1}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeMember(index)}
-                            className="text-xs text-red-600 hover:text-red-800"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <div className="space-y-3">
-                          {/* Basic Info Row */}
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <label className="block text-xs font-medium leading-4 text-gray-900">
-                                  Username
-                                </label>
-                                <span className="text-xs leading-4 text-gray-500">Required</span>
-                              </div>
-                              <input
-                                type="text"
-                                value={member.username || ''}
-                                onChange={(e) => updateMember(index, 'username', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                placeholder="user@example.com"
-                                data-1p-ignore
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                                Full Name
-                              </label>
-                              <input
-                                type="text"
-                                value={member.name || ''}
-                                onChange={(e) => updateMember(index, 'name', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                placeholder="John Doe"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                                Role
-                              </label>
-                              <input
-                                type="text"
-                                value={member.role || ''}
-                                onChange={(e) => updateMember(index, 'role', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                placeholder="e.g., owner, data steward"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Description */}
-                          <div>
-                            <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              value={member.description || ''}
-                              onChange={(e) => updateMember(index, 'description', e.target.value)}
-                              className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                              placeholder="Description of the team member..."
-                              rows={2}
-                            />
-                          </div>
-
-                          {/* Date Fields Row */}
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div>
-                              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                                Date In
-                              </label>
-                              <input
-                                type="date"
-                                value={member.dateIn || ''}
-                                onChange={(e) => updateMember(index, 'dateIn', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                                Date Out
-                              </label>
-                              <input
-                                type="date"
-                                value={member.dateOut || ''}
-                                onChange={(e) => updateMember(index, 'dateOut', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                                Replaced By
-                              </label>
-                              <input
-                                type="text"
-                                value={member.replacedByUsername || ''}
-                                onChange={(e) => updateMember(index, 'replacedByUsername', e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                placeholder="successor@example.com"
-                                data-1p-ignore
-                              />
-                            </div>
-                          </div>
-
-                          {/* Tags */}
-                          <Tags
-                            label="Tags"
-                            value={member.tags || []}
-                            onChange={(value) => updateMember(index, 'tags', value)}
-                            placeholder="Add a tag..."
-                          />
-
-                          {/* Custom Properties */}
-                          <CustomPropertiesEditor
-                            value={member.customProperties || []}
-                            onChange={(value) => updateMember(index, 'customProperties', value)}
-                            helpText="Custom key-value properties for this team member"
-                          />
-
-                          {/* Authoritative Definitions */}
-                          <AuthoritativeDefinitionsEditor
-                            value={member.authoritativeDefinitions || []}
-                            onChange={(value) => updateMember(index, 'authoritativeDefinitions', value)}
-                          />
-                        </div>
-                      </div>
+                      <TeamMember
+                        key={index}
+                        member={member}
+                        index={index}
+                        onUpdate={updateMember}
+                        onRemove={removeMember}
+                      />
                     ))}
                   </div>
                 )}
+
+                {/* Always show add button */}
+                <button
+                  type="button"
+                  onClick={addMember}
+                  className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+                >
+                  + Add Team Member
+                </button>
               </div>
             </div>
           </div>
