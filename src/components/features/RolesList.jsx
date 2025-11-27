@@ -66,25 +66,12 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
 
   return (
     <div className={className}>
-      <div className="flex justify-between items-center mb-2">
-        <label className="block text-xs font-medium leading-4 text-gray-900">
-          Access Roles
-        </label>
-        <button
-          type="button"
-          onClick={addRole}
-          className="inline-flex items-center rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Add Role
-        </button>
-      </div>
+      <label className="block text-xs font-medium text-gray-700 mb-1">
+        Access Roles
+      </label>
 
-      {roles.length === 0 ? (
-        <div className="text-center py-4 text-xs text-gray-500 bg-gray-50 rounded-md border border-gray-200">
-          No roles added yet. Click "Add Role" to get started.
-        </div>
-      ) : (
-        <div className="space-y-3">
+      {roles.length > 0 && (
+        <div className="space-y-3 mb-2">
           {roles.map((roleItem, index) => (
               <RoleItem
                 key={index}
@@ -98,6 +85,14 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
           )}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={addRole}
+        className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+      >
+        + Add Role
+      </button>
     </div>
   );
 };
@@ -105,29 +100,34 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
 const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) => {
 
   return (
-              <div className="border border-gray-300 rounded-md p-3 bg-gray-50">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-medium text-gray-700">Role {index + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeRole(index)}
-                    className="text-xs text-red-600 hover:text-red-800"
-                  >
-                    Remove
-                  </button>
-                </div>
+              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ValidatedInput
-                    ref={(el) => roleInputRefs.current[index] = el}
-                    name={`role-${index}`}
-                    label="Role"
-                    value={roleItem.role || ''}
-                    onChange={(e) => updateRole(index, 'role', e.target.value)}
-                    required={true}
-                    tooltip="IAM role name"
-                    placeholder="arn:aws:iam::123456789:role/DataReader"
-                    externalErrors={[]}
-                  />
+                  <div className="sm:col-span-2 grid grid-cols-12 gap-2 items-end">
+                    <div className="col-span-11">
+                      <ValidatedInput
+                        ref={(el) => roleInputRefs.current[index] = el}
+                        name={`role-${index}`}
+                        label="Role"
+                        value={roleItem.role || ''}
+                        onChange={(e) => updateRole(index, 'role', e.target.value)}
+                        required={true}
+                        tooltip="IAM role name"
+                        placeholder="arn:aws:iam::123456789:role/DataReader"
+                        className="bg-white"
+                        externalErrors={[]}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeRole(index)}
+                      className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
+                      title="Remove"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <label className="block text-xs font-medium leading-4 text-gray-900">

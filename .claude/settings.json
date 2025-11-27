@@ -6,6 +6,7 @@
       "Bash(cat:*)",
       "Bash(npx prettier:*)",
       "Bash(find:*)",
+			"Bash(ls:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_type",
