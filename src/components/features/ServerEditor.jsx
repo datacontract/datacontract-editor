@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../../store.js';
 import { Combobox, Tooltip } from '../ui/index.js';
-import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import ValidatedCombobox from '../ui/ValidatedCombobox.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
@@ -85,10 +85,33 @@ const ServerEditor = ({ serverIndex }) => {
         return;
       }
 
-      parsed.servers[serverIndex] = {
-        ...parsed.servers[serverIndex],
-        [field]: value || undefined
-      };
+      // If type is being changed, preserve server-level properties and reset type-specific fields
+      if (field === 'type') {
+        const currentServer = parsed.servers[serverIndex];
+
+        // Server-level properties to preserve (common to all server types)
+        const serverLevelProps = {
+          server: currentServer.server,
+          environment: currentServer.environment,
+          description: currentServer.description,
+          roles: currentServer.roles,
+          type: value || undefined
+        };
+
+        // Remove undefined values
+        Object.keys(serverLevelProps).forEach(key => {
+          if (serverLevelProps[key] === undefined) {
+            delete serverLevelProps[key];
+          }
+        });
+
+        parsed.servers[serverIndex] = serverLevelProps;
+      } else {
+        parsed.servers[serverIndex] = {
+          ...parsed.servers[serverIndex],
+          [field]: value || undefined
+        };
+      }
 
       // Convert back to YAML
       const newYaml = YAML.stringify(parsed);
@@ -209,7 +232,7 @@ const ServerEditor = ({ serverIndex }) => {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <Combobox
+                  <ValidatedCombobox
                     label={
                       <div className="flex justify-between">
                         <div className="flex items-center gap-1">
@@ -221,6 +244,7 @@ const ServerEditor = ({ serverIndex }) => {
                         <span className="text-xs leading-4 text-gray-500">Required</span>
                       </div>
                     }
+										required={true}
                     options={typeOptions}
                     value={server.type || ''}
                     onChange={(selectedValue) => updateServer('type', selectedValue || '')}
@@ -254,13 +278,13 @@ const ServerEditor = ({ serverIndex }) => {
                 {server.type === 'bigquery' && (
                   <>
                     <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Project
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
+                      <ValidatedInput
+												label={
+													<label className="block text-xs font-medium leading-4 text-gray-900">
+														Project
+													</label>
+												}
+												required={true}
                         type="text"
                         value={server.project || ''}
                         onChange={(e) => updateServer('project', e.target.value)}
@@ -269,13 +293,13 @@ const ServerEditor = ({ serverIndex }) => {
                       />
                     </div>
                     <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Dataset
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
+                      <ValidatedInput
+												required={true}
+												label={
+													<label className="block text-xs font-medium leading-4 text-gray-900">
+														Dataset
+													</label>
+												}
                         type="text"
                         value={server.dataset || ''}
                         onChange={(e) => updateServer('dataset', e.target.value)}
@@ -289,13 +313,13 @@ const ServerEditor = ({ serverIndex }) => {
                 {server.type === 'snowflake' && (
                   <>
                     <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Account
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
+                      <ValidatedInput
+												required={true}
+												label={
+													<label className="block text-xs font-medium leading-4 text-gray-900">
+														Account
+													</label>
+												}
                         type="text"
                         value={server.account || ''}
                         onChange={(e) => updateServer('account', e.target.value)}
@@ -304,13 +328,13 @@ const ServerEditor = ({ serverIndex }) => {
                       />
                     </div>
                     <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
+                      <ValidatedInput
+												label={
+													<label className="block text-xs font-medium leading-4 text-gray-900">
+														Database
+													</label>
+												}
+												required={true}
                         type="text"
                         value={server.database || ''}
                         onChange={(e) => updateServer('database', e.target.value)}
@@ -319,13 +343,13 @@ const ServerEditor = ({ serverIndex }) => {
                       />
                     </div>
                     <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
+                      <ValidatedInput
+												label={
+													<label className="block text-xs font-medium leading-4 text-gray-900">
+														Project
+													</label>
+												}
+												required={true}
                         type="text"
                         value={server.schema || ''}
                         onChange={(e) => updateServer('schema', e.target.value)}
@@ -336,85 +360,53 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'postgres' && (
+                {(server.type === 'postgres' || server.type === 'postgresql') && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="5432"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="public"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="5432"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="public"
+                    />
                   </>
                 )}
 
                 {server.type === 's3' && (
                   <>
                     <div className="sm:col-span-2">
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Location
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
+                      <ValidatedInput
+                        name="location"
+                        label="Location"
                         value={server.location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        required={true}
                         placeholder="s3://bucket-name/path"
                       />
                     </div>
@@ -447,36 +439,22 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'redshift' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="public"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="public"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Host
@@ -494,36 +472,22 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'databricks' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Catalog
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.catalog || ''}
-                        onChange={(e) => updateServer('catalog', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="hive_metastore"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="default"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="catalog"
+                      label="Catalog"
+                      value={server.catalog || ''}
+                      onChange={(e) => updateServer('catalog', e.target.value)}
+                      required={true}
+                      placeholder="hive_metastore"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Host
@@ -541,36 +505,22 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'azure' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Location
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.location || ''}
-                        onChange={(e) => updateServer('location', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="abfss://container@storage.dfs.core.windows.net/path"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Format
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.format || ''}
-                        onChange={(e) => updateServer('format', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="parquet"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="location"
+                      label="Location"
+                      value={server.location || ''}
+                      onChange={(e) => updateServer('location', e.target.value)}
+                      required={true}
+                      placeholder="abfss://container@storage.dfs.core.windows.net/path"
+                    />
+                    <ValidatedInput
+                      name="format"
+                      label="Format"
+                      value={server.format || ''}
+                      onChange={(e) => updateServer('format', e.target.value)}
+                      required={true}
+                      placeholder="parquet"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Delimiter
@@ -588,36 +538,22 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'glue' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Account
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.account || ''}
-                        onChange={(e) => updateServer('account', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="123456789012"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="my_database"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="account"
+                      label="Account"
+                      value={server.account || ''}
+                      onChange={(e) => updateServer('account', e.target.value)}
+                      required={true}
+                      placeholder="123456789012"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="my_database"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Location
@@ -635,36 +571,22 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'athena' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Staging Dir
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.stagingDir || ''}
-                        onChange={(e) => updateServer('stagingDir', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="s3://bucket/athena-results/"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="default"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="stagingDir"
+                      label="Staging Dir"
+                      value={server.stagingDir || ''}
+                      onChange={(e) => updateServer('stagingDir', e.target.value)}
+                      required={true}
+                      placeholder="s3://bucket/athena-results/"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Catalog
@@ -682,21 +604,14 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'kafka' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="broker:9092"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="broker:9092"
+                    />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                         Format
@@ -714,68 +629,43 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'synapse' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="workspace.sql.azuresynapse.net"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="1433"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="workspace.sql.azuresynapse.net"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="1433"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
                   </>
                 )}
 
                 {server.type === 'api' && (
                   <>
                     <div className="sm:col-span-2">
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Location
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
+                      <ValidatedInput
+                        name="location"
+                        label="Location"
                         value={server.location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        required={true}
                         placeholder="https://api.example.com/v1"
                       />
                     </div>
@@ -784,291 +674,177 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'clickhouse' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="9000"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="default"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="9000"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
                   </>
                 )}
 
                 {server.type === 'cloudsql' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="3306"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="public"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="3306"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="public"
+                    />
                   </>
                 )}
 
                 {server.type === 'db2' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="50000"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="50000"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
                   </>
                 )}
 
                 {server.type === 'denodo' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="9999"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="9999"
+                    />
                   </>
                 )}
 
                 {server.type === 'dremio' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="31010"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="31010"
+                    />
                   </>
                 )}
 
                 {server.type === 'duckdb' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="/path/to/database.duckdb"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="/path/to/database.duckdb"
+                    />
                   </>
                 )}
 
                 {server.type === 'informix' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
                   </>
                 )}
 
@@ -1094,213 +870,121 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'local' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Path
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.path || ''}
-                        onChange={(e) => updateServer('path', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="/path/to/data"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Format
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.format || ''}
-                        onChange={(e) => updateServer('format', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="csv"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="path"
+                      label="Path"
+                      value={server.path || ''}
+                      onChange={(e) => updateServer('path', e.target.value)}
+                      required={true}
+                      placeholder="/path/to/data"
+                    />
+                    <ValidatedInput
+                      name="format"
+                      label="Format"
+                      value={server.format || ''}
+                      onChange={(e) => updateServer('format', e.target.value)}
+                      required={true}
+                      placeholder="csv"
+                    />
                   </>
                 )}
 
                 {server.type === 'mysql' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="3306"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
                   </>
                 )}
 
                 {server.type === 'oracle' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="1521"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Service Name
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.serviceName || ''}
-                        onChange={(e) => updateServer('serviceName', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="ORCL"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="1521"
+                    />
+                    <ValidatedInput
+                      name="serviceName"
+                      label="Service Name"
+                      value={server.serviceName || ''}
+                      onChange={(e) => updateServer('serviceName', e.target.value)}
+                      required={true}
+                      placeholder="ORCL"
+                    />
                   </>
                 )}
 
-                {server.type === 'postgresql' && (
-                  <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
-                  </>
-                )}
 
                 {server.type === 'presto' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
                   </>
                 )}
 
                 {server.type === 'pubsub' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Project
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.project || ''}
-                        onChange={(e) => updateServer('project', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="my-project"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="project"
+                      label="Project"
+                      value={server.project || ''}
+                      onChange={(e) => updateServer('project', e.target.value)}
+                      required={true}
+                      placeholder="my-project"
+                    />
                   </>
                 )}
 
                 {server.type === 'sftp' && (
                   <>
                     <div className="sm:col-span-2">
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Location
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
+                      <ValidatedInput
+                        name="location"
+                        label="Location"
                         value={server.location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        required={true}
                         placeholder="sftp://host/path/to/file"
                       />
                     </div>
@@ -1309,131 +993,77 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {server.type === 'trino' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="8080"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Catalog
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.catalog || ''}
-                        onChange={(e) => updateServer('catalog', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="hive"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="default"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="8080"
+                    />
+                    <ValidatedInput
+                      name="catalog"
+                      label="Catalog"
+                      value={server.catalog || ''}
+                      onChange={(e) => updateServer('catalog', e.target.value)}
+                      required={true}
+                      placeholder="hive"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
                   </>
                 )}
 
                 {server.type === 'vertica' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Host
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.host || ''}
-                        onChange={(e) => updateServer('host', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="localhost"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Port
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="number"
-                        value={server.port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="5433"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Database
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.database || ''}
-                        onChange={(e) => updateServer('database', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="mydb"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Schema
-                        </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={server.schema || ''}
-                        onChange={(e) => updateServer('schema', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="public"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={server.host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <ValidatedInput
+                      name="port"
+                      label="Port"
+                      type="number"
+                      value={server.port || ''}
+                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      required={true}
+                      placeholder="5433"
+                    />
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={server.database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={server.schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="public"
+                    />
                   </>
                 )}
 

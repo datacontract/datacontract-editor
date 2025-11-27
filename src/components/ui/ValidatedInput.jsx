@@ -20,7 +20,7 @@ const ValidatedInput = forwardRef(({
 }, ref) => {
 
   // Internal validation - check if required field is empty
-  const hasInternalError = required && (!value || value.trim() === '');
+  const hasInternalError = required && (!value || value.toString().trim() === '');
 
   // Combine internal and external errors
   const hasError = hasInternalError || externalErrors.length > 0;
