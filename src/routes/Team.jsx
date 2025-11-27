@@ -12,7 +12,6 @@ import * as YAML from 'yaml';
 const Team = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
-  const currentView = useEditorStore((state) => state.currentView);
   const editorConfig = useEditorStore((state) => state.editorConfig);
 
   // Parse current YAML to extract form values
@@ -206,10 +205,6 @@ const Team = () => {
 
               {/* Team Members */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Team Members
-                </label>
-
                 {/* Display existing members */}
                 {formData.members.length > 0 && (
                   <div className="space-y-3 mb-2">
