@@ -191,6 +191,8 @@ const defaultEditorStore = create()(
             setView: (view) => set({currentView: view}),
             setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
             setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
+            setSelectedProperty: (selectedProperty) => set({selectedProperty}),
+            clearSelectedProperty: () => set({selectedProperty: null}),
             loadFromFile: async (filename = null) => {
                 try {
                     const yamlContent = await fileStorageBackend.loadYamlFile(filename);
@@ -282,6 +284,7 @@ const defaultEditorStore = create()(
             lastSaveInfo: null, // { filename, timestamp, contractName }
             notifications: [], // { id, type, message, duration }
             selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
+            selectedProperty: null, // { schemaIndex, propPath, property, onUpdate, onDelete } for property details drawer
             editorConfig: {
                 mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
                 onCancel: null,

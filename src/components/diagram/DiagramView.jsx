@@ -16,7 +16,7 @@ import { useEditorStore } from '../../store.js';
 import SchemaNode from './SchemaNode.jsx';
 import { useLocation } from 'react-router-dom';
 import { getLayoutedElements, getGridPosition } from './layoutUtils.js';
-import PropertyDetailsNode from './PropertyDetailsNode.jsx';
+import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 
 const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: '#6366f1' },
@@ -31,7 +31,6 @@ const DiagramViewInner = () => {
   // Memoize nodeTypes to prevent recreation on each render
   const nodeTypes = useMemo(() => ({
     schemaNode: SchemaNode,
-    propertyDetails: PropertyDetailsNode,
   }), []);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -40,10 +39,8 @@ const DiagramViewInner = () => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const lastFocusedIndexRef = useRef(null);
 
-  // Track open property details panel
-  const [openPropertyDetails, setOpenPropertyDetails] = useState(null);
-  const [propertyDetailsOpenMethod, setPropertyDetailsOpenMethod] = useState('hover'); // 'hover' or 'click'
-  const [isPanelPinned, setIsPanelPinned] = useState(false);
+  // Track selected property for drawer
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   // Parse schemas from YAML
   const parsedData = useMemo(() => {
@@ -186,21 +183,12 @@ const DiagramViewInner = () => {
     updateSchemas(updatedSchemas);
   }, [parsedData, updateSchemas]);
 
-  // Handle showing property details with position
+  // Handle showing property details in drawer
   const handleShowPropertyDetails = useCallback((nodeId, propertyIndex, nodePosition, propertyOffset, openMethod = 'hover', nestedIndex = null) => {
     if (!parsedData?.schema) return;
 
-    // If a panel is pinned and this is a hover event, don't open a new panel
-    if (isPanelPinned && openMethod === 'hover') {
-      return;
-    }
-
-    // If clicking on the same property that's already open, toggle pin state
-    if (openMethod === 'click' &&
-        openPropertyDetails?.nodeId === nodeId &&
-        openPropertyDetails?.propertyIndex === propertyIndex &&
-        openPropertyDetails?.nestedIndex === nestedIndex) {
-      setIsPanelPinned(!isPanelPinned);
+    // Only open drawer on click, not on hover
+    if (openMethod === 'hover') {
       return;
     }
 
@@ -211,34 +199,132 @@ const DiagramViewInner = () => {
     // Get the property (either top-level or nested)
     if (nestedIndex !== null && nestedIndex !== undefined) {
       const parentProperty = schema?.properties?.[propertyIndex];
-      property = parentProperty?.properties?.[nestedIndex];
+      // Check if nestedIndex is for items or regular nested property
+      if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
+        const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
+        property = parentProperty?.items?.properties?.[itemsPropIndex];
+      } else {
+        property = parentProperty?.properties?.[nestedIndex];
+      }
     } else {
       property = schema?.properties?.[propertyIndex];
     }
 
     if (!property) return;
 
-    // If opening via click, pin the panel by default (set this FIRST)
-    if (openMethod === 'click') {
-      setIsPanelPinned(true);
-    } else {
-      setIsPanelPinned(false);
-    }
-
-    // Calculate panel position (to the right of the node)
-    const nodeWidth = 250;
-    const panelX = nodePosition.x + nodeWidth + 20;
-    const panelY = nodePosition.y + propertyOffset;
-
-    // Store the open property details info
-    setOpenPropertyDetails({
+    // Store the selected property info
+    setSelectedProperty({
       nodeId,
+      schemaIndex,
       propertyIndex,
       nestedIndex,
-      position: { x: panelX, y: panelY },
+      property,
     });
-    setPropertyDetailsOpenMethod(openMethod);
-  }, [parsedData, isPanelPinned, openPropertyDetails]);
+  }, [parsedData]);
+
+  // Handle closing the drawer
+  const handleCloseDrawer = useCallback(() => {
+    setSelectedProperty(null);
+  }, []);
+
+  // Handle property update from drawer
+  const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
+    if (!selectedProperty || !parsedData?.schema) return;
+
+    const { schemaIndex, propertyIndex, nestedIndex } = selectedProperty;
+    const updatedSchemas = [...parsedData.schema];
+    const schema = updatedSchemas[schemaIndex];
+
+    if (nestedIndex !== null && nestedIndex !== undefined) {
+      // Update nested property
+      const properties = [...(schema.properties || [])];
+      const parentProperty = { ...properties[propertyIndex] };
+
+      if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
+        // Update property within items
+        const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
+        const items = { ...parentProperty.items };
+        const itemsProperties = [...(items.properties || [])];
+        itemsProperties[itemsPropIndex] = updatedProperty;
+        items.properties = itemsProperties;
+        parentProperty.items = items;
+      } else {
+        // Update regular nested property
+        const nestedProperties = [...(parentProperty.properties || [])];
+        nestedProperties[nestedIndex] = updatedProperty;
+        parentProperty.properties = nestedProperties;
+      }
+
+      properties[propertyIndex] = parentProperty;
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+    } else {
+      // Update top-level property
+      const properties = [...(schema.properties || [])];
+      properties[propertyIndex] = updatedProperty;
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+    }
+
+    updateSchemas(updatedSchemas);
+
+    // Update the selected property to reflect changes
+    setSelectedProperty(prev => ({
+      ...prev,
+      property: updatedProperty
+    }));
+  }, [selectedProperty, parsedData, updateSchemas]);
+
+  // Handle property delete from drawer
+  const handleDrawerPropertyDelete = useCallback(() => {
+    if (!selectedProperty || !parsedData?.schema) return;
+
+    const { schemaIndex, propertyIndex, nestedIndex } = selectedProperty;
+    const updatedSchemas = [...parsedData.schema];
+    const schema = updatedSchemas[schemaIndex];
+
+    if (nestedIndex !== null && nestedIndex !== undefined) {
+      // Delete nested property
+      const properties = [...(schema.properties || [])];
+      const parentProperty = { ...properties[propertyIndex] };
+
+      if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
+        // Delete property within items
+        const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
+        const items = { ...parentProperty.items };
+        const itemsProperties = [...(items.properties || [])];
+        itemsProperties.splice(itemsPropIndex, 1);
+        items.properties = itemsProperties;
+        parentProperty.items = items;
+      } else {
+        // Delete regular nested property
+        const nestedProperties = [...(parentProperty.properties || [])];
+        nestedProperties.splice(nestedIndex, 1);
+        parentProperty.properties = nestedProperties;
+      }
+
+      properties[propertyIndex] = parentProperty;
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+    } else {
+      // Delete top-level property
+      const properties = [...(schema.properties || [])];
+      properties.splice(propertyIndex, 1);
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+    }
+
+    updateSchemas(updatedSchemas);
+    handleCloseDrawer();
+  }, [selectedProperty, parsedData, updateSchemas, handleCloseDrawer]);
 
 
   // Validate connections: only allow left (source) to right (target)
@@ -412,7 +498,10 @@ const DiagramViewInner = () => {
           onUpdateSchema: handleUpdateSchema,
           onDeleteSchema: handleDeleteSchema,
           onShowPropertyDetails: handleShowPropertyDetails,
-          openPropertyDetails: openPropertyDetails?.nodeId === `schema-${index}` ? openPropertyDetails : null,
+          openPropertyDetails: selectedProperty?.nodeId === `schema-${index}` ? {
+            propertyIndex: selectedProperty.propertyIndex,
+            nestedIndex: selectedProperty.nestedIndex
+          } : null,
         },
       }));
 
@@ -506,108 +595,9 @@ const DiagramViewInner = () => {
         });
       });
 
-    // Add property details node if one is open
-    let finalNodes = schemaNodes;
-    if (openPropertyDetails) {
-      const schemaIndex = parseInt(openPropertyDetails.nodeId.replace('schema-', ''));
-      const schema = parsedData.schema[schemaIndex];
-      const isNested = openPropertyDetails.nestedIndex !== null && openPropertyDetails.nestedIndex !== undefined;
-
-      let property;
-      if (isNested) {
-        const parentProperty = schema?.properties?.[openPropertyDetails.propertyIndex];
-        property = parentProperty?.properties?.[openPropertyDetails.nestedIndex];
-      } else {
-        property = schema?.properties?.[openPropertyDetails.propertyIndex];
-      }
-
-      if (property) {
-        // Determine if panel should be pinned based on current state and open method
-        const shouldBePinned = propertyDetailsOpenMethod === 'click' ? isPanelPinned : false;
-
-        const detailsNode = {
-          id: 'property-details',
-          type: 'propertyDetails',
-          position: openPropertyDetails.position,
-          data: {
-            property,
-            openMethod: propertyDetailsOpenMethod,
-            initialPinned: shouldBePinned,
-            onUpdate: (updatedProperty) => {
-              const updatedSchemas = [...parsedData.schema];
-
-              if (isNested) {
-                // Update nested property
-                const properties = [...(schema.properties || [])];
-                const parentProperty = { ...properties[openPropertyDetails.propertyIndex] };
-                const nestedProperties = [...(parentProperty.properties || [])];
-                nestedProperties[openPropertyDetails.nestedIndex] = updatedProperty;
-                parentProperty.properties = nestedProperties;
-                properties[openPropertyDetails.propertyIndex] = parentProperty;
-                updatedSchemas[schemaIndex] = {
-                  ...schema,
-                  properties,
-                };
-              } else {
-                // Update top-level property
-                const properties = [...(schema.properties || [])];
-                properties[openPropertyDetails.propertyIndex] = updatedProperty;
-                updatedSchemas[schemaIndex] = {
-                  ...schema,
-                  properties,
-                };
-              }
-
-              updateSchemas(updatedSchemas);
-            },
-            onDelete: () => {
-              const updatedSchemas = [...parsedData.schema];
-
-              if (isNested) {
-                // Delete nested property
-                const properties = [...(schema.properties || [])];
-                const parentProperty = { ...properties[openPropertyDetails.propertyIndex] };
-                const nestedProperties = [...(parentProperty.properties || [])];
-                nestedProperties.splice(openPropertyDetails.nestedIndex, 1);
-                parentProperty.properties = nestedProperties;
-                properties[openPropertyDetails.propertyIndex] = parentProperty;
-                updatedSchemas[schemaIndex] = {
-                  ...schema,
-                  properties,
-                };
-              } else {
-                // Delete top-level property
-                const properties = [...(schema.properties || [])];
-                properties.splice(openPropertyDetails.propertyIndex, 1);
-                updatedSchemas[schemaIndex] = {
-                  ...schema,
-                  properties,
-                };
-              }
-
-              updateSchemas(updatedSchemas);
-              setOpenPropertyDetails(null);
-              setIsPanelPinned(false);
-            },
-            onClose: () => {
-              setOpenPropertyDetails(null);
-              setIsPanelPinned(false);
-            },
-            onPinnedChange: (pinned) => {
-              setIsPanelPinned(pinned);
-            },
-          },
-          draggable: false,
-          selectable: false,
-          focusable: true,
-        };
-        finalNodes = [...schemaNodes, detailsNode];
-      }
-    }
-
-    setNodes(finalNodes);
+    setNodes(schemaNodes);
     setEdges(propertyEdges);
-  }, [parsedData, handleAddProperty, handleDeleteProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, openPropertyDetails, propertyDetailsOpenMethod, isPanelPinned, updateSchemas, setNodes, setEdges]);
+  }, [parsedData, handleAddProperty, handleDeleteProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
 
   // Focus on selected schema when coming from sidebar
   useEffect(() => {
@@ -683,8 +673,7 @@ const DiagramViewInner = () => {
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneClick={() => {
-          setOpenPropertyDetails(null);
-          setIsPanelPinned(false);
+          handleCloseDrawer();
         }}
         fitView
         fitViewOptions={{
@@ -733,7 +722,7 @@ const DiagramViewInner = () => {
               <div className="font-semibold text-blue-900">Quick Tips:</div>
               <ul className="text-blue-800 space-y-1 list-disc list-inside">
                 <li>Click on schema or property names to edit</li>
-                <li>Hover over properties to see connection handles</li>
+                <li>Click on properties to see details in drawer</li>
                 <li>Drag from right handle to left handle to link properties</li>
                 <li>Drag nodes to reposition</li>
                 <li>Use mouse wheel to zoom</li>
@@ -767,6 +756,15 @@ const DiagramViewInner = () => {
         )}
 
       </ReactFlow>
+
+      {/* Property Details Drawer */}
+      <PropertyDetailsDrawer
+        open={selectedProperty !== null}
+        onClose={handleCloseDrawer}
+        property={selectedProperty?.property}
+        onUpdate={handleDrawerPropertyUpdate}
+        onDelete={handleDrawerPropertyDelete}
+      />
     </div>
   );
 };

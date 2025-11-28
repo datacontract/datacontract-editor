@@ -19,7 +19,7 @@ import TimestampIcon from "../ui/icons/TimestampIcon.jsx";
 import ObjectIcon from "../ui/icons/ObjectIcon.jsx";
 import ArrayIcon from "../ui/icons/ArrayIcon.jsx";
 import BooleanIcon from "../ui/icons/BooleanIcon.jsx";
-import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
+import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
@@ -114,14 +114,16 @@ const ItemsRow = ({
                       schemaIdx,
                       depth = 0,
                       propPath = [],
-                      togglePropertyExpansion,
                       updateItems,
                       updateProperty,
                       addSubProperty,
                       removeProperty,
                       expandedProperties,
+                      togglePropertyExpansion,
                       yaml,
-                      setYaml
+                      setYaml,
+                      onSelectProperty,
+                      selectedPropertyPath
                   }) => {
     const [editingItemsType, setEditingItemsType] = useState(false);
     const jsonSchema = useEditorStore((state) => state.schemaData);
@@ -136,13 +138,20 @@ const ItemsRow = ({
     const isExpanded = expandedProperties.has(pathKey);
     const isObject = items?.logicalType === 'object';
     const hasSubProperties = items?.properties && items.properties.length > 0;
+    const itemsPath = [...propPath, 'items'];
+    const isSelected = selectedPropertyPath === itemsPath.join('-');
+
+    const handleSelect = (e) => {
+        e.stopPropagation();
+        onSelectProperty(itemsPath, items);
+    };
 
     return (
         <>
             <div
-                className="border-t border-gray-100 hover:bg-gray-50 group cursor-pointer"
+                className={`border-t border-gray-100 hover:bg-gray-50 group cursor-pointer ${isSelected ? 'bg-indigo-50 ring-1 ring-inset ring-indigo-200' : ''}`}
                 style={{paddingLeft: `${depth * 1.5}rem`}}
-                onClick={() => togglePropertyExpansion(pathKey)}
+                onClick={handleSelect}
             >
                 {/* Main row for items node */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
@@ -238,82 +247,26 @@ const ItemsRow = ({
                                 </button>
                             </Tooltip>
                         )}
-                        {/* Expand/Collapse Button */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                togglePropertyExpansion(pathKey);
-                            }}
-                            className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
-                        >
-                            <ChevronRightIcon
-                                className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                            />
-                        </button>
+                        {/* Expand/Collapse Button for nested items */}
+                        {(hasSubProperties || (items?.logicalType === 'array' && items.items)) && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePropertyExpansion(pathKey);
+                                }}
+                                className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
+                            >
+                                <ChevronRightIcon
+                                    className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Expandable Details Section for items */}
-            {isExpanded && (
-                <div
-                    className="border-t border-gray-100 bg-blue-50/20 py-3 px-2"
-                    style={{paddingLeft: `${0.5 + depth * 1.5}rem`}}
-                >
-                    <PropertyDetailsPanel
-                        property={items || {}}
-                        onUpdate={(updatedItems) => {
-                            try {
-                                let parsed = {};
-                                if (yaml?.trim()) {
-                                    try {
-                                        parsed = YAML.parse(yaml) || {};
-                                    } catch {
-                                        parsed = {};
-                                    }
-                                }
-
-                                if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
-                                    return;
-                                }
-
-                                // Navigate to the parent property using propPath
-                                let targetProp = parsed.schema[schemaIdx].properties;
-                                for (let i = 0; i < propPath.length; i++) {
-                                    if (propPath[i] === 'items') {
-                                        targetProp = targetProp.items;
-                                        if (i < propPath.length - 1 && !targetProp.properties) {
-                                            targetProp.properties = [];
-                                        }
-                                        if (i < propPath.length - 1) {
-                                            targetProp = targetProp.properties;
-                                        }
-                                    } else if (i < propPath.length - 1) {
-                                        targetProp = targetProp[propPath[i]];
-                                        if (propPath[i + 1] !== 'items') {
-                                            targetProp = targetProp.properties;
-                                        }
-                                    } else {
-                                        targetProp = targetProp[propPath[i]];
-                                    }
-                                }
-
-                                // Update items
-                                targetProp.items = updatedItems;
-
-                                const newYaml = YAML.stringify(parsed);
-                                setYaml(newYaml);
-                            } catch (error) {
-                                console.error('Error updating items:', error);
-                            }
-                        }}
-                        onDelete={null} // Items cannot be deleted, only the parent array property can be deleted
-                    />
-                </div>
-            )}
-
-            {/* Render items' sub-properties recursively if items is an object */}
-            {hasSubProperties && (
+            {/* Render items' sub-properties recursively if items is an object and expanded */}
+            {isExpanded && hasSubProperties && (
                 <>
                     {items.properties.map((subProp, subPropIndex) => (
                         <PropertyRow
@@ -322,7 +275,7 @@ const ItemsRow = ({
                             propIndex={subPropIndex}
                             schemaIdx={schemaIdx}
                             depth={depth + 1}
-                            propPath={[...propPath, 'items']}
+                            propPath={itemsPath}
                             togglePropertyExpansion={togglePropertyExpansion}
                             updateProperty={updateProperty}
                             addSubProperty={addSubProperty}
@@ -330,19 +283,21 @@ const ItemsRow = ({
                             expandedProperties={expandedProperties}
                             yaml={yaml}
                             setYaml={setYaml}
+                            onSelectProperty={onSelectProperty}
+                            selectedPropertyPath={selectedPropertyPath}
                         />
                     ))}
                 </>
             )}
 
-            {/* Render nested items if items is also an array */}
-            {items?.logicalType === 'array' && items.items && (
+            {/* Render nested items if items is also an array and expanded */}
+            {isExpanded && items?.logicalType === 'array' && items.items && (
                 <ItemsRow
                     items={items.items}
                     parentPropertyName={parentPropertyName + '[]'}
                     schemaIdx={schemaIdx}
                     depth={depth + 1}
-                    propPath={[...propPath, 'items']}
+                    propPath={itemsPath}
                     togglePropertyExpansion={togglePropertyExpansion}
                     updateItems={(field, value) => {
                         try {
@@ -390,6 +345,8 @@ const ItemsRow = ({
                     expandedProperties={expandedProperties}
                     yaml={yaml}
                     setYaml={setYaml}
+                    onSelectProperty={onSelectProperty}
+                    selectedPropertyPath={selectedPropertyPath}
                 />
             )}
         </>
@@ -409,7 +366,9 @@ const PropertyRow = ({
                          removeProperty,
                          expandedProperties,
                          yaml,
-                         setYaml
+                         setYaml,
+                         onSelectProperty,
+                         selectedPropertyPath
                      }) => {
     const [editingPropertyName, setEditingPropertyName] = useState(false);
     const [editedPropertyName, setEditedPropertyName] = useState('');
@@ -429,13 +388,19 @@ const PropertyRow = ({
     const isArray = property.logicalType === 'array';
     const hasSubProperties = property.properties && property.properties.length > 0;
     const hasItems = property.items;
+    const isSelected = selectedPropertyPath === currentPath.join('-');
+
+    const handleSelect = (e) => {
+        e.stopPropagation();
+        onSelectProperty(currentPath, property);
+    };
 
     return (
         <>
             <div
-                className="border-t border-gray-100 hover:bg-gray-50 group cursor-pointer"
+                className={`border-t border-gray-100 hover:bg-gray-50 group cursor-pointer ${isSelected ? 'bg-indigo-50 ring-1 ring-inset ring-indigo-200' : ''}`}
                 style={{paddingLeft: `${depth * 1.5}rem`}}
-                onClick={() => togglePropertyExpansion(pathKey)}
+                onClick={handleSelect}
             >
                 {/* Main row with name, type, description */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
@@ -563,79 +528,26 @@ const PropertyRow = ({
                                 </button>
                             </Tooltip>
                         )}
-                        {/* Expand/Collapse Button */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                togglePropertyExpansion(pathKey);
-                            }}
-                            className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
-                        >
-                            <ChevronRightIcon
-                                className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                            />
-                        </button>
+                        {/* Expand/Collapse Button for nested items */}
+                        {(hasSubProperties || (isArray && hasItems)) && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePropertyExpansion(pathKey);
+                                }}
+                                className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
+                            >
+                                <ChevronRightIcon
+                                    className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Expandable Details Section with PropertyDetailsPanel */}
-            {isExpanded && (
-                <div
-                    className="border-t border-gray-100 bg-gray-50/50 py-3 px-2"
-                    style={{paddingLeft: `${0.5 + depth * 1.5}rem`}}
-                >
-                    <PropertyDetailsPanel
-                        property={property}
-                        onUpdate={(updatedProperty) => {
-                            // Update the entire property at once to avoid multiple YAML parse/stringify cycles
-                            try {
-                                let parsed = {};
-                                if (yaml?.trim()) {
-                                    try {
-                                        parsed = YAML.parse(yaml) || {};
-                                    } catch {
-                                        parsed = {};
-                                    }
-                                }
-
-                                if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
-                                    return;
-                                }
-
-                                // Navigate to the target property using currentPath
-                                let targetProp = parsed.schema[schemaIdx].properties;
-                                for (let i = 0; i < currentPath.length; i++) {
-                                    // Check if current path segment is 'items'
-                                    if (currentPath[i] === 'items') {
-                                        targetProp = targetProp.items;
-                                    } else if (i < currentPath.length - 1) {
-                                        targetProp = targetProp[currentPath[i]];
-                                        // Only navigate to properties if next segment is not 'items'
-                                        if (currentPath[i + 1] !== 'items') {
-                                            targetProp = targetProp.properties;
-                                        }
-                                    } else {
-                                        targetProp = targetProp[currentPath[i]];
-                                    }
-                                }
-
-                                // Update all fields at once
-                                Object.assign(targetProp, updatedProperty);
-
-                                const newYaml = YAML.stringify(parsed);
-                                setYaml(newYaml);
-                            } catch (error) {
-                                console.error('Error updating property:', error);
-                            }
-                        }}
-                        onDelete={() => removeProperty(schemaIdx, propIndex)}
-                    />
-                </div>
-            )}
-
-            {/* Render sub-properties recursively */}
-            {hasSubProperties && (
+            {/* Render sub-properties recursively if expanded */}
+            {isExpanded && hasSubProperties && (
                 <>
                     {property.properties.map((subProp, subPropIndex) => (
                         <PropertyRow
@@ -652,13 +564,15 @@ const PropertyRow = ({
                             expandedProperties={expandedProperties}
                             yaml={yaml}
                             setYaml={setYaml}
+                            onSelectProperty={onSelectProperty}
+                            selectedPropertyPath={selectedPropertyPath}
                         />
                     ))}
                 </>
             )}
 
-            {/* Render items node for array properties */}
-            {isArray && hasItems && (
+            {/* Render items node for array properties if expanded */}
+            {isExpanded && isArray && hasItems && (
                 <ItemsRow
                     items={property.items}
                     parentPropertyName={property.name}
@@ -709,6 +623,8 @@ const PropertyRow = ({
                     expandedProperties={expandedProperties}
                     yaml={yaml}
                     setYaml={setYaml}
+                    onSelectProperty={onSelectProperty}
+                    selectedPropertyPath={selectedPropertyPath}
                 />
             )}
         </>
@@ -718,9 +634,12 @@ const PropertyRow = ({
 const SchemaEditor = ({schemaIndex}) => {
     const yaml = useEditorStore((state) => state.yaml);
     const setYaml = useEditorStore((state) => state.setYaml);
-    const currentView = useEditorStore((state) => state.currentView);
     const jsonSchema = useEditorStore((state) => state.schemaData);
-    const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths
+    const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
+
+    // Selected property state for drawer
+    const [selectedProperty, setSelectedProperty] = useState(null);
+    const [selectedPropertyPath, setSelectedPropertyPath] = useState(null);
 
     // Get logical type options dynamically from schema
     const logicalTypeOptions = useMemo(() => {
@@ -1049,7 +968,7 @@ const SchemaEditor = ({schemaIndex}) => {
         }
     };
 
-    // Helper to toggle property expansion
+    // Helper to toggle property expansion (for nested structures)
     const togglePropertyExpansion = useCallback((pathKey) => {
         setExpandedProperties(prev => {
             const next = new Set(prev);
@@ -1061,6 +980,89 @@ const SchemaEditor = ({schemaIndex}) => {
             return next;
         });
     }, []);
+
+    // Handle property selection for drawer
+    const handleSelectProperty = useCallback((propPath, property) => {
+        setSelectedPropertyPath(propPath.join('-'));
+        setSelectedProperty({
+            propPath,
+            property
+        });
+    }, []);
+
+    // Handle closing the drawer
+    const handleCloseDrawer = useCallback(() => {
+        setSelectedProperty(null);
+        setSelectedPropertyPath(null);
+    }, []);
+
+    // Handle property update from drawer
+    const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
+        if (!selectedProperty) return;
+
+        try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = YAML.parse(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex] || !parsed.schema[schemaIndex].properties) {
+                return;
+            }
+
+            const propPath = selectedProperty.propPath;
+
+            // Navigate to the target property using propPath
+            let targetProp = parsed.schema[schemaIndex].properties;
+            for (let i = 0; i < propPath.length; i++) {
+                // Check if current path segment is 'items'
+                if (propPath[i] === 'items') {
+                    targetProp = targetProp.items;
+                } else if (i < propPath.length - 1) {
+                    targetProp = targetProp[propPath[i]];
+                    // Only navigate to properties if next segment is not 'items'
+                    if (propPath[i + 1] !== 'items') {
+                        targetProp = targetProp.properties;
+                    }
+                } else {
+                    targetProp = targetProp[propPath[i]];
+                }
+            }
+
+            // Update all fields at once
+            Object.assign(targetProp, updatedProperty);
+
+            const newYaml = YAML.stringify(parsed);
+            setYaml(newYaml);
+
+            // Update the selected property to reflect changes
+            setSelectedProperty(prev => ({
+                ...prev,
+                property: updatedProperty
+            }));
+        } catch (error) {
+            console.error('Error updating property:', error);
+        }
+    }, [selectedProperty, yaml, schemaIndex, setYaml]);
+
+    // Handle property delete from drawer
+    const handleDrawerPropertyDelete = useCallback(() => {
+        if (!selectedProperty) return;
+
+        const propPath = selectedProperty.propPath;
+        const propIdx = propPath[propPath.length - 1];
+
+        // For now, only support deleting top-level properties
+        if (propPath.length === 1 && typeof propIdx === 'number') {
+            removeProperty(schemaIndex, propIdx);
+        }
+
+        handleCloseDrawer();
+    }, [selectedProperty, schemaIndex, removeProperty, handleCloseDrawer]);
 
     return (
         <div className="h-full flex flex-col bg-white">
@@ -1388,6 +1390,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             expandedProperties={expandedProperties}
                                                             yaml={yaml}
                                                             setYaml={setYaml}
+                                                            onSelectProperty={handleSelectProperty}
+                                                            selectedPropertyPath={selectedPropertyPath}
                                                         />
                                                     ))}
                                                 </div>
@@ -1426,6 +1430,15 @@ const SchemaEditor = ({schemaIndex}) => {
 
                     </div>
                 </div>
+
+            {/* Property Details Drawer */}
+            <PropertyDetailsDrawer
+                open={selectedProperty !== null}
+                onClose={handleCloseDrawer}
+                property={selectedProperty?.property}
+                onUpdate={handleDrawerPropertyUpdate}
+                onDelete={handleDrawerPropertyDelete}
+            />
         </div>
     );
 };
