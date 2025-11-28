@@ -11,6 +11,16 @@ import PropertyValueRenderer from '../ui/PropertyValueRenderer.jsx';
 import AuthoritativeDefinitionsPreview from '../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../ui/CustomPropertiesPreview.jsx';
 
+// Reusable Tag component
+const Tag = ({children, className = ""}) => (
+	<span className={`inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 ${className}`}>
+		<svg className="size-1.5 fill-gray-500 mr-1" viewBox="0 0 6 6" aria-hidden="true">
+			<circle cx="3" cy="3" r="3"></circle>
+		</svg>
+		{children}
+	</span>
+);
+
 const DataContractPreview = ({yamlContent}) => {
 	const parsedData = useMemo(() => {
 		if (!yamlContent?.trim()) {
@@ -56,12 +66,6 @@ const DataContractPreview = ({yamlContent}) => {
 			name: Array.isArray(docs.team) && docs.team[0]?.username,
 			email: docs.support[0].url
 		} : undefined
-	};
-
-	const terms = docs.terms || {
-		usage: docs.description?.usage,
-		limitations: docs.description?.limitations,
-		billing: docs.price ? `${docs.price.priceAmount} ${docs.price.priceCurrency} ${docs.price.priceUnit}` : undefined
 	};
 
 	// Convert schema array to models object
@@ -131,8 +135,6 @@ const DataContractPreview = ({yamlContent}) => {
 			}
 		});
 	}
-
-	const examples = docs.examples || [];
 
 	// Extract data for all sections
 	const description = docs.description || {};
@@ -413,13 +415,9 @@ const DataContractPreview = ({yamlContent}) => {
 										<dd className="mt-1 text-sm text-gray-900">
 											<div className="flex gap-y-1 items-center text-xs text-gray-500 flex-wrap">
 												{parsedData.tags.map((tag, index) => (
-													<span key={index}
-																className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mb-1">
-                              <svg className="size-1.5 fill-gray-500 mr-1" viewBox="0 0 6 6" aria-hidden="true">
-                                <circle cx="3" cy="3" r="3"></circle>
-                              </svg>
-                              <span>{tag}</span>
-                            </span>
+													<Tag key={index} className="mr-1 mb-1">
+														{tag}
+													</Tag>
 												))}
 											</div>
 										</dd>
@@ -553,13 +551,9 @@ const DataContractPreview = ({yamlContent}) => {
                               </span>
 													))}
 													{property.tags && Array.isArray(property.tags) && property.tags.map((tag, idx) => (
-														<span key={idx}
-																	className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">
-                                <svg className="size-1.5 fill-gray-500 mr-1" viewBox="0 0 6 6" aria-hidden="true">
-                                  <circle cx="3" cy="3" r="3"></circle>
-                                </svg>
-                                <span>{tag}</span>
-                              </span>
+														<Tag key={idx} className="mr-1 mt-1">
+															{tag}
+														</Tag>
 													))}
 													{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => {
 														const QualityIcon = getQualityCheckIcon(qualityCheck.type);
@@ -636,13 +630,9 @@ const DataContractPreview = ({yamlContent}) => {
 													{docs.schema && docs.schema.find(s => s.name === modelName)?.tags && Array.isArray(docs.schema.find(s => s.name === modelName).tags) && docs.schema.find(s => s.name === modelName).tags.length > 0 && (
 														<div className="mt-1">
 															{docs.schema.find(s => s.name === modelName).tags.map((tag, idx) => (
-																<span key={idx}
-																			className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">
-                                      <svg className="size-1.5 fill-gray-500 mr-1" viewBox="0 0 6 6" aria-hidden="true">
-                                        <circle cx="3" cy="3" r="3"></circle>
-                                      </svg>
-                                      <span>{tag}</span>
-                                    </span>
+																<Tag key={idx} className="mr-1 mt-1">
+																	{tag}
+																</Tag>
 															))}
 														</div>
 													)}
@@ -935,13 +925,9 @@ const DataContractPreview = ({yamlContent}) => {
 											<dt className="text-sm font-medium text-gray-500 mb-2">Tags</dt>
 											<dd className="flex gap-1 items-center text-xs text-gray-500 flex-wrap">
 												{team.tags.map((tag, index) => (
-													<span key={index}
-																className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                              <svg className="size-1.5 fill-gray-500 mr-1" viewBox="0 0 6 6" aria-hidden="true">
-                                <circle cx="3" cy="3" r="3"></circle>
-                              </svg>
-                              <span>{tag}</span>
-                            </span>
+													<Tag key={index}>
+														{tag}
+													</Tag>
 												))}
 											</dd>
 										</div>
@@ -1017,10 +1003,9 @@ const DataContractPreview = ({yamlContent}) => {
 															{teamMember.tags && Array.isArray(teamMember.tags) && teamMember.tags.length > 0 && (
 																<div className="flex gap-1 flex-wrap mt-1">
 																	{teamMember.tags.map((tag, idx) => (
-																		<span key={idx}
-																					className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                        {tag}
-                                      </span>
+																		<Tag key={idx} className="px-1.5 py-0.5">
+																			{tag}
+																		</Tag>
 																	))}
 																</div>
 															)}
