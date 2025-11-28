@@ -96,7 +96,7 @@ const Pricing = () => {
                       Price Amount
                     </label>
                     <Tooltip content="Subscription price per unit">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input
@@ -118,7 +118,7 @@ const Pricing = () => {
                       Currency
                     </label>
                     <Tooltip content="Currency code (e.g., USD, EUR)">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input
@@ -139,7 +139,7 @@ const Pricing = () => {
                       Price Unit
                     </label>
                     <Tooltip content="Unit of measurement (e.g., megabyte, gigabyte)">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input

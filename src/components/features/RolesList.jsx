@@ -134,7 +134,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                       Access
                     </label>
                     <Tooltip content="The type of access provided by the IAM role (e.g. read or write)">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input
@@ -151,7 +151,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                       Description
                     </label>
                     <Tooltip content="Permission scope explanation">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <textarea
@@ -168,7 +168,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                       First Level Approvers
                     </label>
                     <Tooltip content="Primary approval authority">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input
@@ -186,7 +186,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                       Second Level Approvers
                     </label>
                     <Tooltip content="Secondary approval authority">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <input

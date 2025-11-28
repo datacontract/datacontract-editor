@@ -151,7 +151,7 @@ const Support = () => {
                               <div className="flex items-center gap-1">
                                 <span>Tool</span>
                                 <Tooltip content="Platform type (email, slack, teams, discord, ticket, googlechat, other)">
-                                  <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                                  <QuestionMarkCircleIcon />
                                 </Tooltip>
                               </div>
                             }
@@ -181,7 +181,7 @@ const Support = () => {
                               <div className="flex items-center gap-1">
                                 <span>Scope</span>
                                 <Tooltip content="Usage context (interactive, announcements, issues, notifications)">
-                                  <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                                  <QuestionMarkCircleIcon />
                                 </Tooltip>
                               </div>
                             }

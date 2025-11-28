@@ -25,6 +25,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
+import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 
 // Fallback logical type options (used if schema not loaded)
@@ -1347,12 +1348,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                     Description
                                                 </label>
                                                 <Tooltip content="Description of what this schema contains">
-                                                    <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                         viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd"
-                                                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                              clipRule="evenodd"/>
-                                                    </svg>
+                                                    <QuestionMarkCircleIcon />
                                                 </Tooltip>
                                             </div>
                                             <textarea
@@ -1388,12 +1384,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                         Business Name
                                                                     </label>
                                                                     <Tooltip content="Human-friendly name for the schema">
-                                                                        <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                                             viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd"
-                                                                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                                                  clipRule="evenodd"/>
-                                                                        </svg>
+                                                                        <QuestionMarkCircleIcon />
                                                                     </Tooltip>
                                                                 </div>
                                                                 <input
@@ -1414,12 +1405,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                         Physical Type
                                                                     </label>
                                                                     <Tooltip content="Physical type of the schema (table, view, etc.)">
-                                                                        <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                                             viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd"
-                                                                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                                                  clipRule="evenodd"/>
-                                                                        </svg>
+                                                                        <QuestionMarkCircleIcon />
                                                                     </Tooltip>
                                                                 </div>
                                                                 <div className="mt-1 grid grid-cols-1">
@@ -1456,12 +1442,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                         Physical Name
                                                                     </label>
                                                                     <Tooltip content="Physical name in the database/storage">
-                                                                        <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                                             viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd"
-                                                                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                                                  clipRule="evenodd"/>
-                                                                        </svg>
+                                                                        <QuestionMarkCircleIcon />
                                                                     </Tooltip>
                                                                 </div>
                                                                 <input
@@ -1483,12 +1464,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                         Logical Type
                                                                     </label>
                                                                     <Tooltip content="Logical type of the schema (object, array, etc.)">
-                                                                        <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                                             viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd"
-                                                                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                                                  clipRule="evenodd"/>
-                                                                        </svg>
+                                                                        <QuestionMarkCircleIcon />
                                                                     </Tooltip>
                                                                 </div>
                                                                 <input
@@ -1511,12 +1487,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     Data Granularity Description
                                                                 </label>
                                                                 <Tooltip content="Describe the level of detail represented by one record">
-                                                                    <svg className="w-4 h-4 text-gray-400" fill="currentColor"
-                                                                         viewBox="0 0 20 20">
-                                                                        <path fillRule="evenodd"
-                                                                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                                                              clipRule="evenodd"/>
-                                                                    </svg>
+                                                                    <QuestionMarkCircleIcon />
                                                                 </Tooltip>
                                                             </div>
                                                             <textarea

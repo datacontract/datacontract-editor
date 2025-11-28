@@ -203,7 +203,7 @@ const ServerEditor = ({ serverIndex }) => {
                       <div className="flex items-center gap-1">
                         <span>Environment</span>
                         <Tooltip content="Deployment stage (prod, preprod, dev, uat)">
-                          <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                          <QuestionMarkCircleIcon />
                         </Tooltip>
                       </div>
                     }
@@ -220,7 +220,7 @@ const ServerEditor = ({ serverIndex }) => {
                       Description
                     </label>
                     <Tooltip content="Server details">
-                      <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                      <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
                   <textarea
@@ -233,18 +233,9 @@ const ServerEditor = ({ serverIndex }) => {
                 </div>
                 <div className="sm:col-span-2">
                   <ValidatedCombobox
-                    label={
-                      <div className="flex justify-between">
-                        <div className="flex items-center gap-1">
-                          <span>Type</span>
-                          <Tooltip content="Platform category (api, athena, bigquery, snowflake, postgres, etc.)">
-                            <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
-                          </Tooltip>
-                        </div>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
-                      </div>
-                    }
-										required={true}
+                    label="Type"
+                    tooltip="Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
+                    required={true}
                     options={typeOptions}
                     value={server.type || ''}
                     onChange={(selectedValue) => updateServer('type', selectedValue || '')}

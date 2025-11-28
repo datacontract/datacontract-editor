@@ -132,7 +132,7 @@ const ServiceLevelAgreement = () => {
                               Value
                             </label>
                             <Tooltip content="Target commitment value">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <div className="flex gap-2">
@@ -161,7 +161,7 @@ const ServiceLevelAgreement = () => {
                               Unit
                             </label>
                             <Tooltip content="Measurement standard (ISO format: d/day/days, y/yr/years)">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <input
@@ -178,7 +178,7 @@ const ServiceLevelAgreement = () => {
                               Element
                             </label>
                             <Tooltip content="Target schema component(s)">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <input
@@ -195,7 +195,7 @@ const ServiceLevelAgreement = () => {
                               <div className="flex items-center gap-1">
                                 <span>Driver</span>
                                 <Tooltip content="Priority classification">
-                                  <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                                  <QuestionMarkCircleIcon />
                                 </Tooltip>
                               </div>
                             }
@@ -212,7 +212,7 @@ const ServiceLevelAgreement = () => {
                               Scheduler
                             </label>
                             <Tooltip content="Name of the scheduler (e.g., cron or any tool your organization supports)">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <input
@@ -229,7 +229,7 @@ const ServiceLevelAgreement = () => {
                               Schedule
                             </label>
                             <Tooltip content="Configuration for the scheduling tool (e.g., 0 20 * * * for cron)">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <input
@@ -246,7 +246,7 @@ const ServiceLevelAgreement = () => {
                               Description
                             </label>
                             <Tooltip content="Human-readable explanation">
-                              <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+                              <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
                           <textarea

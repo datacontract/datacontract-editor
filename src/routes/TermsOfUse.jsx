@@ -5,6 +5,7 @@ import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import * as YAML from 'yaml';
+import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 
 const TermsOfUse = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -105,9 +106,7 @@ const TermsOfUse = () => {
                     Purpose
                   </label>
                   <Tooltip content="Intended purpose for the provided data">
-                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
+                    <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
                 <textarea
@@ -128,9 +127,7 @@ const TermsOfUse = () => {
                     Usage
                   </label>
                   <Tooltip content="How this data should be used">
-                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
+                    <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
                 <textarea
@@ -151,9 +148,7 @@ const TermsOfUse = () => {
                     Limitations
                   </label>
                   <Tooltip content="Technical, compliance, and legal limitations for data use">
-                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
+                    <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
                 <textarea

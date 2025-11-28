@@ -46,7 +46,7 @@ const ValidatedInput = forwardRef(({
         </label>
         {tooltip && (
           <Tooltip content={tooltip}>
-						<QuestionMarkCircleIcon className="w-3.5 h-3.5 text-gray-400" />
+						<QuestionMarkCircleIcon />
           </Tooltip>
         )}
         {required && (
