@@ -18,7 +18,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
   const [showSettings, setShowSettings] = useState(false);
 
   // Get the configured API server URL
-  const apiServerUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'http://localhost:4242';
+  const apiServerUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'https://api.datacontract.com';
 
   // Parse servers from YAML
   useEffect(() => {
@@ -401,7 +401,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
           )}
           <div className="mt-2 flex items-center justify-between">
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              Connected to Data Contract CLI via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
+              Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -542,7 +542,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
         </div>
         <div className="mt-2 flex items-center justify-between">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Connected to Data Contract CLI via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
+            Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
           </div>
           <div className="flex items-center gap-2">
             <button

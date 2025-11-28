@@ -56,7 +56,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           <p className="mt-1 text-xs text-gray-500">
-            The base URL for the Data Contract CLI API server. Leave empty to use the default relative endpoint.
+            Current: <span className="font-mono text-gray-600">{apiServerUrl || 'https://api.datacontract.com'}</span>
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            The base URL for the Data Contract CLI API server. Leave empty to use the default.
           </p>
         </div>
       </div>

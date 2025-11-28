@@ -96,7 +96,7 @@ const defaultEditorStore = create()(
                 set({ isTestRunning: true });
                 try {
                     // Build the test endpoint URL
-                    const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || '';
+                    const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'https://api.datacontract.com';
                     const testEndpoint = `${baseUrl}/test`;
                     const url = server ? `${testEndpoint}?server=${encodeURIComponent(server)}` : testEndpoint;
                     const response = await fetch(url, {
@@ -166,7 +166,7 @@ const defaultEditorStore = create()(
                     let isConnectionError = false;
 
                     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                        const displayUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'http://localhost:4242';
+                        const displayUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'https://api.datacontract.com';
                         errorMessage = `Cannot connect to Data Contract CLI at ${displayUrl}.`;
                         isConnectionError = true;
                     } else if (error.message === 'Unexpected end of JSON input' || error.message.includes('JSON')) {
