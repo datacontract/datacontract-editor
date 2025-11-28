@@ -1,10 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { YamlEditor, DataContractPreview, TestResultsPanel } from "../components/features/index.js";
 import WarningsPanel from "../components/features/WarningsPanel.jsx";
 import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
 import { useEditorStore } from "../store.js";
 import { PreviewErrorBoundary, DiagramErrorBoundary, FormPageErrorBoundary, ErrorBoundary } from "../components/error/index.js";
+import ResizeDivider from "../components/ui/ResizeDivider.jsx";
 
 const MainContent = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -64,10 +65,16 @@ const MainContent = () => {
   // Determine if right pane should be shown
   const isRightPaneVisible = isPreviewVisible || isWarningsVisible || isTestResultsVisible;
 
+  // State for resizable panel width (percentage of left pane)
+  const [leftPanePercent, setLeftPanePercent] = useState(50);
+
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-row w-full h-full">
-        <div className={`${isRightPaneVisible ? 'w-1/2' : 'w-full'} h-full border-r border-gray-300`}>
+        <div
+          className="h-full"
+          style={{ width: isRightPaneVisible ? `${leftPanePercent}%` : '100%' }}
+        >
           {/* Always keep YAML editor mounted for validation */}
           <div className={currentView === 'yaml' ? 'h-full' : 'hidden'}>
             <YamlEditor
@@ -158,22 +165,34 @@ const MainContent = () => {
             </Routes>
           )}
         </div>
+        {isRightPaneVisible && (
+          <ResizeDivider onResize={setLeftPanePercent} />
+        )}
         {isPreviewVisible && (
-          <div className="w-1/2 h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50">
+          <div
+            className="h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50"
+            style={{ width: `${100 - leftPanePercent}%` }}
+          >
             <PreviewErrorBoundary yamlContent={yaml}>
               <DataContractPreview yamlContent={yaml} />
             </PreviewErrorBoundary>
           </div>
         )}
         {isWarningsVisible && (
-          <div className="w-1/2 h-full border-l border-gray-300">
+          <div
+            className="h-full"
+            style={{ width: `${100 - leftPanePercent}%` }}
+          >
             <ErrorBoundary>
               <WarningsPanel onMarkerClick={handleMarkerClick} />
             </ErrorBoundary>
           </div>
         )}
         {isTestResultsVisible && (
-          <div className="w-1/2 h-full border-l border-gray-300">
+          <div
+            className="h-full"
+            style={{ width: `${100 - leftPanePercent}%` }}
+          >
             <ErrorBoundary>
               <TestResultsPanel onCheckClick={handleCheckClick} />
             </ErrorBoundary>
