@@ -100,11 +100,11 @@ const PropertyIndicators = ({property}) => {
         );
     }
 
-    return indicators.length > 0 ? (
-        <div className="flex items-center gap-1">
+    return (
+        <div className="flex items-center gap-1 min-w-14">
             {indicators}
         </div>
-    ) : null;
+    );
 };
 
 // Component to render array items as a special node
@@ -484,7 +484,7 @@ const PropertyRow = ({
                             />
                         ) : (
                             <span
-                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 ${
+                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
                                     !property.name || property.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
                                 }`}
                                 onClick={(e) => {
@@ -522,7 +522,7 @@ const PropertyRow = ({
                                 </select>
                             ) : (
                                 <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap"
+                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap min-w-24"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onSelectProperty(currentPath, property);
