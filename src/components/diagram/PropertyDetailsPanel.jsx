@@ -148,14 +148,19 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 <textarea
                   value={property.examples?.join('\n') || ''}
                   onChange={(e) => {
-                    const examples = e.target.value.split('\n').map(ex => ex.trim()).filter(ex => ex);
-                    updateField('examples', examples.length > 0 ? examples : undefined);
+                    const value = e.target.value;
+                    if (value === '') {
+                      updateField('examples', undefined);
+                    } else {
+                      const examples = value.split('\n');
+                      updateField('examples', examples);
+                    }
                   }}
                   rows={3}
                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                   placeholder="example1&#10;example2&#10;example3"
                 />
-                <p className="mt-1 text-xs text-gray-500">One example per line</p>
+                <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
               </div>
             </DisclosurePanel>
           </>

@@ -10,6 +10,7 @@ import {IconResolver} from '../ui/IconResolver.jsx';
 import PropertyValueRenderer from '../ui/PropertyValueRenderer.jsx';
 import AuthoritativeDefinitionsPreview from '../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../ui/CustomPropertiesPreview.jsx';
+import QuestionMarkCircleIcon from "../ui/icons/QuestionMarkCircleIcon.jsx";
 
 // Reusable Tag component
 const Tag = ({children, className = ""}) => (
@@ -78,6 +79,7 @@ const DataContractPreview = ({yamlContent}) => {
 
 		const converted = {
 			businessName: prop.businessName,
+			physicalName: prop.physicalName,
 			description: prop.description,
 			logicalType: prop.logicalType,
 			physicalType: prop.physicalType,
@@ -92,6 +94,8 @@ const DataContractPreview = ({yamlContent}) => {
 			transformLogic: prop.transformLogic,
 			transformDescription: prop.transformDescription,
 			examples: prop.examples,
+			format: prop.format,
+			logicalTypeOptions: prop.logicalTypeOptions,
 			customProperties: prop.customProperties,
 			tags: prop.tags,
 			quality: prop.quality
@@ -464,19 +468,26 @@ const DataContractPreview = ({yamlContent}) => {
 																<br/>
 															</>
 														)}
-														<span className="font-mono">{propertyName}</span>
+														<span className="font-mono">{propertyName}
+
+															{(property.physicalName && property.physicalName !== propertyName) && (
+																	<Tooltip content={`physicalName: ${property.physicalName}`}>
+																		<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+																	</Tooltip>
+																)}
+														</span>
 													</div>
 												</td>
 												<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 													{property.logicalType && (
 														<div
-															className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10">
+															className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1">
 															<span>{property.logicalType}</span>
 														</div>
 													)}
 													{property.physicalType && (
 														<div
-															className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+															className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1">
 															<span>{property.physicalType}</span>
 														</div>
 													)}
@@ -551,6 +562,65 @@ const DataContractPreview = ({yamlContent}) => {
 																{tag}
 															</Tag>
 														))}
+														{property.logicalTypeOptions?.format && (
+															<Tooltip content={
+																<div className="space-y-1">
+																	<div className="text-gray-300">Format: {property.logicalTypeOptions.format}</div>
+																	{property.logicalTypeOptions.minLength !== undefined && (
+																		<div className="text-gray-300">Min Length: {property.logicalTypeOptions.minLength}</div>
+																	)}
+																	{property.logicalTypeOptions.maxLength !== undefined && (
+																		<div className="text-gray-300">Max Length: {property.logicalTypeOptions.maxLength}</div>
+																	)}
+																	{property.logicalTypeOptions.pattern && (
+																		<div className="text-gray-300">Pattern: {property.logicalTypeOptions.pattern}</div>
+																	)}
+																	{property.logicalTypeOptions.minimum !== undefined && (
+																		<div className="text-gray-300">Minimum: {property.logicalTypeOptions.minimum}</div>
+																	)}
+																	{property.logicalTypeOptions.maximum !== undefined && (
+																		<div className="text-gray-300">Maximum: {property.logicalTypeOptions.maximum}</div>
+																	)}
+																	{property.logicalTypeOptions.exclusiveMinimum !== undefined && (
+																		<div className="text-gray-300">Exclusive Minimum: {property.logicalTypeOptions.exclusiveMinimum}</div>
+																	)}
+																	{property.logicalTypeOptions.exclusiveMaximum !== undefined && (
+																		<div className="text-gray-300">Exclusive Maximum: {property.logicalTypeOptions.exclusiveMaximum}</div>
+																	)}
+																	{property.logicalTypeOptions.multipleOf !== undefined && (
+																		<div className="text-gray-300">Multiple Of: {property.logicalTypeOptions.multipleOf}</div>
+																	)}
+																	{property.logicalTypeOptions.minItems !== undefined && (
+																		<div className="text-gray-300">Min Items: {property.logicalTypeOptions.minItems}</div>
+																	)}
+																	{property.logicalTypeOptions.maxItems !== undefined && (
+																		<div className="text-gray-300">Max Items: {property.logicalTypeOptions.maxItems}</div>
+																	)}
+																	{property.logicalTypeOptions.uniqueItems !== undefined && (
+																		<div className="text-gray-300">Unique Items: {property.logicalTypeOptions.uniqueItems ? 'Yes' : 'No'}</div>
+																	)}
+																	{property.logicalTypeOptions.minProperties !== undefined && (
+																		<div className="text-gray-300">Min Properties: {property.logicalTypeOptions.minProperties}</div>
+																	)}
+																	{property.logicalTypeOptions.maxProperties !== undefined && (
+																		<div className="text-gray-300">Max Properties: {property.logicalTypeOptions.maxProperties}</div>
+																	)}
+																	{property.logicalTypeOptions.required && Array.isArray(property.logicalTypeOptions.required) && (
+																		<div className="text-gray-300">Required: {property.logicalTypeOptions.required.join(', ')}</div>
+																	)}
+																	{property.logicalTypeOptions.timezone !== undefined && (
+																		<div className="text-gray-300">Timezone: {property.logicalTypeOptions.timezone ? 'Yes' : 'No'}</div>
+																	)}
+																	{property.logicalTypeOptions.defaultTimezone && (
+																		<div className="text-gray-300">Default Timezone: {property.logicalTypeOptions.defaultTimezone}</div>
+																	)}
+																</div>
+															}>
+																<span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20 mr-1 mt-1">
+																	{property.logicalTypeOptions.format}
+																</span>
+															</Tooltip>
+														)}
 														{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => {
 															const QualityIcon = getQualityCheckIcon(qualityCheck.type);
 															const tooltipContent = (
@@ -609,9 +679,9 @@ const DataContractPreview = ({yamlContent}) => {
                                 </span>
 														)}
 														{model.description ? (
-															<div className="text-sm font-medium text-gray-500">{model.description}</div>
+															<div className="text-sm font-normal text-gray-500">{model.description}</div>
 														) : (
-															<div className="text-sm font-medium text-gray-400">No description</div>
+															<div className="text-sm font-normal text-gray-400">No description</div>
 														)}
 														<CustomPropertiesPreview properties={model.customProperties} pillClassName="mr-1 mt-1"/>
 														{docs.schema && docs.schema.find(s => s.name === modelName)?.tags && Array.isArray(docs.schema.find(s => s.name === modelName).tags) && docs.schema.find(s => s.name === modelName).tags.length > 0 && (
