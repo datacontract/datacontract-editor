@@ -86,11 +86,8 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
       return strVal === 'true';
     }
     if (type === 'array' || type === 'object') {
-      try {
-        return JSON.parse(strVal);
-      } catch {
-        return type === 'array' ? [] : {};
-      }
+      // Store the raw string value directly without parsing
+      return strVal;
     }
     return strVal;
   };
@@ -98,6 +95,11 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
   // Get string representation for display
   const getValueString = (val, type) => {
     if (type === 'array' || type === 'object') {
+      // If it's already a string, return it as-is
+      if (typeof val === 'string') {
+        return val;
+      }
+      // If it's an actual object/array, stringify it
       try {
         return JSON.stringify(val, null, 2);
       } catch {
@@ -253,12 +255,12 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
                   placeholder="0"
                 />
               ) : type === 'array' || type === 'object' ? (
-                <textarea
+                <input
+                  type="text"
                   value={getValueString(item.value, type)}
                   onChange={(e) => handleValueChange(e.target.value, type)}
                   className={`${inputClasses} font-mono`}
-                  placeholder={type === 'array' ? '[\n  "item1",\n  "item2"\n]' : '{\n  "key": "value"\n}'}
-                  rows={3}
+                  placeholder={type === 'array' ? '["item1", "item2"]' : '{"key": "value"}'}
                 />
               ) : (
                 <input

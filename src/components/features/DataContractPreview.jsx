@@ -4,6 +4,7 @@ import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import supportIcons from '../../assets/support-icons/supportIcons.jsx';
 import LinkIcon from '../ui/icons/LinkIcon.jsx';
 import {getQualityCheckIcon} from '../ui/icons/QualityCheckIcons.jsx';
+import LockClosedIcon from '../ui/icons/LockClosedIcon.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
 import DescriptionPreview from '../ui/DescriptionPreview.jsx';
 import {IconResolver} from '../ui/IconResolver.jsx';
@@ -91,6 +92,8 @@ const DataContractPreview = ({yamlContent}) => {
 			partitioned: prop.partitioned,
 			partitionKeyPosition: prop.partitionKeyPosition,
 			classification: prop.classification,
+			criticalDataElement: prop.criticalDataElement,
+			encryptedName: prop.encryptedName,
 			transformLogic: prop.transformLogic,
 			transformDescription: prop.transformDescription,
 			examples: prop.examples,
@@ -538,23 +541,44 @@ const DataContractPreview = ({yamlContent}) => {
 														)}
 														{property.classification && (
 															<span
-																className="inline-flex items-center rounded-md bg-blue-50 px-1 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mr-1 mt-1">
+																className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-1 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mr-1 mt-1">
+                                {property.classification.toLowerCase() !== 'public' && <LockClosedIcon className="w-3 h-3"/>}
                                 {property.classification}
                               </span>
 														)}
-														{property.transformLogic && (
+														{property.criticalDataElement && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1"
-																title={property.transformLogic}>
-                                transform logic
+																className="inline-flex items-center rounded-md bg-red-50 px-1 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10 mr-1 mt-1">
+                                critical data element
                               </span>
 														)}
-														{property.transformDescription && (
+														{property.encryptedName && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1"
-																title={property.transformDescription}>
-                                transform description
+																className="inline-flex items-center rounded-md bg-purple-50 px-1 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10 mr-1 mt-1">
+                                {property.encryptedName}
                               </span>
+														)}
+														{(property.transformLogic || property.transformDescription) && (
+															<Tooltip content={
+																<div className="space-y-1">
+																	{property.transformLogic && (
+																		<div>
+																			<div className="text-gray-300 font-medium">Transform Logic:</div>
+																			<div>{property.transformLogic}</div>
+																		</div>
+																	)}
+																	{property.transformDescription && (
+																		<div>
+																			<div className="text-gray-300 font-medium">Description:</div>
+																			<div>{property.transformDescription}</div>
+																		</div>
+																	)}
+																</div>
+															}>
+																<span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 mr-1 mt-1">
+                                  transformation
+                                </span>
+															</Tooltip>
 														)}
 														<CustomPropertiesPreview properties={property.customProperties} pillClassName="mr-1 mt-1"/>
 														{property.tags && Array.isArray(property.tags) && property.tags.map((tag, idx) => (

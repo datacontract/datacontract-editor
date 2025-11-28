@@ -219,7 +219,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       type="text"
                       value={property.logicalTypeOptions?.pattern || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, pattern: e.target.value || undefined })}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono"
+                      className="w-full rounded-md border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                       placeholder="Regular expression"
                     />
                   </div>
@@ -534,8 +534,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   </label>
                   <input
                     type="number"
-                    value={property.primaryKeyPosition ?? -1}
-                    onChange={(e) => updateField('primaryKeyPosition', parseInt(e.target.value) || -1)}
+                    value={property.primaryKeyPosition}
+                    onChange={(e) => updateField('primaryKeyPosition', parseInt(e.target.value) || null)}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                     placeholder="-1"
                     min="-1"
@@ -554,8 +554,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   </label>
                   <input
                     type="number"
-                    value={property.partitionKeyPosition ?? -1}
-                    onChange={(e) => updateField('partitionKeyPosition', parseInt(e.target.value) || -1)}
+                    value={property.partitionKeyPosition}
+                    onChange={(e) => updateField('partitionKeyPosition', parseInt(e.target.value) || null)}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                     placeholder="-1"
                     min="-1"
