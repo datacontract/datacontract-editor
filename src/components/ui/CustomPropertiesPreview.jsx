@@ -5,8 +5,10 @@ import Tooltip from './Tooltip.jsx';
  * A compact preview component showing property-value pairs
  *
  * @param {Array} properties - Array of custom property objects with {property, value, description}
+ * @param {string} pillClassName - Additional CSS classes to apply to individual pills (e.g., "mr-1 mt-1")
+ * @param {string} variant - Pill shape variant: "rounded" (default, rounded-full) or "square" (rounded-md)
  */
-const CustomPropertiesPreview = ({properties = []}) => {
+const CustomPropertiesPreview = ({properties = [], pillClassName = ""}) => {
 	if (!properties || properties.length === 0) {
 		return null;
 	}
@@ -24,30 +26,31 @@ const CustomPropertiesPreview = ({properties = []}) => {
 		return String(value);
 	};
 
+	const roundedClass = "rounded-md";
+	const paddingClass = "px-2 py-1";
+
 	return (
-		<div className="flex flex-wrap gap-1">
+		<>
 			{properties.map((prop, index) => {
-				const pillContent = (
-					<span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 cursor-help">
+				const pill = (
+					<span
+						className={`inline-flex items-center ${roundedClass} bg-yellow-50 ${paddingClass} text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 ${pillClassName} ${prop.description ? 'cursor-help' : ''}`}
+					>
 						{prop.property}:{formatValue(prop.value)}
 					</span>
 				);
 
-				const tooltipContent = prop.description ? (
-					<div className="text-xs">{prop.description}</div>
-				) : null;
-
-				if (tooltipContent) {
+				if (prop.description) {
 					return (
-						<Tooltip key={index} content={tooltipContent}>
-							{pillContent}
+						<Tooltip key={index} content={<div className="text-xs">{prop.description}</div>}>
+							{pill}
 						</Tooltip>
 					);
 				}
 
-				return <span key={index}>{pillContent}</span>;
+				return <span key={index}>{pill}</span>;
 			})}
-		</div>
+		</>
 	);
 };
 
