@@ -1213,56 +1213,73 @@ const DataContractPreview = ({yamlContent}) => {
 							<ul role="list"
 									className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
 								{slaProperties.map((sla, index) => (
-									<li key={index} className="relative flex gap-x-6 px-4 py-3 sm:px-6">
-										{sla.property && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Property</dt>
-													<dd
-														className="mt-1 text-sm text-gray-900 overflow-hidden text-ellipsis w-64">{sla.property}</dd>
+									<li key={index} className="relative flex items-start gap-x-4 px-4 py-3 sm:px-6">
+										<div className="flex-1 flex flex-wrap gap-x-6 gap-y-2">
+											{sla.property && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Property</dt>
+														<dd className="mt-1 text-sm font-medium text-gray-900">{sla.property}</dd>
+													</div>
 												</div>
-											</div>
-										)}
-										{sla.value && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Value</dt>
-													<dd className="mt-1 text-sm text-gray-900">{sla.value}</dd>
+											)}
+											{sla.value !== undefined && sla.value !== null && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Value</dt>
+														<dd className="mt-1 text-sm font-medium text-gray-900">{sla.value}</dd>
+													</div>
 												</div>
-											</div>
-										)}
-										{sla.valueExt && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Extended value</dt>
-													<dd className="mt-1 text-sm text-gray-900">{sla.valueExt}</dd>
+											)}
+											{sla.unit && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Unit</dt>
+														<dd className="mt-1 text-sm text-gray-900">{sla.unit}</dd>
+													</div>
 												</div>
-											</div>
-										)}
-										{sla.unit && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Unit</dt>
-													<dd className="mt-1 text-sm text-gray-900">{sla.unit}</dd>
+											)}
+											{sla.element && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Element(s)</dt>
+														<dd className="mt-1 text-sm text-gray-900">{sla.element}</dd>
+													</div>
 												</div>
-											</div>
-										)}
-										{sla.element && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Element(s)</dt>
-													<dd className="mt-1 text-sm text-gray-900">{sla.element}</dd>
+											)}
+											{sla.driver && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Driver</dt>
+														<dd className="mt-1 text-sm text-gray-900">{sla.driver}</dd>
+													</div>
 												</div>
-											</div>
-										)}
-										{sla.driver && (
-											<div className="flex items-center gap-x-4">
-												<div className="hidden sm:flex sm:flex-col">
-													<dt className="text-sm font-medium text-gray-500">Driver</dt>
-													<dd className="mt-1 text-sm text-gray-900">{sla.driver}</dd>
+											)}
+											{sla.scheduler && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Scheduler</dt>
+														<dd className="mt-1 text-sm text-gray-900">{sla.scheduler}</dd>
+													</div>
 												</div>
-											</div>
-										)}
+											)}
+											{sla.schedule && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Schedule</dt>
+														<dd className="mt-1 text-sm text-gray-900 font-mono">{sla.schedule}</dd>
+													</div>
+												</div>
+											)}
+											{sla.description && (
+												<div className="flex items-center gap-x-4">
+													<div className="flex flex-col">
+														<dt className="text-sm font-medium text-gray-500">Description</dt>
+														<dd className="mt-1 text-sm text-gray-900">{sla.description}</dd>
+													</div>
+												</div>
+											)}
+										</div>
 									</li>
 								))}
 							</ul>

@@ -6,7 +6,6 @@ import Tooltip from './Tooltip.jsx';
  *
  * @param {Array} properties - Array of custom property objects with {property, value, description}
  * @param {string} pillClassName - Additional CSS classes to apply to individual pills (e.g., "mr-1 mt-1")
- * @param {string} variant - Pill shape variant: "rounded" (default, rounded-full) or "square" (rounded-md)
  */
 const CustomPropertiesPreview = ({properties = [], pillClassName = ""}) => {
 	if (!properties || properties.length === 0) {
