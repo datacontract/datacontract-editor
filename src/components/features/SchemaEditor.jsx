@@ -1,4 +1,4 @@
-import {useMemo, useState, useCallback, useEffect} from 'react';
+import {useMemo, useState, useCallback, useEffect, useRef} from 'react';
 import {useEditorStore} from '../../store.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
@@ -200,12 +200,14 @@ const ItemsRow = ({
                                     className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        onSelectProperty(itemsPath, items);
                                         setEditingItemsType(true);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
                                             e.preventDefault();
                                             e.stopPropagation();
+                                            onSelectProperty(itemsPath, items);
                                             setEditingItemsType(true);
                                         }
                                     }}
@@ -450,6 +452,7 @@ const PropertyRow = ({
                                 }`}
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    onSelectProperty(currentPath, property);
                                     setEditedPropertyName(property.name || '');
                                     setEditingPropertyName(true);
                                 }}
@@ -485,12 +488,14 @@ const PropertyRow = ({
                                     className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        onSelectProperty(currentPath, property);
                                         setEditingPropertyType(true);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
                                             e.preventDefault();
                                             e.stopPropagation();
+                                            onSelectProperty(currentPath, property);
                                             setEditingPropertyType(true);
                                         }
                                     }}
@@ -641,11 +646,35 @@ const SchemaEditor = ({schemaIndex}) => {
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [selectedPropertyPath, setSelectedPropertyPath] = useState(null);
 
+    // Ref for properties container to detect outside clicks
+    const propertiesContainerRef = useRef(null);
+    const drawerRef = useRef(null);
+
     // Close drawer when schema index changes
     useEffect(() => {
         setSelectedProperty(null);
         setSelectedPropertyPath(null);
     }, [schemaIndex]);
+
+    // Close drawer when clicking outside properties and drawer
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!selectedProperty) return;
+
+            const isInsideProperties = propertiesContainerRef.current?.contains(event.target);
+            const isInsideDrawer = drawerRef.current?.contains(event.target);
+
+            if (!isInsideProperties && !isInsideDrawer) {
+                setSelectedProperty(null);
+                setSelectedPropertyPath(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [selectedProperty]);
 
     // Get logical type options dynamically from schema
     const logicalTypeOptions = useMemo(() => {
@@ -1359,7 +1388,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                     </div>
 
                                     {/* Properties Section - Schema Tree View */}
-                                    <div className="mt-6">
+                                    <div className="mt-6" ref={propertiesContainerRef}>
                                         <div className="border border-gray-200 rounded-md">
                                             {/* Header Row */}
                                             <div
@@ -1439,6 +1468,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
             {/* Property Details Drawer */}
             <PropertyDetailsDrawer
+                ref={drawerRef}
                 open={selectedProperty !== null}
                 onClose={handleCloseDrawer}
                 property={selectedProperty?.property}

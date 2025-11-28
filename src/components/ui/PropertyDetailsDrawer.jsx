@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 
 // Streamline X icon (Lucide Line)
@@ -18,14 +19,16 @@ const XIcon = ({ className }) => (
  * @param {Object} props.property - The property object to edit
  * @param {Function} props.onUpdate - Callback when the property is updated
  * @param {Function} props.onDelete - Callback when the property should be deleted
+ * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
-const PropertyDetailsDrawer = ({ open, onClose, property, onUpdate, onDelete }) => {
+const PropertyDetailsDrawer = forwardRef(({ open, onClose, property, onUpdate, onDelete }, ref) => {
   if (!property) {
     return null;
   }
 
   return (
     <div
+      ref={ref}
       className={`fixed inset-y-0 right-0 z-40 w-screen max-w-xs transform transition-transform duration-300 ease-in-out ${
         open ? 'translate-x-0' : 'translate-x-full'
       }`}
@@ -35,7 +38,7 @@ const PropertyDetailsDrawer = ({ open, onClose, property, onUpdate, onDelete }) 
         <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <h2 className="text-sm font-semibold text-gray-900 truncate">
-              {property.name ? `Edit: ${property.name}` : 'Edit Property'}
+              {property.name ? `Edit Property: ${property.name}` : 'Edit Property'}
             </h2>
             <div className="ml-2 flex h-6 items-center">
               <button
@@ -62,6 +65,8 @@ const PropertyDetailsDrawer = ({ open, onClose, property, onUpdate, onDelete }) 
       </div>
     </div>
   );
-};
+});
+
+PropertyDetailsDrawer.displayName = 'PropertyDetailsDrawer';
 
 export default PropertyDetailsDrawer;
