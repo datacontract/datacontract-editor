@@ -147,17 +147,14 @@ team:
       name: Sarah Chen
       role: Data Product Owner
       description: Responsible for the overall data product strategy and roadmap
-      dateIn: "2022-01-15"
     - username: mike.johnson@entropy-data.com
       name: Mike Johnson
       role: Data Steward
       description: Ensures data quality and maintains data governance standards
-      dateIn: "2022-03-20"
     - username: lisa.martinez@entropy-data.com
       name: Lisa Martinez
       role: Data Engineer
       description: Manages data pipelines and technical implementation
-      dateIn: "2023-06-01"
 support:
   - channel: "#sales-data-support"
     tool: teams

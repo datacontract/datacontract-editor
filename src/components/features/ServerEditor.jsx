@@ -1058,6 +1058,227 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
+                {server.type === 'custom' && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Host
+                      </label>
+                      <input
+                        type="text"
+                        value={server.host || ''}
+                        onChange={(e) => updateServer('host', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="hostname or IP"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        value={server.port || ''}
+                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="port number"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Account
+                      </label>
+                      <input
+                        type="text"
+                        value={server.account || ''}
+                        onChange={(e) => updateServer('account', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="account name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Project
+                      </label>
+                      <input
+                        type="text"
+                        value={server.project || ''}
+                        onChange={(e) => updateServer('project', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="project name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Database
+                      </label>
+                      <input
+                        type="text"
+                        value={server.database || ''}
+                        onChange={(e) => updateServer('database', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="database name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Dataset
+                      </label>
+                      <input
+                        type="text"
+                        value={server.dataset || ''}
+                        onChange={(e) => updateServer('dataset', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="dataset name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Catalog
+                      </label>
+                      <input
+                        type="text"
+                        value={server.catalog || ''}
+                        onChange={(e) => updateServer('catalog', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="catalog name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Schema
+                      </label>
+                      <input
+                        type="text"
+                        value={server.schema || ''}
+                        onChange={(e) => updateServer('schema', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="schema name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Warehouse
+                      </label>
+                      <input
+                        type="text"
+                        value={server.warehouse || ''}
+                        onChange={(e) => updateServer('warehouse', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="warehouse or cluster name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Service Name
+                      </label>
+                      <input
+                        type="text"
+                        value={server.serviceName || ''}
+                        onChange={(e) => updateServer('serviceName', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="service name"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        value={server.location || ''}
+                        onChange={(e) => updateServer('location', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="https://example.com/data or s3://bucket/path"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Endpoint URL
+                      </label>
+                      <input
+                        type="text"
+                        value={server.endpointUrl || ''}
+                        onChange={(e) => updateServer('endpointUrl', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="https://api.example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Path
+                      </label>
+                      <input
+                        type="text"
+                        value={server.path || ''}
+                        onChange={(e) => updateServer('path', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="/path/to/data"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Staging Dir
+                      </label>
+                      <input
+                        type="text"
+                        value={server.stagingDir || ''}
+                        onChange={(e) => updateServer('stagingDir', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="staging directory"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Format
+                      </label>
+                      <input
+                        type="text"
+                        value={server.format || ''}
+                        onChange={(e) => updateServer('format', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="parquet, json, csv"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Delimiter
+                      </label>
+                      <input
+                        type="text"
+                        value={server.delimiter || ''}
+                        onChange={(e) => updateServer('delimiter', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="delimiter character"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Region
+                      </label>
+                      <input
+                        type="text"
+                        value={server.region || ''}
+                        onChange={(e) => updateServer('region', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="cloud region"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Region Name
+                      </label>
+                      <input
+                        type="text"
+                        value={server.regionName || ''}
+                        onChange={(e) => updateServer('regionName', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="region name"
+                      />
+                    </div>
+                  </>
+                )}
+
                 {/* Roles */}
                 <div className="sm:col-span-2">
                   <RolesList
