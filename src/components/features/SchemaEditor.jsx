@@ -1,4 +1,4 @@
-import {useMemo, useState, useCallback} from 'react';
+import {useMemo, useState, useCallback, useEffect} from 'react';
 import {useEditorStore} from '../../store.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
@@ -640,6 +640,12 @@ const SchemaEditor = ({schemaIndex}) => {
     // Selected property state for drawer
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [selectedPropertyPath, setSelectedPropertyPath] = useState(null);
+
+    // Close drawer when schema index changes
+    useEffect(() => {
+        setSelectedProperty(null);
+        setSelectedPropertyPath(null);
+    }, [schemaIndex]);
 
     // Get logical type options dynamically from schema
     const logicalTypeOptions = useMemo(() => {

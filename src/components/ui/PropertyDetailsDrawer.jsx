@@ -1,4 +1,3 @@
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 
 // Streamline X icon (Lucide Line)
@@ -10,7 +9,8 @@ const XIcon = ({ className }) => (
 );
 
 /**
- * PropertyDetailsDrawer - A slide-out drawer for editing property details
+ * PropertyDetailsDrawer - A non-modal slide-out drawer for editing property details
+ * Does not block interaction with the main content when open.
  *
  * @param {Object} props
  * @param {boolean} props.open - Whether the drawer is open
@@ -25,52 +25,42 @@ const PropertyDetailsDrawer = ({ open, onClose, property, onUpdate, onDelete }) 
   }
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
-      {/* Backdrop - transparent to keep content visible */}
-      <div className="fixed inset-0" aria-hidden="true" />
-
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-            <DialogPanel
-              transition
-              className="pointer-events-auto w-screen max-w-xs transform transition duration-300 ease-in-out data-[closed]:translate-x-full"
-            >
-              <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
-                {/* Header */}
-                <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
-                  <div className="flex items-start justify-between">
-                    <DialogTitle className="text-base font-semibold text-gray-900 truncate">
-                      {property.name ? `Edit Property: ${property.name}` : 'Edit Property'}
-                    </DialogTitle>
-                    <div className="ml-2 flex h-6 items-center">
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        <span className="absolute -inset-2.5" />
-                        <span className="sr-only">Close panel</span>
-                        <XIcon aria-hidden="true" className="size-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="relative flex-1 px-3 py-3 overflow-y-auto">
-                  <PropertyDetailsPanel
-                    property={property}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                  />
-                </div>
-              </div>
-            </DialogPanel>
+    <div
+      className={`fixed inset-y-0 right-0 z-40 w-screen max-w-xs transform transition-transform duration-300 ease-in-out ${
+        open ? 'translate-x-0' : 'translate-x-full'
+      }`}
+    >
+      <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
+        {/* Header */}
+        <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
+          <div className="flex items-start justify-between">
+            <h2 className="text-sm font-semibold text-gray-900 truncate">
+              {property.name ? `Edit: ${property.name}` : 'Edit Property'}
+            </h2>
+            <div className="ml-2 flex h-6 items-center">
+              <button
+                type="button"
+                onClick={onClose}
+                className="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span className="absolute -inset-2.5" />
+                <span className="sr-only">Close panel</span>
+                <XIcon aria-hidden="true" className="size-5" />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Content */}
+        <div className="relative flex-1 px-3 py-3 overflow-y-auto">
+          <PropertyDetailsPanel
+            property={property}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          />
+        </div>
       </div>
-    </Dialog>
+    </div>
   );
 };
 
