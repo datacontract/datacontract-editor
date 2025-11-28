@@ -197,7 +197,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
           {/* Property, Value, and Remove button in one line */}
           <div className="grid grid-cols-12 gap-2 items-end">
             <div className="col-span-4">
-              <label className="block text-xs font-medium text-gray-700 mb-0.5">Property</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Property</label>
               <input
                 type="text"
                 value={item.property || ''}
@@ -207,7 +207,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
               />
             </div>
             <div className="col-span-7">
-              <div className="flex items-center gap-1 mb-0.5">
+              <div className="flex items-center gap-1 h-6">
                 <label className="text-xs font-medium text-gray-700">Value</label>
                 {editingType ? (
                   <select
