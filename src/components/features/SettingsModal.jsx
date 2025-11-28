@@ -7,11 +7,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   // Local state for form values
   const [apiServerUrl, setApiServerUrl] = useState('');
+  const [apiKey, setApiKey] = useState('');
 
   // Initialize form values when modal opens
   useEffect(() => {
     if (isOpen) {
       setApiServerUrl(editorConfig?.tests?.dataContractCliApiServerUrl || '');
+      setApiKey(editorConfig?.tests?.apiKey || '');
     }
   }, [isOpen, editorConfig]);
 
@@ -21,6 +23,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
       tests: {
         enabled: true,
         dataContractCliApiServerUrl: apiServerUrl.trim() || null,
+        apiKey: apiKey.trim() || null,
       },
     });
     onClose();
@@ -29,6 +32,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const handleCancel = () => {
     // Reset to original values
     setApiServerUrl(editorConfig?.tests?.dataContractCliApiServerUrl || '');
+    setApiKey(editorConfig?.tests?.apiKey || '');
     onClose();
   };
 
@@ -60,6 +64,22 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </p>
           <p className="mt-1 text-xs text-gray-500">
             The base URL for the Data Contract CLI API server. Leave empty to use the default.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-1">
+            X-API-KEY
+          </label>
+          <input
+            type="password"
+            id="api-key"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter your API key"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Optional API key for authentication with the Data Contract CLI API server.
           </p>
         </div>
       </div>

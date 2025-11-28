@@ -99,11 +99,18 @@ const defaultEditorStore = create()(
                     const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || 'https://api.datacontract.com';
                     const testEndpoint = `${baseUrl}/test`;
                     const url = server ? `${testEndpoint}?server=${encodeURIComponent(server)}` : testEndpoint;
+
+                    // Build headers with optional API key
+                    const headers = {
+                        'Content-Type': 'text/plain',
+                    };
+                    if (editorConfig?.tests?.apiKey) {
+                        headers['X-API-KEY'] = editorConfig.tests.apiKey;
+                    }
+
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'text/plain',
-                        },
+                        headers,
                         body: yaml,
                     });
 
@@ -293,7 +300,8 @@ const defaultEditorStore = create()(
                 domains: null,
                 tests: {
                     enabled: true,
-                    dataContractCliApiServerUrl: null, // null means use relative /test endpoint
+                    dataContractCliApiServerUrl: null, // null means use default https://api.datacontract.com
+                    apiKey: null, // Optional X-API-KEY for authentication
                 },
             },
             ...actions,

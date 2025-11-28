@@ -1,11 +1,10 @@
-apiVersion: v3.1.0
 kind: DataContract
-name: orders_data_contract
+apiVersion: v3.1.0
 id: urn:datacontract:orders:v1
+name: orders_data_contract
 version: 1.0.0
 status: active
 domain: sales
-tenant: example-org
 tags:
 - demo
 description:
@@ -20,23 +19,126 @@ description:
     - url: https://entropy-data.com/policies/gdpr-compliance
       type: businessDefinition
       description: GDPR compliance policy for handling customer data
-support:
-  - channel: "#sales-data-support"
-    tool: teams
-    url: https://teams.microsoft.com/l/channel/sales-data-support
-    scope: interactive
-    description: Teams channel for data contract support and questions
-  - channel: "#data-contracts"
-    tool: slack
-    url: https://entropy-data.slack.com/archives/C123456789
-    invitationUrl: https://entropy-data.slack.com/join/shared_invite/abc123xyz
-    scope: interactive
-    description: Slack channel for real-time support and collaboration
-  - channel: SALES Board
-    tool: ticket
-    url: https://entropy-data.atlassian.net/jira/software/projects/SALES/boards/1
-    scope: issues
-    description: Jira board for requesting new data products or submitting bugs
+schema:
+  - name: orders
+    logicalType: object
+    physicalType: table
+    description: All successful and cancelled web-shop orders since 2020-01-01
+    quality:
+      - name: Row count
+        metric: rowCount
+        mustBeGreaterThan: 100000
+        description: If the row count is less than 100,000, something is wrong
+        dimension: completeness
+    properties:
+      - name: order_id
+        businessName: Order Identifier
+        logicalType: string
+        physicalType: uuid
+        description: Technical ID for the order
+        required: true
+        primaryKey: true
+        classification: internal
+        examples:
+          - 123e4567-e89b-12d3-a456-426614174000
+      - name: customer_id
+        businessName: Customer Identifier
+        logicalType: string
+        physicalType: text
+        description: Reference to customer who placed the order
+        required: true
+        classification: public
+        examples:
+          - "1000000001"
+      - name: order_total
+        businessName: Total Order Amount
+        logicalType: integer
+        physicalType: integer
+        description: Total order amount in cent
+        required: true
+        classification: internal
+        examples:
+          - 9999
+        logicalTypeOptions:
+          minimum: 0
+      - name: order_timestamp
+        businessName: Order Date
+        logicalType: timestamp
+        physicalType: timestamptz
+        description: Date and time when order was placed in UTC time zone
+        required: true
+        partitioned: true
+        partitionKeyPosition: 1
+        classification: internal
+        examples:
+          - "2025-11-23 11:40:26.456654+00"
+      - name: order_status
+        businessName: Status
+        description: The business status of the order
+        logicalType: string
+        physicalType: TEXT
+        examples:
+          - shipped
+        quality:
+          - type: library
+            description: Ensure that there are no other status values.
+            metric: invalidValues
+            arguments:
+              validValues:
+                - pending
+                - paid
+                - processing
+                - shipped
+                - delivered
+                - cancelled
+                - refunded
+            mustBe: 0
+  - name: line_items
+    physicalType: table
+    description: Details for each item in an order
+    properties:
+      - name: line_item_id
+        logicalType: string
+        description: Unique identifier for the line item
+        physicalType: UUID
+        examples:
+          - 12c9ba21-0c44-4e29-ba72-b8fd01c1be30
+        logicalTypeOptions:
+          format: uuid
+        required: true
+        primaryKey: true
+      - name: sku
+        logicalType: string
+        businessName: Stock Keeping Unit
+        description: Identifier for the purchased product
+        physicalType: TEXT
+        examples:
+          - 111222333
+        required: true
+      - name: price
+        logicalType: integer
+        description: Price in cents for this line item including tax
+        physicalType: INTEGER
+        examples:
+          - 9999
+        required: true
+      - name: order_id
+        required: false
+        primaryKey: false
+        logicalType: string
+        physicalType: uuid
+        description: Reference to the order that this line item belongs to
+        relationships:
+          - type: foreignKey
+            to: orders.order_id
+servers:
+  - server: postgres
+    environment: demo
+    type: postgres
+    host: aws-1-eu-central-2.pooler.supabase.com
+    port: 6543
+    database: postgres
+    schema: dp_orders_v1
 team:
   name: Sales Analytics Team
   description: Team responsible for managing and maintaining sales order data
@@ -56,6 +158,23 @@ team:
       role: Data Engineer
       description: Manages data pipelines and technical implementation
       dateIn: "2023-06-01"
+support:
+  - channel: "#sales-data-support"
+    tool: teams
+    url: https://teams.microsoft.com/l/channel/sales-data-support
+    scope: interactive
+    description: Teams channel for data contract support and questions
+  - channel: "#data-contracts"
+    tool: slack
+    url: https://entropy-data.slack.com/archives/C123456789
+    invitationUrl: https://entropy-data.slack.com/join/shared_invite/abc123xyz
+    scope: interactive
+    description: Slack channel for real-time support and collaboration
+  - channel: SALES Board
+    tool: ticket
+    url: https://entropy-data.atlassian.net/jira/software/projects/SALES/boards/1
+    scope: issues
+    description: Jira board for requesting new data products or submitting bugs
 slaProperties:
   - property: freshness
     value: 24
@@ -68,206 +187,3 @@ slaProperties:
     unit: years
     driver: regulatory
     description: Order and line item data retained for 10 years for compliance purposes
-servers:
-  - server: production
-    type: snowflake
-    account: example-org
-    database: SALES_PROD
-    schema: ORDERS_V1
-    environment: prod
-    roles:
-      - role: sales-prod-orders-v1-read
-        access: read
-        description: Read-only access to production orders data
-  - server: test
-    type: snowflake
-    account: example-org
-    database: SALES_TEST
-    schema: ORDERS_V1
-    environment: test
-    roles:
-      - role: sales-test-orders-v1-read
-        access: read
-        description: Read-only access to test orders data
-schema:
-  - name: orders
-    logicalType: object
-    physicalType: table
-    description: Customer orders with order header information
-    quality:
-      - type: text
-        name: SAP Order Verification
-        description: All orders are double checked with the SAP order module
-        dimension: accuracy
-    properties:
-      - name: order_id
-        businessName: Order Identifier
-        logicalType: string
-        physicalType: VARCHAR(50)
-        description: Unique order identifier
-        required: true
-        primaryKey: true
-        classification: public
-      - name: customer_id
-        businessName: Customer Identifier
-        logicalType: string
-        physicalType: VARCHAR(50)
-        description: Reference to customer who placed the order
-        required: true
-        classification: restricted
-      - name: customer_email
-        businessName: Customer Email Address
-        logicalType: string
-        physicalType: VARCHAR(100)
-        description: Email address of the customer
-        required: false
-        tags:
-          - pii
-      - name: order_date
-        businessName: Order Date
-        logicalType: timestamp
-        physicalType: TIMESTAMP
-        description: Date and time when order was placed
-        required: true
-        partitioned: true
-        partitionKeyPosition: 1
-        classification: public
-      - name: order_status
-        businessName: Order Status
-        logicalType: string
-        physicalType: VARCHAR(20)
-        description: Current status of the order
-        required: true
-        classification: public
-        enum:
-          - SHIPPED
-          - CANCELLED
-          - ORDERED
-        quality:
-          - type: library
-            metric: invalidValues
-            name: Valid Order Status Check
-            description: Ensures order_status contains only valid values (SHIPPED, CANCELLED, or ORDERED)
-            dimension: conformity
-            arguments:
-              validValues:
-                - SHIPPED
-                - CANCELLED
-                - ORDERED
-            mustBe: 0
-      - name: total_amount
-        businessName: Total Order Amount
-        logicalType: number
-        physicalType: DECIMAL(10,2)
-        description: Total order amount in USD
-        required: true
-        classification: public
-      - name: order_tags
-        businessName: Order Tags
-        logicalType: array
-        description: Tags associated with this order for categorization
-        required: false
-        classification: public
-        logicalTypeOptions:
-          minItems: 0
-          maxItems: 10
-          uniqueItems: true
-        items:
-          logicalType: string
-          description: Individual tag value
-      - name: shipping_addresses
-        businessName: Shipping Addresses
-        logicalType: array
-        description: One or more shipping addresses for this order
-        required: false
-        classification: restricted
-        tags:
-          - pii
-        logicalTypeOptions:
-          minItems: 1
-        items:
-          logicalType: object
-          description: Shipping address information
-          properties:
-            - name: address_type
-              logicalType: string
-              description: Type of address (e.g., residential, commercial)
-              required: true
-            - name: street_line_1
-              logicalType: string
-              description: First line of street address
-              required: true
-            - name: street_line_2
-              logicalType: string
-              description: Second line of street address (apt, suite, etc.)
-              required: false
-            - name: city
-              logicalType: string
-              description: City name
-              required: true
-            - name: postal_code
-              logicalType: string
-              description: Postal or ZIP code
-              required: true
-            - name: country
-              logicalType: string
-              description: Country code (ISO 3166-1 alpha-2)
-              required: true
-  - name: line_items
-    logicalType: object
-    physicalType: table
-    description: Individual line items within each order
-    properties:
-      - name: line_item_id
-        businessName: Line Item Identifier
-        logicalType: string
-        physicalType: VARCHAR(50)
-        description: Unique line item identifier
-        required: true
-        primaryKey: true
-        classification: public
-      - name: order_id
-        businessName: Order Identifier
-        logicalType: string
-        physicalType: VARCHAR(50)
-        description: Reference to the parent order
-        required: true
-        classification: public
-        relationships:
-          - to: orders.order_id
-            type: foreignKey
-      - name: product_id
-        businessName: Product Identifier
-        logicalType: string
-        physicalType: VARCHAR(50)
-        description: Reference to the product
-        required: true
-        classification: public
-      - name: quantity
-        businessName: Quantity
-        logicalType: integer
-        physicalType: INTEGER
-        description: Quantity of the product ordered
-        required: true
-        classification: public
-        quality:
-          - type: library
-            metric: invalidValues
-            name: Positive Quantity Check
-            description: Ensures quantity is always greater than zero
-            dimension: accuracy
-            mustBeGreaterThan: 0
-      - name: unit_price
-        businessName: Unit Price
-        logicalType: number
-        physicalType: DECIMAL(10,2)
-        description: Price per unit in USD
-        required: true
-        classification: public
-      - name: line_total
-        businessName: Line Total
-        logicalType: number
-        physicalType: DECIMAL(10,2)
-        description: Total for this line item (quantity * unit_price)
-        required: true
-        classification: public
