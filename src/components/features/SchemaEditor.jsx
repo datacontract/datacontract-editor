@@ -1565,7 +1565,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                 <span className="text-sm font-medium text-gray-700">Properties</span>
                                                 <button
                                                     onClick={() => addProperty()}
-                                                    className="text-gray-400 hover:text-indigo-600"
+                                                    className="text-gray-400 hover:text-indigo-600 cursor-pointer"
                                                     title="Add property"
                                                 >
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor"
