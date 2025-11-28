@@ -284,8 +284,14 @@ description:
                 cursorLine: yamlCursorLine,
                 targetRoute: formRoute
             });
-            setView('form');
             navigate(formRoute);
+            setView('form');
+        } else if (currentView === 'diagram') {
+            // When switching from diagram to form, navigate to the selected schema or overview
+            const selectedSchemaIndex = useEditorStore.getState().selectedDiagramSchemaIndex;
+            const targetRoute = selectedSchemaIndex !== null ? `/schemas/${selectedSchemaIndex}` : '/overview';
+            navigate(targetRoute);
+            setView('form');
         } else {
             setView('form');
         }

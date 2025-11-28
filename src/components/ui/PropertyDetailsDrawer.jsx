@@ -21,9 +21,10 @@ const XIcon = ({ className }) => (
  * @param {Function} props.onDelete - Callback when the property should be deleted
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
-const PropertyDetailsDrawer = forwardRef(({ open, onClose, property, onUpdate, onDelete }, ref) => {
+const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, onClose, property, onUpdate, onDelete }, ref) {
+  // Always render the container for the ref, but hide it when no property
   if (!property) {
-    return null;
+    return <div ref={ref} className="hidden" />;
   }
 
   return (
@@ -66,7 +67,5 @@ const PropertyDetailsDrawer = forwardRef(({ open, onClose, property, onUpdate, o
     </div>
   );
 });
-
-PropertyDetailsDrawer.displayName = 'PropertyDetailsDrawer';
 
 export default PropertyDetailsDrawer;

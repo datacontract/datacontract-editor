@@ -422,20 +422,25 @@ const PropertyRow = ({
                             <input
                                 type="text"
                                 value={editedPropertyName}
-                                onChange={(e) => setEditedPropertyName(e.target.value)}
+                                onChange={(e) => {
+                                    const newName = e.target.value;
+                                    setEditedPropertyName(newName);
+                                    // Update YAML immediately so drawer syncs in real-time
+                                    updateProperty(schemaIdx, currentPath, 'name', newName);
+                                }}
                                 onBlur={() => {
-                                    updateProperty(schemaIdx, currentPath, 'name', editedPropertyName.trim());
                                     setEditingPropertyName(false);
                                 }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        updateProperty(schemaIdx, currentPath, 'name', editedPropertyName.trim());
                                         setEditingPropertyName(false);
                                     } else if (e.key === 'Escape') {
                                         e.preventDefault();
                                         e.stopPropagation();
+                                        // Restore original value on escape
+                                        updateProperty(schemaIdx, currentPath, 'name', property.name || '');
                                         setEditingPropertyName(false);
                                     }
                                 }}
@@ -662,6 +667,41 @@ const SchemaEditor = ({schemaIndex}) => {
         setSelectedProperty(null);
         setSelectedPropertyPath(null);
     }, [schemaIndex]);
+
+    // Sync selected property with YAML changes (e.g., when editing inline)
+    useEffect(() => {
+        if (!selectedProperty || !selectedProperty.propPath) return;
+
+        try {
+            const parsed = YAML.parse(yaml);
+            if (!parsed?.schema?.[schemaIndex]?.properties) return;
+
+            // Navigate to the property using the propPath array from selectedProperty
+            const propPath = selectedProperty.propPath;
+            let currentProp = parsed.schema[schemaIndex].properties;
+
+            for (let i = 0; i < propPath.length; i++) {
+                if (propPath[i] === 'items') {
+                    currentProp = currentProp?.items;
+                } else if (typeof propPath[i] === 'number') {
+                    currentProp = currentProp?.[propPath[i]];
+                    // Check if next segment is 'items', if not navigate to properties
+                    if (i < propPath.length - 1 && propPath[i + 1] !== 'items') {
+                        currentProp = currentProp?.properties;
+                    }
+                }
+            }
+
+            if (currentProp) {
+                setSelectedProperty(prev => ({
+                    ...prev,
+                    property: currentProp
+                }));
+            }
+        } catch {
+            // Ignore parse errors
+        }
+    }, [yaml, selectedProperty?.propPath, schemaIndex]);
 
     // Close drawer when clicking outside properties and drawer
     useEffect(() => {

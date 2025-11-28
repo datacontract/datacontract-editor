@@ -149,6 +149,12 @@ const MainContent = () => {
                   <CustomProperties />
                 </FormPageErrorBoundary>
               } />
+              {/* Catch-all route for unmatched paths (e.g., /diagram during view transition) */}
+              <Route path="*" element={
+                <FormPageErrorBoundary pageName="Overview">
+                  <Overview />
+                </FormPageErrorBoundary>
+              } />
             </Routes>
           )}
         </div>
