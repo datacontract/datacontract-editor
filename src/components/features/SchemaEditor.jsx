@@ -511,6 +511,13 @@ const PropertyRow = ({
 
                         {/* Visual Indicators */}
                         <PropertyIndicators property={property}/>
+
+                        {/* Description preview */}
+                        {property.description && (
+                            <span className="text-xs text-gray-400 truncate max-w-xs" title={property.description}>
+                                {property.description}
+                            </span>
+                        )}
                     </div>
 
                     {/* Action Icons */}
