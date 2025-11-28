@@ -149,7 +149,7 @@ const ItemsRow = ({
     return (
         <>
             <div
-                className={`border-t border-gray-100 hover:bg-gray-50 group cursor-pointer ${isSelected ? 'bg-indigo-50 ring-1 ring-inset ring-indigo-200' : ''}`}
+                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
                 style={{paddingLeft: `${depth * 1.5}rem`}}
                 onClick={handleSelect}
             >
@@ -370,12 +370,37 @@ const PropertyRow = ({
                          yaml,
                          setYaml,
                          onSelectProperty,
-                         selectedPropertyPath
+                         selectedPropertyPath,
+                         totalPropertiesCount = 0,
+                         onSaveAndAddNext,
+                         autoEditNewProperty = false,
+                         onAutoEditComplete
                      }) => {
     const [editingPropertyName, setEditingPropertyName] = useState(false);
     const [editedPropertyName, setEditedPropertyName] = useState('');
     const [editingPropertyType, setEditingPropertyType] = useState(false);
     const jsonSchema = useEditorStore((state) => state.schemaData);
+    const inputRef = useRef(null);
+
+    // Auto-edit when this is a newly added property
+    useEffect(() => {
+        if (autoEditNewProperty && depth === 0) {
+            setEditedPropertyName(property.name || '');
+            setEditingPropertyName(true);
+            // Also select this property to show details drawer
+            const currentPath = [...propPath, propIndex];
+            onSelectProperty(currentPath, property);
+            onAutoEditComplete?.();
+        }
+    }, [autoEditNewProperty, depth, onAutoEditComplete, property.name, propPath, propIndex, onSelectProperty, property]);
+
+    // Focus input when editing starts
+    useEffect(() => {
+        if (editingPropertyName && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [editingPropertyName]);
 
     // Get logical type options dynamically from schema
     const logicalTypeOptions = useMemo(() => {
@@ -400,7 +425,7 @@ const PropertyRow = ({
     return (
         <>
             <div
-                className={`border-t border-gray-100 hover:bg-gray-50 group cursor-pointer ${isSelected ? 'bg-indigo-50 ring-1 ring-inset ring-indigo-200' : ''}`}
+                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
                 style={{paddingLeft: `${depth * 1.5}rem`}}
                 onClick={handleSelect}
             >
@@ -435,6 +460,12 @@ const PropertyRow = ({
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
                                         e.stopPropagation();
+                                        // Check if this is the last property at top level (depth === 0)
+                                        const isLastProperty = depth === 0 && propIndex === totalPropertiesCount - 1;
+                                        if (isLastProperty && onSaveAndAddNext) {
+                                            // Save and add next property
+                                            onSaveAndAddNext(schemaIdx, currentPath, editedPropertyName);
+                                        }
                                         setEditingPropertyName(false);
                                     } else if (e.key === 'Escape') {
                                         e.preventDefault();
@@ -445,6 +476,7 @@ const PropertyRow = ({
                                     }
                                 }}
                                 onClick={(e) => e.stopPropagation()}
+                                ref={inputRef}
                                 className="bg-white px-2 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[8rem]"
                                 placeholder="property name"
                                 size={editedPropertyName ? editedPropertyName.length : 16}
@@ -662,11 +694,49 @@ const SchemaEditor = ({schemaIndex}) => {
     const propertiesContainerRef = useRef(null);
     const drawerRef = useRef(null);
 
+    // Refs for auto-editing newly added properties (like diagram editor)
+    const shouldEditNextProperty = useRef(false);
+    const previousPropertyCount = useRef(0);
+    const nextPropertyToEdit = useRef(null); // { schemaIdx, propPath }
+
+    // State to track which property index should auto-edit
+    const [autoEditPropertyIndex, setAutoEditPropertyIndex] = useState(null);
+
     // Close drawer when schema index changes
     useEffect(() => {
         setSelectedProperty(null);
         setSelectedPropertyPath(null);
     }, [schemaIndex]);
+
+    // Track property count for auto-edit detection
+    useEffect(() => {
+        try {
+            const parsed = yaml?.trim() ? YAML.parse(yaml) : null;
+            const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
+            previousPropertyCount.current = currentCount;
+        } catch {
+            // Ignore parse errors
+        }
+    }, [schemaIndex]);
+
+    // Auto-edit newly added property (like diagram editor)
+    useEffect(() => {
+        if (!shouldEditNextProperty.current || !nextPropertyToEdit.current) return;
+
+        try {
+            const parsed = yaml?.trim() ? YAML.parse(yaml) : null;
+            const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
+
+            if (currentCount > previousPropertyCount.current) {
+                // A new property was added - the PropertyRow will detect this via its own state
+                previousPropertyCount.current = currentCount;
+                shouldEditNextProperty.current = false;
+                nextPropertyToEdit.current = null;
+            }
+        } catch {
+            // Ignore parse errors
+        }
+    }, [yaml, schemaIndex]);
 
     // Sync selected property with YAML changes (e.g., when editing inline)
     useEffect(() => {
@@ -885,6 +955,50 @@ const SchemaEditor = ({schemaIndex}) => {
         }
     };
 
+    // Save current property and add next one (for Enter key on last property)
+    const handleSaveAndAddNext = useCallback((schemaIdx, propPath, newName) => {
+        try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = YAML.parse(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
+                return;
+            }
+
+            if (!parsed.schema[schemaIndex].properties) {
+                parsed.schema[schemaIndex].properties = [];
+            }
+
+            // Update the current property name
+            const propIndex = propPath[propPath.length - 1];
+            if (typeof propIndex === 'number' && parsed.schema[schemaIndex].properties[propIndex]) {
+                parsed.schema[schemaIndex].properties[propIndex].name = newName?.trim() || '';
+            }
+
+            // Add the new property
+            parsed.schema[schemaIndex].properties.push({
+                name: '',
+                logicalType: '',
+                description: ''
+            });
+
+            const newYaml = YAML.stringify(parsed);
+            setYaml(newYaml);
+
+            // Set the new property index to auto-edit
+            const newPropertyIndex = parsed.schema[schemaIndex].properties.length - 1;
+            setAutoEditPropertyIndex(newPropertyIndex);
+        } catch (error) {
+            console.error('Error saving and adding next property:', error);
+        }
+    }, [yaml, schemaIndex, setYaml]);
+
     // Update property field (supports nested properties via propPath)
     const updateProperty = (schemaIdx, propPath, field, value) => {
         try {
@@ -980,6 +1094,43 @@ const SchemaEditor = ({schemaIndex}) => {
             console.error('Error removing property:', error);
         }
     };
+
+    // Handle keyboard shortcuts for selected property (Delete/Backspace to remove)
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (!selectedProperty) return;
+
+            // Check if we're inside an input/textarea - don't delete if typing
+            const activeElement = document.activeElement;
+            const isTyping = activeElement?.tagName === 'INPUT' ||
+                           activeElement?.tagName === 'TEXTAREA' ||
+                           activeElement?.isContentEditable;
+
+            if (isTyping) return;
+
+            // Delete or Backspace to remove property
+            if (event.key === 'Delete' || event.key === 'Backspace') {
+                event.preventDefault();
+
+                const propPath = selectedProperty.propPath;
+                const propIdx = propPath[propPath.length - 1];
+
+                // Only support deleting top-level properties for now
+                if (propPath.length === 1 && typeof propIdx === 'number') {
+                    if (window.confirm('Are you sure you want to delete this property?')) {
+                        removeProperty(schemaIndex, propIdx);
+                        setSelectedProperty(null);
+                        setSelectedPropertyPath(null);
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [selectedProperty, schemaIndex]);
 
     // Add sub-property to a property (for nested objects or items)
     const addSubProperty = (schemaIdx, propPath, isItems = false) => {
@@ -1474,6 +1625,10 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             setYaml={setYaml}
                                                             onSelectProperty={handleSelectProperty}
                                                             selectedPropertyPath={selectedPropertyPath}
+                                                            totalPropertiesCount={schemaData.schema.properties.length}
+                                                            onSaveAndAddNext={handleSaveAndAddNext}
+                                                            autoEditNewProperty={autoEditPropertyIndex === propIndex}
+                                                            onAutoEditComplete={() => setAutoEditPropertyIndex(null)}
                                                         />
                                                     ))}
                                                 </div>

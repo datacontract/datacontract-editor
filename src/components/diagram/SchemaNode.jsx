@@ -369,8 +369,8 @@ const SchemaNode = ({ data, id }) => {
             return (
             <Fragment key={index}>
               <div
-                className={`px-3 py-2 hover:bg-gray-50 group relative cursor-pointer ${
-                  isPropertyDetailsOpen ? 'bg-blue-50' : ''
+                className={`px-3 py-2 group relative cursor-pointer ${
+                  isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                 }`}
                 onContextMenu={(e) => handlePropertyContextMenu(e, index)}
                 onClick={() => {
@@ -583,8 +583,8 @@ const SchemaNode = ({ data, id }) => {
                     return (
                     <div
                       key={`${index}-items-${itemPropIndex}`}
-                      className={`pl-12 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer ${
-                        isItemPropertyDetailsOpen ? 'bg-blue-50' : ''
+                      className={`pl-12 pr-3 py-1.5 relative cursor-pointer ${
+                        isItemPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -796,8 +796,8 @@ const SchemaNode = ({ data, id }) => {
                 return (
                 <div
                   key={`${index}-${nestedIndex}`}
-                  className={`pl-8 pr-3 py-1.5 hover:bg-gray-50 relative cursor-pointer ${
-                    isNestedPropertyDetailsOpen ? 'bg-blue-50' : ''
+                  className={`pl-8 pr-3 py-1.5 relative cursor-pointer ${
+                    isNestedPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();

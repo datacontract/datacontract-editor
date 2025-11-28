@@ -227,6 +227,40 @@ const DiagramViewInner = () => {
     setSelectedProperty(null);
   }, []);
 
+  // Handle keyboard shortcuts for selected property (Delete/Backspace to remove)
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Only handle if a property is selected (not nested)
+      if (!selectedProperty || selectedProperty.nestedIndex != null) return;
+
+      // Check if we're inside an input/textarea - don't delete if typing
+      const activeElement = document.activeElement;
+      const isTyping = activeElement?.tagName === 'INPUT' ||
+                       activeElement?.tagName === 'TEXTAREA' ||
+                       activeElement?.isContentEditable;
+
+      if (isTyping) return;
+
+      // Delete or Backspace to remove property
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault();
+
+        const { schemaIndex, propertyIndex } = selectedProperty;
+        if (typeof propertyIndex === 'number' && typeof schemaIndex === 'number') {
+          if (window.confirm('Are you sure you want to delete this property?')) {
+            handleDeleteProperty(`schema-${schemaIndex}`, propertyIndex);
+            setSelectedProperty(null);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedProperty, handleDeleteProperty]);
+
   // Handle property update from drawer
   const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
     if (!selectedProperty || !parsedData?.schema) return;
