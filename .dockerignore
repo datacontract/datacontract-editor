@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+
+# Build output (will be rebuilt in container)
+dist
+
+# Development files
+.git
+.gitignore
+.env
+.env.*
+*.log
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+coverage
+*.test.js
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore

@@ -41,6 +41,17 @@ npx datacontract-editor mydatacontract.odcs.yaml
 
 
 
+### Docker
+
+Run the editor locally in a Docker container:
+
+```
+docker run -d -p 4173:4173 datacontract/editor
+```
+
+Then open http://localhost:4173
+
+
 ### Data Contract CLI
 
 Coming soon!
