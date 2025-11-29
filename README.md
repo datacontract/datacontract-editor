@@ -2,33 +2,43 @@
 
 A web-based editor for creating and managing data contracts using the [Open Data Contract Standard](https://bitol-io.github.io/open-data-contract-standard/latest/) (ODCS).
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/datacontract/datacontract-editor/main/docs/screenshot.png)
 
 ## Features
 
+- **Open Data Contract Standard**: ODCS is the industry-standard for data contracts. Now with support for v3.1.0.
 - **Editing Modes**:
   - **Visual Editor**: Define data models and relationships using a visual interface
-  - **Form Editor**: Get guided input from a simple form interface
-  - **YAML Editor**: Edit data contracts in YAML format
-- **Real-time Preview**: Live preview of data contracts with syntax validation
+  - **Form Editor**: Get guided input with a simple form interface
+  - **YAML Editor**: Edit data contracts directly in YAML format with code completion
+- **Preview**: Live preview of data contracts as HTML
 - **Validation**: Get instant feedback on your data contracts
-- **Data Contract CLI Integration**: Run tests against your contracts using the Data Contract CLI API Server.
+- **Test**: Test your data contract directly against your data using the Data Contract CLI API Server.
 
 
 ## Usage
 
 ### Web Editor
 
+Open the editor as web application:
+
 https://editor.datacontract.com
 
 
 ### Standalone Application
 
-Coming soon!
+You can start the editor locally using the following command:
 
 ```
 npx datacontract-editor
 ```
+
+Or edit a data contract file directly:
+
+```
+npx datacontract-editor mydatacontract.odcs.yaml
+```
+
 
 
 ### Data Contract CLI
@@ -45,7 +55,7 @@ datacontract editor datacontract.yaml
 
 ### Entropy Data
 
-[Entropy Data](https://entropy-data.com) is our commercial offering for managing data products with data contracts.
+The Data Contract Editor is fully integrated in our commercial product [Entropy Data](https://entropy-data.com) to manage multiple data contracts in a single application.
 
 
 
