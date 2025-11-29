@@ -27,7 +27,7 @@ https://editor.datacontract.com
 Coming soon!
 
 ```
-npx datacontract-editor datacontract.yaml
+npx datacontract-editor
 ```
 
 
