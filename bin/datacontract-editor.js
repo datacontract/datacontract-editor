@@ -52,19 +52,21 @@ const { port: requestedPort, targetFile } = parseArgs();
 // Resolve target file path if provided
 let targetFilePath = null;
 let targetFileName = null;
+let isNewFile = false;
 if (targetFile) {
   targetFilePath = resolve(process.cwd(), targetFile);
   targetFileName = basename(targetFile);
-
-  if (!existsSync(targetFilePath)) {
-    console.error(`Error: File not found: ${targetFilePath}`);
-    process.exit(1);
-  }
 
   // Validate it's a YAML file
   if (!targetFile.endsWith('.yaml') && !targetFile.endsWith('.yml')) {
     console.error('Error: File must be a YAML file (.yaml or .yml)');
     process.exit(1);
+  }
+
+  // Create empty file if it doesn't exist
+  if (!existsSync(targetFilePath)) {
+    writeFileSync(targetFilePath, '', 'utf-8');
+    isNewFile = true;
   }
 }
 
@@ -338,7 +340,7 @@ async function start() {
   datacontract-editor v${pkg.version}
 
   Server running at ${url}${targetFileName ? `
-  Editing: ${targetFileName}` : ''}
+  ${isNewFile ? 'Creating' : 'Editing'}: ${targetFileName}` : ''}
 
   Press Ctrl+C to stop
 `);
