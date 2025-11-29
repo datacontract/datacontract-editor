@@ -1,6 +1,8 @@
 # Data Contract Editor
 
-A modern web-based editor for creating and managing data contracts using the Open Data Contract Standard (ODCS).
+A web-based editor for creating and managing data contracts using the [Open Data Contract Standard](https://bitol-io.github.io/open-data-contract-standard/latest/) (ODCS).
+
+![Screenshot](docs/screenshot.png)
 
 ## Features
 
@@ -10,7 +12,7 @@ A modern web-based editor for creating and managing data contracts using the Ope
   - **YAML Editor**: Edit data contracts in YAML format
 - **Real-time Preview**: Live preview of data contracts with syntax validation
 - **Validation**: Get instant feedback on your data contracts
-- **Data Contract CLI Integration**: Run tests against your contracts using the Data Contract CLI
+- **Data Contract CLI Integration**: Run tests against your contracts using the Data Contract CLI API Server.
 
 
 ## Usage
@@ -18,6 +20,15 @@ A modern web-based editor for creating and managing data contracts using the Ope
 ### Web Editor
 
 https://editor.datacontract.com
+
+
+### Standalone Application
+
+Coming soon!
+
+```
+npx datacontract-editor datacontract.yaml
+```
 
 
 ### Data Contract CLI
@@ -30,13 +41,6 @@ You can start the editor from the Data Contract CLI:
 datacontract editor datacontract.yaml
 ```
 
-### Standalone Application
-
-Coming soon!
-
-```
-npx datacontract-editor@latest
-```
 
 
 ### Entropy Data
