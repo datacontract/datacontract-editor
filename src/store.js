@@ -299,6 +299,7 @@ const defaultEditorStore = create()(
                 mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
                 onCancel: null,
                 onDelete: null,
+                showDelete: true, // Show Delete button in EMBEDDED mode
                 teams: null,
                 domains: null,
                 tests: {
