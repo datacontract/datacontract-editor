@@ -20,7 +20,11 @@
         container: '#root',
         mode: 'SERVER',
         enablePersistence: true,
-        initialView: 'form'
+        initialView: 'form',
+        tests: {
+          enabled: true,
+          dataContractCliApiServerUrl: 'https://api.datacontract.com'
+        }
       });
     </script>
   </body>
