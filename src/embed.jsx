@@ -88,7 +88,7 @@ function createConfiguredStore(config) {
       setYaml: (newYaml) => {
         set({ yaml: newYaml, isDirty: true });
       },
-      loadYaml: (newYaml) => set({ yaml: newYaml, isDirty: false }),
+      loadYaml: (newYaml) => set({ yaml: newYaml, baselineYaml: newYaml, isDirty: false }),
       markClean: () => set({ isDirty: false }),
       clearSaveInfo: () => set({ lastSaveInfo: null }),
       addNotification: (notification) => {
@@ -220,7 +220,7 @@ function createConfiguredStore(config) {
       loadFromFile: async () => {
         try {
           const yamlContent = await fileStorageBackend.loadYamlFile();
-          set({ yaml: yamlContent, isDirty: false });
+          set({ yaml: yamlContent, baselineYaml: yamlContent, isDirty: false });
           return yamlContent;
         } catch (error) {
           if (error.message !== 'File selection cancelled') {
@@ -234,17 +234,18 @@ function createConfiguredStore(config) {
         // Use custom onSave callback if provided
         if (config.onSave) {
           config.onSave(yaml);
-          set({ isDirty: false });
+          set({ isDirty: false, baselineYaml: yaml });
           return;
         }
 
         await fileStorageBackend.saveYamlFile(yaml, suggestedName);
-        set({ isDirty: false });
+        set({ isDirty: false, baselineYaml: yaml });
       },
     };
 
     return {
       yaml: config.yaml,
+      baselineYaml: config.yaml, // Set initial YAML as baseline for diff view
       isDirty: false,
       isPreviewVisible: true,
       isWarningsVisible: false,
