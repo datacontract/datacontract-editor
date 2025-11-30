@@ -19,7 +19,7 @@ import { getLayoutedElements, getGridPosition } from './layoutUtils.js';
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 
 const defaultEdgeOptions = {
-  style: { strokeWidth: 2, stroke: '#6366f1' },
+  style: { strokeWidth: 2, stroke: '#b1b1b7' },
 };
 
 const DiagramViewInner = () => {
@@ -579,7 +579,7 @@ const DiagramViewInner = () => {
                     deletable: true,
                     focusable: true,
                     interactionWidth: 20,
-                    style: { stroke: '#6366f1', strokeWidth: 2 },
+                    style: { stroke: '#b1b1b7', strokeWidth: 2 },
                   });
                 }
               }
@@ -620,7 +620,7 @@ const DiagramViewInner = () => {
                     deletable: true,
                     focusable: true,
                     interactionWidth: 20,
-                    style: { stroke: '#6366f1', strokeWidth: 2 },
+                    style: { stroke: '#b1b1b7', strokeWidth: 2 },
                   });
                 }
               }

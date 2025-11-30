@@ -283,7 +283,7 @@ const SchemaNode = ({ data, id }) => {
 
   return (
     <div
-      className="bg-white border-2 border-gray-300 rounded-lg shadow-lg min-w-[250px]"
+      className="min-w-[250px]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -329,9 +329,19 @@ const SchemaNode = ({ data, id }) => {
         </div>
       </NodeToolbar>
 
-      {/* Schema Header */}
-      <div className="bg-indigo-600 text-white px-4 py-2 rounded-t-md flex justify-between items-center">
-        <div className="flex-1 min-w-0">
+      {/* Accent Bar */}
+      <div className="h-1.5 rounded-t bg-fuchsia-700"></div>
+
+      {/* Schema Container with Border */}
+      <div className="border-[3px] rounded-b border-solid border-[#E9EEF4]">
+        {/* Schema Header */}
+        <div className="flex items-center bg-[#E9EEF4] px-2 py-1.5">
+          {/* Table Icon */}
+          <span className="mr-1.5 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#000">
+              <path d="M1.930848 1.960304C1.164656 2.0890560000000002 0.5672480000000001 2.720784 0.481104 3.493344C0.45718400000000003 3.707872 0.45718400000000003 12.292128000000002 0.481104 12.506656000000001C0.556416 13.182064 1.023328 13.757952 1.67112 13.9744C1.955984 14.069584 1.5522719999999999 14.063872 8 14.063872C14.428111999999999 14.063872 14.025120000000001 14.069504 14.32 13.975567999999999C14.967136 13.769408 15.44312 13.186208 15.518896000000002 12.506656000000001C15.542816 12.292128000000002 15.542816 3.707872 15.518896000000002 3.493344C15.432112 2.714992 14.832336 2.0853919999999997 14.058 1.959808C13.930848000000001 1.939184 13.146432 1.936336 7.984 1.937712C3.166448 1.938992 2.03256 1.9432159999999998 1.930848 1.960304M1.981696 2.981056C1.74744 3.060912 1.557504 3.262384 1.4968320000000002 3.4953600000000002C1.475616 3.576832 1.472 3.742864 1.472 4.6353599999999995L1.472 5.68 8 5.68L14.528 5.68 14.528 4.6353599999999995C14.528 3.742864 14.524384 3.576832 14.503168 3.4953600000000002C14.441392 3.258128 14.239951999999999 3.0488000000000004 14.002992 2.975616C13.901808 2.944368 13.832176 2.944 7.99432 2.9444160000000004L2.088 2.944832 1.981696 2.981056M1.472 8.064L1.472 9.44 3.3120000000000003 9.44L5.152 9.44 5.152 8.064L5.152 6.688 3.3120000000000003 6.688L1.472 6.688 1.472 8.064M6.16 8.064L6.16 9.44 8 9.44L9.84 9.44 9.84 8.064L9.84 6.688 8 6.688L6.16 6.688 6.16 8.064M10.848 8.064L10.848 9.44 12.688 9.44L14.528 9.44 14.528 8.064L14.528 6.688 12.688 6.688L10.848 6.688 10.848 8.064M1.472 11.420639999999999C1.472 12.262528 1.47568 12.423440000000001 1.4968320000000002 12.50464C1.558608 12.741871999999999 1.760048 12.951200000000002 1.9970080000000001 13.024384C2.09592 13.054943999999999 2.1507359999999998 13.056000000000001 3.62568 13.056000000000001L5.152 13.056000000000001 5.152 11.744L5.152 10.432 3.3120000000000003 10.432L1.472 10.432 1.472 11.420639999999999M6.16 11.744L6.16 13.056000000000001 8 13.056000000000001L9.84 13.056000000000001 9.84 11.744L9.84 10.432 8 10.432L6.16 10.432 6.16 11.744M10.848 11.744L10.848 13.056000000000001 12.374319999999999 13.056000000000001C13.849264 13.056000000000001 13.90408 13.054943999999999 14.002992 13.024384C14.239951999999999 12.951200000000002 14.441392 12.741871999999999 14.503168 12.50464C14.52432 12.423440000000001 14.528 12.262528 14.528 11.420639999999999L14.528 10.432 12.688 10.432L10.848 10.432 10.848 11.744" fillRule="evenodd"/>
+            </svg>
+          </span>
           {isEditingSchemaName ? (
             <input
               type="text"
@@ -345,23 +355,22 @@ const SchemaNode = ({ data, id }) => {
                   setIsEditingSchemaName(false);
                 }
               }}
-              className="w-full px-2 py-1 text-sm bg-white text-gray-900 rounded border-2 border-indigo-300 focus:outline-none focus:border-indigo-400"
+              className="flex-1 px-2 py-1 text-sm bg-white text-gray-900 rounded border-2 border-indigo-300 focus:outline-none focus:border-indigo-400"
               autoFocus
             />
           ) : (
             <div
-              className="cursor-pointer hover:opacity-80"
+              className="cursor-pointer hover:opacity-80 flex-1 min-w-0"
               onClick={handleStartEditSchemaName}
               title="Click to edit"
             >
-              <div className="font-bold text-sm truncate">{data.schema.name || 'Unnamed Schema'}</div>
+              <span className="font-bold text-md truncate">{data.schema.name || 'Unnamed Schema'}</span>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Properties List */}
-      <div className="divide-y divide-gray-200">
+        {/* Properties List */}
+        <div className="bg-white rounded-b divide-y divide-[#E9EEF4]">
         {data.schema.properties && data.schema.properties.length > 0 ? (
           data.schema.properties.map((prop, index) => {
             const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
@@ -430,7 +439,7 @@ const SchemaNode = ({ data, id }) => {
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
-                    <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <span
                         className={`text-sm font-medium truncate cursor-pointer hover:text-indigo-600 ${
                           !prop.name || prop.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-900'
@@ -467,10 +476,14 @@ const SchemaNode = ({ data, id }) => {
                   )}
                 </div>
 
-                {/* Right side: Type */}
-                <div className="flex items-center gap-2 ml-2">
+                {/* Right side: Type with Key Icon */}
+                <div className="flex items-center gap-1.5 ml-2">
                   {editingPropertyIndex !== index && (
-                    <div className="text-xs text-gray-600 flex items-center">
+                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                      {/* Key Icon for Primary Key */}
+                      {prop.primaryKey && (
+                        <KeyIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                      )}
                       {editingPropertyType === index ? (
                         <select
                           value={prop.logicalType || ''}
@@ -493,7 +506,7 @@ const SchemaNode = ({ data, id }) => {
                         </select>
                       ) : (
                         <span
-                          className={`cursor-pointer hover:text-blue-600 ${!prop.logicalType ? 'text-gray-400 italic' : ''}`}
+                          className={`cursor-pointer hover:text-indigo-600 ${!prop.logicalType ? 'text-gray-400 italic' : ''}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingPropertyType(index);
@@ -906,6 +919,7 @@ const SchemaNode = ({ data, id }) => {
             No properties defined
           </div>
         )}
+        </div>
       </div>
 
       {/* Context Menu */}
