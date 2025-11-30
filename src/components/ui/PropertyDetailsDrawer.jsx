@@ -30,7 +30,7 @@ const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, 
   return (
     <div
       ref={ref}
-      className={`fixed inset-y-0 right-0 z-40 w-screen max-w-xl transform transition-transform duration-300 ease-in-out ${
+      className={`fixed inset-y-0 right-0 z-40 w-screen max-w-[calc(100vw-3rem)] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg transform transition-transform duration-300 ease-in-out ${
         open ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
