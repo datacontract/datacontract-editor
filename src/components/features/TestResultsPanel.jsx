@@ -293,7 +293,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
 
   if (testResults.length === 0) {
     return (
-      <div className="h-full bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <div className="h-full bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
         {/* Run Test Button */}
         <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-2">
@@ -399,11 +399,11 @@ const TestResultsPanel = ({ onCheckClick }) => {
               )}
             </button>
           )}
-          <div className="mt-2 flex items-center justify-between">
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
+          <div className="mt-2 flex items-center justify-between gap-2 min-w-0">
+            <div className="text-xs text-gray-500 dark:text-gray-400 min-w-0 truncate">
+              Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline" title={apiServerUrl}>{apiServerUrl}</a>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setShowSettings(true)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -416,7 +416,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
               </button>
               <button
                 onClick={() => setShowHelp(!showHelp)}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium whitespace-nowrap"
               >
                 {showHelp ? 'Hide Help' : 'Show Help'}
               </button>
@@ -456,7 +456,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
   }
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="h-full bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
       {/* Run Test Button */}
       <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-2">
@@ -540,11 +540,11 @@ const TestResultsPanel = ({ onCheckClick }) => {
             </button>
           )}
         </div>
-        <div className="mt-2 flex items-center justify-between">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline">{apiServerUrl}</a>
+        <div className="mt-2 flex items-center justify-between gap-2 min-w-0">
+          <div className="text-xs text-gray-500 dark:text-gray-400 min-w-0 truncate">
+            Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline" title={apiServerUrl}>{apiServerUrl}</a>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowSettings(true)}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -557,7 +557,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
             </button>
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium whitespace-nowrap"
             >
               {showHelp ? 'Hide Help' : 'Show Help'}
             </button>
