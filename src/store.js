@@ -47,7 +47,7 @@ const defaultEditorStore = create()(
         // Define action functions to ensure stable references
         const actions = {
             setYaml: (newYaml) => set({yaml: newYaml, isDirty: true}),
-            loadYaml: (newYaml) => set({yaml: newYaml, isDirty: false}),
+            loadYaml: (newYaml) => set({yaml: newYaml, baselineYaml: newYaml, isDirty: false}),
             markClean: () => set({isDirty: false}),
             clearSaveInfo: () => set({lastSaveInfo: null}),
             addNotification: (notification) => {
@@ -216,6 +216,7 @@ const defaultEditorStore = create()(
                     // Set the loaded file info so subsequent saves update the same file
                     set({
                         yaml: yamlContent,
+                        baselineYaml: yamlContent,
                         isDirty: false,
                         lastSaveInfo: filename ? {
                             filename: filename,
@@ -254,9 +255,10 @@ const defaultEditorStore = create()(
                     existingFilename
                 );
 
-                // Update save status
+                // Update save status and baseline
                 set({
                     isDirty: false,
+                    baselineYaml: yaml,
                     lastSaveInfo: {
                         filename: result?.filename || suggestedFilename,
                         timestamp: new Date().toISOString(),
@@ -277,6 +279,7 @@ const defaultEditorStore = create()(
 
         return {
             yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n',
+            baselineYaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n', // YAML at last save/load for diff comparison
             isDirty: false,
             isPreviewVisible: true,
             isWarningsVisible: false,

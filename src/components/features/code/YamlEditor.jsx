@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import Editor from '@monaco-editor/react';
+import Editor, { DiffEditor } from '@monaco-editor/react';
 import { configureMonacoYaml } from 'monaco-yaml';
 import { useEditorStore } from '../../../store.js';
 
@@ -11,11 +11,16 @@ const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
     const editorRef = useRef(null);
     const [fetchedSchema, setFetchedSchema] = useState(null);
     const [schemaError, setSchemaError] = useState(null);
+    const [showDiff, setShowDiff] = useState(false);
+    const [diffRenderSideBySide, setDiffRenderSideBySide] = useState(true);
     const monacoYamlRef = useRef(null);
     const monacoRef = useRef(null);
     const setMarkers = useEditorStore((state) => state.setMarkers);
     const setSchemaInfo = useEditorStore((state) => state.setSchemaInfo);
+    const baselineYaml = useEditorStore((state) => state.baselineYaml);
     const location = useLocation();
+
+    const hasChanges = yaml !== baselineYaml;
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
@@ -167,6 +172,59 @@ const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
 
     return (
         <div className="h-full w-full flex flex-col">
+            {/* Edit / Changes toggle bar */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-gray-100 border-b border-gray-200">
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setShowDiff(false)}
+                        className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                            !showDiff
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        }`}
+                    >
+                        Edit
+                    </button>
+                    <button
+                        onClick={() => setShowDiff(true)}
+                        className={`px-3 py-1 text-xs font-medium rounded transition-colors inline-flex items-center gap-1.5 ${
+                            showDiff
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        }`}
+                    >
+                        Diff
+                        {hasChanges && (
+                            <span className="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+                        )}
+                    </button>
+                </div>
+                {showDiff && (
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setDiffRenderSideBySide(true)}
+                            className={`px-2 py-0.5 text-xs rounded ${
+                                diffRenderSideBySide
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            Split
+                        </button>
+                        <button
+                            onClick={() => setDiffRenderSideBySide(false)}
+                            className={`px-2 py-0.5 text-xs rounded ${
+                                !diffRenderSideBySide
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            Unified
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {schemaError && (
                 <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-2">
                     <div className="flex">
@@ -179,33 +237,88 @@ const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
                 </div>
             )}
             <div className="flex-1">
-                <Editor
-                    height="100%"
-                    language="yaml"
-                    value={yaml || '# Enter your YAML here\n'}
-                    onChange={handleChange}
-                    onMount={handleEditorDidMount}
-                    theme="vs-light"
-                    options={{
-                        minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        fontSize: 12,
-                        wordWrap: 'on',
-                        automaticLayout: true,
-                        tabSize: 2,
-                        insertSpaces: true,
-                        folding: true,
-                        lineNumbers: 'on',
-                        glyphMargin: true,
-                        stickyScroll: {
-                            enabled: false,
-                        },
-                        scrollbar: {
-                            verticalScrollbarSize: 8,
-                            horizontalScrollbarSize: 8
-                        }
-                    }}
-                />
+                {showDiff ? (
+                    hasChanges ? (
+                        <DiffEditor
+                            original={baselineYaml || ''}
+                            modified={yaml || ''}
+                            language="yaml"
+                            theme="light"
+                            onMount={(editor) => {
+                                // Get the modified (right) editor and listen for changes
+                                const modifiedEditor = editor.getModifiedEditor();
+                                modifiedEditor.onDidChangeModelContent(() => {
+                                    const newValue = modifiedEditor.getValue();
+                                    if (onChange && newValue !== yaml) {
+                                        onChange(newValue);
+                                    }
+                                });
+                            }}
+                            options={{
+                                renderSideBySide: diffRenderSideBySide,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                                fontSize: 12,
+                                lineNumbers: 'on',
+                                wordWrap: diffRenderSideBySide ? 'off' : 'on',
+                                automaticLayout: true,
+                                originalEditable: false,
+                                ignoreTrimWhitespace: true,
+                                enableSplitViewResizing: true,
+                                stickyScroll: { enabled: false },
+                            }}
+                        />
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-gray-500 bg-gray-50">
+                            <div className="text-center">
+                                <svg
+                                    className="mx-auto h-12 w-12 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                <h3 className="mt-2 text-sm font-medium">No changes</h3>
+                                <p className="mt-1 text-sm">Your contract matches the last saved version.</p>
+                            </div>
+                        </div>
+                    )
+                ) : (
+                    <Editor
+                        height="100%"
+                        language="yaml"
+                        value={yaml || '# Enter your YAML here\n'}
+                        onChange={handleChange}
+                        onMount={handleEditorDidMount}
+                        theme="vs-light"
+                        options={{
+                            minimap: { enabled: false },
+                            scrollBeyondLastLine: false,
+                            fontSize: 12,
+                            wordWrap: 'on',
+                            automaticLayout: true,
+                            tabSize: 2,
+                            insertSpaces: true,
+                            folding: true,
+                            lineNumbers: 'on',
+                            glyphMargin: true,
+                            stickyScroll: {
+                                enabled: false,
+                            },
+                            scrollbar: {
+                                verticalScrollbarSize: 8,
+                                horizontalScrollbarSize: 8
+                            }
+                        }}
+                    />
+                )}
             </div>
         </div>
     );
