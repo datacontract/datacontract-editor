@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState, useEffect, useCallback } from 'react';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 
 // Streamline X icon (Lucide Line)
@@ -9,9 +9,13 @@ const XIcon = ({ className }) => (
   </svg>
 );
 
+const MIN_WIDTH = 280;
+const MAX_WIDTH_PERCENT = 0.8;
+
 /**
  * PropertyDetailsDrawer - A non-modal slide-out drawer for editing property details
  * Does not block interaction with the main content when open.
+ * Resizable by dragging the left edge.
  *
  * @param {Object} props
  * @param {boolean} props.open - Whether the drawer is open
@@ -22,6 +26,43 @@ const XIcon = ({ className }) => (
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
 const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, onClose, property, onUpdate, onDelete }, ref) {
+  const [width, setWidth] = useState(null);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizing) return;
+
+    const newWidth = window.innerWidth - e.clientX;
+    const maxWidth = window.innerWidth * MAX_WIDTH_PERCENT;
+    const clampedWidth = Math.min(Math.max(newWidth, MIN_WIDTH), maxWidth);
+    setWidth(clampedWidth);
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
   // Always render the container for the ref, but hide it when no property
   if (!property) {
     return <div ref={ref} className="hidden" />;
@@ -30,10 +71,20 @@ const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, 
   return (
     <div
       ref={ref}
-      className={`fixed inset-y-0 right-0 z-40 w-screen max-w-[calc(100vw-3rem)] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg transform transition-transform duration-300 ease-in-out ${
+      style={width ? { width: `${width}px` } : undefined}
+      className={`fixed inset-y-0 right-0 z-40 ${
+        width ? '' : 'w-screen max-w-[calc(100vw-3rem)] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg'
+      } transform transition-transform ${isResizing ? '' : 'duration-300'} ease-in-out ${
         open ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
+      {/* Resize handle */}
+      <div
+        onMouseDown={handleMouseDown}
+        className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors z-10"
+        title="Drag to resize"
+      />
+
       <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
         {/* Header */}
         <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
