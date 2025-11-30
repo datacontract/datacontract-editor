@@ -1,6 +1,30 @@
 import { memo, useState, useEffect, useRef, Fragment } from 'react';
 import { Handle, Position, NodeToolbar, useReactFlow } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
+import StringIcon from '../ui/icons/StringIcon.jsx';
+import NumberIcon from '../ui/icons/NumberIcon.jsx';
+import IntegerIcon from '../ui/icons/IntegerIcon.jsx';
+import DateIcon from '../ui/icons/DateIcon.jsx';
+import TimeIcon from '../ui/icons/TimeIcon.jsx';
+import TimestampIcon from '../ui/icons/TimestampIcon.jsx';
+import ObjectIcon from '../ui/icons/ObjectIcon.jsx';
+import ArrayIcon from '../ui/icons/ArrayIcon.jsx';
+import BooleanIcon from '../ui/icons/BooleanIcon.jsx';
+
+const getLogicalTypeIcon = (logicalType) => {
+  const iconMap = {
+    'string': StringIcon,
+    'number': NumberIcon,
+    'integer': IntegerIcon,
+    'date': DateIcon,
+    'time': TimeIcon,
+    'timestamp': TimestampIcon,
+    'object': ObjectIcon,
+    'array': ArrayIcon,
+    'boolean': BooleanIcon
+  };
+  return iconMap[logicalType] || null;
+};
 
 const logicalTypeOptions = [
   'string',
@@ -378,7 +402,7 @@ const SchemaNode = ({ data, id }) => {
             return (
             <Fragment key={index}>
               <div
-                className={`px-3 py-2 group relative cursor-pointer ${
+                className={`pl-2 pr-3 py-2 group relative cursor-pointer ${
                   isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                 }`}
                 onContextMenu={(e) => handlePropertyContextMenu(e, index)}
@@ -440,6 +464,11 @@ const SchemaNode = ({ data, id }) => {
                     />
                   ) : (
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      {/* Type Icon left of column name */}
+                      {(() => {
+                        const TypeIcon = getLogicalTypeIcon(prop.logicalType);
+                        return TypeIcon ? <TypeIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" /> : null;
+                      })()}
                       <span
                         className={`text-sm font-medium truncate cursor-pointer hover:text-indigo-600 ${
                           !prop.name || prop.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-900'
@@ -612,8 +641,13 @@ const SchemaNode = ({ data, id }) => {
                       }}
                     >
                       <div className="flex justify-between items-center text-xs">
-                        {/* Left side: Name */}
+                        {/* Left side: Type Icon + Name */}
                         <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {/* Type Icon left of array item property name */}
+                          {(() => {
+                            const TypeIcon = getLogicalTypeIcon(itemProp.logicalType);
+                            return TypeIcon ? <TypeIcon className="h-3 w-3 flex-shrink-0 text-gray-400" /> : null;
+                          })()}
                           {editingNestedProperty?.parentIndex === index &&
                            editingNestedProperty?.nestedIndex === `items-${itemPropIndex}` &&
                            editingNestedProperty?.field === 'name' ? (
@@ -824,8 +858,13 @@ const SchemaNode = ({ data, id }) => {
                   }}
                 >
                   <div className="flex justify-between items-center text-xs">
-                    {/* Left side: Name */}
+                    {/* Left side: Type Icon + Name */}
                     <div className="flex items-center gap-1 flex-1 min-w-0">
+                      {/* Type Icon left of nested property name */}
+                      {(() => {
+                        const TypeIcon = getLogicalTypeIcon(nestedProp.logicalType);
+                        return TypeIcon ? <TypeIcon className="h-3 w-3 flex-shrink-0 text-gray-400" /> : null;
+                      })()}
                       {editingNestedProperty?.parentIndex === index &&
                        editingNestedProperty?.nestedIndex === nestedIndex &&
                        editingNestedProperty?.field === 'name' ? (
