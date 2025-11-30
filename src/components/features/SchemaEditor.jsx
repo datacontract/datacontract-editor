@@ -3,7 +3,7 @@ import {useEditorStore} from '../../store.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import Tags from '../ui/Tags.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
 import KeyIcon from "../ui/icons/KeyIcon.jsx";
 import AsteriskIcon from "../ui/icons/AsteriskIcon.jsx";
@@ -307,7 +307,7 @@ const ItemsRow = ({
                             let parsed = {};
                             if (yaml?.trim()) {
                                 try {
-                                    parsed = YAML.parse(yaml) || {};
+                                    parsed = parseYaml(yaml) || {};
                                 } catch {
                                     parsed = {};
                                 }
@@ -336,7 +336,7 @@ const ItemsRow = ({
                             }
                             targetProp.items.items[field] = value;
 
-                            const newYaml = YAML.stringify(parsed);
+                            const newYaml = stringifyYaml(parsed);
                             setYaml(newYaml);
                         } catch (error) {
                             console.error('Error updating nested items:', error);
@@ -635,7 +635,7 @@ const PropertyRow = ({
                             let parsed = {};
                             if (yaml?.trim()) {
                                 try {
-                                    parsed = YAML.parse(yaml) || {};
+                                    parsed = parseYaml(yaml) || {};
                                 } catch {
                                     parsed = {};
                                 }
@@ -661,7 +661,7 @@ const PropertyRow = ({
                             }
                             targetProp.items[field] = value;
 
-                            const newYaml = YAML.stringify(parsed);
+                            const newYaml = stringifyYaml(parsed);
                             setYaml(newYaml);
                         } catch (error) {
                             console.error('Error updating items field:', error);
@@ -712,7 +712,7 @@ const SchemaEditor = ({schemaIndex}) => {
     // Track property count for auto-edit detection
     useEffect(() => {
         try {
-            const parsed = yaml?.trim() ? YAML.parse(yaml) : null;
+            const parsed = yaml?.trim() ? parseYaml(yaml) : null;
             const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
             previousPropertyCount.current = currentCount;
         } catch {
@@ -725,7 +725,7 @@ const SchemaEditor = ({schemaIndex}) => {
         if (!shouldEditNextProperty.current || !nextPropertyToEdit.current) return;
 
         try {
-            const parsed = yaml?.trim() ? YAML.parse(yaml) : null;
+            const parsed = yaml?.trim() ? parseYaml(yaml) : null;
             const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
 
             if (currentCount > previousPropertyCount.current) {
@@ -744,7 +744,7 @@ const SchemaEditor = ({schemaIndex}) => {
         if (!selectedProperty || !selectedProperty.propPath) return;
 
         try {
-            const parsed = YAML.parse(yaml);
+            const parsed = parseYaml(yaml);
             if (!parsed?.schema?.[schemaIndex]?.properties) return;
 
             // Navigate to the property using the propPath array from selectedProperty
@@ -839,7 +839,7 @@ const SchemaEditor = ({schemaIndex}) => {
         }
 
         try {
-            const parsed = YAML.parse(yaml);
+            const parsed = parseYaml(yaml);
             const allSchemas = parsed.schema || [];
 
             // Get the specific schema by index
@@ -865,7 +865,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -881,7 +881,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
             parsed.schema[schemaIndex][field] = value;
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error updating schema:', error);
@@ -894,7 +894,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     return;
                 }
@@ -910,7 +910,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
             parsed.schema.splice(schemaIndex, 1);
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error removing schema:', error);
@@ -923,7 +923,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -949,7 +949,7 @@ const SchemaEditor = ({schemaIndex}) => {
                 description: ''
             });
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error adding property:', error);
@@ -962,7 +962,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -989,7 +989,7 @@ const SchemaEditor = ({schemaIndex}) => {
                 description: ''
             });
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
 
             // Set the new property index to auto-edit
@@ -1006,7 +1006,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -1056,7 +1056,7 @@ const SchemaEditor = ({schemaIndex}) => {
                 targetProp[field] = value;
             }
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error updating property:', error);
@@ -1069,7 +1069,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     return;
                 }
@@ -1089,7 +1089,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
             parsed.schema[schemaIndex].properties.splice(propIdx, 1);
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error removing property:', error);
@@ -1139,7 +1139,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -1195,7 +1195,7 @@ const SchemaEditor = ({schemaIndex}) => {
                 });
             }
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
         } catch (error) {
             console.error('Error adding sub-property:', error);
@@ -1238,7 +1238,7 @@ const SchemaEditor = ({schemaIndex}) => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -1270,7 +1270,7 @@ const SchemaEditor = ({schemaIndex}) => {
             // Update all fields at once
             Object.assign(targetProp, updatedProperty);
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
 
             // Update the selected property to reflect changes

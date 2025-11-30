@@ -1,5 +1,5 @@
 import {Fragment, useMemo} from 'react';
-import * as YAML from 'yaml';
+import { parseYaml } from '../../utils/yaml.js';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import supportIcons from '../../assets/support-icons/supportIcons.jsx';
 import LinkIcon from '../ui/icons/LinkIcon.jsx';
@@ -31,7 +31,7 @@ const DataContractPreview = ({yamlContent}) => {
 		}
 
 		try {
-			return YAML.parse(yamlContent);
+			return parseYaml(yamlContent);
 		} catch (error) {
 			return {error: error.message};
 		}

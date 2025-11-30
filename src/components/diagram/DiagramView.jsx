@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './DiagramStyles.css';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import { useEditorStore } from '../../store.js';
 import SchemaNode from './SchemaNode.jsx';
 import { useLocation } from 'react-router-dom';
@@ -48,7 +48,7 @@ const DiagramViewInner = () => {
       return null;
     }
     try {
-      return YAML.parse(yaml);
+      return parseYaml(yaml);
     } catch {
       return null;
     }
@@ -59,7 +59,7 @@ const DiagramViewInner = () => {
     if (!parsedData) return;
 
     const newData = { ...parsedData, schema: updatedSchemas };
-    const newYaml = YAML.stringify(newData);
+    const newYaml = stringifyYaml(newData);
     setYaml(newYaml);
   }, [parsedData, setYaml]);
 

@@ -7,7 +7,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 
 const ServerEditor = ({ serverIndex }) => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -61,7 +61,7 @@ const ServerEditor = ({ serverIndex }) => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       const servers = parsed.servers || [];
       return (serverIndex >= 0 && serverIndex < servers.length) ? servers[serverIndex] : null;
     } catch {
@@ -75,7 +75,7 @@ const ServerEditor = ({ serverIndex }) => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -114,7 +114,7 @@ const ServerEditor = ({ serverIndex }) => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating server:', error);
@@ -127,7 +127,7 @@ const ServerEditor = ({ serverIndex }) => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           return;
         }
@@ -143,7 +143,7 @@ const ServerEditor = ({ serverIndex }) => {
         delete parsed.servers;
       }
 
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error removing server:', error);

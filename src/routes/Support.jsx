@@ -4,7 +4,7 @@ import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import supportIcons from '../assets/support-icons/supportIcons.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Support = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -35,7 +35,7 @@ const Support = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return {
         supportItems: parsed.support || []
       };
@@ -50,7 +50,7 @@ const Support = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -63,7 +63,7 @@ const Support = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

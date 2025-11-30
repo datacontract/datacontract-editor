@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Tooltip } from '../components/ui/index.js';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Pricing = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -20,7 +20,7 @@ const Pricing = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       const price = parsed.price || {};
       return {
         priceAmount: price.priceAmount ?? '',
@@ -42,7 +42,7 @@ const Pricing = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -70,7 +70,7 @@ const Pricing = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

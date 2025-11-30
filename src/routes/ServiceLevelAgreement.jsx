@@ -3,7 +3,7 @@ import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const ServiceLevelAgreement = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -22,7 +22,7 @@ const ServiceLevelAgreement = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return {
         slas: parsed.slaProperties || []
       };
@@ -37,7 +37,7 @@ const ServiceLevelAgreement = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -50,7 +50,7 @@ const ServiceLevelAgreement = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

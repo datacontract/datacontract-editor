@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useEditorStore } from '../../store';
-import * as YAML from 'yaml';
+import { parseYaml } from '../../utils/yaml.js';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon';
 import SettingsModal from './SettingsModal';
 
@@ -23,7 +23,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
   // Parse servers from YAML
   useEffect(() => {
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       if (parsed && parsed.servers && Array.isArray(parsed.servers)) {
         const serverList = parsed.servers.map(server => ({
           name: server.server || server.name || 'Unnamed Server',

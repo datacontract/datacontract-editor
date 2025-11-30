@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../../store.js';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 
 const SchemasEditor = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -14,7 +14,7 @@ const SchemasEditor = () => {
       return [];
     }
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return parsed.schema || [];
     } catch {
       return [];
@@ -27,7 +27,7 @@ const SchemasEditor = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -46,7 +46,7 @@ const SchemasEditor = () => {
         properties: []
       });
 
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
 
       // Navigate to the new schema

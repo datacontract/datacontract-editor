@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import RolesList from '../components/features/RolesList.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Roles = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -15,7 +15,7 @@ const Roles = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return {
         roles: parsed.roles || []
       };
@@ -30,7 +30,7 @@ const Roles = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -43,7 +43,7 @@ const Roles = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

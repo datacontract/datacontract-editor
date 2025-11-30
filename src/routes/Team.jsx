@@ -7,7 +7,7 @@ import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Team = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -28,7 +28,7 @@ const Team = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       // team is now an object with name, description, members, tags, customProperties, authoritativeDefinitions
       const team = parsed.team || {};
       return {
@@ -57,7 +57,7 @@ const Team = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -85,7 +85,7 @@ const Team = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

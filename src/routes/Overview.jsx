@@ -6,7 +6,7 @@ import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import Tooltip from '../components/ui/Tooltip.jsx';
 import Tags from '../components/ui/Tags.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Overview = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -46,7 +46,7 @@ const Overview = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       const description = parsed.description || {};
       return {
         name: parsed.name || '',
@@ -92,7 +92,7 @@ const Overview = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           // If YAML is invalid, start fresh
           parsed = {};
@@ -134,7 +134,7 @@ const Overview = () => {
       }
 
       // Convert back to YAML
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

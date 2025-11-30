@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const CustomProperties = () => {
   const yaml = useEditorStore((state) => state.yaml);
@@ -14,7 +14,7 @@ const CustomProperties = () => {
     }
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return {
         customProperties: parsed.customProperties || []
       };
@@ -29,7 +29,7 @@ const CustomProperties = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -41,7 +41,7 @@ const CustomProperties = () => {
         delete parsed.customProperties;
       }
 
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

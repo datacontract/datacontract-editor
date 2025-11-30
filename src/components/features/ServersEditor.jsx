@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../../store.js';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 
 const ServersEditor = () => {
@@ -15,7 +15,7 @@ const ServersEditor = () => {
       return [];
     }
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       return parsed.servers || [];
     } catch {
       return [];
@@ -28,7 +28,7 @@ const ServersEditor = () => {
       let parsed = {};
       if (yaml?.trim()) {
         try {
-          parsed = YAML.parse(yaml) || {};
+          parsed = parseYaml(yaml) || {};
         } catch {
           parsed = {};
         }
@@ -44,7 +44,7 @@ const ServersEditor = () => {
         type: ''
       });
 
-      const newYaml = YAML.stringify(parsed);
+      const newYaml = stringifyYaml(parsed);
       setYaml(newYaml);
 
       // Navigate to the new server

@@ -1,7 +1,7 @@
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useEditorStore} from "../store.js";
 import {useMemo} from 'react';
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
 
 const SidebarNavigation = () => {
@@ -19,7 +19,7 @@ const SidebarNavigation = () => {
             return [];
         }
         try {
-            const parsed = YAML.parse(yaml);
+            const parsed = parseYaml(yaml);
             return parsed.schema || [];
         } catch {
             return [];
@@ -32,7 +32,7 @@ const SidebarNavigation = () => {
             return [];
         }
         try {
-            const parsed = YAML.parse(yaml);
+            const parsed = parseYaml(yaml);
             return parsed.servers || [];
         } catch {
             return [];
@@ -60,7 +60,7 @@ const SidebarNavigation = () => {
             let parsed = {};
             if (yaml?.trim()) {
                 try {
-                    parsed = YAML.parse(yaml) || {};
+                    parsed = parseYaml(yaml) || {};
                 } catch {
                     parsed = {};
                 }
@@ -78,7 +78,7 @@ const SidebarNavigation = () => {
                 properties: []
             });
 
-            const newYaml = YAML.stringify(parsed);
+            const newYaml = stringifyYaml(parsed);
             setYaml(newYaml);
 
             // Navigate to the new schema

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEditorStore, getFileStorageBackend } from "../store.js";
-import * as YAML from 'yaml';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { FileSelectionModal } from '../components/ui/FileSelectionModal.jsx';
 import exampleYaml from '../example.yaml?raw';
@@ -65,7 +65,7 @@ const Header = () => {
             // Parse YAML to check for required fields
             let parsedYaml;
             try {
-                parsedYaml = YAML.parse(yaml);
+                parsedYaml = parseYaml(yaml);
             } catch (parseError) {
                 alert('Cannot save: YAML is invalid. Please fix syntax errors first.');
                 return;
@@ -231,7 +231,7 @@ description:
                     break;
                 }
             }
-            const parsed = YAML.parse(yaml);
+            const parsed = parseYaml(yaml);
             let schemaIndex = 0;
             for(let i = 0; i < parsed?.schema?.length; i++){
                 if(parsed.schema[i].name === schemaName) {
@@ -259,7 +259,7 @@ description:
                     break;
                 }
             }
-						const parsed = YAML.parse(yaml);
+						const parsed = parseYaml(yaml);
 						console.log(parsed);
 						console.log(serverName);
 						let serverIndex = 0;

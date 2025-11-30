@@ -3,7 +3,7 @@ import { useEditorStore } from '../../store.js';
 import Combobox from './Combobox.jsx';
 import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
-import * as YAML from 'yaml';
+import { parseYaml } from '../../utils/yaml.js';
 
 /**
  * RelationshipEditor component for editing relationships between schemas/properties
@@ -22,7 +22,7 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
     if (!yaml?.trim()) return [];
 
     try {
-      const parsed = YAML.parse(yaml);
+      const parsed = parseYaml(yaml);
       const schemas = parsed?.schema || [];
       const suggestions = [];
 
