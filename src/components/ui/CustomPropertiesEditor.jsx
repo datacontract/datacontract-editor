@@ -160,7 +160,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
     <div className="border border-gray-200 rounded-md bg-white">
       {/* Header - Always visible */}
       <div
-        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50"
+        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 rounded-md"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex-1 min-w-0">

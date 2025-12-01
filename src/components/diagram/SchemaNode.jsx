@@ -10,6 +10,7 @@ import TimestampIcon from '../ui/icons/TimestampIcon.jsx';
 import ObjectIcon from '../ui/icons/ObjectIcon.jsx';
 import ArrayIcon from '../ui/icons/ArrayIcon.jsx';
 import BooleanIcon from '../ui/icons/BooleanIcon.jsx';
+import AuthoritativeDefinitionsPreview from '../ui/AuthoritativeDefinitionsPreview.jsx';
 
 const getLogicalTypeIcon = (logicalType) => {
   const iconMap = {
@@ -549,6 +550,16 @@ const SchemaNode = ({ data, id }) => {
                   )}
                 </div>
               </div>
+
+              {/* Authoritative Definitions Preview */}
+              {prop.authoritativeDefinitions && prop.authoritativeDefinitions.length > 0 && (
+                <div className="mt-1.5 ml-5">
+                  <AuthoritativeDefinitionsPreview
+                    definitions={prop.authoritativeDefinitions}
+                    size="w-3.5 h-3.5"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Render array items if they exist */}
@@ -758,6 +769,16 @@ const SchemaNode = ({ data, id }) => {
                           )}
                         </div>
                       </div>
+
+                      {/* Authoritative Definitions Preview for Array Item Properties */}
+                      {itemProp.authoritativeDefinitions && itemProp.authoritativeDefinitions.length > 0 && (
+                        <div className="mt-1 ml-4">
+                          <AuthoritativeDefinitionsPreview
+                            definitions={itemProp.authoritativeDefinitions}
+                            size="w-3 h-3"
+                          />
+                        </div>
+                      )}
                     </div>
                     );
                   })
@@ -943,6 +964,16 @@ const SchemaNode = ({ data, id }) => {
                       )}
                     </div>
                   </div>
+
+                  {/* Authoritative Definitions Preview for Nested Properties */}
+                  {nestedProp.authoritativeDefinitions && nestedProp.authoritativeDefinitions.length > 0 && (
+                    <div className="mt-1 ml-4">
+                      <AuthoritativeDefinitionsPreview
+                        definitions={nestedProp.authoritativeDefinitions}
+                        size="w-3 h-3"
+                      />
+                    </div>
+                  )}
                 </div>
                 );
               })

@@ -99,6 +99,7 @@ const DataContractPreview = ({yamlContent}) => {
 			examples: prop.examples,
 			format: prop.format,
 			logicalTypeOptions: prop.logicalTypeOptions,
+			authoritativeDefinitions: prop.authoritativeDefinitions,
 			customProperties: prop.customProperties,
 			tags: prop.tags,
 			quality: prop.quality
@@ -484,13 +485,13 @@ const DataContractPreview = ({yamlContent}) => {
 												<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 													{property.logicalType && (
 														<div
-															className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1">
+															className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
 															<span>{property.logicalType}</span>
 														</div>
 													)}
 													{property.physicalType && (
 														<div
-															className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1">
+															className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mb-1">
 															<span>{property.physicalType}</span>
 														</div>
 													)}
@@ -518,43 +519,46 @@ const DataContractPreview = ({yamlContent}) => {
 														</div>
 													)}
 
-													<div>
+													<div className="mt-1 flex gap-x-1 items-center flex-wrap">
 														{property.primaryKey && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">
+																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                                 primaryKey{property.primaryKeyPosition && ` (${property.primaryKeyPosition})`}
                               </span>
 														)}
 														{property.required && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">required</span>
+																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">required</span>
 														)}
 														{property.unique && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">unique</span>
+																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">unique</span>
 														)}
 														{property.partitioned && (
 															<span
-																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mt-1">
+																className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                                 partitioned{property.partitionKeyPosition && ` (${property.partitionKeyPosition})`}
                               </span>
 														)}
+														{property.authoritativeDefinitions && property.authoritativeDefinitions.length > 0 && (
+																<AuthoritativeDefinitionsPreview definitions={property.authoritativeDefinitions} className='size-4' buttonRadius="rounded-md" />
+														)}
 														{property.classification && (
 															<span
-																className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-1 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mr-1 mt-1">
+																className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-1 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                                 {property.classification.toLowerCase() !== 'public' && <LockClosedIcon className="w-3 h-3"/>}
                                 {property.classification}
                               </span>
 														)}
 														{property.criticalDataElement && (
 															<span
-																className="inline-flex items-center rounded-md bg-red-50 px-1 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10 mr-1 mt-1">
+																className="inline-flex items-center rounded-md bg-red-50 px-1 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">
                                 critical data element
                               </span>
 														)}
 														{property.encryptedName && (
 															<span
-																className="inline-flex items-center rounded-md bg-purple-50 px-1 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10 mr-1 mt-1">
+																className="inline-flex items-center rounded-md bg-purple-50 px-1 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
                                 {property.encryptedName}
                               </span>
 														)}
