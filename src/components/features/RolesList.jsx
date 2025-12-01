@@ -86,13 +86,15 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={addRole}
-        className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
-      >
-        + Add Role
-      </button>
+      <div className="flex items-center justify-end">
+        <button
+          type="button"
+          onClick={addRole}
+          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          + Add Role
+        </button>
+      </div>
     </div>
   );
 };

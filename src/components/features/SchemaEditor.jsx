@@ -1533,6 +1533,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
                                                         {/* Relationships Section */}
                                                         <div className="mt-6">
+																													<h4 className="text-xs font-medium text-gray-900 mb-3">Relationships</h4>
                                                             <RelationshipEditor
                                                                 value={schemaData.schema.relationships}
                                                                 onChange={(value) => updateSchema(schemaIndex, 'relationships', value)}

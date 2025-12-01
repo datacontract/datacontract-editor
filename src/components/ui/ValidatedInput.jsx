@@ -16,6 +16,7 @@ const ValidatedInput = forwardRef(({
   tooltip,
   placeholder,
   className = '',
+	wrapperClassName = '',
   externalErrors = [],
   ...props
 }, ref) => {
@@ -39,7 +40,7 @@ const ValidatedInput = forwardRef(({
     : 'ring-gray-300 focus:ring-indigo-600';
 
   return (
-    <div>
+    <div className={wrapperClassName}>
       <div className="flex items-center gap-1 mb-1">
         <label htmlFor={name} className="block text-xs font-medium leading-4 text-gray-900">
           {label}
