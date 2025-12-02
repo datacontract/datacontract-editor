@@ -718,7 +718,7 @@ const SchemaEditor = ({schemaIndex}) => {
         } catch {
             // Ignore parse errors
         }
-    }, [schemaIndex]);
+    }, [schemaIndex, yaml]);
 
     // Auto-edit newly added property (like diagram editor)
     useEffect(() => {
@@ -793,28 +793,6 @@ const SchemaEditor = ({schemaIndex}) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [selectedProperty]);
-
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
-
-    // Dynamically get enum values from schema for schema-level KeyValueEditor fields
-    const qualityDimensionOptions = useMemo(() => {
-        return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'schema') ||
-               ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
-    }, [jsonSchema]);
-
-    const qualityTypeOptions = useMemo(() => {
-        return getSchemaEnumValues(jsonSchema, 'quality.type', 'schema') ||
-               ['library', 'text', 'sql', 'custom'];
-    }, [jsonSchema]);
-
-    const qualityMetricOptions = useMemo(() => {
-        return getSchemaEnumValues(jsonSchema, 'quality.metric', 'schema') ||
-               ['nullValues', 'missingValues', 'invalidValues', 'duplicateValues', 'rowCount'];
-    }, [jsonSchema]);
 
     const relationshipTypeOptions = useMemo(() => {
         return getSchemaEnumValues(jsonSchema, 'relationships.type', 'schema') ||
