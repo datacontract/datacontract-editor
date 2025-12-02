@@ -39,18 +39,18 @@ class ErrorBoundary extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
-    // Reset error boundary when resetKeys change
-    if (this.state.hasError && this.props.resetKeys) {
-      const hasResetKeyChanged = this.props.resetKeys.some(
-        (key, index) => key !== prevProps.resetKeys?.[index]
-      );
-
-      if (hasResetKeyChanged) {
-        this.resetError();
-      }
-    }
-  }
+  // componentDidUpdate(prevProps) {
+  //   // Reset error boundary when resetKeys change
+  //   if (this.state.hasError && this.props.resetKeys) {
+  //     const hasResetKeyChanged = this.props.resetKeys.some(
+  //       (key, index) => key !== prevProps.resetKeys?.[index]
+  //     );
+	//
+  //     if (hasResetKeyChanged) {
+  //       this.resetError();
+  //     }
+  //   }
+  // }
 
   resetError = () => {
     this.setState({
