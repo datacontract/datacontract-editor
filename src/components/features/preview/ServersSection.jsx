@@ -185,6 +185,12 @@ const ServerItem = memo(({ server }) => {
 			</div>
 		</li>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.server) === JSON.stringify(nextProps.server);
+	} catch {
+		return false;
+	}
 });
 
 ServerItem.displayName = 'ServerItem';
@@ -208,6 +214,12 @@ const ServersSection = memo(({ servers }) => {
 			</ul>
 		</section>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.servers) === JSON.stringify(nextProps.servers);
+	} catch {
+		return false;
+	}
 });
 
 ServersSection.displayName = 'ServersSection';

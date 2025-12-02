@@ -73,6 +73,12 @@ const SupportChannel = memo(({ channel }) => {
 			</div>
 		</li>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.channel) === JSON.stringify(nextProps.channel);
+	} catch {
+		return false;
+	}
 });
 
 SupportChannel.displayName = 'SupportChannel';
@@ -98,6 +104,12 @@ const SupportSection = memo(({ support }) => {
 			</ul>
 		</section>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.support) === JSON.stringify(nextProps.support);
+	} catch {
+		return false;
+	}
 });
 
 SupportSection.displayName = 'SupportSection';

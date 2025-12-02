@@ -72,6 +72,12 @@ const SlaItem = memo(({ sla }) => {
 			</div>
 		</li>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.sla) === JSON.stringify(nextProps.sla);
+	} catch {
+		return false;
+	}
 });
 
 SlaItem.displayName = 'SlaItem';
@@ -95,6 +101,12 @@ const SlaSection = memo(({ slaProperties }) => {
 			</ul>
 		</section>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.slaProperties) === JSON.stringify(nextProps.slaProperties);
+	} catch {
+		return false;
+	}
 });
 
 SlaSection.displayName = 'SlaSection';

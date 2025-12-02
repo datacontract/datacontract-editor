@@ -7,6 +7,26 @@ import { getQualityCheckIcon } from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 
+// Custom comparison for schema property
+const propertyAreEqual = (prevProps, nextProps) => {
+	if (prevProps.property === nextProps.property &&
+		prevProps.propertyName === nextProps.propertyName &&
+		prevProps.schemaName === nextProps.schemaName &&
+		prevProps.indent === nextProps.indent) {
+		return true;
+	}
+
+	// Deep comparison for property object
+	try {
+		return JSON.stringify(prevProps.property) === JSON.stringify(nextProps.property) &&
+			prevProps.propertyName === nextProps.propertyName &&
+			prevProps.schemaName === nextProps.schemaName &&
+			prevProps.indent === nextProps.indent;
+	} catch {
+		return false;
+	}
+};
+
 // Memoized property row component
 const SchemaProperty = memo(({ property, propertyName, schemaName, indent = 0 }) => {
 	const indentSpaces = '    '.repeat(Math.max(0, indent - 1));
@@ -246,9 +266,25 @@ const SchemaProperty = memo(({ property, propertyName, schemaName, indent = 0 })
 			)}
 		</Fragment>
 	);
-});
+}, propertyAreEqual);
 
 SchemaProperty.displayName = 'SchemaProperty';
+
+// Custom comparison for schema table
+const tableAreEqual = (prevProps, nextProps) => {
+	if (prevProps.schemaName === nextProps.schemaName &&
+		prevProps.schema === nextProps.schema) {
+		return true;
+	}
+
+	// Deep comparison for schema object
+	try {
+		return prevProps.schemaName === nextProps.schemaName &&
+			JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
+	} catch {
+		return false;
+	}
+};
 
 // Memoized schema table component
 const SchemaTable = memo(({ schemaName, schema }) => {
@@ -331,9 +367,27 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 			</div>
 		</div>
 	);
-});
+}, tableAreEqual);
 
 SchemaTable.displayName = 'SchemaTable';
+
+// Custom comparison function for schema
+const schemaAreEqual = (prevProps, nextProps) => {
+	// Quick reference check first
+	if (prevProps.schema === nextProps.schema) return true;
+
+	// Check if both are falsy
+	if (!prevProps.schema && !nextProps.schema) return true;
+	if (!prevProps.schema || !nextProps.schema) return false;
+
+	// Use JSON.stringify for deep comparison
+	// This is acceptable for schema data as it's not too large and changes infrequently
+	try {
+		return JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
+	} catch {
+		return false;
+	}
+};
 
 // Main SchemaSection component
 const SchemaSection = memo(({ schema }) => {
@@ -358,7 +412,7 @@ const SchemaSection = memo(({ schema }) => {
 			))}
 		</section>
 	);
-});
+}, schemaAreEqual);
 
 SchemaSection.displayName = 'SchemaSection';
 

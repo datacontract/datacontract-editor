@@ -37,6 +37,12 @@ const CustomPropertiesSection = memo(({ customProperties }) => {
 			</div>
 		</section>
 	);
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.customProperties) === JSON.stringify(nextProps.customProperties);
+	} catch {
+		return false;
+	}
 });
 
 CustomPropertiesSection.displayName = 'CustomPropertiesSection';
