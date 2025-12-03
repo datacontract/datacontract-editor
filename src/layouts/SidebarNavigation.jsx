@@ -1,47 +1,16 @@
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useEditorStore} from "../store.js";
-import {useMemo} from 'react';
-import { parseYaml } from '../utils/yaml.js';
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
+import {useShallow} from "zustand/react/shallow";
 
 const SidebarNavigation = () => {
-    const yaml = useEditorStore((state) => state.yaml);
+	const schemas = useEditorStore(useShallow((state) => state.getValue('schema')));
+	const servers = useEditorStore(useShallow((state) => state.getValue('server')));
     const setView = useEditorStore((state) => state.setView);
     const currentView = useEditorStore((state) => state.currentView);
     const selectedDiagramSchemaIndex = useEditorStore((state) => state.selectedDiagramSchemaIndex);
     const location = useLocation();
     const navigate = useNavigate();
-
-		let parsed = [];
-		try {
-			parsed = parseYaml(yaml);
-		} catch (_) { // NOOP
-		}
-
-
-    // Parse schemas from YAML
-    const schemas = useMemo(() => {
-        if (!parsed) {
-            return [];
-        }
-        try {
-            return parsed.schema || [];
-        } catch {
-            return [];
-        }
-    }, [parsed]);
-
-    // Parse servers from YAML
-    const servers = useMemo(() => {
-        if (!parsed) {
-            return [];
-        }
-        try {
-            return parsed.servers || [];
-        } catch {
-            return [];
-        }
-    }, [parsed]);
 
     // Get colored icon for server type
   const getServerTypeIcon = (type) => {
@@ -67,37 +36,7 @@ const SidebarNavigation = () => {
                 navigate(item.path);
                 break;
             case 'yaml':
-                // For YAML view, try to find and scroll to the section
-                try {
-                    const yamlPropertyName = item.yamlProperty;
-                    if (yamlPropertyName) {
-                        // Look for the property in YAML (handles both top-level and nested)
-                        const propertyPattern = new RegExp(`^\\s*${yamlPropertyName}:\\s*`, 'm');
-                        const match = yaml.match(propertyPattern);
-                        if (match) {
-                            const lineNumber = yaml.substring(0, match.index).split('\n').length;
-                            // Store the line number in navigation state
-                            navigate('/yaml', {state: {scrollToLine: lineNumber}});
-                        } else {
-                            // If not found in YAML, stay in YAML view (don't switch to form)
-                            // Just ensure we're on the /yaml route
-                            if (location.pathname !== '/yaml') {
-                                navigate('/yaml');
-                            }
-                        }
-                    } else {
-                        // No YAML property, stay in YAML view
-                        if (location.pathname !== '/yaml') {
-                            navigate('/yaml');
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error finding section in YAML:', error);
-                    // Stay in YAML view even on error
-                    if (location.pathname !== '/yaml') {
-                        navigate('/yaml');
-                    }
-                }
+                navigate('/yaml');
                 break;
             case 'diagram':
                 // For schemas section, handle differently
@@ -274,7 +213,7 @@ const SidebarNavigation = () => {
                                         </div>
                                         <p className="ml-1.5 text-sm font-medium">{item.title}</p>
                                     </Link>
-                                    {schemas.length > 0 && (
+                                    {schemas && schemas.length > 0 && (
                                         <ol className="mt-1 space-y-0.5">
                                             {schemas.filter(schema => schema).map((schema, index) => (
                                                 <li key={index}>
@@ -321,7 +260,7 @@ const SidebarNavigation = () => {
                                         </div>
                                         <p className="ml-1.5 text-sm font-medium">{item.title}</p>
                                     </Link>
-                                    {servers.length > 0 && (
+                                    {servers && servers.length > 0 && (
                                         <ol className="mt-1 space-y-0.5">
                                             {servers.filter(server => server).map((server, index) => (
                                                 <li key={index}>

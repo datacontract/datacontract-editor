@@ -1,5 +1,5 @@
 import {create} from 'zustand'
-import {persist, createJSONStorage} from 'zustand/middleware'
+import {devtools, persist, createJSONStorage} from 'zustand/middleware'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
 
@@ -41,14 +41,38 @@ export const getOverrideStore = () => {
     return overrideStore;
 };
 
+function getValueWithPath(obj, path, defaultValue) {
+	const keys = path.split(/\.|\[|\]/).filter(Boolean);
+	const result = keys.reduce((acc, key) => acc?.[key], obj);
+	return result !== undefined ? result : defaultValue;
+}
+
+function setValueWithPath(obj, path, value) {
+	const keys = path.match(/[^.\[\]]+/g);
+	keys.slice(0, -1).reduce((acc, key, i) =>
+		acc[key] = acc[key] || (/^\d+$/.test(keys[i + 1]) ? [] : {}), obj
+	)[keys[keys.length - 1]] = value;
+	return obj;
+}
+
 // Create central zustand store for app state
 const defaultEditorStore = create()(
-    persist((set, get) => {
+    devtools(
+        persist((set, get) => {
         // Define action functions to ensure stable references
         const actions = {
-            setYaml: (newYaml) => set({yaml: newYaml, isDirty: true}),
+            setYaml: (newYaml) => {
+							const yamlParts = Yaml.parse(newYaml);
+							set({yaml: newYaml, isDirty: true, yamlParts}
+							)
+						},
             loadYaml: (newYaml) => set({yaml: newYaml, baselineYaml: newYaml, isDirty: false}),
             markClean: () => set({isDirty: false}),
+					  getValue: (path) => getValueWithPath(get().yamlParts, path),
+						setValue: (path, value) => {
+							const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+							set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts)})
+						},
             clearSaveInfo: () => set({lastSaveInfo: null}),
             addNotification: (notification) => {
                 const id = Date.now() + Math.random();
@@ -279,6 +303,7 @@ const defaultEditorStore = create()(
 
         return {
             yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n',
+						yamlParts: {},
             baselineYaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n', // YAML at last save/load for diff comparison
             isDirty: false,
             isPreviewVisible: true,
@@ -314,6 +339,8 @@ const defaultEditorStore = create()(
         name: 'editor-store',
         storage: createJSONStorage(() => localStorage),
     }),
+        { name: 'DataContract Editor Store' }
+    ),
 )
 
 /**
