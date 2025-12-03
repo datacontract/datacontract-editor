@@ -12,7 +12,12 @@ const SidebarNavigation = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-		const parsed = parseYaml(yaml);
+		let parsed = [];
+		try {
+			parsed = parseYaml(yaml);
+		} catch (_) { // NOOP
+		}
+
 
     // Parse schemas from YAML
     const schemas = useMemo(() => {
