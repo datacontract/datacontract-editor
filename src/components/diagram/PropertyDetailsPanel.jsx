@@ -15,6 +15,22 @@ import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
 
+  // Dynamically get enum values from schema
+  const qualityDimensionOptions = useMemo(() => {
+    return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'property') ||
+           ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
+  }, [jsonSchema]);
+
+  const qualityTypeOptions = useMemo(() => {
+    return getSchemaEnumValues(jsonSchema, 'quality.type', 'property') ||
+           ['library', 'text', 'sql', 'custom'];
+  }, [jsonSchema]);
+
+  const qualityMetricOptions = useMemo(() => {
+    return getSchemaEnumValues(jsonSchema, 'quality.metric', 'property') ||
+           ['nullValues', 'missingValues', 'invalidValues', 'duplicateValues', 'rowCount'];
+  }, [jsonSchema]);
+
   const relationshipTypeOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'relationships.type', 'property') ||
            ['foreignKey', 'references', 'mapsTo'];

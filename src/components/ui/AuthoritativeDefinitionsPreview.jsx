@@ -9,13 +9,13 @@ import LinkIcon from './icons/LinkIcon.jsx';
  * @param {Array} definitions - Array of authoritative definition objects with {type, url, description}
  * @param {string} size - Icon size class (default: 'w-4 h-4')
  */
-const AuthoritativeDefinitionsPreview = ({definitions = [], className = 'w-4 h-4', listClassName= 'flex flex-wrap gap-1', buttonRadius='rounded'}) => {
+const AuthoritativeDefinitionsPreview = ({definitions = [], size = 'w-4 h-4'}) => {
 	if (!definitions || definitions.length === 0) {
 		return null;
 	}
 
 	return (
-		<div className={listClassName}>
+		<div className="flex flex-wrap gap-1">
 			{definitions.map((def, index) => {
 				const tooltipContent = (
 					<div className="text-xs">
@@ -36,9 +36,9 @@ const AuthoritativeDefinitionsPreview = ({definitions = [], className = 'w-4 h-4
 							href={def.url}
 							target="_blank"
 							rel="noopener noreferrer"
-							className={`${buttonRadius} cursor-pointer bg-white p-1 text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:ring-indigo-300 hover:text-gray-700 transition-colors`}
+							className="cursor-pointer rounded bg-white p-1 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:ring-indigo-300 hover:text-gray-700 transition-colors"
 						>
-							<div className={className}>
+							<div className={size}>
 								<IconResolver url={def.url} type={def.type} className="w-full h-full"/>
 							</div>
 						</a>
