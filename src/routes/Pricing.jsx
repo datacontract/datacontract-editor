@@ -1,38 +1,77 @@
+import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Tooltip } from '../components/ui/index.js';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import {useShallow} from "zustand/react/shallow";
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Pricing = () => {
-	const price = useEditorStore(useShallow((state) => state.getValue('price')));
-	const setValue = useEditorStore(useShallow((state) => state.setValue));
+  const yaml = useEditorStore((state) => state.yaml);
+  const setYaml = useEditorStore((state) => state.setYaml);
+  const currentView = useEditorStore((state) => state.currentView);
 
+  // Parse current YAML to extract form values
+  const formData = useMemo(() => {
+    if (!yaml?.trim()) {
+      return {
+        priceAmount: '',
+        priceCurrency: '',
+        priceUnit: ''
+      };
+    }
+
+    try {
+      const parsed = parseYaml(yaml);
+      const price = parsed.price || {};
+      return {
+        priceAmount: price.priceAmount ?? '',
+        priceCurrency: price.priceCurrency || '',
+        priceUnit: price.priceUnit || ''
+      };
+    } catch {
+      return {
+        priceAmount: '',
+        priceCurrency: '',
+        priceUnit: ''
+      };
+    }
+  }, [yaml]);
 
   // Update YAML when form fields change
   const updateField = (field, value) => {
     try {
-			const newPrice = price || {};
+      let parsed = {};
+      if (yaml?.trim()) {
+        try {
+          parsed = parseYaml(yaml) || {};
+        } catch {
+          parsed = {};
+        }
+      }
+
+      if (!parsed.price) {
+        parsed.price = {};
+      }
 
       // Update the field
       if (field === 'priceAmount') {
         const numValue = value === '' ? undefined : parseFloat(value);
         if (numValue !== undefined && !isNaN(numValue)) {
-          newPrice.priceAmount = numValue;
+          parsed.price.priceAmount = numValue;
         } else if (value === '') {
-          delete newPrice.priceAmount;
+          delete parsed.price.priceAmount;
         }
       } else {
-        newPrice[field] = value || undefined;
+        parsed.price[field] = value || undefined;
       }
 
       // Remove price object if empty
-			// TODO: Implement removal of complete sections
-      if (Object.keys(newPrice).length === 0) {
-				setValue('price', null);
+      if (Object.keys(parsed.price).length === 0) {
+        delete parsed.price;
       }
 
       // Convert back to YAML
-			setValue('price', newPrice);
+      const newYaml = stringifyYaml(parsed);
+      setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -65,7 +104,7 @@ const Pricing = () => {
                     name="priceAmount"
                     id="priceAmount"
                     step="0.01"
-                    value={price.priceAmount}
+                    value={formData.priceAmount}
                     onChange={(e) => updateField('priceAmount', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="9.99"
@@ -86,7 +125,7 @@ const Pricing = () => {
                     type="text"
                     name="priceCurrency"
                     id="priceCurrency"
-                    value={price.priceCurrency}
+                    value={formData.priceCurrency}
                     onChange={(e) => updateField('priceCurrency', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="USD"
@@ -107,7 +146,7 @@ const Pricing = () => {
                     type="text"
                     name="priceUnit"
                     id="priceUnit"
-                    value={price.priceUnit}
+                    value={formData.priceUnit}
                     onChange={(e) => updateField('priceUnit', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="megabyte"
