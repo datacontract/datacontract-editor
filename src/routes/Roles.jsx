@@ -1,50 +1,17 @@
-import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import RolesList from '../components/features/RolesList.jsx';
-import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import {useShallow} from "zustand/react/shallow";
 
 const Roles = () => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
-  const currentView = useEditorStore((state) => state.currentView);
-
-  // Parse current YAML to extract form values
-  const formData = useMemo(() => {
-    if (!yaml?.trim()) {
-      return { roles: [] };
-    }
-
-    try {
-      const parsed = parseYaml(yaml);
-      return {
-        roles: parsed.roles || []
-      };
-    } catch {
-      return { roles: [] };
-    }
-  }, [yaml]);
+  const roles = useEditorStore(useShallow((state) => state.getValue('roles')));
+	const setValue = useEditorStore(useShallow((state) => state.setValue('value')));
 
   // Update YAML when form fields change
   const updateRoles = (value) => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          parsed = {};
-        }
-      }
-
       if (value && value.length > 0) {
-        parsed.roles = value;
-      } else {
-        delete parsed.roles;
+				setValue('roles', value);
       }
-
-      // Convert back to YAML
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -60,7 +27,7 @@ const Roles = () => {
               A list of roles that will provide user access to the dataset.
             </p>
 
-            <RolesList roles={formData.roles} onUpdate={updateRoles} />
+            <RolesList roles={roles} onUpdate={updateRoles} />
           </div>
         </div>
       </div>
