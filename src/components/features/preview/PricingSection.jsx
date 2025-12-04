@@ -1,8 +1,6 @@
-import {useEditorStore} from "../../../store.js";
-import {useShallow} from "zustand/react/shallow";
+import { memo } from 'react';
 
-const PricingSection = () => {
-	const price = useEditorStore(useShallow(state => state.getValue('price')));
+const PricingSection = memo(({ price }) => {
 	if (!price) return null;
 
 	return (
@@ -40,7 +38,13 @@ const PricingSection = () => {
 			</div>
 		</section>
 	);
-};
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.price) === JSON.stringify(nextProps.price);
+	} catch {
+		return false;
+	}
+});
 
 PricingSection.displayName = 'PricingSection';
 

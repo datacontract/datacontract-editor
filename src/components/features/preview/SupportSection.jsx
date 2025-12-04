@@ -1,7 +1,5 @@
 import { memo } from 'react';
 import supportIcons from '../../../assets/support-icons/supportIcons.jsx';
-import {useEditorStore} from "../../../store.js";
-import {useShallow} from "zustand/react/shallow";
 
 // Memoized Support Channel component
 const SupportChannel = memo(({ channel }) => {
@@ -86,8 +84,7 @@ const SupportChannel = memo(({ channel }) => {
 SupportChannel.displayName = 'SupportChannel';
 
 // Main SupportSection component
-const SupportSection = () => {
-	const support = useEditorStore(useShallow(state => state.getValue('support')));
+const SupportSection = memo(({ support }) => {
 	if (!support || support.length === 0) return null;
 
 	return (
@@ -107,7 +104,13 @@ const SupportSection = () => {
 			</ul>
 		</section>
 	);
-}
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.support) === JSON.stringify(nextProps.support);
+	} catch {
+		return false;
+	}
+});
 
 SupportSection.displayName = 'SupportSection';
 

@@ -1,11 +1,9 @@
+import { memo } from 'react';
 import Tooltip from '../../ui/Tooltip.jsx';
 import PropertyValueRenderer from '../../ui/PropertyValueRenderer.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
-import {useEditorStore} from "../../../store.js";
-import {useShallow} from "zustand/react/shallow";
 
-const CustomPropertiesSection = () => {
-	const customProperties = useEditorStore(useShallow(state => state.getValue('customProperties')));
+const CustomPropertiesSection = memo(({ customProperties }) => {
 	if (!customProperties || customProperties.length === 0) return null;
 
 	return (
@@ -39,7 +37,13 @@ const CustomPropertiesSection = () => {
 			</div>
 		</section>
 	);
-};
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.customProperties) === JSON.stringify(nextProps.customProperties);
+	} catch {
+		return false;
+	}
+});
 
 CustomPropertiesSection.displayName = 'CustomPropertiesSection';
 

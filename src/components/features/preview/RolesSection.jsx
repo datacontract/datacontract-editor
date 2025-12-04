@@ -1,7 +1,5 @@
 import { memo } from 'react';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
-import {useEditorStore} from "../../../store.js";
-import {useShallow} from "zustand/react/shallow";
 
 // Memoized Role Item component
 const RoleItem = memo(({ role }) => {
@@ -62,8 +60,7 @@ const RoleItem = memo(({ role }) => {
 RoleItem.displayName = 'RoleItem';
 
 // Main RolesSection component
-const RolesSection = () => {
-	const roles = useEditorStore(useShallow(state => state.getValue('roles')));
+const RolesSection = memo(({ roles }) => {
 	if (!roles || roles.length === 0) return null;
 
 	return (
@@ -82,7 +79,13 @@ const RolesSection = () => {
 			</ul>
 		</section>
 	);
-}
+}, (prevProps, nextProps) => {
+	try {
+		return JSON.stringify(prevProps.roles) === JSON.stringify(nextProps.roles);
+	} catch {
+		return false;
+	}
+});
 
 RolesSection.displayName = 'RolesSection';
 

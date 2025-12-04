@@ -1,8 +1,9 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useMemo, useState, useCallback, useEffect, useRef} from 'react';
 import {useEditorStore} from '../../store.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import Tags from '../ui/Tags.jsx';
+import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
 import KeyIcon from "../ui/icons/KeyIcon.jsx";
 import AsteriskIcon from "../ui/icons/AsteriskIcon.jsx";
@@ -26,7 +27,6 @@ import ValidatedInput from '../ui/ValidatedInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
-import {useShallow} from "zustand/react/shallow";
 
 // Fallback logical type options (used if schema not loaded)
 const fallbackLogicalTypeOptions = [
@@ -121,8 +121,8 @@ const ItemsRow = ({
                       removeProperty,
                       expandedProperties,
                       togglePropertyExpansion,
-                      schema,
-                      setYamlValue,
+                      yaml,
+                      setYaml,
                       onSelectProperty,
                       selectedPropertyPath
                   }) => {
@@ -284,8 +284,8 @@ const ItemsRow = ({
                             addSubProperty={addSubProperty}
                             removeProperty={removeProperty}
                             expandedProperties={expandedProperties}
-                            schema={schema}
-                            setYamlValue={setYamlValue}
+                            yaml={yaml}
+                            setYaml={setYaml}
                             onSelectProperty={onSelectProperty}
                             selectedPropertyPath={selectedPropertyPath}
                         />
@@ -302,11 +302,52 @@ const ItemsRow = ({
                     depth={depth + 1}
                     propPath={itemsPath}
                     togglePropertyExpansion={togglePropertyExpansion}
+                    updateItems={(field, value) => {
+                        try {
+                            let parsed = {};
+                            if (yaml?.trim()) {
+                                try {
+                                    parsed = parseYaml(yaml) || {};
+                                } catch {
+                                    parsed = {};
+                                }
+                            }
+
+                            if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
+                                return;
+                            }
+
+                            // Navigate to the parent property
+                            let targetProp = parsed.schema[schemaIdx].properties;
+                            for (let i = 0; i < propPath.length; i++) {
+                                if (i < propPath.length - 1) {
+                                    targetProp = targetProp[propPath[i]].properties;
+                                } else {
+                                    targetProp = targetProp[propPath[i]];
+                                }
+                            }
+
+                            // Update nested items.items
+                            if (!targetProp.items) {
+                                targetProp.items = {};
+                            }
+                            if (!targetProp.items.items) {
+                                targetProp.items.items = {};
+                            }
+                            targetProp.items.items[field] = value;
+
+                            const newYaml = stringifyYaml(parsed);
+                            setYaml(newYaml);
+                        } catch (error) {
+                            console.error('Error updating nested items:', error);
+                        }
+                    }}
                     updateProperty={updateProperty}
                     addSubProperty={addSubProperty}
                     removeProperty={removeProperty}
                     expandedProperties={expandedProperties}
-                    setYamlValue={setYamlValue}
+                    yaml={yaml}
+                    setYaml={setYaml}
                     onSelectProperty={onSelectProperty}
                     selectedPropertyPath={selectedPropertyPath}
                 />
@@ -327,7 +368,8 @@ const PropertyRow = ({
                          addSubProperty,
                          removeProperty,
                          expandedProperties,
-                         setYamlValue,
+                         yaml,
+                         setYaml,
                          onSelectProperty,
                          selectedPropertyPath,
                          totalPropertiesCount = 0,
@@ -570,7 +612,8 @@ const PropertyRow = ({
                             addSubProperty={addSubProperty}
                             removeProperty={removeProperty}
                             expandedProperties={expandedProperties}
-                            setYamlValue={setYamlValue}
+                            yaml={yaml}
+                            setYaml={setYaml}
                             onSelectProperty={onSelectProperty}
                             selectedPropertyPath={selectedPropertyPath}
                         />
@@ -587,11 +630,49 @@ const PropertyRow = ({
                     depth={depth + 1}
                     propPath={currentPath}
                     togglePropertyExpansion={togglePropertyExpansion}
+                    updateItems={(field, value) => {
+                        try {
+                            let parsed = {};
+                            if (yaml?.trim()) {
+                                try {
+                                    parsed = parseYaml(yaml) || {};
+                                } catch {
+                                    parsed = {};
+                                }
+                            }
+
+                            if (!parsed.schema || !parsed.schema[schemaIdx] || !parsed.schema[schemaIdx].properties) {
+                                return;
+                            }
+
+                            // Navigate to the target property using currentPath
+                            let targetProp = parsed.schema[schemaIdx].properties;
+                            for (let i = 0; i < currentPath.length; i++) {
+                                if (i < currentPath.length - 1) {
+                                    targetProp = targetProp[currentPath[i]].properties;
+                                } else {
+                                    targetProp = targetProp[currentPath[i]];
+                                }
+                            }
+
+                            // Update items field
+                            if (!targetProp.items) {
+                                targetProp.items = {};
+                            }
+                            targetProp.items[field] = value;
+
+                            const newYaml = stringifyYaml(parsed);
+                            setYaml(newYaml);
+                        } catch (error) {
+                            console.error('Error updating items field:', error);
+                        }
+                    }}
                     updateProperty={updateProperty}
                     addSubProperty={addSubProperty}
                     removeProperty={removeProperty}
                     expandedProperties={expandedProperties}
-                    setYamlValue={setYamlValue}
+                    yaml={yaml}
+                    setYaml={setYaml}
                     onSelectProperty={onSelectProperty}
                     selectedPropertyPath={selectedPropertyPath}
                 />
@@ -601,9 +682,9 @@ const PropertyRow = ({
 };
 
 const SchemaEditor = ({schemaIndex}) => {
+    const yaml = useEditorStore((state) => state.yaml);
+    const setYaml = useEditorStore((state) => state.setYaml);
     const jsonSchema = useEditorStore((state) => state.schemaData);
-		const schema = useEditorStore(useShallow((state) => state.getValue('schema')));
-		const setYamlValue = useEditorStore((state) => state.setYamlValue);
     const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
 
     // Selected property state for drawer
@@ -631,18 +712,21 @@ const SchemaEditor = ({schemaIndex}) => {
     // Track property count for auto-edit detection
     useEffect(() => {
         try {
-					previousPropertyCount.current = schema?.[schemaIndex]?.properties?.length || 0;
+            const parsed = yaml?.trim() ? parseYaml(yaml) : null;
+            const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
+            previousPropertyCount.current = currentCount;
         } catch {
             // Ignore parse errors
         }
-    }, [schemaIndex, schema]);
+    }, [schemaIndex, yaml]);
 
     // Auto-edit newly added property (like diagram editor)
     useEffect(() => {
         if (!shouldEditNextProperty.current || !nextPropertyToEdit.current) return;
 
         try {
-            const currentCount = schema?.[schemaIndex]?.properties?.length || 0;
+            const parsed = yaml?.trim() ? parseYaml(yaml) : null;
+            const currentCount = parsed?.schema?.[schemaIndex]?.properties?.length || 0;
 
             if (currentCount > previousPropertyCount.current) {
                 // A new property was added - the PropertyRow will detect this via its own state
@@ -653,18 +737,19 @@ const SchemaEditor = ({schemaIndex}) => {
         } catch {
             // Ignore parse errors
         }
-    }, [schema, schemaIndex]);
+    }, [yaml, schemaIndex]);
 
     // Sync selected property with YAML changes (e.g., when editing inline)
     useEffect(() => {
         if (!selectedProperty || !selectedProperty.propPath) return;
 
         try {
-            if (schema?.[schemaIndex]?.properties) return;
+            const parsed = parseYaml(yaml);
+            if (!parsed?.schema?.[schemaIndex]?.properties) return;
 
             // Navigate to the property using the propPath array from selectedProperty
             const propPath = selectedProperty.propPath;
-            let currentProp = schema[schemaIndex].properties;
+            let currentProp = parsed.schema[schemaIndex].properties;
 
             for (let i = 0; i < propPath.length; i++) {
                 if (propPath[i] === 'items') {
@@ -687,7 +772,7 @@ const SchemaEditor = ({schemaIndex}) => {
         } catch {
             // Ignore parse errors
         }
-    }, [schema, selectedProperty?.propPath, schemaIndex]);
+    }, [yaml, selectedProperty?.propPath, schemaIndex]);
 
     // Close drawer when clicking outside properties and drawer
     useEffect(() => {
@@ -722,11 +807,89 @@ const SchemaEditor = ({schemaIndex}) => {
         {id: 'object', name: 'object'}
     ];
 
+    // Parse current YAML to extract the specific schema
+    const schemaData = useMemo(() => {
+        if (!yaml?.trim()) {
+            return {
+                schema: null,
+                allSchemas: []
+            };
+        }
+
+        try {
+            const parsed = parseYaml(yaml);
+            const allSchemas = parsed.schema || [];
+
+            // Get the specific schema by index
+            const schema = (schemaIndex >= 0 && schemaIndex < allSchemas.length)
+                ? allSchemas[schemaIndex]
+                : null;
+
+            return {
+                schema,
+                allSchemas
+            };
+        } catch {
+            return {
+                schema: null,
+                allSchemas: []
+            };
+        }
+    }, [yaml, schemaIndex]);
+
+    // Update schema field
+    const updateSchema = (index, field, value) => {
+        try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema) {
+                return;
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
+                return;
+            }
+
+            parsed.schema[schemaIndex][field] = value;
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
+        } catch (error) {
+            console.error('Error updating schema:', error);
+        }
+    };
+
     // Remove schema
     const removeSchema = () => {
         try {
-            const newSchemaList = schema.splice(schemaIndex, 1);
-						setYamlValue('schema', newSchemaList);
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    return;
+                }
+            }
+
+            if (!parsed.schema) {
+                return;
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
+                return;
+            }
+
+            parsed.schema.splice(schemaIndex, 1);
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
         } catch (error) {
             console.error('Error removing schema:', error);
         }
@@ -735,28 +898,37 @@ const SchemaEditor = ({schemaIndex}) => {
     // Add property to schema
     const addProperty = () => {
         try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
 
-            if (!schema) {
+            if (!parsed.schema) {
                 console.warn('No schema found in YAML');
                 return;
             }
 
-            if (!schema || !schema[schemaIndex]) {
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
                 console.warn(`Schema at index ${schemaIndex} not found`);
                 return;
             }
 
-            if (!schema[schemaIndex].properties) {
-                schema[schemaIndex].properties = [];
+            if (!parsed.schema[schemaIndex].properties) {
+                parsed.schema[schemaIndex].properties = [];
             }
 
-            schema[schemaIndex].properties.push({
+            parsed.schema[schemaIndex].properties.push({
                 name: '',
                 logicalType: '',
                 description: ''
             });
 
-            setYamlValue('schema', schema);
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
         } catch (error) {
             console.error('Error adding property:', error);
         }
@@ -765,51 +937,69 @@ const SchemaEditor = ({schemaIndex}) => {
     // Save current property and add next one (for Enter key on last property)
     const handleSaveAndAddNext = useCallback((schemaIdx, propPath, newName) => {
         try {
-            if (!schema || !schema[schemaIndex]) {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
                 return;
             }
 
-            if (!schema[schemaIndex].properties) {
-                schema[schemaIndex].properties = [];
+            if (!parsed.schema[schemaIndex].properties) {
+                parsed.schema[schemaIndex].properties = [];
             }
 
             // Update the current property name
             const propIndex = propPath[propPath.length - 1];
-            if (typeof propIndex === 'number' && schema[schemaIndex].properties[propIndex]) {
-                schema[schemaIndex].properties[propIndex].name = newName?.trim() || '';
+            if (typeof propIndex === 'number' && parsed.schema[schemaIndex].properties[propIndex]) {
+                parsed.schema[schemaIndex].properties[propIndex].name = newName?.trim() || '';
             }
 
             // Add the new property
-            schema[schemaIndex].properties.push({
+            parsed.schema[schemaIndex].properties.push({
                 name: '',
                 logicalType: '',
                 description: ''
             });
 
-            setYamlValue('schema', schema);
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
 
             // Set the new property index to auto-edit
-            const newPropertyIndex = schema[schemaIndex].properties.length - 1;
+            const newPropertyIndex = parsed.schema[schemaIndex].properties.length - 1;
             setAutoEditPropertyIndex(newPropertyIndex);
         } catch (error) {
             console.error('Error saving and adding next property:', error);
         }
-    }, [setYamlValue, schemaIndex, schema]);
+    }, [yaml, schemaIndex, setYaml]);
 
     // Update property field (supports nested properties via propPath)
     const updateProperty = (schemaIdx, propPath, field, value) => {
-			// TODO: Make this work and more efficient
         try {
-            if (!schema) {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema) {
                 return;
             }
 
-            if (!schema || !schema[schemaIndex] || !schema[schemaIndex].properties) {
+            if (!parsed.schema || !parsed.schema[schemaIndex] || !parsed.schema[schemaIndex].properties) {
                 return;
             }
 
             // Navigate to the target property using propPath
-            let targetProp = schema[schemaIndex].properties;
+            let targetProp = parsed.schema[schemaIndex].properties;
 
             // For backward compatibility, if propPath is a number, treat it as old behavior
             if (typeof propPath === 'number') {
@@ -844,34 +1034,45 @@ const SchemaEditor = ({schemaIndex}) => {
                 targetProp[field] = value;
             }
 
-            setYamlValue(`schema[${schemaIndex}].properties[${propPath}].${field}`, value );
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
         } catch (error) {
             console.error('Error updating property:', error);
         }
     };
 
     // Remove property from schema
-    const removeProperty = useCallback((schemaIdx, propIdx) => {
+    const removeProperty = (schemaIdx, propIdx) => {
         try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    return;
+                }
+            }
 
-            if (!schema) {
+            if (!parsed.schema) {
                 return;
             }
 
-            if (!schema || !schema[schemaIdx] || !schema[schemaIdx].properties) {
+            if (!parsed.schema || !parsed.schema[schemaIndex] || !parsed.schema[schemaIndex].properties) {
                 return;
             }
 
-            if (!schema[schemaIdx].properties[propIdx]) {
+            if (!parsed.schema[schemaIndex].properties[propIdx]) {
                 return;
             }
 
-						//TODO: implement more efficient removal
-            setYamlValue('schema', schema);
+            parsed.schema[schemaIndex].properties.splice(propIdx, 1);
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
         } catch (error) {
             console.error('Error removing property:', error);
         }
-    }, [setYamlValue, schema]);
+    };
 
     // Handle keyboard shortcuts for selected property (Delete/Backspace to remove)
     useEffect(() => {
@@ -912,20 +1113,28 @@ const SchemaEditor = ({schemaIndex}) => {
 
     // Add sub-property to a property (for nested objects or items)
     const addSubProperty = (schemaIdx, propPath, isItems = false) => {
-			// TODO: Make this work and more efficient
         try {
-            if (!schema) {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema) {
                 console.warn('No schema found in YAML');
                 return;
             }
 
-            if (!schema || !schema[schemaIndex]) {
+            if (!parsed.schema || !parsed.schema[schemaIndex]) {
                 console.warn(`Schema at index ${schemaIndex} not found`);
                 return;
             }
 
             // Navigate to the property using propPath array
-            let targetProp = schema[schemaIndex].properties;
+            let targetProp = parsed.schema[schemaIndex].properties;
             for (let i = 0; i < propPath.length; i++) {
                 // Check if current path segment is 'items'
                 if (propPath[i] === 'items') {
@@ -963,6 +1172,9 @@ const SchemaEditor = ({schemaIndex}) => {
                     description: ''
                 });
             }
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
         } catch (error) {
             console.error('Error adding sub-property:', error);
         }
@@ -997,62 +1209,72 @@ const SchemaEditor = ({schemaIndex}) => {
     }, []);
 
     // Handle property update from drawer
-    // const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
-    //     if (!selectedProperty) return;
-		//
-    //     try {
-		//
-    //         if (!schema || !schema[schemaIndex] || !schema[schemaIndex].properties) {
-    //             return;
-    //         }
-		//
-    //         const propPath = selectedProperty.propPath;
-		//
-    //         // Navigate to the target property using propPath
-    //         let targetProp = schema[schemaIndex].properties;
-    //         for (let i = 0; i < propPath.length; i++) {
-    //             // Check if current path segment is 'items'
-    //             if (propPath[i] === 'items') {
-    //                 targetProp = targetProp.items;
-    //             } else if (i < propPath.length - 1) {
-    //                 targetProp = targetProp[propPath[i]];
-    //                 // Only navigate to properties if next segment is not 'items'
-    //                 if (propPath[i + 1] !== 'items') {
-    //                     targetProp = targetProp.properties;
-    //                 }
-    //             } else {
-    //                 targetProp = targetProp[propPath[i]];
-    //             }
-    //         }
-		//
-    //         // Update all fields at once
-    //         Object.assign(targetProp, updatedProperty);
-		//
-    //         // Update the selected property to reflect changes
-		// 				// TODO: Make this work and more efficient
-    //         setSelectedProperty(prev => ({
-    //             ...prev,
-    //             property: updatedProperty
-    //         }));
-    //     } catch (error) {
-    //         console.error('Error updating property:', error);
-    //     }
-    // }, [selectedProperty, schemaIndex]);
+    const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
+        if (!selectedProperty) return;
+
+        try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema || !parsed.schema[schemaIndex] || !parsed.schema[schemaIndex].properties) {
+                return;
+            }
+
+            const propPath = selectedProperty.propPath;
+
+            // Navigate to the target property using propPath
+            let targetProp = parsed.schema[schemaIndex].properties;
+            for (let i = 0; i < propPath.length; i++) {
+                // Check if current path segment is 'items'
+                if (propPath[i] === 'items') {
+                    targetProp = targetProp.items;
+                } else if (i < propPath.length - 1) {
+                    targetProp = targetProp[propPath[i]];
+                    // Only navigate to properties if next segment is not 'items'
+                    if (propPath[i + 1] !== 'items') {
+                        targetProp = targetProp.properties;
+                    }
+                } else {
+                    targetProp = targetProp[propPath[i]];
+                }
+            }
+
+            // Update all fields at once
+            Object.assign(targetProp, updatedProperty);
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
+
+            // Update the selected property to reflect changes
+            setSelectedProperty(prev => ({
+                ...prev,
+                property: updatedProperty
+            }));
+        } catch (error) {
+            console.error('Error updating property:', error);
+        }
+    }, [selectedProperty, yaml, schemaIndex, setYaml]);
 
     // Handle property delete from drawer
-    // const handleDrawerPropertyDelete = useCallback(() => {
-    //     if (!selectedProperty) return;
-		//
-    //     const propPath = selectedProperty.propPath;
-    //     const propIdx = propPath[propPath.length - 1];
-		//
-    //     // For now, only support deleting top-level properties
-    //     if (propPath.length === 1 && typeof propIdx === 'number') {
-    //         removeProperty(schemaIndex, propIdx);
-    //     }
-		//
-    //     handleCloseDrawer();
-    // }, [selectedProperty, schemaIndex, removeProperty, handleCloseDrawer]);
+    const handleDrawerPropertyDelete = useCallback(() => {
+        if (!selectedProperty) return;
+
+        const propPath = selectedProperty.propPath;
+        const propIdx = propPath[propPath.length - 1];
+
+        // For now, only support deleting top-level properties
+        if (propPath.length === 1 && typeof propIdx === 'number') {
+            removeProperty(schemaIndex, propIdx);
+        }
+
+        handleCloseDrawer();
+    }, [selectedProperty, schemaIndex, removeProperty, handleCloseDrawer]);
 
     return (
         <div className="h-full flex flex-col bg-white">
@@ -1061,11 +1283,11 @@ const SchemaEditor = ({schemaIndex}) => {
 
                         {/* Schema Section */}
                         <div>
-                            {schema[schemaIndex] ? (
+                            {schemaData.schema ? (
                                 <div>
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-base font-semibold leading-6 text-gray-900">
-                                            {schema[schemaIndex].name || schema[schemaIndex].businessName || 'Untitled Schema'}
+                                            {schemaData.schema.name || schemaData.schema.businessName || 'Untitled Schema'}
                                         </h3>
                                         <button
                                             type="button"
@@ -1086,12 +1308,11 @@ const SchemaEditor = ({schemaIndex}) => {
                                     {/* Basic Metadata */}
                                     <div className="space-y-4">
                                         {/* Name Field */}
-																				{ /* TODO: Add onchange logic */ }
                                         <ValidatedInput
                                             name={`schema-name-${schemaIndex}`}
                                             label="Name"
-                                            value={schema[schemaIndex].name || ''}
-                                            onChange={(e) => console.log(schemaIndex, 'name', e.target.value)}
+                                            value={schemaData.schema.name || ''}
+                                            onChange={(e) => updateSchema(schemaIndex, 'name', e.target.value)}
                                             required={true}
                                             tooltip="Technical name for the schema (required)"
                                             placeholder="schema_name"
@@ -1108,13 +1329,12 @@ const SchemaEditor = ({schemaIndex}) => {
                                                     <QuestionMarkCircleIcon />
                                                 </Tooltip>
                                             </div>
-																					{ /* TODO: Add onchange logic */ }
                                             <textarea
                                                 id={`schema-description-${schemaIndex}`}
                                                 name={`schema-description-${schemaIndex}`}
                                                 rows={2}
-                                                value={schema[schemaIndex].description || ''}
-                                                onChange={(e) => console.log(schemaIndex, 'description', e.target.value)}
+                                                value={schemaData.schema.description || ''}
+                                                onChange={(e) => updateSchema(schemaIndex, 'description', e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                 placeholder="Describe the schema..."
                                             />
@@ -1149,9 +1369,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     type="text"
                                                                     name={`schema-business-name-${schemaIndex}`}
                                                                     id={`schema-business-name-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].businessName || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'businessName', e.target.value)}
+                                                                    value={schemaData.schema.businessName || ''}
+                                                                    onChange={(e) => updateSchema(schemaIndex, 'businessName', e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="Human readable name"
                                                                 />
@@ -1171,7 +1390,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     <input
                                                                         type="text"
                                                                         value={(() => {
-                                                                            const currentType = schema[schemaIndex].physicalType || 'table';
+                                                                            const currentType = schemaData.schema.physicalType || 'table';
                                                                             const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
                                                                             return matchedOption ? matchedOption.name : currentType;
                                                                         })()}
@@ -1179,8 +1398,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                             const inputValue = e.target.value;
                                                                             const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
                                                                             const typeValue = matchedOption ? matchedOption.id : inputValue;
-																																						// TODO: implement update
-                                                                            console.log(schemaIndex, 'physicalType', typeValue);
+                                                                            updateSchema(schemaIndex, 'physicalType', typeValue);
                                                                         }}
                                                                         className="col-start-1 row-start-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                         placeholder="table"
@@ -1209,9 +1427,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     type="text"
                                                                     name={`schema-physical-name-${schemaIndex}`}
                                                                     id={`schema-physical-name-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].physicalName || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'physicalName', e.target.value)}
+                                                                    value={schemaData.schema.physicalName || ''}
+                                                                    onChange={(e) => updateSchema(schemaIndex, 'physicalName', e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="shipments_v1"
                                                                 />
@@ -1232,9 +1449,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     type="text"
                                                                     name={`schema-logical-type-${schemaIndex}`}
                                                                     id={`schema-logical-type-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].logicalType || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'logicalType', e.target.value)}
+                                                                    value={schemaData.schema.logicalType || ''}
+                                                                    onChange={(e) => updateSchema(schemaIndex, 'logicalType', e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="object"
                                                                 />
@@ -1256,9 +1472,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                 id={`schema-data-granularity-${schemaIndex}`}
                                                                 name={`schema-data-granularity-${schemaIndex}`}
                                                                 rows={2}
-                                                                value={schema[schemaIndex].dataGranularityDescription || ''}
-																																// TODO: Implement update
-                                                                onChange={(e) => console.log(schemaIndex, 'dataGranularityDescription', e.target.value)}
+                                                                value={schemaData.schema.dataGranularityDescription || ''}
+                                                                onChange={(e) => updateSchema(schemaIndex, 'dataGranularityDescription', e.target.value)}
                                                                 className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                 placeholder="e.g., One record per customer per day"
                                                             />
@@ -1268,9 +1483,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         <div className="mt-4">
                                                             <Tags
                                                                 label="Tags"
-                                                                value={schema[schemaIndex].tags || []}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'tags', value)}
+                                                                value={schemaData.schema.tags || []}
+                                                                onChange={(value) => updateSchema(schemaIndex, 'tags', value)}
                                                                 tooltip="Tags for categorizing and organizing schemas"
                                                                 placeholder="Add a tag..."
                                                             />
@@ -1280,9 +1494,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Data Quality</h4>
                                                             <QualityEditor
-                                                                value={schema[schemaIndex].quality}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'quality', value)}
+                                                                value={schemaData.schema.quality}
+                                                                onChange={(value) => updateSchema(schemaIndex, 'quality', value)}
                                                                 context="schema"
                                                             />
                                                         </div>
@@ -1291,9 +1504,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Authoritative Definitions</h4>
                                                             <AuthoritativeDefinitionsEditor
-                                                                value={schema[schemaIndex].authoritativeDefinitions}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'authoritativeDefinitions', value)}
+                                                                value={schemaData.schema.authoritativeDefinitions}
+                                                                onChange={(value) => updateSchema(schemaIndex, 'authoritativeDefinitions', value)}
                                                             />
                                                         </div>
 
@@ -1301,9 +1513,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         <div className="mt-6">
 																													<h4 className="text-xs font-medium text-gray-900 mb-3">Relationships</h4>
                                                             <RelationshipEditor
-                                                                value={schema[schemaIndex].relationships}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'relationships', value)}
+                                                                value={schemaData.schema.relationships}
+                                                                onChange={(value) => updateSchema(schemaIndex, 'relationships', value)}
                                                                 relationshipTypeOptions={relationshipTypeOptions}
                                                                 showFrom={true}
                                                             />
@@ -1313,9 +1524,8 @@ const SchemaEditor = ({schemaIndex}) => {
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Custom Properties</h4>
                                                             <CustomPropertiesEditor
-                                                                value={schema[schemaIndex].customProperties}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'customProperties', value)}
+                                                                value={schemaData.schema.customProperties}
+                                                                onChange={(value) => updateSchema(schemaIndex, 'customProperties', value)}
                                                                 showDescription={true}
                                                             />
                                                         </div>
@@ -1346,9 +1556,9 @@ const SchemaEditor = ({schemaIndex}) => {
                                             </div>
 
                                             {/* Properties List */}
-                                            {schema[schemaIndex].properties && schema[schemaIndex].properties.length > 0 ? (
+                                            {schemaData.schema.properties && schemaData.schema.properties.length > 0 ? (
                                                 <div className="rounded-b-md">
-                                                    {schema[schemaIndex].properties.map((property, propIndex) => (
+                                                    {schemaData.schema.properties.map((property, propIndex) => (
                                                         <PropertyRow
                                                             key={propIndex}
                                                             property={property}
@@ -1361,9 +1571,11 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             addSubProperty={addSubProperty}
                                                             removeProperty={removeProperty}
                                                             expandedProperties={expandedProperties}
+                                                            yaml={yaml}
+                                                            setYaml={setYaml}
                                                             onSelectProperty={handleSelectProperty}
                                                             selectedPropertyPath={selectedPropertyPath}
-                                                            totalPropertiesCount={schema[schemaIndex].properties.length}
+                                                            totalPropertiesCount={schemaData.schema.properties.length}
                                                             onSaveAndAddNext={handleSaveAndAddNext}
                                                             autoEditNewProperty={autoEditPropertyIndex === propIndex}
                                                             onAutoEditComplete={() => setAutoEditPropertyIndex(null)}
@@ -1410,9 +1622,10 @@ const SchemaEditor = ({schemaIndex}) => {
             <PropertyDetailsDrawer
                 ref={drawerRef}
                 open={selectedProperty !== null}
-								onUpdate={(field, value) => setYamlValue(`${selectedProperty.propPath}.${field}`, value)}
                 onClose={handleCloseDrawer}
                 property={selectedProperty?.property}
+                onUpdate={handleDrawerPropertyUpdate}
+                onDelete={handleDrawerPropertyDelete}
             />
         </div>
     );

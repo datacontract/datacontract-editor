@@ -6,8 +6,6 @@ import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
 import { getQualityCheckIcon } from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
-import {useEditorStore} from "../../../store.js";
-import {useShallow} from "zustand/react/shallow";
 
 // Custom comparison for schema property
 const propertyAreEqual = (prevProps, nextProps) => {
@@ -373,9 +371,26 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 
 SchemaTable.displayName = 'SchemaTable';
 
+// Custom comparison function for schema
+const schemaAreEqual = (prevProps, nextProps) => {
+	// Quick reference check first
+	if (prevProps.schema === nextProps.schema) return true;
+
+	// Check if both are falsy
+	if (!prevProps.schema && !nextProps.schema) return true;
+	if (!prevProps.schema || !nextProps.schema) return false;
+
+	// Use JSON.stringify for deep comparison
+	// This is acceptable for schema data as it's not too large and changes infrequently
+	try {
+		return JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
+	} catch {
+		return false;
+	}
+};
+
 // Main SchemaSection component
-const SchemaSection = () => {
-	const schema = useEditorStore(useShallow(state => state.getValue('schema')));
+const SchemaSection = memo(({ schema }) => {
 	if (!schema || Object.keys(schema).length === 0) return null;
 
 	return (
@@ -397,7 +412,7 @@ const SchemaSection = () => {
 			))}
 		</section>
 	);
-}
+}, schemaAreEqual);
 
 SchemaSection.displayName = 'SchemaSection';
 
