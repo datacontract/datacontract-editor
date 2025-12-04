@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { ValidatedCombobox } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
@@ -5,28 +6,11 @@ import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import Tooltip from '../components/ui/Tooltip.jsx';
 import Tags from '../components/ui/Tags.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import {useShallow} from "zustand/react/shallow";
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 
 const Overview = () => {
-	const id = useEditorStore(useShallow((state) => state.getValue('id')));
-	const name = useEditorStore(useShallow((state) => state.getValue('name')));
-	const version = useEditorStore(useShallow((state) => state.getValue('version')));
-	const status = useEditorStore(useShallow((state) => state.getValue('status')));
-	const domain = useEditorStore(useShallow((state) => state.getValue('domain')));
-	const tenant = useEditorStore(useShallow((state) => state.getValue('tenant')));
-	const tags = useEditorStore(useShallow((state) => state.getValue('tags')));
-	const authoritativeDefinitions = useEditorStore(useShallow((state) => state.getValue('authoritativeDefinitions')));
-
-	const setValue = useEditorStore((state) => state.setValue);
-	const setId = (newValue) => setValue('id', newValue);
-	const setName = (newValue) => setValue('name', newValue);
-	const setVersion = (newValue) => setValue('version', newValue);
-	const setStatus = (newValue) => setValue('status', newValue);
-	const setDomain = (newValue) => setValue('domain', newValue);
-	const setTenant = (newValue) => setValue('tenant', newValue);
-	const setTags = (key, newValue) => setValue(key, newValue);
-	const setAuthoritativeDefinitions = (newValue) => setValue('authoritativeDefinitions', newValue);
-
+  const yaml = useEditorStore((state) => state.yaml);
+  const setYaml = useEditorStore((state) => state.setYaml);
   const editorConfig = useEditorStore((state) => state.editorConfig);
 
   // Status options for the combobox
@@ -38,6 +22,124 @@ const Overview = () => {
     { id: 'deprecated', name: 'deprecated' },
     { id: 'retired', name: 'retired' }
   ];
+
+  // Parse current YAML to extract form values
+  const formData = useMemo(() => {
+    if (!yaml?.trim()) {
+      return {
+        name: '',
+        version: '',
+        status: '',
+        tenant: '',
+        id: '',
+        domain: '',
+        tags: [],
+        authoritativeDefinitions: [],
+        description: {
+          purpose: '',
+          usage: '',
+          limitations: '',
+          authoritativeDefinitions: [],
+          customProperties: []
+        }
+      };
+    }
+
+    try {
+      const parsed = parseYaml(yaml);
+      const description = parsed.description || {};
+      return {
+        name: parsed.name || '',
+        version: parsed.version || '',
+        status: parsed.status || '',
+        tenant: parsed.tenant || '',
+        id: parsed.id || '',
+        domain: parsed.domain || '',
+        tags: parsed.tags || [],
+        authoritativeDefinitions: parsed.authoritativeDefinitions || [],
+        description: {
+          purpose: description.purpose || '',
+          usage: description.usage || '',
+          limitations: description.limitations || '',
+          authoritativeDefinitions: description.authoritativeDefinitions || [],
+          customProperties: description.customProperties || []
+        }
+      };
+    } catch {
+      return {
+        name: '',
+        version: '',
+        status: '',
+        tenant: '',
+        id: '',
+        domain: '',
+        tags: [],
+        authoritativeDefinitions: [],
+        description: {
+          purpose: '',
+          usage: '',
+          limitations: '',
+          authoritativeDefinitions: [],
+          customProperties: []
+        }
+      };
+    }
+  }, [yaml]);
+
+  // Update YAML when form fields change
+  const updateField = (field, value) => {
+    try {
+      let parsed = {};
+      if (yaml?.trim()) {
+        try {
+          parsed = parseYaml(yaml) || {};
+        } catch {
+          // If YAML is invalid, start fresh
+          parsed = {};
+        }
+      }
+
+      // Update the field
+      if (field === 'name') {
+        parsed.name = value;
+      } else if (field === 'version') {
+        parsed.version = value;
+      } else if (field === 'status') {
+        parsed.status = value;
+      } else if (field === 'tenant') {
+        parsed.tenant = value;
+      } else if (field === 'id') {
+        parsed.id = value;
+      } else if (field === 'domain') {
+        parsed.domain = value;
+      } else if (field === 'tags') {
+        parsed.tags = value;
+      } else if (field === 'authoritativeDefinitions') {
+        parsed.authoritativeDefinitions = value;
+      } else if (field.startsWith('description.')) {
+        const descriptionField = field.split('.')[1];
+        if (!parsed.description) {
+          parsed.description = {};
+        }
+        if (typeof parsed.description === 'string') {
+          parsed.description = { purpose: parsed.description };
+        }
+        // For array fields, use value directly (including undefined to remove)
+        if (descriptionField === 'authoritativeDefinitions' || descriptionField === 'customProperties') {
+          parsed.description[descriptionField] = value;
+        } else {
+          // For string fields
+          parsed.description[descriptionField] = value;
+        }
+      }
+
+      // Convert back to YAML
+      const newYaml = stringifyYaml(parsed);
+      setYaml(newYaml);
+    } catch (error) {
+      console.error('Error updating YAML:', error);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -54,8 +156,8 @@ const Overview = () => {
                 <ValidatedInput
                   name="name"
                   label="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formData.name}
+                  onChange={(e) => updateField('name', e.target.value)}
                   required={true}
                   tooltip="The name of the data contract"
                   placeholder="Enter document name"
@@ -67,8 +169,8 @@ const Overview = () => {
                 <ValidatedInput
                   name="version"
                   label="Version"
-                  value={version}
-                  onChange={(e) => setVersion(e.target.value)}
+                  value={formData.version}
+                  onChange={(e) => updateField('version', e.target.value)}
                   required={true}
                   tooltip="Version number using semantic versioning"
                   placeholder="1.0.0"
@@ -79,8 +181,8 @@ const Overview = () => {
                 <ValidatedInput
                   name="id"
                   label="ID"
-                  value={id}
-                  onChange={(e) => setId(e.target.value)}
+                  value={formData.id}
+                  onChange={(e) => updateField('id', e.target.value)}
                   required={true}
                   tooltip="Unique identifier for this data contract"
                   placeholder="unique-identifier"
@@ -92,8 +194,8 @@ const Overview = () => {
                   name="status"
                   label="Status"
                   options={statusOptions}
-                  value={status}
-                  onChange={(selectedValue) => setStatus(selectedValue?.id || '')}
+                  value={formData.status}
+                  onChange={(selectedValue) => updateField('status', selectedValue || '')}
                   placeholder="Select a status..."
                   acceptAnyInput={true}
                   required={true}
@@ -115,8 +217,8 @@ const Overview = () => {
                     type="text"
                     name="tenant"
                     id="tenant"
-                    value={tenant}
-                    onChange={(e) => setTenant(e.target.value)}
+                    value={formData.tenant}
+                    onChange={(e) => updateField('tenant', e.target.value)}
                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="company-A"
                   />
@@ -136,8 +238,8 @@ const Overview = () => {
                     <select
                       name="domain"
                       id="domain"
-                      value={domain}
-                      onChange={(e) => setDomain(e.target.value)}
+                      value={formData.domain}
+                      onChange={(e) => updateField('domain', e.target.value)}
                       className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     >
                       <option value="">Select a domain...</option>
@@ -152,8 +254,8 @@ const Overview = () => {
                       type="text"
                       name="domain"
                       id="domain"
-                      value={domain}
-                      onChange={(e) => setDomain(e.target.value)}
+                      value={formData.domain}
+                      onChange={(e) => updateField('domain', e.target.value)}
                       className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                       placeholder="e.g., logistics, finance"
                     />
@@ -164,8 +266,8 @@ const Overview = () => {
                 <div className="sm:col-span-2">
                   <Tags
                     label="Tags"
-                    value={tags}
-                    onChange={(value) => setTags('tags', value)}
+                    value={formData.tags}
+                    onChange={(value) => updateField('tags', value)}
                     tooltip="Categorize your data contract with tags"
                     placeholder="Add a tag..."
                   />
@@ -174,8 +276,8 @@ const Overview = () => {
                 {/* Top-level Authoritative Definitions */}
                 <div className="sm:col-span-2">
                   <AuthoritativeDefinitionsEditor
-                    value={authoritativeDefinitions}
-                    onChange={(value) => setAuthoritativeDefinitions(value)}
+                    value={formData.authoritativeDefinitions}
+                    onChange={(value) => updateField('authoritativeDefinitions', value)}
                   />
                 </div>
               </div>
