@@ -5,11 +5,11 @@ import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import supportIcons from '../assets/support-icons/supportIcons.jsx';
 import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import {useShallow} from "zustand/react/shallow";
 
 const Support = () => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
-  const currentView = useEditorStore((state) => state.currentView);
+	const support = useEditorStore(useShallow((state) => state.getValue('support')));
+	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
   const toolOptions = [
     { id: 'email', name: 'email' },
@@ -28,43 +28,13 @@ const Support = () => {
     { id: 'notifications', name: 'notifications' }
   ];
 
-  // Parse current YAML to extract form values
-  const formData = useMemo(() => {
-    if (!yaml?.trim()) {
-      return { supportItems: [] };
-    }
-
-    try {
-      const parsed = parseYaml(yaml);
-      return {
-        supportItems: parsed.support || []
-      };
-    } catch {
-      return { supportItems: [] };
-    }
-  }, [yaml]);
-
   // Update YAML when form fields change
   const updateField = (value) => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          parsed = {};
-        }
-      }
 
       if (value && value.length > 0) {
-        parsed.support = value;
-      } else {
-        delete parsed.support;
+				setValue('support', value);
       }
-
-      // Convert back to YAML
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -72,7 +42,7 @@ const Support = () => {
 
   // Update a specific support item
   const updateSupportItem = (index, field, value) => {
-    const updatedItems = [...formData.supportItems];
+    const updatedItems = [...support];
     updatedItems[index] = {
       ...updatedItems[index],
       [field]: value || undefined
@@ -86,12 +56,12 @@ const Support = () => {
       channel: '',
       url: ''
     };
-    updateField([...formData.supportItems, newItem]);
+    updateField([...support, newItem]);
   };
 
   // Remove a support item
   const removeSupportItem = (index) => {
-    const updatedItems = formData.supportItems.filter((_, i) => i !== index);
+    const updatedItems = support.filter((_, i) => i !== index);
     updateField(updatedItems);
   };
 
@@ -107,9 +77,9 @@ const Support = () => {
 
             <div>
               {/* Display existing support channels */}
-              {formData.supportItems.length > 0 && (
+              {support.length > 0 && (
                 <div className="space-y-3 mb-2">
-                  {formData.supportItems.map((item, index) => (
+                  {support.map((item, index) => (
                     <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="flex items-end gap-3 col-span-2">
