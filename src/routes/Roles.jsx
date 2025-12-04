@@ -4,7 +4,7 @@ import {useShallow} from "zustand/react/shallow";
 
 const Roles = () => {
   const roles = useEditorStore(useShallow((state) => state.getValue('roles')));
-	const setValue = useEditorStore(useShallow((state) => state.setValue('value')));
+	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
   // Update YAML when form fields change
   const updateRoles = (value) => {

@@ -48,6 +48,12 @@ const RoleItem = memo(({ role }) => {
 						</dd>
 					</div>
 				</div>
+				<div className="flex items-center gap-x-4">
+					<div className="sm:flex sm:flex-col">
+						<dt className="text-sm font-medium text-gray-500">Description</dt>
+						<dd className="mt-1 text-sm text-gray-900">{role.description}</dd>
+					</div>
+				</div>
 			</div>
 		</li>
 	);
