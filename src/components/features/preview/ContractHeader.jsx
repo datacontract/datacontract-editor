@@ -80,13 +80,6 @@ const ContractHeader = memo(({ info, parsedData }) => {
 			</div>
 		</div>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.info) === JSON.stringify(nextProps.info) &&
-			JSON.stringify(prevProps.parsedData) === JSON.stringify(nextProps.parsedData);
-	} catch {
-		return false;
-	}
 });
 
 ContractHeader.displayName = 'ContractHeader';

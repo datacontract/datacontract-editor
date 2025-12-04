@@ -157,16 +157,6 @@ const FundamentalsSection = memo(({
 			</div>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.parsedData) === JSON.stringify(nextProps.parsedData) &&
-			JSON.stringify(prevProps.authoritativeDefinitions) === JSON.stringify(nextProps.authoritativeDefinitions) &&
-			JSON.stringify(prevProps.links) === JSON.stringify(nextProps.links) &&
-			prevProps.domain === nextProps.domain &&
-			prevProps.contractCreatedTs === nextProps.contractCreatedTs;
-	} catch {
-		return false;
-	}
 });
 
 FundamentalsSection.displayName = 'FundamentalsSection';

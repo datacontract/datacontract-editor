@@ -77,12 +77,6 @@ const TeamMember = memo(({ teamMember }) => {
 			)}
 		</div>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.teamMember) === JSON.stringify(nextProps.teamMember);
-	} catch {
-		return false;
-	}
 });
 
 TeamMember.displayName = 'TeamMember';
@@ -195,13 +189,6 @@ const TeamSection = memo(({ team, teamMembers }) => {
 			</div>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.team) === JSON.stringify(nextProps.team) &&
-			JSON.stringify(prevProps.teamMembers) === JSON.stringify(nextProps.teamMembers);
-	} catch {
-		return false;
-	}
 });
 
 TeamSection.displayName = 'TeamSection';

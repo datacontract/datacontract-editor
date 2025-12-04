@@ -49,12 +49,6 @@ const RoleItem = memo(({ role }) => {
 			</div>
 		</li>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.role) === JSON.stringify(nextProps.role);
-	} catch {
-		return false;
-	}
 });
 
 RoleItem.displayName = 'RoleItem';
@@ -79,12 +73,6 @@ const RolesSection = memo(({ roles }) => {
 			</ul>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.roles) === JSON.stringify(nextProps.roles);
-	} catch {
-		return false;
-	}
 });
 
 RolesSection.displayName = 'RolesSection';

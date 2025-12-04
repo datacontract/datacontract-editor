@@ -38,12 +38,6 @@ const PricingSection = memo(({ price }) => {
 			</div>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.price) === JSON.stringify(nextProps.price);
-	} catch {
-		return false;
-	}
 });
 
 PricingSection.displayName = 'PricingSection';
