@@ -112,28 +112,15 @@ const Support = () => {
                   {formData.supportItems.map((item, index) => (
                     <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="flex items-end gap-3 col-span-2">
-												<ValidatedInput
+                        <ValidatedInput
                           name={`support-channel-${index}`}
                           label="Channel"
                           value={item.channel || ''}
                           onChange={(e) => updateSupportItem(index, 'channel', e.target.value)}
                           required={true}
 													className="bg-white"
-													wrapperClassName="flex-grow"
                           placeholder="support-slack"
                         />
-												<button
-													type="button"
-													onClick={() => removeSupportItem(index)}
-													className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-													title="Remove channel"
-												>
-													<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-													</svg>
-												</button>
-												</div>
                         <div>
                           <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                             URL
@@ -146,6 +133,16 @@ const Support = () => {
                               className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                               placeholder="https://slack.com/channels/support"
                             />
+                            <button
+                              type="button"
+                              onClick={() => removeSupportItem(index)}
+                              className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
+                              title="Remove channel"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
                         <div>
@@ -226,15 +223,13 @@ const Support = () => {
               )}
 
               {/* Always show add button */}
-              <div className="flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={addSupportItem}
-                  className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                >
-                  + Add Support Channel
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={addSupportItem}
+                className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+              >
+                + Add Support Channel
+              </button>
             </div>
           </div>
         </div>

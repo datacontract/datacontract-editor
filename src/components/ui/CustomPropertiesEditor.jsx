@@ -31,6 +31,18 @@ const CustomPropertiesEditor = ({ value = [], onChange, showDescription = false 
 
   return (
     <div className="space-y-2">
+      {/* Header with label and add button */}
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium text-gray-700">Custom Properties</label>
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          + Add
+        </button>
+      </div>
+
       {/* Existing properties */}
       {value.map((item, index) => (
         <CustomPropertyCard
@@ -42,15 +54,6 @@ const CustomPropertiesEditor = ({ value = [], onChange, showDescription = false 
           onRemove={handleRemove}
         />
       ))}
-			<div className="flex items-center justify-end">
-				<button
-					type="button"
-					onClick={handleAdd}
-					className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-				>
-					+ Add Custom Property
-				</button>
-			</div>
     </div>
   );
 };
