@@ -1,4 +1,4 @@
-import { forwardRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 
 // Streamline X icon (Lucide Line)
@@ -25,7 +25,7 @@ const MAX_WIDTH_PERCENT = 0.8;
  * @param {Function} props.onDelete - Callback when the property should be deleted
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
-const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, onClose, property, onUpdate, onDelete }, ref) {
+const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, property, onUpdate, onDelete, ref }) {
   const [width, setWidth] = useState(null);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -117,6 +117,6 @@ const PropertyDetailsDrawer = forwardRef(function PropertyDetailsDrawer({ open, 
       </div>
     </div>
   );
-});
+};
 
 export default PropertyDetailsDrawer;

@@ -1,8 +1,11 @@
 import Tooltip from './Tooltip.jsx';
 import { IconResolver } from './IconResolver.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
+import {useEditorStore} from "../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
-const DescriptionPreview = ({ description }) => {
+const DescriptionPreview = () => {
+	const description = useEditorStore(useShallow(state => state.getValue('description')));
   if (!description) return null;
 
   const hasContent = description.purpose || description.usage || description.limitations ||

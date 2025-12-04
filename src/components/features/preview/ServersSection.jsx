@@ -3,6 +3,8 @@ import serverIcons from '../../../assets/server-icons/serverIcons.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import PropertyValueRenderer from '../../ui/PropertyValueRenderer.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
+import {useEditorStore} from "../../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
 // Memoized Server Item component
 const ServerItem = memo(({ server }) => {
@@ -196,7 +198,8 @@ const ServerItem = memo(({ server }) => {
 ServerItem.displayName = 'ServerItem';
 
 // Main ServersSection component
-const ServersSection = memo(({ servers }) => {
+const ServersSection = () => {
+	const servers = useEditorStore(useShallow(state => state.getValue('servers')));
 	if (!servers || servers.length === 0) return null;
 
 	return (
@@ -214,14 +217,6 @@ const ServersSection = memo(({ servers }) => {
 			</ul>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.servers) === JSON.stringify(nextProps.servers);
-	} catch {
-		return false;
-	}
-});
-
-ServersSection.displayName = 'ServersSection';
+}
 
 export default ServersSection;

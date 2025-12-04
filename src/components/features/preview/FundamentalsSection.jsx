@@ -1,27 +1,28 @@
-import { memo } from 'react';
 import Tag from '../../ui/Tag.jsx';
-import LinkIcon from '../../ui/icons/LinkIcon.jsx';
 import { IconResolver } from '../../ui/IconResolver.jsx';
+import {useEditorStore} from "../../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
-const FundamentalsSection = memo(({
-	parsedData,
-	authoritativeDefinitions,
-	links,
-	domain,
-	contractCreatedTs
-}) => {
+const FundamentalsSection = () => {
+	const id = useEditorStore(useShallow(state => state.getValue('id')));
+	const name = useEditorStore(useShallow(state => state.getValue('name')));
+	const version = useEditorStore(useShallow(state => state.getValue('version')));
+	const status = useEditorStore(useShallow(state => state.getValue('status')));
+	const tenant = useEditorStore(useShallow(state => state.getValue('tenant')));
+	const dataProduct = useEditorStore(useShallow(state => state.getValue('dataProduct')));
+	const authoritativeDefinitions = useEditorStore(useShallow(state => state.getValue('authoritativeDefinitions')));
+	const customProperties = useEditorStore(useShallow(state => state.getValue('customProperties')));
+	const domain = useEditorStore(useShallow(state => state.getValue('domain')));
+	const contractCreatedTs = useEditorStore(useShallow(state => state.getValue('contractCreatedTs')));
+	const tags = useEditorStore(useShallow(state => state.getValue('tags')));
+
 	// Check if section has any data
-	const hasData = parsedData.name ||
-		parsedData.version ||
-		parsedData.id ||
-		parsedData.status ||
-		parsedData.tenant ||
-		domain ||
-		parsedData.dataProduct ||
-		contractCreatedTs ||
-		(parsedData.tags && Array.isArray(parsedData.tags) && parsedData.tags.length > 0) ||
+	const hasData =
+		id || name || version ||
+		(tags && Array.isArray(tags) && tags.length > 0) ||
 		(authoritativeDefinitions && authoritativeDefinitions.length > 0) ||
-		(links && links.length > 0);
+		(customProperties && customProperties.length > 0)
+	;
 
 	if (!hasData) return null;
 
@@ -56,64 +57,39 @@ const FundamentalsSection = memo(({
 						</div>
 					)}
 
-					{/* Links Section */}
-					{links && links.length > 0 && (
-						<div className="flex flex-wrap gap-3 print:hidden mb-6">
-							{links.map((link, index) => {
-								if (!link.href) return null;
-								return (
-									<a
-										key={index}
-										href={link.href}
-										className="flex flex-col text-center rounded-md bg-white px-2 py-2 text-sm font-medium text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-										target="_blank"
-										rel="noopener noreferrer"
-										style={{minWidth: '100px'}}
-									>
-										<div className="mx-auto w-8 h-8 my-2">
-											<LinkIcon className="w-full h-full"/>
-										</div>
-										{link.displayName && <div>{link.displayName}</div>}
-										{link.displayName2 && <div>{link.displayName2}</div>}
-									</a>
-								);
-							})}
-						</div>
-					)}
-
 					<dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-						{parsedData.name && (
+						{name && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">Name</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.name}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{name}</dd>
 							</div>
 						)}
 
-						{parsedData.version && (
+						{version && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">Version</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.version}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{version}</dd>
 							</div>
 						)}
 
-						{parsedData.id && (
+						{id && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">ID</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.id}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{id}</dd>
 							</div>
 						)}
 
-						{parsedData.status && (
+						{status && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">Status</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.status}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{status}</dd>
 							</div>
 						)}
 
-						{parsedData.tenant && (
+						{tenant && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">Tenant</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.tenant}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{tenant}</dd>
 							</div>
 						)}
 
@@ -124,10 +100,10 @@ const FundamentalsSection = memo(({
 							</div>
 						)}
 
-						{parsedData.dataProduct && (
+						{dataProduct && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">Data Product</dt>
-								<dd className="mt-1 text-sm text-gray-900">{parsedData.dataProduct}</dd>
+								<dd className="mt-1 text-sm text-gray-900">{dataProduct}</dd>
 							</div>
 						)}
 
@@ -138,12 +114,12 @@ const FundamentalsSection = memo(({
 							</div>
 						)}
 
-						{parsedData.tags && Array.isArray(parsedData.tags) && parsedData.tags.length > 0 && (
+						{tags && Array.isArray(tags) && tags.length > 0 && (
 							<div className="sm:col-span-2">
 								<dt className="text-sm font-medium text-gray-500">Tags</dt>
 								<dd className="mt-1 text-sm text-gray-900">
 									<div className="flex gap-y-1 items-center text-xs text-gray-500 flex-wrap">
-										{parsedData.tags.map((tag, index) => (
+										{tags.map((tag, index) => (
 											<Tag key={index} className="mr-1 mb-1">
 												{tag}
 											</Tag>
@@ -157,18 +133,6 @@ const FundamentalsSection = memo(({
 			</div>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.parsedData) === JSON.stringify(nextProps.parsedData) &&
-			JSON.stringify(prevProps.authoritativeDefinitions) === JSON.stringify(nextProps.authoritativeDefinitions) &&
-			JSON.stringify(prevProps.links) === JSON.stringify(nextProps.links) &&
-			prevProps.domain === nextProps.domain &&
-			prevProps.contractCreatedTs === nextProps.contractCreatedTs;
-	} catch {
-		return false;
-	}
-});
-
-FundamentalsSection.displayName = 'FundamentalsSection';
+}
 
 export default FundamentalsSection;

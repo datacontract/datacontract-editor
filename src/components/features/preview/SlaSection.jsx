@@ -1,4 +1,6 @@
 import { memo } from 'react';
+import {useEditorStore} from "../../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
 // Memoized SLA Item component
 const SlaItem = memo(({ sla }) => {
@@ -83,7 +85,8 @@ const SlaItem = memo(({ sla }) => {
 SlaItem.displayName = 'SlaItem';
 
 // Main SlaSection component
-const SlaSection = memo(({ slaProperties }) => {
+const SlaSection = () => {
+	const slaProperties = useEditorStore(useShallow(state => state.getValue('slaProperties')));
 	if (!slaProperties || slaProperties.length === 0) return null;
 
 	return (
@@ -94,20 +97,14 @@ const SlaSection = memo(({ slaProperties }) => {
 				<p className="text-sm text-gray-500">This section describes the service-level agreements (SLA).</p>
 			</div>
 			<ul role="list"
-				className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+					className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
 				{slaProperties.map((sla, index) => (
-					<SlaItem key={index} sla={sla} index={index} />
+					<SlaItem key={index} sla={sla} index={index}/>
 				))}
 			</ul>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.slaProperties) === JSON.stringify(nextProps.slaProperties);
-	} catch {
-		return false;
-	}
-});
+}
 
 SlaSection.displayName = 'SlaSection';
 

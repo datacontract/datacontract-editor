@@ -6,6 +6,8 @@ import { IconResolver } from '../../ui/IconResolver.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
+import {useEditorStore} from "../../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
 // Memoized Team Member component
 const TeamMember = memo(({ teamMember }) => {
@@ -88,7 +90,9 @@ const TeamMember = memo(({ teamMember }) => {
 TeamMember.displayName = 'TeamMember';
 
 // Main TeamSection component
-const TeamSection = memo(({ team, teamMembers }) => {
+const TeamSection = () => {
+	const team = useEditorStore(useShallow(state => state.getValue('team')));
+	const teamMembers = team.members || [];
 	const hasData = team.name || team.description || teamMembers.length > 0 || (team.tags && team.tags.length > 0);
 
 	if (!hasData) return null;
@@ -178,12 +182,12 @@ const TeamSection = memo(({ team, teamMembers }) => {
 						)}
 
 						{/* Team members */}
-						{teamMembers.length > 0 && (
+						{teamMembers?.length > 0 && (
 							<div>
 								<dt className="text-sm font-medium text-gray-500 mb-2">Members</dt>
 								<dd>
 									<div className="space-y-3">
-										{teamMembers.map((teamMember, index) => (
+										{teamMembers?.map((teamMember, index) => (
 											<TeamMember key={index} teamMember={teamMember} index={index} />
 										))}
 									</div>
@@ -195,14 +199,7 @@ const TeamSection = memo(({ team, teamMembers }) => {
 			</div>
 		</section>
 	);
-}, (prevProps, nextProps) => {
-	try {
-		return JSON.stringify(prevProps.team) === JSON.stringify(nextProps.team) &&
-			JSON.stringify(prevProps.teamMembers) === JSON.stringify(nextProps.teamMembers);
-	} catch {
-		return false;
-	}
-});
+};
 
 TeamSection.displayName = 'TeamSection';
 
