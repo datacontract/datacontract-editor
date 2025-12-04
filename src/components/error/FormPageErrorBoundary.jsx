@@ -1,4 +1,3 @@
-import { memo, useCallback, useMemo } from 'react';
 import ErrorBoundary from './ErrorBoundary.jsx';
 import { useEditorStore } from '../../store.js';
 
@@ -6,22 +5,11 @@ import { useEditorStore } from '../../store.js';
  * Specialized error boundary for form pages (Overview, Schema, Servers, etc.)
  * Provides context-specific error messaging and recovery options
  */
+const FormPageErrorBoundary = ({ children, pageName = 'form' }) => {
+  const setView = useEditorStore((state) => state.setView);
+  const yaml = useEditorStore((state) => state.yaml);
 
-// const generateHash = (string) => {
-// 	let hash = 0;
-// 	for (const char of string) {
-// 		hash = (hash << 5) - hash + char.charCodeAt(0);
-// 		hash |= 0; // Constrain to 32bit integer
-// 	}
-// 	return hash;
-// };
-
-const FormPageErrorBoundary = memo(({ children, pageName = 'form' }) => {
-  // Only subscribe to setView, and use shallow comparison to prevent unnecessary re-renders
-  const setView = useEditorStore(useCallback((state) => state.setView, []));
-  // const yaml = useEditorStore((state) => state.yaml);
-
-  const fallback = useCallback(({ error, resetError }) => (
+  const fallback = ({ error, resetError }) => (
     <div className="flex items-center justify-center h-full p-4 bg-white">
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-lg w-full">
         <div className="flex items-start gap-3">
@@ -82,27 +70,23 @@ const FormPageErrorBoundary = memo(({ children, pageName = 'form' }) => {
         </div>
       </div>
     </div>
-  ), [pageName, setView]);
-
-  const onError = useCallback((error, errorInfo) => {
-    console.error(`Form page (${pageName}) error:`, {
-      error,
-      errorInfo,
-      pageName,
-    });
-  }, [pageName]);
+  );
 
   return (
     <ErrorBoundary
       fallback={fallback}
-      // resetKeys={[generateHash(yaml)]}
-      onError={onError}
+      resetKeys={[yaml]}
+      onError={(error, errorInfo) => {
+        console.error(`Form page (${pageName}) error:`, {
+          error,
+          errorInfo,
+          pageName,
+        });
+      }}
     >
       {children}
     </ErrorBoundary>
   );
-});
-
-FormPageErrorBoundary.displayName = 'FormPageErrorBoundary';
+};
 
 export default FormPageErrorBoundary;
