@@ -1,13 +1,12 @@
-import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import {useShallow} from "zustand/react/shallow";
 
 const ServiceLevelAgreement = () => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
+	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties')));
+	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
   const driverOptions = [
     { id: 'regulatory', name: 'regulatory' },
@@ -15,43 +14,12 @@ const ServiceLevelAgreement = () => {
     { id: 'operational', name: 'operational' }
   ];
 
-  // Parse current YAML to extract form values
-  const formData = useMemo(() => {
-    if (!yaml?.trim()) {
-      return { slas: [] };
-    }
-
-    try {
-      const parsed = parseYaml(yaml);
-      return {
-        slas: parsed.slaProperties || []
-      };
-    } catch {
-      return { slas: [] };
-    }
-  }, [yaml]);
-
   // Update YAML when form fields change
   const updateField = (value) => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          parsed = {};
-        }
-      }
-
       if (value && value.length > 0) {
-        parsed.slaProperties = value;
-      } else {
-        delete parsed.slaProperties;
+				setValue('slaProperties', value);
       }
-
-      // Convert back to YAML
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -59,7 +27,7 @@ const ServiceLevelAgreement = () => {
 
   // Update a specific SLA
   const updateSLA = (index, field, value) => {
-    const updatedSLAs = [...formData.slas];
+    const updatedSLAs = [...slaProperties];
 
     // Handle value type conversions
     let processedValue = value;
@@ -90,12 +58,12 @@ const ServiceLevelAgreement = () => {
       property: '',
       value: ''
     };
-    updateField([...formData.slas, newSLA]);
+    updateField([...slaProperties, newSLA]);
   };
 
   // Remove an SLA
   const removeSLA = (index) => {
-    const updatedSLAs = formData.slas.filter((_, i) => i !== index);
+    const updatedSLAs = slaProperties.filter((_, i) => i !== index);
     updateField(updatedSLAs);
   };
 
@@ -111,9 +79,9 @@ const ServiceLevelAgreement = () => {
 
             <div>
               {/* Display existing SLAs */}
-              {formData.slas.length > 0 && (
+              {slaProperties.length > 0 && (
                 <div className="space-y-3 mb-2">
-                  {formData.slas.map((sla, index) => (
+                  {slaProperties.map((sla, index) => (
                     <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <ValidatedInput
