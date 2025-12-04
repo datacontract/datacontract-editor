@@ -486,17 +486,17 @@ const PropertyRow = ({
                         ) : (
                             <span
                                 className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
-                                    !property.name || property?.name?.toString().trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
+                                    !property.name || property.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
                                 }`}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onSelectProperty(currentPath, property);
-                                    setEditedPropertyName(property?.name || '');
+                                    setEditedPropertyName(property.name || '');
                                     setEditingPropertyName(true);
                                 }}
                                 title={property.name || "Click to edit"}
                             >
-                                {!property.name || property?.name?.toString().trim() === '' ? 'unnamed property' : property.name}
+                                {!property.name || property.name.trim() === '' ? 'unnamed property' : property.name}
                             </span>
                         )}
 

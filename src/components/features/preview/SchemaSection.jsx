@@ -317,11 +317,11 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200 bg-white">
-						{schema.properties && Object.values(schema.properties).map((property) =>
+						{schema.fields && Object.entries(schema.fields).map(([fieldName, field]) =>
 							<SchemaProperty
-								key={`${schemaName}-${property?.name}`}
-								property={property}
-								propertyName={property?.name}
+								key={`${schemaName}-${fieldName}`}
+								property={field}
+								propertyName={fieldName}
 								schemaName={schemaName}
 								indent={0}
 							/>
@@ -349,10 +349,10 @@ const SchemaSection = memo(({ schema }) => {
 				</div>
 			</div>
 
-			{schema.map((schemaData) => (
+			{Object.entries(schema).map(([schemaName, schemaData]) => (
 				<SchemaTable
-					key={schemaData?.name}
-					schemaName={schemaData?.name}
+					key={schemaName}
+					schemaName={schemaName}
 					schema={schemaData}
 				/>
 			))}

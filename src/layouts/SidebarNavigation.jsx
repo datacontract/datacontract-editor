@@ -1,42 +1,43 @@
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useEditorStore} from "../store.js";
 import {useMemo} from 'react';
-import { parseYaml } from '../utils/yaml.js';
+import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
 
 const SidebarNavigation = () => {
     const yaml = useEditorStore((state) => state.yaml);
+    const setYaml = useEditorStore((state) => state.setYaml);
     const setView = useEditorStore((state) => state.setView);
     const currentView = useEditorStore((state) => state.currentView);
     const selectedDiagramSchemaIndex = useEditorStore((state) => state.selectedDiagramSchemaIndex);
     const location = useLocation();
     const navigate = useNavigate();
 
-		const parsed = parseYaml(yaml);
-
     // Parse schemas from YAML
     const schemas = useMemo(() => {
-        if (!parsed) {
+        if (!yaml?.trim()) {
             return [];
         }
         try {
+            const parsed = parseYaml(yaml);
             return parsed.schema || [];
         } catch {
             return [];
         }
-    }, [parsed]);
+    }, [yaml]);
 
     // Parse servers from YAML
     const servers = useMemo(() => {
-        if (!parsed) {
+        if (!yaml?.trim()) {
             return [];
         }
         try {
+            const parsed = parseYaml(yaml);
             return parsed.servers || [];
         } catch {
             return [];
         }
-    }, [parsed]);
+    }, [yaml]);
 
     // Get colored icon for server type
   const getServerTypeIcon = (type) => {
@@ -51,6 +52,40 @@ const SidebarNavigation = () => {
 
     // Default to custom icon if type not found
     return serverIcons.custom();
+    };
+
+    // Add a new schema
+    const addSchema = () => {
+        try {
+            let parsed = {};
+            if (yaml?.trim()) {
+                try {
+                    parsed = parseYaml(yaml) || {};
+                } catch {
+                    parsed = {};
+                }
+            }
+
+            if (!parsed.schema) {
+                parsed.schema = [];
+            }
+
+            // Add new empty schema
+            parsed.schema.push({
+                name: '',
+                description: '',
+                type: 'object',
+                properties: []
+            });
+
+            const newYaml = stringifyYaml(parsed);
+            setYaml(newYaml);
+
+            // Navigate to the new schema
+            navigate(`/schemas/${parsed.schema.length - 1}`);
+        } catch (error) {
+            console.error('Error adding schema:', error);
+        }
     };
 
     const handleNavigationClick = (e, item) => {
