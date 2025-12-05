@@ -1,10 +1,8 @@
-import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import supportIcons from '../assets/support-icons/supportIcons.jsx';
-import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import {useShallow} from "zustand/react/shallow";
 
 const Support = () => {
