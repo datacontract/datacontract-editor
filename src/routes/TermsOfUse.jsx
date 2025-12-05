@@ -6,7 +6,7 @@ import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIco
 import {useShallow} from "zustand/react/shallow";
 
 const TermsOfUse = () => {
-	const description = useEditorStore(useShallow((state) => state.getValue('description')));
+	const description = useEditorStore(useShallow((state) => state.getValue('description'))) || {};
 	const setYamlValue = useEditorStore(useShallow((state) => state.setValue));
 
   return (
@@ -33,7 +33,7 @@ const TermsOfUse = () => {
                   id="description-purpose"
                   name="description-purpose"
                   rows={3}
-                  value={description.purpose}
+                  value={description?.purpose}
                   onChange={(e) => setYamlValue('description.purpose', e.target.value)}
                   className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                   placeholder="Describe the purpose of this data contract..."
@@ -54,7 +54,7 @@ const TermsOfUse = () => {
                   id="description-usage"
                   name="description-usage"
                   rows={3}
-                  value={description.usage}
+                  value={description?.usage}
                   onChange={(e) => setYamlValue('description.usage', e.target.value)}
                   className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                   placeholder="Describe how to use this data..."
@@ -75,7 +75,7 @@ const TermsOfUse = () => {
                   id="description-limitations"
                   name="description-limitations"
                   rows={3}
-                  value={description.limitations}
+                  value={description?.limitations}
                   onChange={(e) => setYamlValue('description.limitations', e.target.value)}
                   className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                   placeholder="Describe any limitations or constraints..."
@@ -85,7 +85,7 @@ const TermsOfUse = () => {
               {/* Authoritative Definitions Field */}
               <div>
                 <AuthoritativeDefinitionsEditor
-                  value={description.authoritativeDefinitions}
+                  value={description?.authoritativeDefinitions}
                   onChange={(value) => setYamlValue('description.authoritativeDefinitions', value)}
                 />
               </div>
@@ -93,7 +93,7 @@ const TermsOfUse = () => {
               {/* Custom Properties Field */}
               <div>
                 <CustomPropertiesEditor
-                  value={description.customProperties}
+                  value={description?.customProperties}
                   onChange={(value) => setYamlValue('description.customProperties', value)}
                   showDescription={true}
                 />
