@@ -7,7 +7,9 @@ import { useEditorStore } from '../../../store.js';
 // Import Monaco workers setup
 import '../../../lib/monaco-workers.js';
 
-const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
+const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
+		const yaml = useEditorStore((state) => state.yaml);
+		const setYaml = useEditorStore((state) => state.setYaml);
     const editorRef = useRef(null);
     const [fetchedSchema, setFetchedSchema] = useState(null);
     const [schemaError, setSchemaError] = useState(null);
@@ -126,8 +128,8 @@ const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
 
 
     const handleChange = (value) => {
-        if (onChange) {
-            onChange(value);
+        if (setYaml) {
+            setYaml(value);
         }
         // monaco-yaml handles validation automatically
     };
@@ -249,8 +251,8 @@ const YamlEditor = forwardRef(({ yaml, onChange, schemaUrl }, ref) => {
                                 const modifiedEditor = editor.getModifiedEditor();
                                 modifiedEditor.onDidChangeModelContent(() => {
                                     const newValue = modifiedEditor.getValue();
-                                    if (onChange && newValue !== yaml) {
-                                        onChange(newValue);
+                                    if (setYaml && newValue !== yaml) {
+                                        setYaml(newValue);
                                     }
                                 });
                             }}

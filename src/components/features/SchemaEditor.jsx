@@ -4,20 +4,6 @@ import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import Tags from '../ui/Tags.jsx';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
-import KeyIcon from "../ui/icons/KeyIcon.jsx";
-import AsteriskIcon from "../ui/icons/AsteriskIcon.jsx";
-import LockClosedIcon from "../ui/icons/LockClosedIcon.jsx";
-import CheckCircleIcon from "../ui/icons/CheckCircleIcon.jsx";
-import LinkIcon from "../ui/icons/LinkIcon.jsx";
-import StringIcon from "../ui/icons/StringIcon.jsx";
-import NumberIcon from "../ui/icons/NumberIcon.jsx";
-import IntegerIcon from "../ui/icons/IntegerIcon.jsx";
-import DateIcon from "../ui/icons/DateIcon.jsx";
-import TimeIcon from "../ui/icons/TimeIcon.jsx";
-import TimestampIcon from "../ui/icons/TimestampIcon.jsx";
-import ObjectIcon from "../ui/icons/ObjectIcon.jsx";
-import ArrayIcon from "../ui/icons/ArrayIcon.jsx";
-import BooleanIcon from "../ui/icons/BooleanIcon.jsx";
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
@@ -27,583 +13,22 @@ import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import {useShallow} from "zustand/react/shallow";
-
-// Fallback logical type options (used if schema not loaded)
-const fallbackLogicalTypeOptions = [
-    'string',
-    'date',
-    'timestamp',
-    'time',
-    'number',
-    'integer',
-    'object',
-    'array',
-    'boolean'
-];
-
-// Get icon component for logical type
-const getLogicalTypeIcon = (logicalType) => {
-    const iconMap = {
-        'string': StringIcon,
-        'number': NumberIcon,
-        'integer': IntegerIcon,
-        'date': DateIcon,
-        'time': TimeIcon,
-        'timestamp': TimestampIcon,
-        'object': ObjectIcon,
-        'array': ArrayIcon,
-        'boolean': BooleanIcon
-    };
-    return iconMap[logicalType] || null;
-};
-
-// Visual indicator badges component
-const PropertyIndicators = ({property}) => {
-    const indicators = [];
-
-    if (property.primaryKey) {
-        indicators.push(
-            <Tooltip key="pk" content="Primary Key">
-                <KeyIcon className="h-3.5 w-3.5 text-gray-400"/>
-            </Tooltip>
-        );
-    }
-
-    if (property.required) {
-        indicators.push(
-            <Tooltip key="req" content="Required">
-                <AsteriskIcon className="h-3.5 w-3.5 text-gray-400"/>
-            </Tooltip>
-        );
-    }
-
-    if (property.classification) {
-        indicators.push(
-            <Tooltip key="class" content={`Classification: ${property.classification}`}>
-                <LockClosedIcon className="h-3.5 w-3.5 text-gray-400"/>
-            </Tooltip>
-        );
-    }
-
-    if (property.quality && property.quality.length > 0) {
-        indicators.push(
-            <Tooltip key="qual" content={`${property.quality.length} quality rule(s)`}>
-                <CheckCircleIcon className="h-3.5 w-3.5 text-gray-400"/>
-            </Tooltip>
-        );
-    }
-
-    if (property.relationships && property.relationships.length > 0) {
-        indicators.push(
-            <Tooltip key="rel" content={`${property.relationships.length} relationship(s)`}>
-                <LinkIcon className="h-3.5 w-3.5 text-gray-400"/>
-            </Tooltip>
-        );
-    }
-
-    return (
-        <div className="flex items-center gap-1 min-w-14">
-            {indicators}
-        </div>
-    );
-};
-
-// Component to render array items as a special node
-const ItemsRow = ({
-                      items,
-                      parentPropertyName,
-                      schemaIdx,
-                      depth = 0,
-                      propPath = [],
-                      updateItems,
-                      updateProperty,
-                      addSubProperty,
-                      removeProperty,
-                      expandedProperties,
-                      togglePropertyExpansion,
-                      schema,
-                      setYamlValue,
-                      onSelectProperty,
-                      selectedPropertyPath
-                  }) => {
-    const [editingItemsType, setEditingItemsType] = useState(false);
-    const jsonSchema = useEditorStore((state) => state.schemaData);
-
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
-
-    const pathKey = `${schemaIdx}-${propPath.join('-')}-items`;
-    const isExpanded = expandedProperties.has(pathKey);
-    const isObject = items?.logicalType === 'object';
-    const hasSubProperties = items?.properties && items.properties.length > 0;
-    const itemsPath = [...propPath, 'items'];
-    const isSelected = selectedPropertyPath === itemsPath.join('-');
-
-    const handleSelect = (e) => {
-        e.stopPropagation();
-        onSelectProperty(itemsPath, items);
-    };
-
-    return (
-        <>
-            <div
-                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
-                style={{paddingLeft: `${depth * 1.5}rem`}}
-                onClick={handleSelect}
-            >
-                {/* Main row for items node */}
-                <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {/* Logical Type Icon */}
-                        {(() => {
-                            const IconComponent = getLogicalTypeIcon(items?.logicalType);
-                            return IconComponent ? (
-                                <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-                            ) : (
-                                <div className="h-3.5 w-3.5 flex-shrink-0" />
-                            );
-                        })()}
-
-                        {/* Items label - showing parent property name with [] */}
-                        <span
-                            className="px-1 py-0.5 text-sm text-gray-700 font-medium min-w-32 max-w-xs truncate"
-                            title={`${parentPropertyName}[]`}
-                        >
-                            {parentPropertyName}[]
-                        </span>
-
-                        {/* Items Type - inline select */}
-                        <div className="text-xs text-gray-600 flex items-center">
-                            {editingItemsType ? (
-                                <select
-                                    value={items?.logicalType || ''}
-                                    onChange={(e) => {
-                                        updateItems('logicalType', e.target.value || undefined);
-                                        setEditingItemsType(false);
-                                    }}
-                                    onBlur={() => setEditingItemsType(false)}
-                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="">Select...</option>
-                                    {logicalTypeOptions.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSelectProperty(itemsPath, items);
-                                        setEditingItemsType(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onSelectProperty(itemsPath, items);
-                                            setEditingItemsType(true);
-                                        }
-                                    }}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label="Edit items type"
-                                    title="Click or press Enter to edit items type"
-                                >
-                                    {items?.logicalType || <span className="text-gray-400 italic">type</span>}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Description hint */}
-                        {items?.description && (
-                            <span className="text-xs text-gray-500 truncate" title={items.description}>
-                                {items.description}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Action Icons */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isObject && (
-                            <Tooltip content="Add property to items">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        addSubProperty(schemaIdx, propPath, true);
-                                    }}
-                                    className="p-1.5 rounded-full hover:bg-indigo-50"
-                                    title="Add property to items"
-                                >
-                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                        )}
-                        {/* Expand/Collapse Button for nested items */}
-                        {(hasSubProperties || (items?.logicalType === 'array' && items.items)) && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    togglePropertyExpansion(pathKey);
-                                }}
-                                className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
-                            >
-                                <ChevronRightIcon
-                                    className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Render items' sub-properties recursively if items is an object and expanded */}
-            {isExpanded && hasSubProperties && (
-                <>
-                    {items.properties.map((subProp, subPropIndex) => (
-                        <PropertyRow
-                            key={subPropIndex}
-                            property={subProp}
-                            propIndex={subPropIndex}
-                            schemaIdx={schemaIdx}
-                            depth={depth + 1}
-                            propPath={itemsPath}
-                            togglePropertyExpansion={togglePropertyExpansion}
-                            updateProperty={updateProperty}
-                            addSubProperty={addSubProperty}
-                            removeProperty={removeProperty}
-                            expandedProperties={expandedProperties}
-                            schema={schema}
-                            setYamlValue={setYamlValue}
-                            onSelectProperty={onSelectProperty}
-                            selectedPropertyPath={selectedPropertyPath}
-                        />
-                    ))}
-                </>
-            )}
-
-            {/* Render nested items if items is also an array and expanded */}
-            {isExpanded && items?.logicalType === 'array' && items.items && (
-                <ItemsRow
-                    items={items.items}
-                    parentPropertyName={parentPropertyName + '[]'}
-                    schemaIdx={schemaIdx}
-                    depth={depth + 1}
-                    propPath={itemsPath}
-                    togglePropertyExpansion={togglePropertyExpansion}
-                    updateProperty={updateProperty}
-                    addSubProperty={addSubProperty}
-                    removeProperty={removeProperty}
-                    expandedProperties={expandedProperties}
-                    setYamlValue={setYamlValue}
-                    onSelectProperty={onSelectProperty}
-                    selectedPropertyPath={selectedPropertyPath}
-                />
-            )}
-        </>
-    );
-};
-
-// Recursive component to render a property and its sub-properties
-const PropertyRow = ({
-                         property,
-                         propIndex,
-                         schemaIdx,
-                         depth = 0,
-                         propPath = [],
-                         togglePropertyExpansion,
-                         updateProperty,
-                         addSubProperty,
-                         removeProperty,
-                         expandedProperties,
-                         setYamlValue,
-                         onSelectProperty,
-                         selectedPropertyPath,
-                         totalPropertiesCount = 0,
-                         onSaveAndAddNext,
-                         autoEditNewProperty = false,
-                         onAutoEditComplete
-                     }) => {
-    const [editingPropertyName, setEditingPropertyName] = useState(false);
-    const [editedPropertyName, setEditedPropertyName] = useState('');
-    const [editingPropertyType, setEditingPropertyType] = useState(false);
-    const jsonSchema = useEditorStore((state) => state.schemaData);
-    const inputRef = useRef(null);
-
-    // Auto-edit when this is a newly added property
-    useEffect(() => {
-        if (autoEditNewProperty && depth === 0) {
-            setEditedPropertyName(property.name || '');
-            setEditingPropertyName(true);
-            // Also select this property to show details drawer
-            const currentPath = [...propPath, propIndex];
-            onSelectProperty(currentPath, property);
-            onAutoEditComplete?.();
-        }
-    }, [autoEditNewProperty, depth, onAutoEditComplete, property.name, propPath, propIndex, onSelectProperty, property]);
-
-    // Focus input when editing starts
-    useEffect(() => {
-        if (editingPropertyName && inputRef.current) {
-            inputRef.current.focus();
-            inputRef.current.select();
-        }
-    }, [editingPropertyName]);
-
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
-
-    const currentPath = [...propPath, propIndex];
-    const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
-    const isExpanded = expandedProperties.has(pathKey);
-    const isObject = property.logicalType === 'object';
-    const isArray = property.logicalType === 'array';
-    const hasSubProperties = property.properties && property.properties.length > 0;
-    const hasItems = property.items;
-    const isSelected = selectedPropertyPath === currentPath.join('-');
-
-    const handleSelect = (e) => {
-        e.stopPropagation();
-        onSelectProperty(currentPath, property);
-    };
-
-    return (
-        <>
-            <div
-                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
-                style={{paddingLeft: `${depth * 1.5}rem`}}
-                onClick={handleSelect}
-            >
-                {/* Main row with name, type, description */}
-                <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                        {/* Logical Type Icon */}
-                        {(() => {
-                            const IconComponent = getLogicalTypeIcon(property.logicalType);
-                            return IconComponent ? (
-                                <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-                            ) : (
-                                <div className="h-3.5 w-3.5 flex-shrink-0" />
-                            );
-                        })()}
-
-                        {/* Property Name */}
-                        {editingPropertyName ? (
-                            <input
-                                type="text"
-                                value={editedPropertyName}
-                                onChange={(e) => {
-                                    const newName = e.target.value;
-                                    setEditedPropertyName(newName);
-                                    // Update YAML immediately so drawer syncs in real-time
-                                    updateProperty(schemaIdx, currentPath, 'name', newName);
-                                }}
-                                onBlur={() => {
-                                    setEditingPropertyName(false);
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        // Check if this is the last property at top level (depth === 0)
-                                        const isLastProperty = depth === 0 && propIndex === totalPropertiesCount - 1;
-                                        if (isLastProperty && onSaveAndAddNext) {
-                                            // Save and add next property
-                                            onSaveAndAddNext(schemaIdx, currentPath, editedPropertyName);
-                                        }
-                                        setEditingPropertyName(false);
-                                    } else if (e.key === 'Escape') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        // Restore original value on escape
-                                        updateProperty(schemaIdx, currentPath, 'name', property.name || '');
-                                        setEditingPropertyName(false);
-                                    }
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                                ref={inputRef}
-                                className="bg-white px-2 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[8rem]"
-                                placeholder="property name"
-                                size={editedPropertyName ? editedPropertyName.length : 16}
-                                autoFocus
-                            />
-                        ) : (
-                            <span
-                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
-                                    !property.name || property?.name?.toString().trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
-                                }`}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSelectProperty(currentPath, property);
-                                    setEditedPropertyName(property?.name || '');
-                                    setEditingPropertyName(true);
-                                }}
-                                title={property.name || "Click to edit"}
-                            >
-                                {!property.name || property?.name?.toString().trim() === '' ? 'unnamed property' : property.name}
-                            </span>
-                        )}
-
-                        {/* Property Type - inline select like diagram editor */}
-                        <div className="text-xs text-gray-600 flex items-center flex-shrink-0">
-                            {editingPropertyType ? (
-                                <select
-                                    value={property.logicalType || ''}
-                                    onChange={(e) => {
-                                        updateProperty(schemaIdx, currentPath, 'logicalType', e.target.value || undefined);
-                                        setEditingPropertyType(false);
-                                    }}
-                                    onBlur={() => setEditingPropertyType(false)}
-                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="">Select...</option>
-                                    {logicalTypeOptions.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap min-w-24"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSelectProperty(currentPath, property);
-                                        setEditingPropertyType(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onSelectProperty(currentPath, property);
-                                            setEditingPropertyType(true);
-                                        }
-                                    }}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label="Edit logical type"
-                                    title="Click or press Enter to edit type"
-                                >
-                  {property.logicalType || <span className="text-gray-400 italic">logicalType</span>}
-                </span>
-                            )}
-                        </div>
-
-                        {/* Visual Indicators */}
-                        <PropertyIndicators property={property}/>
-
-                        {/* Description preview */}
-                        {property.description && (
-                            <span className="text-xs text-gray-400 truncate max-w-xs" title={property.description}>
-                                {property.description}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Action Icons */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isObject && (
-                            <Tooltip content="Add sub-property">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        addSubProperty(schemaIdx, currentPath);
-                                    }}
-                                    className="p-1.5 rounded-full hover:bg-indigo-50"
-                                    title="Add sub-property"
-                                >
-                                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                        )}
-                        {/* Expand/Collapse Button for nested items */}
-                        {(hasSubProperties || (isArray && hasItems)) && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    togglePropertyExpansion(pathKey);
-                                }}
-                                className="p-1 rounded hover:bg-gray-200 focus:outline-none flex-shrink-0"
-                            >
-                                <ChevronRightIcon
-                                    className={`size-3 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Render sub-properties recursively if expanded */}
-            {isExpanded && hasSubProperties && (
-                <>
-                    {property.properties.map((subProp, subPropIndex) => (
-                        <PropertyRow
-                            key={subPropIndex}
-                            property={subProp}
-                            propIndex={subPropIndex}
-                            schemaIdx={schemaIdx}
-                            depth={depth + 1}
-                            propPath={currentPath}
-                            togglePropertyExpansion={togglePropertyExpansion}
-                            updateProperty={updateProperty}
-                            addSubProperty={addSubProperty}
-                            removeProperty={removeProperty}
-                            expandedProperties={expandedProperties}
-                            setYamlValue={setYamlValue}
-                            onSelectProperty={onSelectProperty}
-                            selectedPropertyPath={selectedPropertyPath}
-                        />
-                    ))}
-                </>
-            )}
-
-            {/* Render items node for array properties if expanded */}
-            {isExpanded && isArray && hasItems && (
-                <ItemsRow
-                    items={property.items}
-                    parentPropertyName={property.name}
-                    schemaIdx={schemaIdx}
-                    depth={depth + 1}
-                    propPath={currentPath}
-                    togglePropertyExpansion={togglePropertyExpansion}
-                    updateProperty={updateProperty}
-                    addSubProperty={addSubProperty}
-                    removeProperty={removeProperty}
-                    expandedProperties={expandedProperties}
-                    setYamlValue={setYamlValue}
-                    onSelectProperty={onSelectProperty}
-                    selectedPropertyPath={selectedPropertyPath}
-                />
-            )}
-        </>
-    );
-};
+import PropertyRow from './schema/PropertyRow.jsx';
+import {useSchemaOperations} from './schema/useSchemaOperations.js';
 
 const SchemaEditor = ({schemaIndex}) => {
     const jsonSchema = useEditorStore((state) => state.schemaData);
-		const schema = useEditorStore(useShallow((state) => state.getValue('schema')));
-		const setYamlValue = useEditorStore((state) => state.setYamlValue);
+    const {
+        schema,
+        getValue,
+        setValue,
+        removeSchema,
+        addProperty,
+        handleSaveAndAddNext,
+        updateProperty,
+        removeProperty,
+        addSubProperty
+    } = useSchemaOperations(schemaIndex);
     const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
 
     // Selected property state for drawer
@@ -621,6 +46,14 @@ const SchemaEditor = ({schemaIndex}) => {
 
     // State to track which property index should auto-edit
     const [autoEditPropertyIndex, setAutoEditPropertyIndex] = useState(null);
+
+    // Wrapper to handle save and add next with auto-edit
+    const handleSaveAndAddNextWrapper = useCallback((schemaIdx, propPath, newName) => {
+        const newPropertyIndex = handleSaveAndAddNext(schemaIdx, propPath, newName);
+        if (newPropertyIndex !== undefined) {
+            setAutoEditPropertyIndex(newPropertyIndex);
+        }
+    }, [handleSaveAndAddNext]);
 
     // Close drawer when schema index changes
     useEffect(() => {
@@ -722,157 +155,6 @@ const SchemaEditor = ({schemaIndex}) => {
         {id: 'object', name: 'object'}
     ];
 
-    // Remove schema
-    const removeSchema = () => {
-        try {
-            const newSchemaList = schema.splice(schemaIndex, 1);
-						setYamlValue('schema', newSchemaList);
-        } catch (error) {
-            console.error('Error removing schema:', error);
-        }
-    };
-
-    // Add property to schema
-    const addProperty = () => {
-        try {
-
-            if (!schema) {
-                console.warn('No schema found in YAML');
-                return;
-            }
-
-            if (!schema || !schema[schemaIndex]) {
-                console.warn(`Schema at index ${schemaIndex} not found`);
-                return;
-            }
-
-            if (!schema[schemaIndex].properties) {
-                schema[schemaIndex].properties = [];
-            }
-
-            schema[schemaIndex].properties.push({
-                name: '',
-                logicalType: '',
-                description: ''
-            });
-
-            setYamlValue('schema', schema);
-        } catch (error) {
-            console.error('Error adding property:', error);
-        }
-    };
-
-    // Save current property and add next one (for Enter key on last property)
-    const handleSaveAndAddNext = useCallback((schemaIdx, propPath, newName) => {
-        try {
-            if (!schema || !schema[schemaIndex]) {
-                return;
-            }
-
-            if (!schema[schemaIndex].properties) {
-                schema[schemaIndex].properties = [];
-            }
-
-            // Update the current property name
-            const propIndex = propPath[propPath.length - 1];
-            if (typeof propIndex === 'number' && schema[schemaIndex].properties[propIndex]) {
-                schema[schemaIndex].properties[propIndex].name = newName?.trim() || '';
-            }
-
-            // Add the new property
-            schema[schemaIndex].properties.push({
-                name: '',
-                logicalType: '',
-                description: ''
-            });
-
-            setYamlValue('schema', schema);
-
-            // Set the new property index to auto-edit
-            const newPropertyIndex = schema[schemaIndex].properties.length - 1;
-            setAutoEditPropertyIndex(newPropertyIndex);
-        } catch (error) {
-            console.error('Error saving and adding next property:', error);
-        }
-    }, [setYamlValue, schemaIndex, schema]);
-
-    // Update property field (supports nested properties via propPath)
-    const updateProperty = (schemaIdx, propPath, field, value) => {
-			// TODO: Make this work and more efficient
-        try {
-            if (!schema) {
-                return;
-            }
-
-            if (!schema || !schema[schemaIndex] || !schema[schemaIndex].properties) {
-                return;
-            }
-
-            // Navigate to the target property using propPath
-            let targetProp = schema[schemaIndex].properties;
-
-            // For backward compatibility, if propPath is a number, treat it as old behavior
-            if (typeof propPath === 'number') {
-                if (!targetProp[propPath]) {
-                    return;
-                }
-                targetProp[propPath][field] = value;
-            } else {
-                // New behavior: propPath is an array
-                for (let i = 0; i < propPath.length; i++) {
-                    // Check if current path segment is 'items'
-                    if (propPath[i] === 'items') {
-                        targetProp = targetProp.items;
-                        // Initialize properties array if needed and this is not the last segment
-                        if (i < propPath.length - 1 && !targetProp.properties) {
-                            targetProp.properties = [];
-                        }
-                        // Move to properties array if there are more segments
-                        if (i < propPath.length - 1) {
-                            targetProp = targetProp.properties;
-                        }
-                    } else if (i < propPath.length - 1) {
-                        targetProp = targetProp[propPath[i]];
-                        // Only navigate to properties if next segment is not 'items'
-                        if (propPath[i + 1] !== 'items') {
-                            targetProp = targetProp.properties;
-                        }
-                    } else {
-                        targetProp = targetProp[propPath[i]];
-                    }
-                }
-                targetProp[field] = value;
-            }
-
-            setYamlValue(`schema[${schemaIndex}].properties[${propPath}].${field}`, value );
-        } catch (error) {
-            console.error('Error updating property:', error);
-        }
-    };
-
-    // Remove property from schema
-    const removeProperty = useCallback((schemaIdx, propIdx) => {
-        try {
-
-            if (!schema) {
-                return;
-            }
-
-            if (!schema || !schema[schemaIdx] || !schema[schemaIdx].properties) {
-                return;
-            }
-
-            if (!schema[schemaIdx].properties[propIdx]) {
-                return;
-            }
-
-						//TODO: implement more efficient removal
-            setYamlValue('schema', schema);
-        } catch (error) {
-            console.error('Error removing property:', error);
-        }
-    }, [setYamlValue, schema]);
-
     // Handle keyboard shortcuts for selected property (Delete/Backspace to remove)
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -908,65 +190,7 @@ const SchemaEditor = ({schemaIndex}) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [selectedProperty, schemaIndex]);
-
-    // Add sub-property to a property (for nested objects or items)
-    const addSubProperty = (schemaIdx, propPath, isItems = false) => {
-			// TODO: Make this work and more efficient
-        try {
-            if (!schema) {
-                console.warn('No schema found in YAML');
-                return;
-            }
-
-            if (!schema || !schema[schemaIndex]) {
-                console.warn(`Schema at index ${schemaIndex} not found`);
-                return;
-            }
-
-            // Navigate to the property using propPath array
-            let targetProp = schema[schemaIndex].properties;
-            for (let i = 0; i < propPath.length; i++) {
-                // Check if current path segment is 'items'
-                if (propPath[i] === 'items') {
-                    targetProp = targetProp.items;
-                } else {
-                    targetProp = targetProp[propPath[i]];
-                    if (i < propPath.length - 1 && propPath[i + 1] !== 'items') {
-                        targetProp = targetProp.properties;
-                    }
-                }
-            }
-
-            // If isItems, we're adding to items.properties
-            if (isItems) {
-                if (!targetProp.items) {
-                    targetProp.items = {};
-                }
-                if (!targetProp.items.properties) {
-                    targetProp.items.properties = [];
-                }
-                targetProp.items.properties.push({
-                    name: '',
-                    logicalType: '',
-                    description: ''
-                });
-            } else {
-                // Initialize properties array if it doesn't exist
-                if (!targetProp.properties) {
-                    targetProp.properties = [];
-                }
-
-                targetProp.properties.push({
-                    name: '',
-                    logicalType: '',
-                    description: ''
-                });
-            }
-        } catch (error) {
-            console.error('Error adding sub-property:', error);
-        }
-    };
+    }, [selectedProperty, schemaIndex, removeProperty]);
 
     // Helper to toggle property expansion (for nested structures)
     const togglePropertyExpansion = useCallback((pathKey) => {
@@ -983,12 +207,29 @@ const SchemaEditor = ({schemaIndex}) => {
 
     // Handle property selection for drawer
     const handleSelectProperty = useCallback((propPath, property) => {
-        setSelectedPropertyPath(propPath.join('-'));
+        // Build proper path string for PropertyDetailsDrawer
+        let pathStr = `schema[${schemaIndex}].properties`;
+
+        for (let i = 0; i < propPath.length; i++) {
+            if (propPath[i] === 'items') {
+                pathStr += '.items';
+                if (i < propPath.length - 1) {
+                    pathStr += '.properties';
+                }
+            } else {
+                pathStr += `[${propPath[i]}]`;
+                if (i < propPath.length - 1 && propPath[i + 1] !== 'items') {
+                    pathStr += '.properties';
+                }
+            }
+        }
+
+        setSelectedPropertyPath(pathStr);
         setSelectedProperty({
             propPath,
             property
         });
-    }, []);
+    }, [schemaIndex]);
 
     // Handle closing the drawer
     const handleCloseDrawer = useCallback(() => {
@@ -1086,12 +327,11 @@ const SchemaEditor = ({schemaIndex}) => {
                                     {/* Basic Metadata */}
                                     <div className="space-y-4">
                                         {/* Name Field */}
-																				{ /* TODO: Add onchange logic */ }
                                         <ValidatedInput
                                             name={`schema-name-${schemaIndex}`}
                                             label="Name"
                                             value={schema[schemaIndex].name || ''}
-                                            onChange={(e) => console.log(schemaIndex, 'name', e.target.value)}
+                                            onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
                                             required={true}
                                             tooltip="Technical name for the schema (required)"
                                             placeholder="schema_name"
@@ -1114,7 +354,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                 name={`schema-description-${schemaIndex}`}
                                                 rows={2}
                                                 value={schema[schemaIndex].description || ''}
-                                                onChange={(e) => console.log(schemaIndex, 'description', e.target.value)}
+                                                onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                 placeholder="Describe the schema..."
                                             />
@@ -1151,7 +391,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     id={`schema-business-name-${schemaIndex}`}
                                                                     value={schema[schemaIndex].businessName || ''}
 																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'businessName', e.target.value)}
+                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="Human readable name"
                                                                 />
@@ -1180,7 +420,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                             const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
                                                                             const typeValue = matchedOption ? matchedOption.id : inputValue;
 																																						// TODO: implement update
-                                                                            console.log(schemaIndex, 'physicalType', typeValue);
+                                                                            setValue(`schema[${schemaIndex}].physicalType`, typeValue);
                                                                         }}
                                                                         className="col-start-1 row-start-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                         placeholder="table"
@@ -1211,7 +451,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     id={`schema-physical-name-${schemaIndex}`}
                                                                     value={schema[schemaIndex].physicalName || ''}
 																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'physicalName', e.target.value)}
+                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="shipments_v1"
                                                                 />
@@ -1234,7 +474,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                     id={`schema-logical-type-${schemaIndex}`}
                                                                     value={schema[schemaIndex].logicalType || ''}
 																																		// TODO: implement update
-                                                                    onChange={(e) => console.log(schemaIndex, 'logicalType', e.target.value)}
+                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
                                                                     className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                     placeholder="object"
                                                                 />
@@ -1258,7 +498,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                 rows={2}
                                                                 value={schema[schemaIndex].dataGranularityDescription || ''}
 																																// TODO: Implement update
-                                                                onChange={(e) => console.log(schemaIndex, 'dataGranularityDescription', e.target.value)}
+                                                                onChange={(e) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, e.target.value)}
                                                                 className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                                 placeholder="e.g., One record per customer per day"
                                                             />
@@ -1270,7 +510,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                                 label="Tags"
                                                                 value={schema[schemaIndex].tags || []}
 																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'tags', value)}
+                                                                onChange={(value) => setValue(`schema[${schemaIndex}].tags`, value)}
                                                                 tooltip="Tags for categorizing and organizing schemas"
                                                                 placeholder="Add a tag..."
                                                             />
@@ -1282,7 +522,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             <QualityEditor
                                                                 value={schema[schemaIndex].quality}
 																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'quality', value)}
+                                                                onChange={(value) => setValue(`schema[${schemaIndex}].quality`, value)}
                                                                 context="schema"
                                                             />
                                                         </div>
@@ -1293,7 +533,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             <AuthoritativeDefinitionsEditor
                                                                 value={schema[schemaIndex].authoritativeDefinitions}
 																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'authoritativeDefinitions', value)}
+                                                                onChange={(value) => setValue(`schema[${schemaIndex}].authoritativeDefinitions`, value)}
                                                             />
                                                         </div>
 
@@ -1302,8 +542,7 @@ const SchemaEditor = ({schemaIndex}) => {
 																													<h4 className="text-xs font-medium text-gray-900 mb-3">Relationships</h4>
                                                             <RelationshipEditor
                                                                 value={schema[schemaIndex].relationships}
-																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'relationships', value)}
+                                                                onChange={(value) => setValue(`schema[${schemaIndex}].relationships`, value)}
                                                                 relationshipTypeOptions={relationshipTypeOptions}
                                                                 showFrom={true}
                                                             />
@@ -1315,7 +554,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             <CustomPropertiesEditor
                                                                 value={schema[schemaIndex].customProperties}
 																																// TODO: Implement update
-                                                                onChange={(value) => console.log(schemaIndex, 'customProperties', value)}
+                                                                onChange={(value) => setValue(`schema[${schemaIndex}].customProperties`, value)}
                                                                 showDescription={true}
                                                             />
                                                         </div>
@@ -1364,8 +603,9 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             onSelectProperty={handleSelectProperty}
                                                             selectedPropertyPath={selectedPropertyPath}
                                                             totalPropertiesCount={schema[schemaIndex].properties.length}
-                                                            onSaveAndAddNext={handleSaveAndAddNext}
+                                                            onSaveAndAddNext={handleSaveAndAddNextWrapper}
                                                             autoEditNewProperty={autoEditPropertyIndex === propIndex}
+                                                            setValue={setValue}
                                                             onAutoEditComplete={() => setAutoEditPropertyIndex(null)}
                                                         />
                                                     ))}
@@ -1410,9 +650,8 @@ const SchemaEditor = ({schemaIndex}) => {
             <PropertyDetailsDrawer
                 ref={drawerRef}
                 open={selectedProperty !== null}
-								onUpdate={(field, value) => setYamlValue(`${selectedProperty.propPath}.${field}`, value)}
                 onClose={handleCloseDrawer}
-                property={selectedProperty?.property}
+                propertyPath={selectedPropertyPath}
             />
         </div>
     );

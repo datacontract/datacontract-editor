@@ -42,17 +42,19 @@ export const getOverrideStore = () => {
 };
 
 function getValueWithPath(obj, path, defaultValue) {
-	const keys = path.split(/\.|\[|\]/).filter(Boolean);
-	const result = keys.reduce((acc, key) => acc?.[key], obj);
+	const keys = path?.split(/\.|\[|\]/).filter(Boolean);
+	const result = keys?.reduce((acc, key) => acc?.[key], obj);
 	return result !== undefined ? result : defaultValue;
 }
 
 function setValueWithPath(obj, path, value) {
+	// Deep clone the object to avoid mutations
+	const newObj = JSON.parse(JSON.stringify(obj || {}));
 	const keys = path.match(/[^.\[\]]+/g);
 	keys.slice(0, -1).reduce((acc, key, i) =>
-		acc[key] = acc[key] || (/^\d+$/.test(keys[i + 1]) ? [] : {}), obj
+		acc[key] = acc[key] || (/^\d+$/.test(keys[i + 1]) ? [] : {}), newObj
 	)[keys[keys.length - 1]] = value;
-	return obj;
+	return newObj;
 }
 
 // Create central zustand store for app state
@@ -71,7 +73,7 @@ const defaultEditorStore = create()(
 					  getValue: (path) => getValueWithPath(get().yamlParts, path),
 						setValue: (path, value) => {
 							const newYamlParts = setValueWithPath(get().yamlParts, path, value);
-							set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts)})
+							set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts), isDirty: true})
 						},
             clearSaveInfo: () => set({lastSaveInfo: null}),
             addNotification: (notification) => {

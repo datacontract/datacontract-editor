@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
+import {useEditorStore} from "../../store.js";
+import {useShallow} from "zustand/react/shallow";
 
 // Streamline X icon (Lucide Line)
 const XIcon = ({ className }) => (
@@ -25,7 +27,44 @@ const MAX_WIDTH_PERCENT = 0.8;
  * @param {Function} props.onDelete - Callback when the property should be deleted
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
-const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, property, onUpdate, onDelete, ref }) {
+const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, propertyPath, ref }) {
+	const property = useEditorStore(useShallow((state) => state.getValue(propertyPath)));
+	const getValue = useEditorStore(useShallow((state) => state.getValue));
+	const setValue = useEditorStore(useShallow((state) => state.setValue));
+	const setProperty = (fieldPath, value) => {
+		// fieldPath is relative to property, so we need to prefix with propertyPath
+		const fullPath = `${propertyPath}.${fieldPath}`;
+		setValue(fullPath, value);
+	}
+
+	const removeProperty = (pathToRemove) => {
+		// Extract parent array path and index
+		// e.g., "schema[0].properties[2]" -> parent: "schema[0].properties", index: 2
+		const lastBracketIndex = pathToRemove.lastIndexOf('[');
+		if (lastBracketIndex === -1) {
+			console.error('Cannot remove property: invalid path format', pathToRemove);
+			return;
+		}
+
+		const parentPath = pathToRemove.substring(0, lastBracketIndex);
+		const indexStr = pathToRemove.substring(lastBracketIndex + 1, pathToRemove.length - 1);
+		const index = parseInt(indexStr, 10);
+
+		if (isNaN(index)) {
+			console.error('Cannot remove property: invalid index', indexStr);
+			return;
+		}
+
+		const parentArray = getValue(parentPath);
+		if (!Array.isArray(parentArray)) {
+			console.error('Cannot remove property: parent is not an array', parentPath);
+			return;
+		}
+
+		const newArray = parentArray.filter((_, idx) => idx !== index);
+		setValue(parentPath, newArray);
+	};
+
   const [width, setWidth] = useState(null);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -110,8 +149,8 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
         <div className="relative flex-1 px-3 py-3 overflow-y-auto">
           <PropertyDetailsPanel
             property={property}
-            onUpdate={onUpdate}
-            onDelete={onDelete}
+            onUpdate={setProperty}
+            onDelete={() => removeProperty(propertyPath)}
           />
         </div>
       </div>

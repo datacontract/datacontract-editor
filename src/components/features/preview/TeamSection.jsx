@@ -132,38 +132,38 @@ const TeamSection = () => {
 					<div className="flex flex-col gap-3">
 						{team?.name && (
 							<div>
-								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Team Name</dt>
-								<dd className="mt-1 text-sm text-gray-900">{team.name}</dd>
+								<div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Team Name</div>
+								<div className="mt-1 text-sm text-gray-900">{team.name}</div>
 							</div>
 						)}
 
 						{team?.description && (
 							<div>
-								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</dt>
-								<dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{team.description}</dd>
+								<div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</div>
+								<div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{team.description}</div>
 							</div>
 						)}
 
 						{team?.tags && Array.isArray(team.tags) && team.tags.length > 0 && (
 							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Tags</dt>
-								<dd className="flex gap-1 items-center text-xs text-gray-500 flex-wrap">
+								<div className="text-sm font-medium text-gray-500 mb-2">Tags</div>
+								<div className="flex gap-1 items-center text-xs text-gray-500 flex-wrap">
 									{team.tags.map((tag, index) => (
 										<Tag key={index}>
 											{tag}
 										</Tag>
 									))}
-								</dd>
+								</div>
 							</div>
 						)}
 
 						{team?.customProperties && Array.isArray(team.customProperties) && team.customProperties.length > 0 && (
 							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
-								<dd className="flex flex-wrap gap-x-4 gap-y-2">
+								<div className="text-sm font-medium text-gray-500 mb-2">Custom Properties</div>
+								<div className="flex flex-wrap gap-x-4 gap-y-2">
 									{team.customProperties.map((customProp, index) => (
 										<div key={index} className="min-w-0">
-											<dt
+											<div
 												className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
 												{customProp.property}
 												{customProp.description && (
@@ -171,27 +171,27 @@ const TeamSection = () => {
 														<QuestionMarkCircleIcon />
 													</Tooltip>
 												)}
-											</dt>
-											<dd className="text-sm text-gray-900">
+											</div>
+											<div className="text-sm text-gray-900">
 												<PropertyValueRenderer value={customProp.value}/>
-											</dd>
+											</div>
 										</div>
 									))}
-								</dd>
+								</div>
 							</div>
 						)}
 
 						{/* Team members */}
 						{teamMembers?.length > 0 && (
 							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Members</dt>
-								<dd>
+								<div className="text-sm font-medium text-gray-500 mb-2">Members</div>
+								<div>
 									<div className="space-y-3">
 										{teamMembers?.map((teamMember, index) => (
 											<TeamMember key={index} teamMember={teamMember} index={index} />
 										))}
 									</div>
-								</dd>
+								</div>
 							</div>
 						)}
 					</div>

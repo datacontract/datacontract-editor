@@ -8,8 +8,6 @@ import { PreviewErrorBoundary, DiagramErrorBoundary, FormPageErrorBoundary, Erro
 import ResizeDivider from "../components/ui/ResizeDivider.jsx";
 
 const MainContent = () => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
   const isPreviewVisible = useEditorStore((state) => state.isPreviewVisible);
   const isWarningsVisible = useEditorStore((state) => state.isWarningsVisible);
   const isTestResultsVisible = useEditorStore((state) => state.isTestResultsVisible);
@@ -79,8 +77,6 @@ const MainContent = () => {
           <div className={currentView === 'yaml' ? 'h-full' : 'hidden'}>
             <YamlEditor
               ref={editorRef}
-              yaml={yaml}
-              onChange={setYaml}
               schemaUrl={schemaUrl}
             />
           </div>
@@ -173,8 +169,8 @@ const MainContent = () => {
             className="h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50"
             style={{ width: `${100 - leftPanePercent}%` }}
           >
-            <PreviewErrorBoundary yamlContent={yaml}>
-              <DataContractPreview yamlContent={yaml} />
+            <PreviewErrorBoundary>
+              <DataContractPreview />
             </PreviewErrorBoundary>
           </div>
         )}

@@ -21,7 +21,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   }, [jsonSchema]);
 
   const updateField = (field, value) => {
-    onUpdate({ ...property, [field]: value });
+    onUpdate(field, value);
   };
 
   return (
