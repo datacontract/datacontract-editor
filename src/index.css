@@ -1,11 +1,99 @@
 @import "tailwindcss";
 
 @layer components {
-    .btn--primary {
-        @apply bg-indigo-600 text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
-    }
+	.btn--primary {
+		@apply bg-indigo-600 text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+	}
 
-    .btn--secondary {
-        @apply inline-flex items-center rounded-md bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:bg-gray-50 cursor-pointer;
-    }
+	.btn--secondary {
+		@apply inline-flex items-center rounded-md bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:bg-gray-50 cursor-pointer;
+	}
+
+	.badge--tag {
+		margin-right: calc(var(--spacing) * 1);
+		display: inline-flex;
+		align-items: center;
+		border-radius: calc(infinity * 1px);
+		background-color: var(--color-indigo-100);
+		padding-inline: calc(var(--spacing) * 2.5);
+		padding-block: calc(var(--spacing) * 0.5);
+		font-size: var(--text-xs);
+		line-height: var(--tw-leading, var(--text-xs--line-height));
+		--tw-font-weight: var(--font-weight-medium);
+		font-weight: var(--font-weight-medium);
+		white-space: nowrap;
+		color: var(--color-gray-800);
+	}
+
+	.badge--gray {
+		display: inline-flex;
+		align-items: center;
+		column-gap: calc(var(--spacing) * 1);
+		border-radius: calc(infinity * 1px);
+		background-color: var(--color-gray-50);
+		padding-inline: calc(var(--spacing) * 2);
+		padding-block: calc(var(--spacing) * 1);
+		font-size: var(--text-xs);
+		line-height: var(--tw-leading, var(--text-xs--line-height));
+		--tw-font-weight: var(--font-weight-medium);
+		font-weight: var(--font-weight-medium);
+		color: var(--color-gray-600);
+		--tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+		box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+		--tw-ring-color: color-mix(in srgb, oklch(44.6% 0.03 256.802) 10%, transparent);
+		@supports (color: color-mix(in lab, red, red)) {
+			--tw-ring-color: color-mix(in oklab, var(--color-gray-600) 10%, transparent);
+		}
+		--tw-ring-inset: inset;
+	}
+
+	.badge--yellow {
+		display: inline-flex;
+		align-items: center;
+		column-gap: calc(var(--spacing) * 1);
+		border-radius: calc(infinity * 1px);
+		background-color: var(--color-yellow-50);
+		padding-inline: calc(var(--spacing) * 2);
+		padding-block: calc(var(--spacing) * 1);
+		font-size: var(--text-xs);
+		line-height: var(--tw-leading, var(--text-xs--line-height));
+		--tw-font-weight: var(--font-weight-medium);
+		font-weight: var(--font-weight-medium);
+		color: var(--color-yellow-800);
+		--tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+		box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+		--tw-ring-color: color-mix(in srgb, oklch(55.4% 0.135 66.442) 10%, transparent);
+		@supports (color: color-mix(in lab, red, red)) {
+			--tw-ring-color: color-mix(in oklab, var(--color-yellow-700) 10%, transparent);
+		}
+		--tw-ring-inset: inset;
+	}
+
+	.badge--indigo {
+		display: inline-flex;
+		align-items: center;
+		column-gap: calc(var(--spacing) * 1);
+		border-radius: calc(infinity * 1px);
+		background-color: var(--color-indigo-50);
+		padding-inline: calc(var(--spacing) * 2);
+		padding-block: calc(var(--spacing) * 1);
+		font-size: var(--text-xs);
+		line-height: var(--tw-leading, var(--text-xs--line-height));
+		--tw-font-weight: var(--font-weight-medium);
+		font-weight: var(--font-weight-medium);
+		color: var(--color-indigo-600);
+		--tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+		box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+		--tw-ring-color: color-mix(in srgb, oklch(51.1% 0.262 276.966) 10%, transparent);
+		@supports (color: color-mix(in lab, red, red)) {
+			--tw-ring-color: color-mix(in oklab, var(--color-indigo-600) 10%, transparent);
+		}
+		--tw-ring-inset: inset;
+	}
+
+	.badge--icon {
+		width: calc(var(--spacing) * 4);
+		height: calc(var(--spacing) * 4);
+	}
+
 }

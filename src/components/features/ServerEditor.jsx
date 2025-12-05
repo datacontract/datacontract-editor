@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useEditorStore } from '../../store.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -7,12 +6,11 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
-import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
+import {useShallow} from "zustand/react/shallow";
 
 const ServerEditor = ({ serverIndex }) => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
-  const currentView = useEditorStore((state) => state.currentView);
+	const servers = useEditorStore(useShallow((state) => state.getValue('servers'))) || {};
+	const setValue = useEditorStore(useShallow((state) => state.setValue))
 
   const typeOptions = [
     { id: 'api', name: 'api' },
@@ -54,40 +52,16 @@ const ServerEditor = ({ serverIndex }) => {
     { id: 'uat', name: 'uat' }
   ];
 
-  // Parse current YAML to extract the specific server
-  const server = useMemo(() => {
-    if (!yaml?.trim()) {
-      return null;
-    }
-
-    try {
-      const parsed = parseYaml(yaml);
-      const servers = parsed.servers || [];
-      return (serverIndex >= 0 && serverIndex < servers.length) ? servers[serverIndex] : null;
-    } catch {
-      return null;
-    }
-  }, [yaml, serverIndex]);
-
   // Update a specific field of the server
   const updateServer = (field, value) => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          parsed = {};
-        }
-      }
-
-      if (!parsed.servers || !parsed.servers[serverIndex]) {
+      if (!servers || !servers[serverIndex]) {
         return;
       }
 
       // If type is being changed, preserve server-level properties and reset type-specific fields
       if (field === 'type') {
-        const currentServer = parsed.servers[serverIndex];
+        const currentServer = servers[serverIndex];
 
         // Server-level properties to preserve (common to all server types)
         const serverLevelProps = {
@@ -105,17 +79,15 @@ const ServerEditor = ({ serverIndex }) => {
           }
         });
 
-        parsed.servers[serverIndex] = serverLevelProps;
+        servers[serverIndex] = serverLevelProps;
       } else {
-        parsed.servers[serverIndex] = {
-          ...parsed.servers[serverIndex],
+        servers[serverIndex] = {
+          ...servers[serverIndex],
           [field]: value || undefined
         };
       }
 
-      // Convert back to YAML
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
+			setValue('servers', servers);
     } catch (error) {
       console.error('Error updating server:', error);
     }
@@ -124,33 +96,24 @@ const ServerEditor = ({ serverIndex }) => {
   // Remove the server
   const removeServer = () => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          return;
-        }
-      }
-
-      if (!parsed.servers || !parsed.servers[serverIndex]) {
+      if (!servers || !servers[serverIndex]) {
         return;
       }
 
-      parsed.servers.splice(serverIndex, 1);
+      servers.splice(serverIndex, 1);
 
-      if (parsed.servers.length === 0) {
-        delete parsed.servers;
-      }
+      if (servers.length === 0) {
+				setValue('servers', null);
+      } else {
+				setValue('servers', servers);
+			}
 
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
     } catch (error) {
       console.error('Error removing server:', error);
     }
   };
 
-  if (!server) {
+  if (!servers[serverIndex]) {
     return (
       <div className="h-full flex flex-col bg-white">
         <div className="flex-1 overflow-y-auto p-4">
@@ -170,7 +133,7 @@ const ServerEditor = ({ serverIndex }) => {
           <div>
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-base font-semibold leading-6 text-gray-900">
-                {server.server || `Server ${serverIndex + 1}`}
+                {servers[serverIndex].server || `Server ${serverIndex + 1}`}
               </h3>
               <button
                 type="button"
@@ -192,7 +155,7 @@ const ServerEditor = ({ serverIndex }) => {
                 <ValidatedInput
                   name="server"
                   label="Server"
-                  value={server.server || ''}
+                  value={servers[serverIndex].server || ''}
                   onChange={(e) => updateServer('server', e.target.value)}
                   required={true}
                   placeholder="production-server"
@@ -208,7 +171,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </div>
                     }
                     options={environmentOptions}
-                    value={server.environment || ''}
+                    value={servers[serverIndex].environment || ''}
                     onChange={(selectedValue) => updateServer('environment', selectedValue || '')}
                     placeholder="Select environment..."
                     acceptAnyInput={true}
@@ -225,7 +188,7 @@ const ServerEditor = ({ serverIndex }) => {
                   </div>
                   <textarea
                     rows={2}
-                    value={server.description || ''}
+                    value={servers[serverIndex].description || ''}
                     onChange={(e) => updateServer('description', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="Describe this server..."
@@ -237,7 +200,7 @@ const ServerEditor = ({ serverIndex }) => {
                     tooltip="Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
                     required={true}
                     options={typeOptions}
-                    value={server.type || ''}
+                    value={servers[serverIndex].type || ''}
                     onChange={(selectedValue) => updateServer('type', selectedValue || '')}
                     placeholder="Select server type..."
                     acceptAnyInput={true}
@@ -266,7 +229,7 @@ const ServerEditor = ({ serverIndex }) => {
                 </div>
 
                 {/* Type-specific fields */}
-                {server.type === 'bigquery' && (
+                {servers[serverIndex].type === 'bigquery' && (
                   <>
                     <div>
                       <ValidatedInput
@@ -277,7 +240,7 @@ const ServerEditor = ({ serverIndex }) => {
 												}
 												required={true}
                         type="text"
-                        value={server.project || ''}
+                        value={servers[serverIndex].project || ''}
                         onChange={(e) => updateServer('project', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="my-project"
@@ -292,7 +255,7 @@ const ServerEditor = ({ serverIndex }) => {
 													</label>
 												}
                         type="text"
-                        value={server.dataset || ''}
+                        value={servers[serverIndex].dataset || ''}
                         onChange={(e) => updateServer('dataset', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="my_dataset"
@@ -301,7 +264,7 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'snowflake' && (
+                {servers[serverIndex].type === 'snowflake' && (
                   <>
                     <div>
                       <ValidatedInput
@@ -312,7 +275,7 @@ const ServerEditor = ({ serverIndex }) => {
 													</label>
 												}
                         type="text"
-                        value={server.account || ''}
+                        value={servers[serverIndex].account || ''}
                         onChange={(e) => updateServer('account', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="account-name"
@@ -327,7 +290,7 @@ const ServerEditor = ({ serverIndex }) => {
 												}
 												required={true}
                         type="text"
-                        value={server.database || ''}
+                        value={servers[serverIndex].database || ''}
                         onChange={(e) => updateServer('database', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="MY_DATABASE"
@@ -342,7 +305,7 @@ const ServerEditor = ({ serverIndex }) => {
 												}
 												required={true}
                         type="text"
-                        value={server.schema || ''}
+                        value={servers[serverIndex].schema || ''}
                         onChange={(e) => updateServer('schema', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="MY_SCHEMA"
@@ -351,12 +314,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {(server.type === 'postgres' || server.type === 'postgresql') && (
+                {(servers[serverIndex].type === 'postgres' || servers[serverIndex].type === 'postgresql') && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -365,7 +328,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="5432"
@@ -373,7 +336,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -381,7 +344,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
@@ -389,13 +352,13 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 's3' && (
+                {servers[serverIndex].type === 's3' && (
                   <>
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
                         label="Location"
-                        value={server.location || ''}
+                        value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="s3://bucket-name/path"
@@ -407,7 +370,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.format || ''}
+                        value={servers[serverIndex].format || ''}
                         onChange={(e) => updateServer('format', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="parquet"
@@ -419,7 +382,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.delimiter || ''}
+                        value={servers[serverIndex].delimiter || ''}
                         onChange={(e) => updateServer('delimiter', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder=","
@@ -428,12 +391,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'redshift' && (
+                {servers[serverIndex].type === 'redshift' && (
                   <>
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -441,7 +404,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
@@ -452,7 +415,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.host || ''}
+                        value={servers[serverIndex].host || ''}
                         onChange={(e) => updateServer('host', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="cluster.region.redshift.amazonaws.com"
@@ -461,12 +424,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'databricks' && (
+                {servers[serverIndex].type === 'databricks' && (
                   <>
                     <ValidatedInput
                       name="catalog"
                       label="Catalog"
-                      value={server.catalog || ''}
+                      value={servers[serverIndex].catalog || ''}
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
                       placeholder="hive_metastore"
@@ -474,7 +437,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
@@ -485,7 +448,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.host || ''}
+                        value={servers[serverIndex].host || ''}
                         onChange={(e) => updateServer('host', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="workspace.databricks.com"
@@ -494,12 +457,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'azure' && (
+                {servers[serverIndex].type === 'azure' && (
                   <>
                     <ValidatedInput
                       name="location"
                       label="Location"
-                      value={server.location || ''}
+                      value={servers[serverIndex].location || ''}
                       onChange={(e) => updateServer('location', e.target.value)}
                       required={true}
                       placeholder="abfss://container@storage.dfs.core.windows.net/path"
@@ -507,7 +470,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="format"
                       label="Format"
-                      value={server.format || ''}
+                      value={servers[serverIndex].format || ''}
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
                       placeholder="parquet"
@@ -518,7 +481,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.delimiter || ''}
+                        value={servers[serverIndex].delimiter || ''}
                         onChange={(e) => updateServer('delimiter', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder=","
@@ -527,12 +490,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'glue' && (
+                {servers[serverIndex].type === 'glue' && (
                   <>
                     <ValidatedInput
                       name="account"
                       label="Account"
-                      value={server.account || ''}
+                      value={servers[serverIndex].account || ''}
                       onChange={(e) => updateServer('account', e.target.value)}
                       required={true}
                       placeholder="123456789012"
@@ -540,7 +503,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="my_database"
@@ -551,7 +514,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.location || ''}
+                        value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="s3://bucket-name/path"
@@ -560,12 +523,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'athena' && (
+                {servers[serverIndex].type === 'athena' && (
                   <>
                     <ValidatedInput
                       name="stagingDir"
                       label="Staging Dir"
-                      value={server.stagingDir || ''}
+                      value={servers[serverIndex].stagingDir || ''}
                       onChange={(e) => updateServer('stagingDir', e.target.value)}
                       required={true}
                       placeholder="s3://bucket/athena-results/"
@@ -573,7 +536,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
@@ -584,7 +547,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.catalog || ''}
+                        value={servers[serverIndex].catalog || ''}
                         onChange={(e) => updateServer('catalog', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="AwsDataCatalog"
@@ -593,12 +556,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'kafka' && (
+                {servers[serverIndex].type === 'kafka' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="broker:9092"
@@ -609,7 +572,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.format || ''}
+                        value={servers[serverIndex].format || ''}
                         onChange={(e) => updateServer('format', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="json"
@@ -618,12 +581,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'synapse' && (
+                {servers[serverIndex].type === 'synapse' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="workspace.sql.azuresynapse.net"
@@ -632,7 +595,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="1433"
@@ -640,7 +603,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -648,13 +611,13 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'api' && (
+                {servers[serverIndex].type === 'api' && (
                   <>
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
                         label="Location"
-                        value={server.location || ''}
+                        value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="https://api.example.com/v1"
@@ -663,12 +626,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'clickhouse' && (
+                {servers[serverIndex].type === 'clickhouse' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -677,7 +640,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="9000"
@@ -685,7 +648,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="default"
@@ -693,12 +656,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'cloudsql' && (
+                {servers[serverIndex].type === 'cloudsql' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -707,7 +670,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="3306"
@@ -715,7 +678,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -723,7 +686,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
@@ -731,12 +694,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'db2' && (
+                {servers[serverIndex].type === 'db2' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -745,7 +708,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="50000"
@@ -753,7 +716,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -761,12 +724,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'denodo' && (
+                {servers[serverIndex].type === 'denodo' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -775,7 +738,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="9999"
@@ -783,12 +746,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'dremio' && (
+                {servers[serverIndex].type === 'dremio' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -797,7 +760,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="31010"
@@ -805,12 +768,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'duckdb' && (
+                {servers[serverIndex].type === 'duckdb' && (
                   <>
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="/path/to/database.duckdb"
@@ -818,12 +781,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'informix' && (
+                {servers[serverIndex].type === 'informix' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -831,7 +794,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -839,7 +802,7 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'kinesis' && (
+                {servers[serverIndex].type === 'kinesis' && (
                   <>
                     <div>
                       <div className="flex justify-between mb-1">
@@ -850,7 +813,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </div>
                       <input
                         type="text"
-                        value={server.stream || ''}
+                        value={servers[serverIndex].stream || ''}
                         onChange={(e) => updateServer('stream', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="my-stream"
@@ -859,12 +822,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'local' && (
+                {servers[serverIndex].type === 'local' && (
                   <>
                     <ValidatedInput
                       name="path"
                       label="Path"
-                      value={server.path || ''}
+                      value={servers[serverIndex].path || ''}
                       onChange={(e) => updateServer('path', e.target.value)}
                       required={true}
                       placeholder="/path/to/data"
@@ -872,7 +835,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="format"
                       label="Format"
-                      value={server.format || ''}
+                      value={servers[serverIndex].format || ''}
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
                       placeholder="csv"
@@ -880,12 +843,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'mysql' && (
+                {servers[serverIndex].type === 'mysql' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -894,7 +857,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="3306"
@@ -902,7 +865,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -910,12 +873,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'oracle' && (
+                {servers[serverIndex].type === 'oracle' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -924,7 +887,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="1521"
@@ -932,7 +895,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="serviceName"
                       label="Service Name"
-                      value={server.serviceName || ''}
+                      value={servers[serverIndex].serviceName || ''}
                       onChange={(e) => updateServer('serviceName', e.target.value)}
                       required={true}
                       placeholder="ORCL"
@@ -941,12 +904,12 @@ const ServerEditor = ({ serverIndex }) => {
                 )}
 
 
-                {server.type === 'presto' && (
+                {servers[serverIndex].type === 'presto' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -954,12 +917,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'pubsub' && (
+                {servers[serverIndex].type === 'pubsub' && (
                   <>
                     <ValidatedInput
                       name="project"
                       label="Project"
-                      value={server.project || ''}
+                      value={servers[serverIndex].project || ''}
                       onChange={(e) => updateServer('project', e.target.value)}
                       required={true}
                       placeholder="my-project"
@@ -967,13 +930,13 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'sftp' && (
+                {servers[serverIndex].type === 'sftp' && (
                   <>
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
                         label="Location"
-                        value={server.location || ''}
+                        value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="sftp://host/path/to/file"
@@ -982,12 +945,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'trino' && (
+                {servers[serverIndex].type === 'trino' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -996,7 +959,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="8080"
@@ -1004,7 +967,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="catalog"
                       label="Catalog"
-                      value={server.catalog || ''}
+                      value={servers[serverIndex].catalog || ''}
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
                       placeholder="hive"
@@ -1012,7 +975,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
@@ -1020,12 +983,12 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'vertica' && (
+                {servers[serverIndex].type === 'vertica' && (
                   <>
                     <ValidatedInput
                       name="host"
                       label="Host"
-                      value={server.host || ''}
+                      value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
@@ -1034,7 +997,7 @@ const ServerEditor = ({ serverIndex }) => {
                       name="port"
                       label="Port"
                       type="number"
-                      value={server.port || ''}
+                      value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="5433"
@@ -1042,7 +1005,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="database"
                       label="Database"
-                      value={server.database || ''}
+                      value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
@@ -1050,7 +1013,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="schema"
                       label="Schema"
-                      value={server.schema || ''}
+                      value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
@@ -1058,7 +1021,7 @@ const ServerEditor = ({ serverIndex }) => {
                   </>
                 )}
 
-                {server.type === 'custom' && (
+                {servers[serverIndex].type === 'custom' && (
                   <>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -1066,7 +1029,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.host || ''}
+                        value={servers[serverIndex].host || ''}
                         onChange={(e) => updateServer('host', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="hostname or IP"
@@ -1078,7 +1041,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="number"
-                        value={server.port || ''}
+                        value={servers[serverIndex].port || ''}
                         onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="port number"
@@ -1090,7 +1053,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.account || ''}
+                        value={servers[serverIndex].account || ''}
                         onChange={(e) => updateServer('account', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="account name"
@@ -1102,7 +1065,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.project || ''}
+                        value={servers[serverIndex].project || ''}
                         onChange={(e) => updateServer('project', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="project name"
@@ -1114,7 +1077,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.database || ''}
+                        value={servers[serverIndex].database || ''}
                         onChange={(e) => updateServer('database', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="database name"
@@ -1126,7 +1089,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.dataset || ''}
+                        value={servers[serverIndex].dataset || ''}
                         onChange={(e) => updateServer('dataset', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="dataset name"
@@ -1138,7 +1101,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.catalog || ''}
+                        value={servers[serverIndex].catalog || ''}
                         onChange={(e) => updateServer('catalog', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="catalog name"
@@ -1150,7 +1113,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.schema || ''}
+                        value={servers[serverIndex].schema || ''}
                         onChange={(e) => updateServer('schema', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="schema name"
@@ -1162,7 +1125,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.warehouse || ''}
+                        value={servers[serverIndex].warehouse || ''}
                         onChange={(e) => updateServer('warehouse', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="warehouse or cluster name"
@@ -1174,7 +1137,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.serviceName || ''}
+                        value={servers[serverIndex].serviceName || ''}
                         onChange={(e) => updateServer('serviceName', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="service name"
@@ -1186,7 +1149,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.location || ''}
+                        value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="https://example.com/data or s3://bucket/path"
@@ -1198,7 +1161,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.endpointUrl || ''}
+                        value={servers[serverIndex].endpointUrl || ''}
                         onChange={(e) => updateServer('endpointUrl', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="https://api.example.com"
@@ -1210,7 +1173,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.path || ''}
+                        value={servers[serverIndex].path || ''}
                         onChange={(e) => updateServer('path', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="/path/to/data"
@@ -1222,7 +1185,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.stagingDir || ''}
+                        value={servers[serverIndex].stagingDir || ''}
                         onChange={(e) => updateServer('stagingDir', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="staging directory"
@@ -1234,7 +1197,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.format || ''}
+                        value={servers[serverIndex].format || ''}
                         onChange={(e) => updateServer('format', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="parquet, json, csv"
@@ -1246,7 +1209,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.delimiter || ''}
+                        value={servers[serverIndex].delimiter || ''}
                         onChange={(e) => updateServer('delimiter', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="delimiter character"
@@ -1258,7 +1221,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.region || ''}
+                        value={servers[serverIndex].region || ''}
                         onChange={(e) => updateServer('region', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="cloud region"
@@ -1270,7 +1233,7 @@ const ServerEditor = ({ serverIndex }) => {
                       </label>
                       <input
                         type="text"
-                        value={server.regionName || ''}
+                        value={servers[serverIndex].regionName || ''}
                         onChange={(e) => updateServer('regionName', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="region name"
@@ -1282,16 +1245,16 @@ const ServerEditor = ({ serverIndex }) => {
                 {/* Roles */}
                 <div className="sm:col-span-2">
                   <RolesList
-                    roles={server.roles || []}
+                    roles={servers[serverIndex].roles || []}
                     onUpdate={(roles) => updateServer('roles', roles.length > 0 ? roles : undefined)}
-                    serverName={server.server}
+                    serverName={servers[serverIndex].server}
                   />
                 </div>
 
                 {/* Custom Properties */}
                 <div className="sm:col-span-2">
                   <CustomPropertiesEditor
-                    value={server.customProperties || []}
+                    value={servers[serverIndex].customProperties || []}
                     onChange={(customProperties) => updateServer('customProperties', customProperties)}
                     showDescription={true}
                   />
