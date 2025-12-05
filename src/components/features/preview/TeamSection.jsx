@@ -92,8 +92,8 @@ TeamMember.displayName = 'TeamMember';
 // Main TeamSection component
 const TeamSection = () => {
 	const team = useEditorStore(useShallow(state => state.getValue('team')));
-	const teamMembers = team.members || [];
-	const hasData = team.name || team.description || teamMembers.length > 0 || (team.tags && team.tags.length > 0);
+	const teamMembers = team && Array.isArray(team) ? team : (team?.members || []);
+	const hasData = team?.name || team?.description || teamMembers?.length > 0 || (team?.tags && team?.tags?.length > 0);
 
 	if (!hasData) return null;
 
@@ -108,9 +108,9 @@ const TeamSection = () => {
 			<div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">
 				<div className="px-4 py-4 sm:px-6">
 					{/* Authoritative Definitions Section */}
-					{team.authoritativeDefinitions && Array.isArray(team.authoritativeDefinitions) && team.authoritativeDefinitions.length > 0 && (
+					{team?.authoritativeDefinitions && Array.isArray(team.authoritativeDefinitions) && team.authoritativeDefinitions.length > 0 && (
 						<div className="flex flex-wrap gap-2 mb-6">
-							{team.authoritativeDefinitions.map((def, index) => (
+							{team?.authoritativeDefinitions.map((def, index) => (
 								<a
 									key={index}
 									href={def.url}
@@ -130,21 +130,21 @@ const TeamSection = () => {
 					)}
 
 					<div className="flex flex-col gap-3">
-						{team.name && (
+						{team?.name && (
 							<div>
 								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Team Name</dt>
 								<dd className="mt-1 text-sm text-gray-900">{team.name}</dd>
 							</div>
 						)}
 
-						{team.description && (
+						{team?.description && (
 							<div>
 								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</dt>
 								<dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{team.description}</dd>
 							</div>
 						)}
 
-						{team.tags && Array.isArray(team.tags) && team.tags.length > 0 && (
+						{team?.tags && Array.isArray(team.tags) && team.tags.length > 0 && (
 							<div>
 								<dt className="text-sm font-medium text-gray-500 mb-2">Tags</dt>
 								<dd className="flex gap-1 items-center text-xs text-gray-500 flex-wrap">
@@ -157,7 +157,7 @@ const TeamSection = () => {
 							</div>
 						)}
 
-						{team.customProperties && Array.isArray(team.customProperties) && team.customProperties.length > 0 && (
+						{team?.customProperties && Array.isArray(team.customProperties) && team.customProperties.length > 0 && (
 							<div>
 								<dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
 								<dd className="flex flex-wrap gap-x-4 gap-y-2">

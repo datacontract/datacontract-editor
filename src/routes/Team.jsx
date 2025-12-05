@@ -1,71 +1,34 @@
-import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
-import { Tooltip } from '../components/ui/index.js';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import Tags from '../components/ui/Tags.jsx';
-import KeyValueEditor from '../components/ui/KeyValueEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
-import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import {useShallow} from "zustand/react/shallow";
+import {useEffect} from "react";
 
 const Team = () => {
-  const yaml = useEditorStore((state) => state.yaml);
-  const setYaml = useEditorStore((state) => state.setYaml);
+	const team = useEditorStore(useShallow((state) => state.getValue('team')))
+	const setValue = useEditorStore(useShallow((state) => state.setValue))
   const editorConfig = useEditorStore((state) => state.editorConfig);
 
-  // Parse current YAML to extract form values
-  const formData = useMemo(() => {
-    if (!yaml?.trim()) {
-      return {
-        name: '',
-        description: '',
-        members: [],
-        tags: [],
-        customProperties: [],
-        authoritativeDefinitions: []
-      };
-    }
+	const members = team && !Array.isArray(team) && team?.members ? team.members : [];
 
-    try {
-      const parsed = parseYaml(yaml);
-      // team is now an object with name, description, members, tags, customProperties, authoritativeDefinitions
-      const team = parsed.team || {};
-      return {
-        name: team.name || '',
-        description: team.description || '',
-        members: Array.isArray(team.members) ? team.members : [],
-        tags: Array.isArray(team.tags) ? team.tags : [],
-        customProperties: Array.isArray(team.customProperties) ? team.customProperties : [],
-        authoritativeDefinitions: Array.isArray(team.authoritativeDefinitions) ? team.authoritativeDefinitions : []
-      };
-    } catch {
-      return {
-        name: '',
-        description: '',
-        members: [],
-        tags: [],
-        customProperties: [],
-        authoritativeDefinitions: []
-      };
-    }
-  }, [yaml]);
+	// Handle old flat team structure
+	useEffect(() => {
+		if(team && Array.isArray(team)) {
+			setValue('team', {
+				members: team,
+			})
+		}
+	}, [])
 
   // Update team object in YAML
   const updateTeamObject = (updates) => {
     try {
-      let parsed = {};
-      if (yaml?.trim()) {
-        try {
-          parsed = parseYaml(yaml) || {};
-        } catch {
-          parsed = {};
-        }
-      }
 
       // Build team object
       const teamObj = {
-        ...(parsed.team || {}),
+        ...(team || {}),
         ...updates
       };
 
@@ -77,16 +40,11 @@ const Team = () => {
         }
       });
 
-      // Set team object or delete if empty
+      // Update in store/yaml
       if (Object.keys(teamObj).length > 0) {
-        parsed.team = teamObj;
-      } else {
-        delete parsed.team;
+        setValue('team', teamObj);
       }
 
-      // Convert back to YAML
-      const newYaml = stringifyYaml(parsed);
-      setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
@@ -104,7 +62,7 @@ const Team = () => {
 
   // Update a specific member
   const updateMember = (index, field, value) => {
-    const updatedMembers = [...formData.members];
+    const updatedMembers = [...members];
     updatedMembers[index] = {
       ...updatedMembers[index],
       [field]: value || undefined
@@ -119,12 +77,12 @@ const Team = () => {
       name: '',
       role: ''
     };
-    updateMembersArray([...formData.members, newMember]);
+    updateMembersArray([...members, newMember]);
   };
 
   // Remove a member
   const removeMember = (index) => {
-    const updatedMembers = formData.members.filter((_, i) => i !== index);
+    const updatedMembers = members.filter((_, i) => i !== index);
     updateMembersArray(updatedMembers);
   };
 
@@ -146,21 +104,21 @@ const Team = () => {
                 </label>
                 {editorConfig?.teams && editorConfig.teams.length > 0 ? (
                   <select
-                    value={formData.name}
+                    value={team?.name}
                     onChange={(e) => updateTeamField('name', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                   >
                     <option value="">Select a team...</option>
-                    {editorConfig.teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
+                    {editorConfig.teams.map((editorConfigTeam) => (
+                      <option key={editorConfigTeam.id} value={editorConfigTeam.id}>
+                        {editorConfigTeam.name}
                       </option>
                     ))}
                   </select>
                 ) : (
                   <input
                     type="text"
-                    value={formData.name}
+                    value={team?.name}
                     onChange={(e) => updateTeamField('name', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                     placeholder="Data Engineering Team"
@@ -174,7 +132,7 @@ const Team = () => {
                   Description
                 </label>
                 <textarea
-                  value={formData.description}
+                  value={team?.description}
                   onChange={(e) => updateTeamField('description', e.target.value)}
                   className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                   placeholder="Description of the team..."
@@ -185,29 +143,29 @@ const Team = () => {
               {/* Team Tags */}
               <Tags
                 label="Tags"
-                value={formData.tags}
+                value={team?.tags}
                 onChange={(value) => updateTeamField('tags', value)}
                 placeholder="Add a tag..."
               />
 
               {/* Team Custom Properties */}
               <CustomPropertiesEditor
-                value={formData.customProperties}
+                value={team?.customProperties}
                 onChange={(value) => updateTeamField('customProperties', value)}
               />
 
               {/* Team Authoritative Definitions */}
               <AuthoritativeDefinitionsEditor
-                value={formData.authoritativeDefinitions}
+                value={team?.authoritativeDefinitions}
                 onChange={(value) => updateTeamField('authoritativeDefinitions', value)}
               />
 
               {/* Team Members */}
               <div>
                 {/* Display existing members */}
-                {formData.members.length > 0 && (
+                {members.length > 0 && (
                   <div className="space-y-3 mb-2">
-                    {formData.members.map((member, index) => (
+                    {members.map((member, index) => (
                       <TeamMember
                         key={index}
                         member={member}
