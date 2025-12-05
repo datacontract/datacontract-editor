@@ -5,7 +5,7 @@ import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIco
 import {useShallow} from "zustand/react/shallow";
 
 const ServiceLevelAgreement = () => {
-	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties')));
+	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
   const driverOptions = [
@@ -17,7 +17,7 @@ const ServiceLevelAgreement = () => {
   // Update YAML when form fields change
   const updateField = (value) => {
     try {
-      if (value && value.length > 0) {
+      if (value) {
 				setValue('slaProperties', value);
       }
     } catch (error) {
@@ -79,7 +79,7 @@ const ServiceLevelAgreement = () => {
 
             <div>
               {/* Display existing SLAs */}
-              {slaProperties.length > 0 && (
+              {slaProperties?.length > 0 && (
                 <div className="space-y-3 mb-2">
                   {slaProperties.map((sla, index) => (
                     <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
@@ -87,7 +87,7 @@ const ServiceLevelAgreement = () => {
                         <ValidatedInput
                           name={`sla-property-${index}`}
                           label="Property"
-                          value={sla.property || ''}
+                          value={sla?.property || ''}
                           onChange={(e) => updateSLA(index, 'property', e.target.value)}
                           required={true}
                           className="bg-white"
@@ -106,7 +106,7 @@ const ServiceLevelAgreement = () => {
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              value={sla.value ?? ''}
+                              value={sla?.value ?? ''}
                               onChange={(e) => updateSLA(index, 'value', e.target.value)}
                               className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                               placeholder="100"
@@ -134,7 +134,7 @@ const ServiceLevelAgreement = () => {
                           </div>
                           <input
                             type="text"
-                            value={sla.unit || ''}
+                            value={sla?.unit || ''}
                             onChange={(e) => updateSLA(index, 'unit', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="ms"
@@ -151,7 +151,7 @@ const ServiceLevelAgreement = () => {
                           </div>
                           <input
                             type="text"
-                            value={sla.element || ''}
+                            value={sla?.element || ''}
                             onChange={(e) => updateSLA(index, 'element', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="table_name"
@@ -168,7 +168,7 @@ const ServiceLevelAgreement = () => {
                               </div>
                             }
                             options={driverOptions}
-                            value={sla.driver || ''}
+                            value={sla?.driver || ''}
                             onChange={(selectedValue) => updateSLA(index, 'driver', selectedValue || '')}
                             placeholder="Select driver..."
                             acceptAnyInput={true}
@@ -185,7 +185,7 @@ const ServiceLevelAgreement = () => {
                           </div>
                           <input
                             type="text"
-                            value={sla.scheduler || ''}
+                            value={sla?.scheduler || ''}
                             onChange={(e) => updateSLA(index, 'scheduler', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="cron"
@@ -202,7 +202,7 @@ const ServiceLevelAgreement = () => {
                           </div>
                           <input
                             type="text"
-                            value={sla.schedule || ''}
+                            value={sla?.schedule || ''}
                             onChange={(e) => updateSLA(index, 'schedule', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="0 20 * * *"
@@ -219,7 +219,7 @@ const ServiceLevelAgreement = () => {
                           </div>
                           <textarea
                             rows={2}
-                            value={sla.description || ''}
+                            value={sla?.description || ''}
                             onChange={(e) => updateSLA(index, 'description', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                             placeholder="Human-readable explanation..."

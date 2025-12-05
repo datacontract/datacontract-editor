@@ -65,7 +65,7 @@ const Pricing = () => {
                     name="priceAmount"
                     id="priceAmount"
                     step="0.01"
-                    value={price.priceAmount}
+                    value={price?.priceAmount}
                     onChange={(e) => updateField('priceAmount', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="9.99"
@@ -86,7 +86,7 @@ const Pricing = () => {
                     type="text"
                     name="priceCurrency"
                     id="priceCurrency"
-                    value={price.priceCurrency}
+                    value={price?.priceCurrency}
                     onChange={(e) => updateField('priceCurrency', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="USD"
@@ -107,7 +107,7 @@ const Pricing = () => {
                     type="text"
                     name="priceUnit"
                     id="priceUnit"
-                    value={price.priceUnit}
+                    value={price?.priceUnit}
                     onChange={(e) => updateField('priceUnit', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
                     placeholder="megabyte"
