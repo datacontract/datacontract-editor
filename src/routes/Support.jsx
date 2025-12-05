@@ -6,7 +6,7 @@ import supportIcons from '../assets/support-icons/supportIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
 
 const Support = () => {
-	const support = useEditorStore(useShallow((state) => state.getValue('support')));
+	const support = useEditorStore(useShallow((state) => state.getValue('support'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
   const toolOptions = [
@@ -30,7 +30,7 @@ const Support = () => {
   const updateField = (value) => {
     try {
 
-      if (value && value.length > 0) {
+      if (value) {
 				setValue('support', value);
       }
     } catch (error) {
@@ -60,6 +60,7 @@ const Support = () => {
   // Remove a support item
   const removeSupportItem = (index) => {
     const updatedItems = support.filter((_, i) => i !== index);
+		console.log(updatedItems);
     updateField(updatedItems);
   };
 
@@ -75,7 +76,7 @@ const Support = () => {
 
             <div>
               {/* Display existing support channels */}
-              {support.length > 0 && (
+              {support?.length > 0 && (
                 <div className="space-y-3 mb-2">
                   {support.map((item, index) => (
                     <div key={index} className="border border-gray-300 rounded-md p-3 bg-gray-50">
