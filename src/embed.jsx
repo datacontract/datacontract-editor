@@ -75,6 +75,9 @@ const DEFAULT_CONFIG = {
   // Enable/disable localStorage persistence
   enablePersistence: false,
 
+  // Show/hide the preview panel on the right side
+  showPreview: true,
+
   // Base path for assets (workers, etc.) - auto-detected if not provided
   basePath: null,
 };
@@ -250,7 +253,7 @@ function createConfiguredStore(config) {
       yaml: config.yaml,
       baselineYaml: config.yaml, // Set initial YAML as baseline for diff view
       isDirty: false,
-      isPreviewVisible: true,
+      isPreviewVisible: config.showPreview ?? true,
       isWarningsVisible: false,
       isTestResultsVisible: false,
       isTestRunning: false,
