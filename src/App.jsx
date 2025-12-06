@@ -59,7 +59,7 @@ function App({ storageBackend = null, editorConfig = null }) {
     return (
         <ErrorBoundary
             fallback={({ error, resetError }) => (
-                <div className="h-screen flex items-center justify-center bg-gray-50">
+                <div className="h-full flex items-center justify-center bg-gray-50">
                     <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-lg">
                         <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
@@ -97,8 +97,8 @@ function App({ storageBackend = null, editorConfig = null }) {
             )}
         >
             <HashRouter>
-                <div className="bg-white">
-                    <div className="h-screen flex flex-col">
+                <div className="bg-white h-full">
+                    <div className="h-full flex flex-col">
                         <Header/>
                         <main className="flex flex-row w-full bg-white flex-1 overflow-hidden">
                             <SidebarNavigation/>

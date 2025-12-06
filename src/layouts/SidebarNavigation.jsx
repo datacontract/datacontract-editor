@@ -282,7 +282,7 @@ const SidebarNavigation = () => {
 
     return (
         <div
-            className="w-56 min-h-[calc(100vh-4.1rem)] overflow-y-auto border-r border-gray-300 bg-gray-50 p-4 shrink-0 text-gray-700 font-medium flex flex-col">
+            className="w-56 h-full overflow-y-auto border-r border-gray-300 bg-gray-50 p-4 shrink-0 text-gray-700 font-medium flex flex-col">
             <nav className="flex mt-2 w-full" aria-label="Progress">
                 <ol role="list" className="space-y-3 w-full">
                     {navigationItems.map((item) => (
@@ -413,7 +413,7 @@ const SidebarNavigation = () => {
                     href="https://datacontract.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
+                    className="flex items-center gap-2 text-xs text-gray-500 hover:text-indigo-600 transition-colors"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
