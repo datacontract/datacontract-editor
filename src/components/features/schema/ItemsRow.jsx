@@ -138,6 +138,8 @@ const ItemsRow = ({
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        // propPath already points to the parent property, so pass isItems=true
+                                        // This will create the path: schema[x].properties[y].items.properties
                                         addSubProperty(schemaIdx, propPath, true);
                                     }}
                                     className="p-1.5 rounded-full hover:bg-indigo-50"

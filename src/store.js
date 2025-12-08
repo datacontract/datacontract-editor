@@ -75,6 +75,29 @@ export function defaultStoreConfig(set, get) {
 			set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts), isDirty: true})
 		},
 		clearSaveInfo: () => set({lastSaveInfo: null}),
+		addNotification: (notification) => {
+			const id = Date.now() + Math.random();
+			const newNotification = {
+				id,
+				type: 'info',
+				duration: 3000,
+				...notification,
+			};
+			set((state) => ({
+				notifications: [...state.notifications, newNotification]
+			}));
+
+			// Auto-remove notification after duration
+			if (newNotification.duration > 0) {
+				setTimeout(() => {
+					set((state) => ({
+						notifications: state.notifications.filter(n => n.id !== id)
+					}));
+				}, newNotification.duration);
+			}
+
+			return id;
+		},
 		removeNotification: (id) => set((state) => ({
 			notifications: state.notifications.filter(n => n.id !== id)
 		})),

@@ -82,10 +82,31 @@ export function useSchemaOperations(schemaIndex) {
 
             const pathStr = buildPropertyPath(schemaIndex, propPath, field);
             setValue(pathStr, value);
+
+            // Auto-initialize items object when logicalType is set to 'array'
+            if (field === 'logicalType' && value === 'array') {
+                const itemsPath = buildPropertyPath(schemaIndex, propPath, 'items');
+                const currentItems = getValue(itemsPath);
+                // Only initialize if items doesn't exist
+                if (!currentItems) {
+                    setValue(itemsPath, {
+                        logicalType: 'string'
+                    });
+                }
+            }
+
+            // Remove items when logicalType is changed from 'array' to something else
+            if (field === 'logicalType' && value !== 'array') {
+                const itemsPath = buildPropertyPath(schemaIndex, propPath, 'items');
+                const currentItems = getValue(itemsPath);
+                if (currentItems) {
+                    setValue(itemsPath, undefined);
+                }
+            }
         } catch (error) {
             console.error('Error updating property:', error);
         }
-    }, [schema, schemaIndex, setValue]);
+    }, [schema, schemaIndex, setValue, getValue]);
 
     // Remove property from schema
     const removeProperty = useCallback((schemaIdx, propIdx) => {
