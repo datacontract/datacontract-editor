@@ -1,4 +1,4 @@
-import { Fragment, memo } from 'react';
+import {Fragment, memo} from 'react';
 import Tag from '../../ui/Tag.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
@@ -9,30 +9,10 @@ import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 
-// Custom comparison for schema property
-const propertyAreEqual = (prevProps, nextProps) => {
-	if (prevProps.property === nextProps.property &&
-		prevProps.propertyName === nextProps.propertyName &&
-		prevProps.schemaName === nextProps.schemaName &&
-		prevProps.indent === nextProps.indent) {
-		return true;
-	}
-
-	// Deep comparison for property object
-	try {
-		return JSON.stringify(prevProps.property) === JSON.stringify(nextProps.property) &&
-			prevProps.propertyName === nextProps.propertyName &&
-			prevProps.schemaName === nextProps.schemaName &&
-			prevProps.indent === nextProps.indent;
-	} catch {
-		return false;
-	}
-};
-
 // Memoized property row component
-const SchemaProperty = memo(({ property, propertyName, schemaName, indent = 0 }) => {
+const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 	const indentSpaces = '    '.repeat(Math.max(0, indent - 1));
-	const hasChildren = property.properties && Object.keys(property.properties).length > 0;
+	const hasChildren = property.properties && Array.isArray(property.properties) && property.properties.length > 0;
 
 	return (
 		<Fragment key={`${schemaName}-${propertyName}`}>
@@ -257,119 +237,104 @@ const SchemaProperty = memo(({ property, propertyName, schemaName, indent = 0 })
 					</div>
 				</td>
 			</tr>
-			{hasChildren && Object.entries(property.properties).map(([childName, childProp]) =>
+			{hasChildren && property.properties.map((childProp, index) =>
 				<SchemaProperty
-					key={`${schemaName}-${propertyName}-${childName}`}
+					key={`${schemaName}-${propertyName}-${childProp?.name || index}`}
 					property={childProp}
-					propertyName={childName}
+					propertyName={childProp?.name}
 					schemaName={schemaName}
 					indent={indent + 1}
 				/>
 			)}
 		</Fragment>
 	);
-}, propertyAreEqual);
+};
 
 SchemaProperty.displayName = 'SchemaProperty';
 
-// Custom comparison for schema table
-const tableAreEqual = (prevProps, nextProps) => {
-	if (prevProps.schemaName === nextProps.schemaName &&
-		prevProps.schema === nextProps.schema) {
-		return true;
-	}
-
-	// Deep comparison for schema object
-	try {
-		return prevProps.schemaName === nextProps.schemaName &&
-			JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
-	} catch {
-		return false;
-	}
-};
-
-// Memoized schema table component
 const SchemaTable = memo(({ schemaName, schema }) => {
 	return (
 		<div className="mt-3 print:block">
 			<div className="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
 				<table className="min-w-full divide-y divide-gray-300 print:relative print:break-inside-auto">
 					<thead className="bg-gray-50 print:table-header-group">
-						<tr className="print:break-inside-avoid-page">
-							<th scope="colgroup" colSpan="3"
+					<tr className="print:break-inside-avoid-page">
+						<th scope="colgroup" colSpan="3"
 								className="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
-								<span>{schema.title || schemaName}</span>
-								{' '}
-								<span className="font-mono font-medium">{schemaName}</span>
-								{' '}
-								{schema.type && (
-									<span
-										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+							<span>{schema.title || schemaName}</span>
+							{' '}
+							<span className="font-mono font-medium">{schemaName}</span>
+							{' '}
+							{schema.type && (
+								<span
+									className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
 										{schema.type}
 									</span>
-								)}
-								{schema.description ? (
-									<div className="text-sm font-normal text-gray-500">{schema.description}</div>
-								) : (
-									<div className="text-sm font-normal text-gray-400">No description</div>
-								)}
-								<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1"/>
-								{schema && schema.tags && schema.tags.length > 0 && (
-									<div className="mt-1">
-										{schema.tags.map((tag, idx) => (
-											<Tag key={idx} className="mr-1 mt-1">
-												{tag}
-											</Tag>
-										))}
-									</div>
-								)}
-								{schema && schema.quality && schema.quality.length > 0 && (
-									<div className="mt-2">
-										{schema.quality.map((qualityCheck, idx) => {
-											const QualityIcon = getQualityCheckIcon(qualityCheck.type);
-											const tooltipContent = (
-												<div className="space-y-1">
-													{qualityCheck.description && <div>{qualityCheck.description}</div>}
-													{qualityCheck.type &&
-														<div className="text-gray-300">Type: {qualityCheck.type}</div>}
-													{qualityCheck.dimension &&
-														<div className="text-gray-300">Dimension: {qualityCheck.dimension}</div>}
-													{qualityCheck.metric &&
-														<div className="text-gray-300">Metric: {qualityCheck.metric}</div>}
-												</div>
-											);
+							)}
+							{schema.description ? (
+								<div className="text-sm font-normal text-gray-500">{schema.description}</div>
+							) : (
+								<div className="text-sm font-normal text-gray-400">No description</div>
+							)}
+							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1"/>
+							{schema && schema.tags && schema.tags.length > 0 && (
+								<div className="mt-1">
+									{schema.tags.map((tag, idx) => (
+										<Tag key={idx} className="mr-1 mt-1">
+											{tag}
+										</Tag>
+									))}
+								</div>
+							)}
+							{schema && schema.quality && schema.quality.length > 0 && (
+								<div className="mt-2">
+									{schema.quality.map((qualityCheck, idx) => {
+										const QualityIcon = getQualityCheckIcon(qualityCheck.type);
+										const tooltipContent = (
+											<div className="space-y-1">
+												{qualityCheck.description && <div>{qualityCheck.description}</div>}
+												{qualityCheck.type &&
+													<div className="text-gray-300">Type: {qualityCheck.type}</div>}
+												{qualityCheck.dimension &&
+													<div className="text-gray-300">Dimension: {qualityCheck.dimension}</div>}
+												{qualityCheck.metric &&
+													<div className="text-gray-300">Metric: {qualityCheck.metric}</div>}
+											</div>
+										);
 
-											return (
-												<Tooltip key={idx} content={tooltipContent}>
+										return (
+											<Tooltip key={idx} content={tooltipContent}>
 													<span
 														className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
 														<QualityIcon className="w-3 h-3"/>
 														{qualityCheck.name || 'Quality Check'}
 													</span>
-												</Tooltip>
-											);
-										})}
-									</div>
-								)}
-							</th>
-						</tr>
+											</Tooltip>
+										);
+									})}
+								</div>
+							)}
+						</th>
+					</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200 bg-white">
-						{schema.fields && Object.entries(schema.fields).map(([fieldName, field]) =>
-							<SchemaProperty
-								key={`${schemaName}-${fieldName}`}
-								property={field}
-								propertyName={fieldName}
-								schemaName={schemaName}
-								indent={0}
-							/>
-						)}
+					{schema.properties && Array.isArray(schema.properties) && schema.properties.map((property) =>
+						<SchemaProperty
+							key={`${schemaName}-${property?.name}`}
+							property={property}
+							propertyName={property?.name}
+							schemaName={schemaName}
+							indent={0}
+						/>
+					)}
 					</tbody>
 				</table>
 			</div>
 		</div>
 	);
-}, tableAreEqual);
+}, (prevProps, nextProps) => (
+	JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema)
+));
 
 SchemaTable.displayName = 'SchemaTable';
 
@@ -388,10 +353,10 @@ const SchemaSection = () => {
 				</div>
 			</div>
 
-			{Object.entries(schema).map(([schemaName, schemaData]) => (
+			{schema.map((schemaData) => (
 				<SchemaTable
-					key={schemaName}
-					schemaName={schemaName}
+					key={schemaData?.name}
+					schemaName={schemaData?.name}
 					schema={schemaData}
 				/>
 			))}
