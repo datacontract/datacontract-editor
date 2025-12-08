@@ -50,7 +50,7 @@ function getValueWithPath(obj, path, defaultValue) {
 function setValueWithPath(obj, path, value) {
 	// Deep clone the object to avoid mutations
 	const newObj = JSON.parse(JSON.stringify(obj || {}));
-	const keys = path.match(/[^.\[\]]+/g);
+	const keys = path.match(/[^.[\]]+/g);
 	keys.slice(0, -1).reduce((acc, key, i) =>
 		acc[key] = acc[key] || (/^\d+$/.test(keys[i + 1]) ? [] : {}), newObj
 	)[keys[keys.length - 1]] = value;
