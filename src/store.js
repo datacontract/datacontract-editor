@@ -42,7 +42,7 @@ export const getOverrideStore = () => {
 };
 
 function getValueWithPath(obj, path, defaultValue) {
-	const keys = path?.split(/[.[\]]/).filter(Boolean);
+	const keys = path?.split(/\.|\[|\]/).filter(Boolean);
 	const result = keys?.reduce((acc, key) => acc?.[key], obj);
 	return result !== undefined ? result : defaultValue;
 }
