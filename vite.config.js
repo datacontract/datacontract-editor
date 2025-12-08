@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     tailwindcss(),
     react()
@@ -31,6 +31,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     copyPublicDir: true,
+    // Enable sourcemaps in debug mode
+    sourcemap: mode === 'debug' ? true : false,
+    // Disable minification in debug mode for easier debugging
+    minify: mode === 'debug' ? false : 'esbuild',
     lib: {
       entry: resolve(__dirname, 'src/embed.jsx'),
       name: 'DataContractEditor',
@@ -64,4 +68,4 @@ export default defineConfig({
       'monaco-yaml'
     ]
   }
-})
+}))
