@@ -1,12 +1,50 @@
+import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import {useShallow} from "zustand/react/shallow";
+import { parseYaml } from '../utils/yaml.js';
 
 const ServiceLevelAgreement = () => {
 	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
+	const yaml = useEditorStore((state) => state.yaml);
+
+  // Generate schema.property suggestions from YAML
+  const schemaPropertySuggestions = useMemo(() => {
+    if (!yaml?.trim()) return [];
+
+    try {
+      const parsed = parseYaml(yaml);
+      const schemas = parsed?.schema || [];
+      const suggestions = [];
+
+      schemas.forEach((schema) => {
+        if (!schema?.name) return;
+
+        // Add property-level suggestions (schema.property format)
+        if (schema.properties && Array.isArray(schema.properties)) {
+          schema.properties.forEach((prop) => {
+            if (prop?.name) {
+              const fullPath = `${schema.name}.${prop.name}`;
+              suggestions.push({
+                id: fullPath,
+                name: fullPath,
+                label: fullPath,
+                schemaName: schema.name,
+                propertyName: prop.name
+              });
+            }
+          });
+        }
+      });
+
+      return suggestions;
+    } catch {
+      return [];
+    }
+  }, [yaml]);
 
   const driverOptions = [
     { id: 'regulatory', name: 'regulatory' },
@@ -141,20 +179,22 @@ const ServiceLevelAgreement = () => {
                           />
                         </div>
                         <div>
-                          <div className="flex items-center gap-1 mb-1">
-                            <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Element
-                            </label>
-                            <Tooltip content="Target schema component(s)">
-                              <QuestionMarkCircleIcon />
-                            </Tooltip>
-                          </div>
-                          <input
-                            type="text"
+                          <Combobox
+                            label={
+                              <div className="flex items-center gap-1">
+                                <span>Element</span>
+                                <Tooltip content="Target schema component(s)">
+                                  <QuestionMarkCircleIcon />
+                                </Tooltip>
+                              </div>
+                            }
+                            options={schemaPropertySuggestions}
                             value={sla?.element || ''}
-                            onChange={(e) => updateSLA(index, 'element', e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                            placeholder="table_name"
+                            onChange={(selectedValue) => updateSLA(index, 'element', selectedValue || '')}
+                            placeholder="schema.property"
+                            acceptAnyInput={true}
+                            filterKey="name"
+                            displayValue={(opt) => opt?.name || opt || ''}
                           />
                         </div>
                         <div>
