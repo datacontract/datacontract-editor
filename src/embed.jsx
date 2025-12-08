@@ -34,7 +34,7 @@ const DEFAULT_CONFIG = {
   yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: example-id\nversion: "0.0.1"\nstatus: draft\n',
 
   // Schema URL for validation
-  schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
+  schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json',
 
   // Available server types (null = all, array = filtered list)
   serverTypes: null,

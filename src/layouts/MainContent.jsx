@@ -16,7 +16,7 @@ const MainContent = () => {
 
   // Use schema URL from store if provided (e.g., from embed config), otherwise use default
   const schemaUrl = useEditorStore((state) => state.schemaUrl) ||
-    'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json';
+    'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
   // Reference to the YAML editor to call its methods
   const editorRef = useRef(null);
