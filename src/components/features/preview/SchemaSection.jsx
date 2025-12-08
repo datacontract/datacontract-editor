@@ -1,4 +1,4 @@
-import {Fragment, memo} from 'react';
+import { Fragment, memo } from 'react';
 import Tag from '../../ui/Tag.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
@@ -9,10 +9,30 @@ import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 
+// Custom comparison for schema property
+const propertyAreEqual = (prevProps, nextProps) => {
+	if (prevProps.property === nextProps.property &&
+		prevProps.propertyName === nextProps.propertyName &&
+		prevProps.schemaName === nextProps.schemaName &&
+		prevProps.indent === nextProps.indent) {
+		return true;
+	}
+
+	// Deep comparison for property object
+	try {
+		return JSON.stringify(prevProps.property) === JSON.stringify(nextProps.property) &&
+			prevProps.propertyName === nextProps.propertyName &&
+			prevProps.schemaName === nextProps.schemaName &&
+			prevProps.indent === nextProps.indent;
+	} catch {
+		return false;
+	}
+};
+
 // Memoized property row component
-const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
+const SchemaProperty = memo(({ property, propertyName, schemaName, indent = 0 }) => {
 	const indentSpaces = '    '.repeat(Math.max(0, indent - 1));
-	const hasChildren = property.properties && Array.isArray(property.properties) && property.properties.length > 0;
+	const hasChildren = property.properties && Object.keys(property.properties).length > 0;
 
 	return (
 		<Fragment key={`${schemaName}-${propertyName}`}>
@@ -237,21 +257,38 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 					</div>
 				</td>
 			</tr>
-			{hasChildren && property.properties.map((childProp, index) =>
+			{hasChildren && Object.entries(property.properties).map(([childName, childProp]) =>
 				<SchemaProperty
-					key={`${schemaName}-${propertyName}-${childProp?.name || index}`}
+					key={`${schemaName}-${propertyName}-${childName}`}
 					property={childProp}
-					propertyName={childProp?.name}
+					propertyName={childName}
 					schemaName={schemaName}
 					indent={indent + 1}
 				/>
 			)}
 		</Fragment>
 	);
-};
+}, propertyAreEqual);
 
 SchemaProperty.displayName = 'SchemaProperty';
 
+// Custom comparison for schema table
+const tableAreEqual = (prevProps, nextProps) => {
+	if (prevProps.schemaName === nextProps.schemaName &&
+		prevProps.schema === nextProps.schema) {
+		return true;
+	}
+
+	// Deep comparison for schema object
+	try {
+		return prevProps.schemaName === nextProps.schemaName &&
+			JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema);
+	} catch {
+		return false;
+	}
+};
+
+// Memoized schema table component
 const SchemaTable = memo(({ schemaName, schema }) => {
 	return (
 		<div className="mt-3 print:block">
@@ -318,11 +355,11 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200 bg-white">
-						{schema.properties && Array.isArray(schema.properties) && schema.properties.map((property) =>
+						{schema.fields && Object.entries(schema.fields).map(([fieldName, field]) =>
 							<SchemaProperty
-								key={`${schemaName}-${property?.name}`}
-								property={property}
-								propertyName={property?.name}
+								key={`${schemaName}-${fieldName}`}
+								property={field}
+								propertyName={fieldName}
 								schemaName={schemaName}
 								indent={0}
 							/>
@@ -332,9 +369,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 			</div>
 		</div>
 	);
-}, (prevProps, nextProps) => (
-	JSON.stringify(prevProps.schema) === JSON.stringify(nextProps.schema)
-));
+}, tableAreEqual);
 
 SchemaTable.displayName = 'SchemaTable';
 
@@ -353,10 +388,10 @@ const SchemaSection = () => {
 				</div>
 			</div>
 
-			{schema.map((schemaData) => (
+			{Object.entries(schema).map(([schemaName, schemaData]) => (
 				<SchemaTable
-					key={schemaData?.name}
-					schemaName={schemaData?.name}
+					key={schemaName}
+					schemaName={schemaName}
 					schema={schemaData}
 				/>
 			))}

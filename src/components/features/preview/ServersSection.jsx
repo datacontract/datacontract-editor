@@ -28,18 +28,6 @@ const ServerItem = memo(({ server }) => {
 				)}
 				<div className="flex-1">
 					<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-						{server.server && (
-							<div className="flex flex-col">
-								<dt className="text-sm font-medium text-gray-500">Server</dt>
-								<dd className="mt-1 text-sm text-gray-900">{server.type}</dd>
-							</div>
-						)}
-						{server.environment && (
-							<div className="flex flex-col">
-								<dt className="text-sm font-medium text-gray-500">Environment</dt>
-								<dd><span className='badge--indigo'>{server.environment}</span></dd>
-							</div>
-						)}
 						{server.type && (
 							<div className="flex flex-col">
 								<dt className="text-sm font-medium text-gray-500">Type</dt>
@@ -88,12 +76,6 @@ const ServerItem = memo(({ server }) => {
 								<dd className="mt-1 text-sm text-gray-900">{server.database}</dd>
 							</div>
 						)}
-						{server.catalog && (
-							<div className="flex flex-col">
-								<dt className="text-sm font-medium text-gray-500">Catalog</dt>
-								<dd className="mt-1 text-sm text-gray-900">{server.catalog}</dd>
-							</div>
-						)}
 						{server.schema && (
 							<div className="flex flex-col">
 								<dt className="text-sm font-medium text-gray-500">Schema</dt>
@@ -140,12 +122,6 @@ const ServerItem = memo(({ server }) => {
 							<div className="flex flex-col">
 								<dt className="text-sm font-medium text-gray-500">Delimiter</dt>
 								<dd className="mt-1 text-sm text-gray-900">{server.delimiter}</dd>
-							</div>
-						)}
-						{server.description && (
-							<div className="flex flex-col">
-								<dt className="text-sm font-medium text-gray-500">Description</dt>
-								<dd className="mt-1 text-sm text-gray-900">{server.description}</dd>
 							</div>
 						)}
 						{server.customProperties && Array.isArray(server.customProperties) && server.customProperties.map((customProperty, cpIndex) => (
