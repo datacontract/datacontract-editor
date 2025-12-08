@@ -77,7 +77,18 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
   };
 
   return (
-    <div className="space-y-2 w-full">
+    <div className="space-y-2">
+      {/* Header with label and add button */}
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium text-gray-700">Relationships</label>
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          + Add
+        </button>
+      </div>
 
       {/* Existing relationships */}
       {value.map((item, index) => (
@@ -93,15 +104,6 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
           onRemove={handleRemove}
         />
       ))}
-			<div className="flex items-center justify-end">
-				<button
-					type="button"
-					onClick={handleAdd}
-					className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-				>
-					+ Add Relationship
-				</button>
-			</div>
     </div>
   );
 };
@@ -201,7 +203,7 @@ const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaProperty
   const pairCount = Math.max(fromArray.length, toArray.length);
 
   return (
-    <div className="w-full border border-gray-200 rounded-md bg-white">
+    <div className="border border-gray-200 rounded-md bg-white">
       {/* Header - Always visible */}
       <div
         className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50"

@@ -1,6 +1,6 @@
 {
   "name": "datacontract-editor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A visual editor for data contracts using the Open Data Contract Standard (ODCS)",
   "repository": {
     "type": "git",

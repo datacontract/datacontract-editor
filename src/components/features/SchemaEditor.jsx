@@ -327,6 +327,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                     {/* Basic Metadata */}
                                     <div className="space-y-4">
                                         {/* Name Field */}
+																				{ /* TODO: Add onchange logic */ }
                                         <ValidatedInput
                                             name={`schema-name-${schemaIndex}`}
                                             label="Name"
@@ -650,6 +651,7 @@ const SchemaEditor = ({schemaIndex}) => {
             <PropertyDetailsDrawer
                 ref={drawerRef}
                 open={selectedProperty !== null}
+								onUpdate={(field, value) => setYamlValue(`${selectedProperty.propPath}.${field}`, value)}
                 onClose={handleCloseDrawer}
                 propertyPath={selectedPropertyPath}
             />

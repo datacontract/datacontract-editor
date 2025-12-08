@@ -75,6 +75,9 @@ const DEFAULT_CONFIG = {
   // Enable/disable localStorage persistence
   enablePersistence: false,
 
+  // Show/hide the preview panel on the right side
+  showPreview: true,
+
   // Base path for assets (workers, etc.) - auto-detected if not provided
   basePath: null,
 };

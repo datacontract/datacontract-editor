@@ -178,15 +178,13 @@ const Team = () => {
                 )}
 
                 {/* Always show add button */}
-                <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={addMember}
-                    className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                  >
-                    + Add Team Member
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={addMember}
+                  className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+                >
+                  + Add Team Member
+                </button>
               </div>
             </div>
           </div>
