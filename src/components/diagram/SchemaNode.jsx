@@ -182,7 +182,8 @@ const SchemaNode = ({ data, id }) => {
 
     // Check if we should add a new property after saving
     const isLastProperty = index === (data.schema.properties?.length || 0) - 1;
-    const trimmedName = editedPropertyName.trim();
+    // Ensure name is always a string
+    const trimmedName = String(editedPropertyName || '').trim();
 
     if (shouldAddNext && isLastProperty) {
       // Combined operation: save current property AND add new one in a single update
@@ -298,7 +299,9 @@ const SchemaNode = ({ data, id }) => {
   };
 
   const handleSaveNestedProperty = (parentIndex, nestedIndex, field) => {
-    const trimmedValue = editedNestedValue.trim();
+    // Ensure value is always a string, especially for 'name' field
+    const stringValue = String(editedNestedValue || '');
+    const trimmedValue = stringValue.trim();
     handleUpdateNestedProperty(parentIndex, nestedIndex, {
       [field]: trimmedValue || undefined
     });
@@ -472,7 +475,7 @@ const SchemaNode = ({ data, id }) => {
                       })()}
                       <span
                         className={`text-sm font-medium truncate cursor-pointer hover:text-indigo-600 ${
-                          !prop.name || prop.name.trim() === '' ? 'text-gray-400 italic' : 'text-gray-900'
+                          !prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'text-gray-400 italic' : 'text-gray-900'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -480,7 +483,7 @@ const SchemaNode = ({ data, id }) => {
                         }}
                         title="Click to edit"
                       >
-                        {!prop.name || prop.name.trim() === '' ? 'unnamed property' : prop.name}
+                        {!prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'unnamed property' : prop.name}
                       </span>
                       {/* Always render button like Handles - just change opacity based on type */}
                       <button
@@ -707,7 +710,7 @@ const SchemaNode = ({ data, id }) => {
                           ) : (
                             <span
                               className={`text-gray-600 truncate cursor-pointer hover:text-indigo-600 ${
-                                !itemProp.name || itemProp.name.trim() === '' ? 'italic text-gray-400' : ''
+                                !itemProp.name || (typeof itemProp.name === 'string' && itemProp.name.trim() === '') ? 'italic text-gray-400' : ''
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -912,7 +915,7 @@ const SchemaNode = ({ data, id }) => {
                       ) : (
                         <span
                           className={`text-gray-600 truncate cursor-pointer hover:text-indigo-600 ${
-                            !nestedProp.name || nestedProp.name.trim() === '' ? 'italic text-gray-400' : ''
+                            !nestedProp.name || (typeof nestedProp.name === 'string' && nestedProp.name.trim() === '') ? 'italic text-gray-400' : ''
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();

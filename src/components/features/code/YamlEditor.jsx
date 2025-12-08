@@ -46,6 +46,12 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
             updateMarkers();
         });
 
+        // Listen for model content changes to trigger validation
+        const contentDisposable = editor.onDidChangeModelContent(() => {
+            // Defer marker update to allow Monaco's validation to complete
+            setTimeout(updateMarkers, 100);
+        });
+
         // Listen for cursor position changes
         const cursorDisposable = editor.onDidChangeCursorPosition((e) => {
             const lineNumber = e.position.lineNumber;
@@ -55,6 +61,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
         // Clean up on unmount
         editor.onDidDispose(() => {
             markerDisposable.dispose();
+            contentDisposable.dispose();
             cursorDisposable.dispose();
             setMarkers([]);
         });
@@ -158,6 +165,20 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
             }
         }
     }, [fetchedSchema, schemaUrl]);
+
+    // Trigger marker update when YAML changes (e.g., from form updates)
+    useEffect(() => {
+        if (editorRef.current && monacoRef.current) {
+            // Wait for Monaco's validation to complete
+            setTimeout(() => {
+                const model = editorRef.current.getModel();
+                if (model) {
+                    const markers = monacoRef.current.editor.getModelMarkers({ resource: model.uri });
+                    setMarkers(markers);
+                }
+            }, 200);
+        }
+    }, [yaml, setMarkers]);
 
     // Scroll to specific line when requested from navigation
     useEffect(() => {

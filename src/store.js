@@ -61,9 +61,12 @@ export function defaultStoreConfig(set, get) {
 	// Define action functions to ensure stable references
 	const actions = {
 		setYaml: (newYaml) => {
-			const yamlParts = Yaml.parse(newYaml);
-			set({yaml: newYaml, isDirty: true, yamlParts}
-			)
+			try {
+				const yamlParts = Yaml.parse(newYaml);
+				set({yaml: newYaml, isDirty: true, yamlParts});
+			} catch(e) {
+				// NOOP
+			}
 		},
 		loadYaml: (newYaml) => set({yaml: newYaml, baselineYaml: newYaml, isDirty: false}),
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
@@ -274,10 +277,12 @@ export function defaultStoreConfig(set, get) {
 		},
 	};
 
+	const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n';
+
 	return {
-		yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n',
-		yamlParts: {},
-		baselineYaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n', // YAML at last save/load for diff comparison
+		yaml: initialYaml,
+		yamlParts: Yaml.parse(initialYaml),
+		baselineYaml: initialYaml, // YAML at last save/load for diff comparison
 		isDirty: false,
 		isPreviewVisible: true,
 		isWarningsVisible: false,

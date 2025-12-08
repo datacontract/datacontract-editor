@@ -5,7 +5,7 @@ import {useShallow} from "zustand/react/shallow";
 
 const SidebarNavigation = () => {
 	const schemas = useEditorStore(useShallow((state) => state.getValue('schema')));
-	const servers = useEditorStore(useShallow((state) => state.getValue('server')));
+	const servers = useEditorStore(useShallow((state) => state.getValue('servers')));
     const setView = useEditorStore((state) => state.setView);
     const currentView = useEditorStore((state) => state.currentView);
     const selectedDiagramSchemaIndex = useEditorStore((state) => state.selectedDiagramSchemaIndex);

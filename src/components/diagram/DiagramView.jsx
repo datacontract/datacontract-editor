@@ -48,7 +48,24 @@ const DiagramViewInner = () => {
       return null;
     }
     try {
-      return parseYaml(yaml);
+      const data = parseYaml(yaml);
+
+      // Normalize property names to always be strings
+      if (data?.schema) {
+        data.schema = data.schema.map(schema => {
+          if (schema?.properties) {
+            schema.properties = schema.properties.map(prop => {
+              if (prop && typeof prop.name !== 'undefined' && typeof prop.name !== 'string') {
+                return { ...prop, name: String(prop.name) };
+              }
+              return prop;
+            });
+          }
+          return schema;
+        });
+      }
+
+      return data;
     } catch {
       return null;
     }
