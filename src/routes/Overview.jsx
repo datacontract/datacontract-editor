@@ -93,7 +93,7 @@ const Overview = () => {
                   label="Status"
                   options={statusOptions}
                   value={status}
-                  onChange={(selectedValue) => setStatus(selectedValue?.id || '')}
+                  onChange={(selectedValue) => setStatus(selectedValue || '')}
                   placeholder="Select a status..."
                   acceptAnyInput={true}
                   required={true}

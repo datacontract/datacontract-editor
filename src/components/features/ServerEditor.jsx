@@ -58,6 +58,7 @@ const ServerEditor = ({ serverIndex }) => {
       if (!servers || !servers[serverIndex]) {
         return;
       }
+			const updatedServers = [...servers]
 
       // If type is being changed, preserve server-level properties and reset type-specific fields
       if (field === 'type') {
@@ -79,15 +80,15 @@ const ServerEditor = ({ serverIndex }) => {
           }
         });
 
-        servers[serverIndex] = serverLevelProps;
+        updatedServers[serverIndex] = serverLevelProps;
       } else {
-        servers[serverIndex] = {
+        updatedServers[serverIndex] = {
           ...servers[serverIndex],
           [field]: value || undefined
         };
       }
 
-			setValue('servers', servers);
+			setValue('servers', updatedServers);
     } catch (error) {
       console.error('Error updating server:', error);
     }
