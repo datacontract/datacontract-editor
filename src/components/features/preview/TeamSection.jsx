@@ -92,8 +92,8 @@ TeamMember.displayName = 'TeamMember';
 // Main TeamSection component
 const TeamSection = () => {
 	const team = useEditorStore(useShallow(state => state.getValue('team')));
-	const teamMembers = team.members || [];
-	const hasData = team.name || team.description || teamMembers.length > 0 || (team.tags && team.tags.length > 0);
+	const teamMembers = team?.members || [];
+	const hasData = team?.name || team?.description || teamMembers?.length > 0 || (team?.tags && team?.tags?.length > 0);
 
 	if (!hasData) return null;
 
