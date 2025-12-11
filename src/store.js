@@ -41,13 +41,13 @@ export const getOverrideStore = () => {
 	return overrideStore;
 };
 
-function getValueWithPath(obj, path, defaultValue) {
+export function getValueWithPath(obj, path, defaultValue) {
 	const keys = path?.split(/\.|\[|\]/).filter(Boolean);
 	const result = keys?.reduce((acc, key) => acc?.[key], obj);
 	return result !== undefined ? result : defaultValue;
 }
 
-function setValueWithPath(obj, path, value) {
+export function setValueWithPath(obj, path, value) {
 	// Deep clone the object to avoid mutations
 	const newObj = JSON.parse(JSON.stringify(obj || {}));
 	const keys = path.match(/[^.[\]]+/g);

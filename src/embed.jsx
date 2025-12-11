@@ -4,10 +4,11 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
-import {defaultStoreConfig, setOverrideStore} from './store.js'
+import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
+import * as Yaml from "yaml";
 
 /**
  * Data Contract Editor - Embeddable Component
@@ -86,18 +87,218 @@ const DEFAULT_CONFIG = {
  * Create a custom Zustand store with configuration
  */
 function createConfiguredStore(config) {
-  const fileStorageBackend = config.backend || new LocalFileStorageBackend();
-  globalBackend = fileStorageBackend;
+  const storageBackend = config.backend || new LocalFileStorageBackend();
+  globalBackend = storageBackend;
+
+	const storeConfig = (set, get) => {
+		const actions = {
+			setYaml: (newYaml) => {
+				try {
+					const yamlParts = Yaml.parse(newYaml);
+					set({yaml: newYaml, isDirty: true, yamlParts});
+				} catch(e) {
+					// NOOP
+				}
+			},
+			loadYaml: (newYaml) => set({ yaml: newYaml, baselineYaml: newYaml, isDirty: false }),
+			getValue: (path) => getValueWithPath(get().yamlParts, path),
+			setValue: (path, value) => {
+				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+				set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts), isDirty: true})
+			},
+			markClean: () => set({ isDirty: false }),
+			clearSaveInfo: () => set({ lastSaveInfo: null }),
+			addNotification: (notification) => {
+				const id = Date.now() + Math.random();
+				const newNotification = {
+					id,
+					type: 'info',
+					duration: 3000,
+					...notification,
+				};
+				set((state) => ({
+					notifications: [...state.notifications, newNotification]
+				}));
+
+				if (newNotification.duration > 0) {
+					setTimeout(() => {
+						set((state) => ({
+							notifications: state.notifications.filter(n => n.id !== id)
+						}));
+					}, newNotification.duration);
+				}
+
+				return id;
+			},
+			removeNotification: (id) => set((state) => ({
+				notifications: state.notifications.filter(n => n.id !== id)
+			})),
+			togglePreview: () => set((state) => ({
+				isPreviewVisible: !state.isPreviewVisible,
+				isWarningsVisible: state.isPreviewVisible ? false : false,
+				isTestResultsVisible: state.isPreviewVisible ? false : false,
+			})),
+			toggleWarnings: () => set((state) => ({
+				isWarningsVisible: !state.isWarningsVisible,
+				isPreviewVisible: state.isWarningsVisible ? false : false,
+				isTestResultsVisible: state.isWarningsVisible ? false : false,
+			})),
+			toggleTestResults: () => set((state) => ({
+				isTestResultsVisible: !state.isTestResultsVisible,
+				isPreviewVisible: state.isTestResultsVisible ? false : false,
+				isWarningsVisible: state.isTestResultsVisible ? false : false,
+			})),
+			runTest: async (server) => {
+				const { yaml } = get();
+				set({ isTestRunning: true });
+				try {
+					// Build the test endpoint URL
+					const baseUrl = config.tests?.dataContractCliApiServerUrl || '';
+					const testEndpoint = `${baseUrl}/test`;
+					const url = server
+						? `${testEndpoint}?server=${encodeURIComponent(server)}`
+						: testEndpoint;
+					const response = await fetch(url, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'text/plain',
+						},
+						body: yaml,
+					});
+
+					if (!response.ok) {
+						let errorMessage = `Server returned error: ${response.status} ${response.statusText}`;
+						try {
+							const errorData = await response.json();
+							if (errorData.message) {
+								errorMessage = errorData.message;
+							} else if (errorData.error) {
+								errorMessage = errorData.error;
+							}
+						} catch {
+							try {
+								const errorText = await response.text();
+								if (errorText) {
+									errorMessage = errorText;
+								}
+							} catch {
+								// Keep default error message
+							}
+						}
+						throw new Error(errorMessage);
+					}
+
+					const result = await response.json();
+					let success = false;
+					if (result.result) {
+						success = result.result === 'passed' || result.result === 'pass';
+					} else if (Array.isArray(result.checks)) {
+						const hasFailures = result.checks.some(check =>
+							check.result === 'failed' || check.result === 'fail' || check.result === false
+						);
+						success = !hasFailures;
+					}
+
+					const newResult = {
+						timestamp: new Date().toISOString(),
+						success: success,
+						data: result,
+					};
+
+					set({ testResults: [newResult], isTestRunning: false });
+					return newResult;
+				} catch (error) {
+					let errorMessage = error.message;
+					let isConnectionError = false;
+
+					if (error.name === 'TypeError' && error.message.includes('fetch')) {
+						errorMessage = 'Cannot connect to test server.';
+						isConnectionError = true;
+					} else if (error.message === 'Unexpected end of JSON input' || error.message.includes('JSON')) {
+						errorMessage = 'Test server returned an invalid response.';
+					}
+
+					const errorResult = {
+						timestamp: new Date().toISOString(),
+						success: false,
+						error: errorMessage,
+						isConnectionError: isConnectionError,
+					};
+
+					set({ testResults: [errorResult], isTestRunning: false });
+					throw error;
+				}
+			},
+			clearTestResults: () => set({ testResults: [] }),
+			setMarkers: (markers) => set({ markers }),
+			setView: (view) => set({ currentView: view }),
+			setSelectedDiagramSchemaIndex: (index) => set({ selectedDiagramSchemaIndex: index }),
+			setSchemaInfo: (schemaUrl, schemaData) => set({ schemaUrl, schemaData }),
+			loadFromFile: async () => {
+				try {
+					const yamlContent = await storageBackend.loadYamlFile();
+					set({ yaml: yamlContent, baselineYaml: yamlContent, isDirty: false });
+					return yamlContent;
+				} catch (error) {
+					if (error.message !== 'File selection cancelled') {
+						throw error;
+					}
+				}
+			},
+			saveToFile: async (suggestedName = 'datacontract.yaml') => {
+				const { yaml } = get();
+
+				// Use custom onSave callback if provided
+				if (config.onSave) {
+					config.onSave(yaml);
+					set({ isDirty: false, baselineYaml: yaml });
+					return;
+				}
+
+				await storageBackend.saveYamlFile(yaml, suggestedName);
+				set({ isDirty: false, baselineYaml: yaml });
+			},
+		};
+
+		return {
+			yaml: config.yaml,
+			baselineYaml: config.yaml, // Set initial YAML as baseline for diff view
+			isDirty: false,
+			isPreviewVisible: true,
+			isWarningsVisible: false,
+			isTestResultsVisible: false,
+			isTestRunning: false,
+			testResults: [],
+			markers: [],
+			currentView: config.initialView,
+			schemaUrl: config.schemaUrl,
+			schemaData: null,
+			yamlCursorLine: 1,
+			lastSaveInfo: null,
+			notifications: [],
+			selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
+			// Store editor config for components to access
+			editorConfig: {
+				mode: config.mode,
+				onCancel: config.onCancel,
+				onDelete: config.onDelete,
+				showDelete: config.showDelete,
+				teams: config.teams,
+				domains: config.domains,
+				tests: config.tests,
+			},
+			...actions,
+		};
+	};
 
   if (config.enablePersistence) {
     return create()(
-      persist(defaultStoreConfig, {
-        name: 'datacontract-editor-store',
-        storage: createJSONStorage(() => localStorage),
-      })
-    );
+      persist(storeConfig, {
+				name: 'datacontract.yaml',
+				storage: createJSONStorage(() => localStorage),
+		}))
   } else {
-    return create()(defaultStoreConfig);
+    return create()(storeConfig);
   }
 }
 
