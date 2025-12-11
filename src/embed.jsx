@@ -262,6 +262,7 @@ function createConfiguredStore(config) {
 
 		return {
 			yaml: config.yaml,
+			yamlParts: Yaml.parse(config.yaml),
 			baselineYaml: config.yaml, // Set initial YAML as baseline for diff view
 			isDirty: false,
 			isPreviewVisible: true,
