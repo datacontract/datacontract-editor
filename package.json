@@ -22,7 +22,8 @@
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
     "start": "npm run build && node bin/datacontract-editor.js",
-		"start:debug": "npm run build:debug && node bin/datacontract-editor.js"
+    "start:debug": "npm run build:debug && node bin/datacontract-editor.js",
+    "test:playwright": "npm run build && (node bin/datacontract-editor.js --port 9091 > /dev/null 2>&1 & echo $! > .preview-server.pid) && sleep 5 && playwright test; TEST_EXIT=$?; kill $(cat .preview-server.pid) 2>/dev/null || true; rm -f .preview-server.pid; exit $TEST_EXIT"
   },
   "engines": {
     "node": ">=22"
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
