@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
@@ -7,6 +8,34 @@ import {useShallow} from "zustand/react/shallow";
 const ServiceLevelAgreement = () => {
 	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
+	const schema = useEditorStore(useShallow((state) => state.getValue('schema'))) || [];
+
+  // Generate schema.property suggestions from schema
+  const schemaPropertySuggestions = useMemo(() => {
+    const suggestions = [];
+
+    schema.forEach((schemaItem) => {
+      if (!schemaItem?.name) return;
+
+      // Add property-level suggestions (schema.property format)
+      if (schemaItem.properties && Array.isArray(schemaItem.properties)) {
+        schemaItem.properties.forEach((prop) => {
+          if (prop?.name) {
+            const fullPath = `${schemaItem.name}.${prop.name}`;
+            suggestions.push({
+              id: fullPath,
+              name: fullPath,
+              label: fullPath,
+              schemaName: schemaItem.name,
+              propertyName: prop.name
+            });
+          }
+        });
+      }
+    });
+
+    return suggestions;
+  }, [schema]);
 
   const driverOptions = [
     { id: 'regulatory', name: 'regulatory' },
@@ -141,20 +170,22 @@ const ServiceLevelAgreement = () => {
                           />
                         </div>
                         <div>
-                          <div className="flex items-center gap-1 mb-1">
-                            <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Element
-                            </label>
-                            <Tooltip content="Target schema component(s)">
-                              <QuestionMarkCircleIcon />
-                            </Tooltip>
-                          </div>
-                          <input
-                            type="text"
+                          <Combobox
+                            label={
+                              <div className="flex items-center gap-1">
+                                <span>Element</span>
+                                <Tooltip content="Target schema component(s)">
+                                  <QuestionMarkCircleIcon />
+                                </Tooltip>
+                              </div>
+                            }
+                            options={schemaPropertySuggestions}
                             value={sla?.element || ''}
-                            onChange={(e) => updateSLA(index, 'element', e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                            placeholder="table_name"
+                            onChange={(selectedValue) => updateSLA(index, 'element', selectedValue || '')}
+                            placeholder="schema.property"
+                            acceptAnyInput={true}
+                            filterKey="name"
+                            displayValue={(opt) => opt?.name || opt || ''}
                           />
                         </div>
                         <div>
