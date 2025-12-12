@@ -4,47 +4,38 @@ import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import {useShallow} from "zustand/react/shallow";
-import { parseYaml } from '../utils/yaml.js';
 
 const ServiceLevelAgreement = () => {
 	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
-	const yaml = useEditorStore((state) => state.yaml);
+	const schema = useEditorStore(useShallow((state) => state.getValue('schema'))) || [];
 
-  // Generate schema.property suggestions from YAML
+  // Generate schema.property suggestions from schema
   const schemaPropertySuggestions = useMemo(() => {
-    if (!yaml?.trim()) return [];
+    const suggestions = [];
 
-    try {
-      const parsed = parseYaml(yaml);
-      const schemas = parsed?.schema || [];
-      const suggestions = [];
+    schema.forEach((schemaItem) => {
+      if (!schemaItem?.name) return;
 
-      schemas.forEach((schema) => {
-        if (!schema?.name) return;
+      // Add property-level suggestions (schema.property format)
+      if (schemaItem.properties && Array.isArray(schemaItem.properties)) {
+        schemaItem.properties.forEach((prop) => {
+          if (prop?.name) {
+            const fullPath = `${schemaItem.name}.${prop.name}`;
+            suggestions.push({
+              id: fullPath,
+              name: fullPath,
+              label: fullPath,
+              schemaName: schemaItem.name,
+              propertyName: prop.name
+            });
+          }
+        });
+      }
+    });
 
-        // Add property-level suggestions (schema.property format)
-        if (schema.properties && Array.isArray(schema.properties)) {
-          schema.properties.forEach((prop) => {
-            if (prop?.name) {
-              const fullPath = `${schema.name}.${prop.name}`;
-              suggestions.push({
-                id: fullPath,
-                name: fullPath,
-                label: fullPath,
-                schemaName: schema.name,
-                propertyName: prop.name
-              });
-            }
-          });
-        }
-      });
-
-      return suggestions;
-    } catch {
-      return [];
-    }
-  }, [yaml]);
+    return suggestions;
+  }, [schema]);
 
   const driverOptions = [
     { id: 'regulatory', name: 'regulatory' },
