@@ -28,9 +28,34 @@ jobs:
       - run: npm run build
 
 
+  test:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-24.04
+    name: Test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright tests
+        run: npm run test:playwright
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test-results/
+          retention-days: 30
+
+
   build_and_deploy_job:
-    # Deploy only from main. Pull requests are built but never published to an
-    # Azure preview environment.
+    # Deploy only from main, and only after the end-to-end tests pass. Pull requests
+    # are built and tested but never published to an Azure preview environment.
+    needs: test
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     name: Build and Deploy Job
