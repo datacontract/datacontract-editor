@@ -15,22 +15,22 @@ Create a `customization.yaml` file in your project root or specify a path via th
 ```yaml
 # customization.yaml
 
-# Each scope can have customProperties and/or properties
+# Each scope can have standardProperties and/or customProperties
 fundamentals:
+  standardProperties: []
   customProperties: []
-  properties: []
 
 schema:
+  standardProperties: []
   customProperties: []
-  properties: []
 
 schema.properties:
+  standardProperties: []
   customProperties: []
-  properties: []
 
 servers:
+  standardProperties: []
   customProperties: []
-  properties: []
 ```
 
 ---
@@ -185,7 +185,7 @@ Modify the behavior of existing ODCS standard properties, or hide them entirely.
 
 ```yaml
 <scope>:
-  properties:
+  standardProperties:
     - property: "propertyName"      # Property name (relative to scope)
       label: "New Label"            # Override display label
       description: "New description" # Override help text
@@ -236,7 +236,7 @@ Hide entire sections:
 
 ```yaml
 fundamentals:
-  properties:
+  standardProperties:
     - property: "price"
       hidden: true
     - property: "slaProperties"
@@ -253,6 +253,34 @@ fundamentals:
 # customization.yaml
 
 fundamentals:
+  standardProperties:
+    - property: "status"
+      enum:
+        - value: "draft"
+          label: "Draft"
+        - value: "in-review"
+          label: "In Review"
+        - value: "approved"
+          label: "Approved"
+        - value: "deprecated"
+          label: "Deprecated"
+
+    - property: "domain"
+      required: true
+      enum:
+        - value: "customer"
+          label: "Customer"
+        - value: "product"
+          label: "Product"
+        - value: "finance"
+          label: "Finance"
+
+    - property: "tenant"
+      hidden: true
+
+    - property: "price"
+      hidden: true
+
   customProperties:
     - section: "governance"
       label: "Governance"
@@ -287,35 +315,17 @@ fundamentals:
             - value: "sox"
               label: "SOX"
 
-  properties:
-    - property: "status"
-      enum:
-        - value: "draft"
-          label: "Draft"
-        - value: "in-review"
-          label: "In Review"
-        - value: "approved"
-          label: "Approved"
-        - value: "deprecated"
-          label: "Deprecated"
-
-    - property: "domain"
-      required: true
-      enum:
-        - value: "customer"
-          label: "Customer"
-        - value: "product"
-          label: "Product"
-        - value: "finance"
-          label: "Finance"
-
-    - property: "tenant"
-      hidden: true
-
-    - property: "price"
-      hidden: true
-
 schema:
+  standardProperties:
+    - property: "physicalType"
+      enum:
+        - value: "table"
+          label: "Table"
+        - value: "view"
+          label: "View"
+        - value: "topic"
+          label: "Topic"
+
   customProperties:
     - section: "lifecycle"
       label: "Data Lifecycle"
@@ -337,17 +347,29 @@ schema:
             - value: "archive-glacier"
               label: "Move to Glacier"
 
-  properties:
-    - property: "physicalType"
-      enum:
-        - value: "table"
-          label: "Table"
-        - value: "view"
-          label: "View"
-        - value: "topic"
-          label: "Topic"
-
 schema.properties:
+  standardProperties:
+    - property: "classification"
+      required: true
+      enum:
+        - value: "public"
+          label: "Public"
+        - value: "internal"
+          label: "Internal"
+        - value: "confidential"
+          label: "Confidential"
+        - value: "pii"
+          label: "PII"
+
+    - property: "encryptedName"
+      hidden: true
+
+    - property: "transformLogic"
+      hidden: true
+
+    - property: "transformDescription"
+      hidden: true
+
   customProperties:
     - section: "privacy"
       label: "Privacy"
@@ -385,49 +407,8 @@ schema.properties:
           placeholder: "e.g., HASH, REDACT, PARTIAL"
           condition: "piiCategory != 'none'"
 
-  properties:
-    - property: "classification"
-      required: true
-      enum:
-        - value: "public"
-          label: "Public"
-        - value: "internal"
-          label: "Internal"
-        - value: "confidential"
-          label: "Confidential"
-        - value: "pii"
-          label: "PII"
-
-    - property: "encryptedName"
-      hidden: true
-
-    - property: "transformLogic"
-      hidden: true
-
-    - property: "transformDescription"
-      hidden: true
-
 servers:
-  customProperties:
-    - section: "infrastructure"
-      label: "Infrastructure"
-      properties:
-        - property: "costCenter"
-          label: "Cost Center"
-          type: "text"
-          pattern: "^CC-[0-9]{3,}$"
-          patternMessage: "Must be in format CC-XXX"
-
-        - property: "maintenanceWindow"
-          label: "Maintenance Window"
-          type: "select"
-          enum:
-            - value: "sun-02-06"
-              label: "Sunday 02:00-06:00 UTC"
-            - value: "sat-02-06"
-              label: "Saturday 02:00-06:00 UTC"
-
-  properties:
+  standardProperties:
     - property: "type"
       enum:
         - value: "snowflake"
@@ -447,6 +428,25 @@ servers:
           label: "Staging"
         - value: "prod"
           label: "Production"
+
+  customProperties:
+    - section: "infrastructure"
+      label: "Infrastructure"
+      properties:
+        - property: "costCenter"
+          label: "Cost Center"
+          type: "text"
+          pattern: "^CC-[0-9]{3,}$"
+          patternMessage: "Must be in format CC-XXX"
+
+        - property: "maintenanceWindow"
+          label: "Maintenance Window"
+          type: "select"
+          enum:
+            - value: "sun-02-06"
+              label: "Sunday 02:00-06:00 UTC"
+            - value: "sat-02-06"
+              label: "Saturday 02:00-06:00 UTC"
 
 team:
   customProperties:
@@ -500,6 +500,15 @@ const editor = init({
   selector: '#editor',
   customizations: {
     fundamentals: {
+      standardProperties: [
+        {
+          property: "status",
+          enum: [
+            { value: "draft", label: "Draft" },
+            { value: "active", label: "Active" }
+          ]
+        }
+      ],
       customProperties: [
         {
           section: "governance",
@@ -512,15 +521,6 @@ const editor = init({
               type: "email",
               required: true
             }
-          ]
-        }
-      ],
-      properties: [
-        {
-          property: "status",
-          enum: [
-            { value: "draft", label: "Draft" },
-            { value: "active", label: "Active" }
           ]
         }
       ]
