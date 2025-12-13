@@ -14,7 +14,6 @@ Create a `customization.yaml` file in your project root or specify a path via th
 
 ```yaml
 # customization.yaml
-version: "1.0"
 
 # Each scope can have customProperties and/or properties
 fundamentals:
@@ -161,29 +160,33 @@ enum:
 
 ### Conditional Display
 
-The `condition` field accepts expressions to conditionally show/hide properties:
+The `condition` field accepts expressions to conditionally show/hide properties.
+
+Properties can be referenced from any scope:
+
+- **Fundamentals properties**: Use the property name directly (e.g., `status`, `domain`, `dataOwner`)
+- **Other scopes**: Use scope prefix with dot notation (e.g., `schema.type`, `schema.properties.piiCategory`)
 
 ```yaml
 condition: "status == 'active'"
-condition: "piiCategory != 'non-pii'"
-condition: "dataOwner != null"
+condition: "domain == 'customer'"
 condition: "status == 'active' && domain != null"
-condition: "complianceFrameworks contains 'gdpr'"
-condition: "retentionDays > 30"
+condition: "tags contains 'gdpr'"
+condition: "tenant != null"
 ```
 
 ---
 
 ## 4. Customize Standard Properties
 
-Modify the behavior of existing ODCS standard properties, or hide them entirely. Paths are relative to the scope.
+Modify the behavior of existing ODCS standard properties, or hide them entirely. Property names are relative to the scope.
 
 ### Structure
 
 ```yaml
 <scope>:
   properties:
-    - path: "propertyName"          # Property path (relative to scope)
+    - property: "propertyName"      # Property name (relative to scope)
       label: "New Label"            # Override display label
       description: "New description" # Override help text
       placeholder: "New placeholder" # Override placeholder
@@ -195,7 +198,7 @@ Modify the behavior of existing ODCS standard properties, or hide them entirely.
       hidden: true                  # Hide from the editor
 ```
 
-### Available Paths by Scope
+### Available Properties by Scope
 
 #### fundamentals
 - `name`, `version`, `status`, `domain`, `tenant`, `tags`
@@ -234,11 +237,11 @@ Hide entire sections:
 ```yaml
 fundamentals:
   properties:
-    - path: "price"
+    - property: "price"
       hidden: true
-    - path: "slaProperties"
+    - property: "slaProperties"
       hidden: true
-    - path: "support"
+    - property: "support"
       hidden: true
 ```
 
@@ -248,7 +251,6 @@ fundamentals:
 
 ```yaml
 # customization.yaml
-version: "1.0"
 
 fundamentals:
   customProperties:
@@ -286,7 +288,7 @@ fundamentals:
               label: "SOX"
 
   properties:
-    - path: "status"
+    - property: "status"
       enum:
         - value: "draft"
           label: "Draft"
@@ -297,7 +299,7 @@ fundamentals:
         - value: "deprecated"
           label: "Deprecated"
 
-    - path: "domain"
+    - property: "domain"
       required: true
       enum:
         - value: "customer"
@@ -307,10 +309,10 @@ fundamentals:
         - value: "finance"
           label: "Finance"
 
-    - path: "tenant"
+    - property: "tenant"
       hidden: true
 
-    - path: "price"
+    - property: "price"
       hidden: true
 
 schema:
@@ -336,7 +338,7 @@ schema:
               label: "Move to Glacier"
 
   properties:
-    - path: "physicalType"
+    - property: "physicalType"
       enum:
         - value: "table"
           label: "Table"
@@ -384,7 +386,7 @@ schema.properties:
           condition: "piiCategory != 'none'"
 
   properties:
-    - path: "classification"
+    - property: "classification"
       required: true
       enum:
         - value: "public"
@@ -396,13 +398,13 @@ schema.properties:
         - value: "pii"
           label: "PII"
 
-    - path: "encryptedName"
+    - property: "encryptedName"
       hidden: true
 
-    - path: "transformLogic"
+    - property: "transformLogic"
       hidden: true
 
-    - path: "transformDescription"
+    - property: "transformDescription"
       hidden: true
 
 servers:
@@ -426,7 +428,7 @@ servers:
               label: "Saturday 02:00-06:00 UTC"
 
   properties:
-    - path: "type"
+    - property: "type"
       enum:
         - value: "snowflake"
           label: "Snowflake"
@@ -437,7 +439,7 @@ servers:
         - value: "s3"
           label: "AWS S3"
 
-    - path: "environment"
+    - property: "environment"
       enum:
         - value: "dev"
           label: "Development"
@@ -483,77 +485,7 @@ team.members:
 
 ---
 
-## 6. Output Format
 
-Custom properties are stored in ODCS-native `customProperties` at each level:
-
-```yaml
-# Generated data contract
-apiVersion: v3.1.0
-kind: DataContract
-name: customer_orders_v1
-
-# Root-level custom properties (from fundamentals scope)
-customProperties:
-  - property: "dataOwner"
-    value: "jane@company.com"
-  - property: "classification"
-    value: "confidential"
-  - property: "complianceFrameworks"
-    value:
-      - gdpr
-      - sox
-
-schema:
-  - name: "orders"
-    # Schema-level custom properties
-    customProperties:
-      - property: "retentionDays"
-        value: 90
-      - property: "archivePolicy"
-        value: "archive-cold"
-    properties:
-      - name: "customer_email"
-        logicalType: "string"
-        classification: "pii"
-        # Property-level custom properties
-        customProperties:
-          - property: "piiCategory"
-            value: "direct-identifier"
-          - property: "gdprLegalBasis"
-            value: "consent"
-          - property: "maskingRule"
-            value: "HASH"
-
-servers:
-  - server: "prod-snowflake"
-    type: "snowflake"
-    environment: "prod"
-    # Server-level custom properties
-    customProperties:
-      - property: "costCenter"
-        value: "CC-500"
-      - property: "maintenanceWindow"
-        value: "sun-02-06"
-
-team:
-  name: "Data Platform Team"
-  # Team-level custom properties
-  customProperties:
-    - property: "slackChannel"
-      value: "#data-platform"
-  members:
-    - username: "jane@company.com"
-      role: "owner"
-      # Member-level custom properties
-      customProperties:
-        - property: "department"
-          value: "Engineering"
-        - property: "location"
-          value: "us"
-```
-
----
 
 ## 7. Loading Customizations
 
@@ -567,7 +499,6 @@ import { init } from 'datacontract-editor';
 const editor = init({
   selector: '#editor',
   customizations: {
-    version: "1.0",
     fundamentals: {
       customProperties: [
         {
@@ -586,7 +517,7 @@ const editor = init({
       ],
       properties: [
         {
-          path: "status",
+          property: "status",
           enum: [
             { value: "draft", label: "Draft" },
             { value: "active", label: "Active" }
@@ -615,23 +546,6 @@ const editor = init({
     }
   }
 });
-```
-
-### From YAML File
-
-Load customizations from a YAML file URL:
-
-```javascript
-const editor = init({
-  selector: '#editor',
-  customizationsUrl: '/config/customizations.yaml'
-});
-```
-
-### Environment Variable (Server Mode)
-
-```bash
-export CUSTOMIZATIONS_CONFIG=/path/to/customizations.yaml
 ```
 
 ---
