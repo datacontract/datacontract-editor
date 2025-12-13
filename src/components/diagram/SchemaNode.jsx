@@ -479,6 +479,14 @@ const SchemaNode = ({ data, id }) => {
                         onClick={(e) => {
                           e.stopPropagation();
                           handleStartEditPropertyName(index, prop.name);
+                          // Also show property details sidebar
+                          const node = getNode(id);
+                          if (node) {
+                            const headerHeight = 40;
+                            const propertyRowHeight = 42;
+                            const propertyOffset = headerHeight + (index * propertyRowHeight);
+                            data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
+                          }
                         }}
                         title="Click to edit"
                       >
@@ -542,6 +550,14 @@ const SchemaNode = ({ data, id }) => {
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingPropertyType(index);
+                            // Also show property details sidebar
+                            const node = getNode(id);
+                            if (node) {
+                              const headerHeight = 40;
+                              const propertyRowHeight = 42;
+                              const propertyOffset = headerHeight + (index * propertyRowHeight);
+                              data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
+                            }
                           }}
                           title="Click to edit type"
                         >

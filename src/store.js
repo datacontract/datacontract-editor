@@ -345,6 +345,20 @@ const defaultEditorStore = create()(
 		persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: createJSONStorage(() => localStorage),
+			onRehydrateStorage: () => (state) => {
+				// Sync yamlParts from yaml when rehydrating from localStorage
+				if (state?.yaml) {
+					try {
+						const yamlParts = Yaml.parse(state.yaml);
+						// Use setState to update yamlParts after rehydration
+						setTimeout(() => {
+							defaultEditorStore.setState({ yamlParts });
+						}, 0);
+					} catch (e) {
+						console.warn('Failed to parse yaml during rehydration:', e);
+					}
+				}
+			},
 		}), {name: 'DataContract Editor Store'})
 )
 
