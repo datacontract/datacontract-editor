@@ -101,6 +101,10 @@ export function defaultStoreConfig(set, get) {
 		removeNotification: (id) => set((state) => ({
 			notifications: state.notifications.filter(n => n.id !== id)
 		})),
+		toggleMobileSidebar: () => set((state) => ({
+			isMobileSidebarOpen: !state.isMobileSidebarOpen,
+		})),
+		closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
 		togglePreview: () => set((state) => ({
 			isPreviewVisible: !state.isPreviewVisible,
 			isWarningsVisible: state.isPreviewVisible ? false : false, // Close warnings when opening preview
@@ -307,6 +311,7 @@ export function defaultStoreConfig(set, get) {
 		yamlParts: Yaml.parse(initialYaml),
 		baselineYaml: initialYaml, // YAML at last save/load for diff comparison
 		isDirty: false,
+		isMobileSidebarOpen: false,
 		isPreviewVisible: true,
 		isWarningsVisible: false,
 		isTestResultsVisible: false,
