@@ -63,11 +63,11 @@ Add custom properties at a specific scope. Custom properties are grouped into se
 <scope>:
   customProperties:
     - section: "section-id"        # UI grouping (display only)
-      label: "Section Label"       # Section heading in the editor
+      title: "Section Label"       # Section heading in the editor
       properties:
         - property: "propertyName"
-          label: "Property Label"
-          type: "text"
+          title: "Property Label"
+          type: "string"
 ```
 
 ### Section Positioning
@@ -78,14 +78,14 @@ Use `positionAfter` to control where custom sections appear relative to existing
 fundamentals:
   customProperties:
     - section: "governance"
-      label: "Governance"
+      title: "Governance"
       positionAfter: "overview"
       properties: [...]
 
 schema.properties:
   customProperties:
     - section: "privacy"
-      label: "Privacy"
+      title: "Privacy"
       positionAfter: "basics"    # Position within property detail drawer
       properties: [...]
 ```
@@ -114,7 +114,7 @@ If `positionAfter` is omitted, custom sections are added at the end.
 properties:
   - property: "technicalName"       # Technical name (stored in customProperties)
     label: "Display Label"          # Human-readable label
-    type: "text"                    # Field type (see Property Types)
+    type: "string"                    # Field type (see Property Types)
     placeholder: "Placeholder text" # Input placeholder
     description: "Help text"        # Description shown as tooltip
     required: true                  # Is field required?
@@ -122,8 +122,8 @@ properties:
     enum: []                        # Options for select/multiselect
     pattern: "^[a-z]+$"            # Regex validation pattern
     patternMessage: "Only lowercase" # Custom validation message
-    min: 0                          # Minimum (for number types)
-    max: 100                        # Maximum (for number types)
+    minimum: 0                      # Minimum (for number types)
+    maximum: 100                    # Maximum (for number types)
     minLength: 1                    # Minimum length (for text)
     maxLength: 255                  # Maximum length (for text)
     condition: "expression"         # Conditional display expression
@@ -131,20 +131,20 @@ properties:
 
 ### Property Types
 
-| Type | Description | Additional Options |
-|------|-------------|-------------------|
-| `text` | Single-line text input | `pattern`, `minLength`, `maxLength` |
-| `textarea` | Multi-line text input | `rows`, `minLength`, `maxLength` |
-| `number` | Numeric input | `min`, `max`, `step` |
-| `integer` | Integer input | `min`, `max` |
-| `select` | Single-select dropdown | `enum` (required) |
-| `multiselect` | Multi-select dropdown | `enum` (required) |
+| Type | Description | Additional Options                    |
+|------|-------------|---------------------------------------|
+| `text` | Single-line text input | `pattern`, `minLength`, `maxLength`   |
+| `textarea` | Multi-line text input | `rows`, `minLength`, `maxLength`      |
+| `number` | Numeric input | `minimum`, `maximum`, `step`          |
+| `integer` | Integer input | `minimum`, `maximum`                      |
+| `select` | Single-select dropdown | `enum` (required)                     |
+| `multiselect` | Multi-select dropdown | `enum` (required)                     |
 | `array` | Array of strings | `placeholder`, `minItems`, `maxItems` |
-| `boolean` | Toggle/checkbox | - |
-| `date` | Date picker | `min`, `max` |
-| `datetime` | Date and time picker | `min`, `max` |
-| `url` | URL input with validation | `pattern` |
-| `email` | Email input with validation | - |
+| `boolean` | Toggle/checkbox | -                                     |
+| `date` | Date picker | `minimum`, `maximum`                          |
+| `datetime` | Date and time picker | `minimum`, `maximum`                          |
+| `url` | URL input with validation | `pattern`                             |
+| `email` | Email input with validation | -                                     |
 
 ### Enum Definition
 
@@ -187,7 +187,7 @@ Modify the behavior of existing ODCS standard properties, or hide them entirely.
 <scope>:
   standardProperties:
     - property: "propertyName"      # Property name (relative to scope)
-      label: "New Label"            # Override display label
+      title: "New Label"            # Override display label
       description: "New description" # Override help text
       placeholder: "New placeholder" # Override placeholder
       required: true                # Make required
@@ -257,23 +257,23 @@ fundamentals:
     - property: "status"
       enum:
         - value: "draft"
-          label: "Draft"
+          title: "Draft"
         - value: "in-review"
-          label: "In Review"
+          title: "In Review"
         - value: "approved"
-          label: "Approved"
+          title: "Approved"
         - value: "deprecated"
-          label: "Deprecated"
+          title: "Deprecated"
 
     - property: "domain"
       required: true
       enum:
         - value: "customer"
-          label: "Customer"
+          title: "Customer"
         - value: "product"
-          label: "Product"
+          title: "Product"
         - value: "finance"
-          label: "Finance"
+          title: "Finance"
 
     - property: "tenant"
       hidden: true
@@ -283,69 +283,69 @@ fundamentals:
 
   customProperties:
     - section: "governance"
-      label: "Governance"
+      title: "Governance"
       positionAfter: "overview"
       properties:
         - property: "dataOwner"
-          label: "Data Owner"
+          title: "Data Owner"
           type: "email"
           required: true
           description: "Person accountable for this data asset"
 
         - property: "classification"
-          label: "Data Classification"
+          title: "Data Classification"
           type: "select"
           required: true
           enum:
             - value: "public"
-              label: "Public"
+              title: "Public"
             - value: "internal"
-              label: "Internal"
+              title: "Internal"
             - value: "confidential"
-              label: "Confidential"
+              title: "Confidential"
 
         - property: "complianceFrameworks"
-          label: "Compliance Frameworks"
+          title: "Compliance Frameworks"
           type: "multiselect"
           enum:
             - value: "gdpr"
-              label: "GDPR"
+              title: "GDPR"
             - value: "hipaa"
-              label: "HIPAA"
+              title: "HIPAA"
             - value: "sox"
-              label: "SOX"
+              title: "SOX"
 
 schema:
   standardProperties:
     - property: "physicalType"
       enum:
         - value: "table"
-          label: "Table"
+          title: "Table"
         - value: "view"
-          label: "View"
+          title: "View"
         - value: "topic"
-          label: "Topic"
+          title: "Topic"
 
   customProperties:
     - section: "lifecycle"
-      label: "Data Lifecycle"
+      title: "Data Lifecycle"
       properties:
         - property: "retentionDays"
-          label: "Retention Period (Days)"
+          title: "Retention Period (Days)"
           type: "integer"
-          min: 1
+          minimum: 1
           description: "Number of days to retain this data"
 
         - property: "archivePolicy"
-          label: "Archive Policy"
+          title: "Archive Policy"
           type: "select"
           enum:
             - value: "delete"
-              label: "Delete after retention"
+              title: "Delete after retention"
             - value: "archive-cold"
-              label: "Move to cold storage"
+              title: "Move to cold storage"
             - value: "archive-glacier"
-              label: "Move to Glacier"
+              title: "Move to Glacier"
 
 schema.properties:
   standardProperties:
@@ -353,13 +353,13 @@ schema.properties:
       required: true
       enum:
         - value: "public"
-          label: "Public"
+          title: "Public"
         - value: "internal"
-          label: "Internal"
+          title: "Internal"
         - value: "confidential"
-          label: "Confidential"
+          title: "Confidential"
         - value: "pii"
-          label: "PII"
+          title: "PII"
 
     - property: "encryptedName"
       hidden: true
@@ -372,38 +372,38 @@ schema.properties:
 
   customProperties:
     - section: "privacy"
-      label: "Privacy"
+      title: "Privacy"
       properties:
         - property: "piiCategory"
-          label: "PII Category"
+          title: "PII Category"
           type: "select"
           enum:
             - value: "none"
-              label: "None"
+              title: "None"
             - value: "direct-identifier"
-              label: "Direct Identifier"
+              title: "Direct Identifier"
             - value: "quasi-identifier"
-              label: "Quasi Identifier"
+              title: "Quasi Identifier"
             - value: "sensitive"
-              label: "Sensitive Data"
+              title: "Sensitive Data"
 
         - property: "gdprLegalBasis"
-          label: "GDPR Legal Basis"
+          title: "GDPR Legal Basis"
           type: "select"
           condition: "piiCategory != 'none'"
           enum:
             - value: "consent"
-              label: "Consent"
+              title: "Consent"
             - value: "contract"
-              label: "Contract"
+              title: "Contract"
             - value: "legal-obligation"
-              label: "Legal Obligation"
+              title: "Legal Obligation"
             - value: "legitimate-interest"
-              label: "Legitimate Interest"
+              title: "Legitimate Interest"
 
         - property: "maskingRule"
-          label: "Masking Rule"
-          type: "text"
+          title: "Masking Rule"
+          type: "string"
           placeholder: "e.g., HASH, REDACT, PARTIAL"
           condition: "piiCategory != 'none'"
 
@@ -412,75 +412,75 @@ servers:
     - property: "type"
       enum:
         - value: "snowflake"
-          label: "Snowflake"
+          title: "Snowflake"
         - value: "bigquery"
-          label: "BigQuery"
+          title: "BigQuery"
         - value: "postgresql"
-          label: "PostgreSQL"
+          title: "PostgreSQL"
         - value: "s3"
-          label: "AWS S3"
+          title: "AWS S3"
 
     - property: "environment"
       enum:
         - value: "dev"
-          label: "Development"
+          title: "Development"
         - value: "staging"
-          label: "Staging"
+          title: "Staging"
         - value: "prod"
-          label: "Production"
+          title: "Production"
 
   customProperties:
     - section: "infrastructure"
-      label: "Infrastructure"
+      title: "Infrastructure"
       properties:
         - property: "costCenter"
-          label: "Cost Center"
-          type: "text"
+          title: "Cost Center"
+          type: "string"
           pattern: "^CC-[0-9]{3,}$"
           patternMessage: "Must be in format CC-XXX"
 
         - property: "maintenanceWindow"
-          label: "Maintenance Window"
+          title: "Maintenance Window"
           type: "select"
           enum:
             - value: "sun-02-06"
-              label: "Sunday 02:00-06:00 UTC"
+              title: "Sunday 02:00-06:00 UTC"
             - value: "sat-02-06"
-              label: "Saturday 02:00-06:00 UTC"
+              title: "Saturday 02:00-06:00 UTC"
 
 team:
   customProperties:
     - section: "team-meta"
-      label: "Team Metadata"
+      title: "Team Metadata"
       properties:
         - property: "slackChannel"
-          label: "Slack Channel"
-          type: "text"
+          title: "Slack Channel"
+          type: "string"
           placeholder: "#data-team"
 
         - property: "onCallRotation"
-          label: "On-Call Rotation URL"
+          title: "On-Call Rotation URL"
           type: "url"
 
 team.members:
   customProperties:
     - section: "member-details"
-      label: "Member Details"
+      title: "Member Details"
       properties:
         - property: "department"
-          label: "Department"
-          type: "text"
+          title: "Department"
+          type: "string"
 
         - property: "location"
-          label: "Location"
+          title: "Location"
           type: "select"
           enum:
             - value: "us"
-              label: "United States"
+              title: "United States"
             - value: "eu"
-              label: "Europe"
+              title: "Europe"
             - value: "apac"
-              label: "Asia Pacific"
+              title: "Asia Pacific"
 ```
 
 ---
@@ -512,12 +512,12 @@ const editor = init({
       customProperties: [
         {
           section: "governance",
-          label: "Governance",
+          title: "Governance",
           positionAfter: "overview",
           properties: [
             {
               property: "dataOwner",
-              label: "Data Owner",
+              title: "Data Owner",
               type: "email",
               required: true
             }
@@ -529,11 +529,11 @@ const editor = init({
       customProperties: [
         {
           section: "privacy",
-          label: "Privacy",
+          title: "Privacy",
           properties: [
             {
               property: "piiCategory",
-              label: "PII Category",
+              title: "PII Category",
               type: "select",
               enum: [
                 { value: "none", label: "None" },
