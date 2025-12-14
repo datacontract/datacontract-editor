@@ -1,42 +1,8 @@
 import { memo, useState, useEffect, useRef, Fragment } from 'react';
 import { Handle, Position, NodeToolbar, useReactFlow } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
-import StringIcon from '../ui/icons/StringIcon.jsx';
-import NumberIcon from '../ui/icons/NumberIcon.jsx';
-import IntegerIcon from '../ui/icons/IntegerIcon.jsx';
-import DateIcon from '../ui/icons/DateIcon.jsx';
-import TimeIcon from '../ui/icons/TimeIcon.jsx';
-import TimestampIcon from '../ui/icons/TimestampIcon.jsx';
-import ObjectIcon from '../ui/icons/ObjectIcon.jsx';
-import ArrayIcon from '../ui/icons/ArrayIcon.jsx';
-import BooleanIcon from '../ui/icons/BooleanIcon.jsx';
-
-const getLogicalTypeIcon = (logicalType) => {
-  const iconMap = {
-    'string': StringIcon,
-    'number': NumberIcon,
-    'integer': IntegerIcon,
-    'date': DateIcon,
-    'time': TimeIcon,
-    'timestamp': TimestampIcon,
-    'object': ObjectIcon,
-    'array': ArrayIcon,
-    'boolean': BooleanIcon
-  };
-  return iconMap[logicalType] || null;
-};
-
-const logicalTypeOptions = [
-  'string',
-  'date',
-  'timestamp',
-  'time',
-  'number',
-  'integer',
-  'object',
-  'array',
-  'boolean'
-];
+import { TypeSelector } from '../ui/TypeSelector';
+import { getLogicalTypeIcon } from '../features/schema/propertyIcons';
 
 const SchemaNode = ({ data, id }) => {
   const { getNode } = useReactFlow();
@@ -44,8 +10,7 @@ const SchemaNode = ({ data, id }) => {
   const [editedSchemaName, setEditedSchemaName] = useState('');
   const [editingPropertyIndex, setEditingPropertyIndex] = useState(null);
   const [editedPropertyName, setEditedPropertyName] = useState('');
-  const [editingPropertyType, setEditingPropertyType] = useState(null);
-  const [editingNestedProperty, setEditingNestedProperty] = useState(null); // { parentIndex, nestedIndex, field: 'name' | 'type' }
+  const [editingNestedProperty, setEditingNestedProperty] = useState(null); // { parentIndex, nestedIndex, field: 'name' }
   const [editedNestedValue, setEditedNestedValue] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
@@ -492,78 +457,39 @@ const SchemaNode = ({ data, id }) => {
                       >
                         {!prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'unnamed property' : prop.name}
                       </span>
-                      {/* Always render button like Handles - just change opacity based on type */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (prop.logicalType === 'object') {
+                      {/* Add nested property button - only shown for object types */}
+                      {prop.logicalType === 'object' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleAddNestedProperty(index);
-                          }
-                        }}
-                        className={`p-0.5 text-indigo-600 rounded transition-opacity flex-shrink-0 ${
-                          prop.logicalType === 'object'
-                            ? 'opacity-0 group-hover:opacity-100 hover:opacity-100 hover:bg-indigo-50'
-                            : 'invisible pointer-events-none'
-                        }`}
-                        title={prop.logicalType === 'object' ? "Add nested property" : ""}
-                        aria-hidden={prop.logicalType !== 'object'}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </button>
+                          }}
+                          className="p-0.5 text-indigo-600 rounded transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 hover:opacity-100 hover:bg-indigo-50"
+                          title="Add nested property"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Right side: Type with Key Icon */}
-                <div className="flex items-center gap-1.5 ml-2">
+                <div className="flex items-center gap-1.5 ml-2" onClick={(e) => e.stopPropagation()}>
                   {editingPropertyIndex !== index && (
-                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                    <div className="flex items-center gap-1">
                       {/* Key Icon for Primary Key */}
                       {prop.primaryKey && (
                         <KeyIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                       )}
-                      {editingPropertyType === index ? (
-                        <select
-                          value={prop.logicalType || ''}
-                          onChange={(e) => {
-                            const newValue = e.target.value || undefined;
-                            handleUpdateProperty(index, { logicalType: newValue });
-                            setEditingPropertyType(null);
-                          }}
-                          onBlur={() => setEditingPropertyType(null)}
-                          className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="">Select...</option>
-                          {logicalTypeOptions.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span
-                          className={`cursor-pointer hover:text-indigo-600 ${!prop.logicalType ? 'text-gray-400 italic' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingPropertyType(index);
-                            // Also show property details sidebar
-                            const node = getNode(id);
-                            if (node) {
-                              const headerHeight = 40;
-                              const propertyRowHeight = 42;
-                              const propertyOffset = headerHeight + (index * propertyRowHeight);
-                              data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
-                            }
-                          }}
-                          title="Click to edit type"
-                        >
-                          {prop.logicalType || 'Select...'}
-                        </span>
-                      )}
+                      <TypeSelector
+                        logicalType={prop.logicalType}
+                        onLogicalTypeChange={(value) => handleUpdateProperty(index, { logicalType: value || undefined })}
+                        physicalType={prop.physicalType}
+                        onPhysicalTypeChange={(value) => handleUpdateProperty(index, { physicalType: value || undefined })}
+                      />
                     </div>
                   )}
                 </div>
@@ -595,43 +521,17 @@ const SchemaNode = ({ data, id }) => {
                     </div>
 
                     {/* Right side: Items Type */}
-                    <div className="flex items-center gap-2 ml-2">
-                      {editingPropertyType === `${index}-items` ? (
-                        <select
-                          value={prop.items.logicalType || ''}
-                          onChange={(e) => {
-                            const newValue = e.target.value || undefined;
-                            handleUpdateProperty(index, {
-                              items: { ...prop.items, logicalType: newValue }
-                            });
-                            setEditingPropertyType(null);
-                          }}
-                          onBlur={() => setEditingPropertyType(null)}
-                          className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="">Select...</option>
-                          {logicalTypeOptions.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span
-                          className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
-                            !prop.items.logicalType ? 'italic text-gray-400' : ''
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingPropertyType(`${index}-items`);
-                          }}
-                          title="Click to edit item type"
-                        >
-                          {prop.items.logicalType || 'no type'}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 ml-2" onClick={(e) => e.stopPropagation()}>
+                      <TypeSelector
+                        logicalType={prop.items.logicalType}
+                        onLogicalTypeChange={(value) => handleUpdateProperty(index, {
+                          items: { ...prop.items, logicalType: value || undefined }
+                        })}
+                        physicalType={prop.items.physicalType}
+                        onPhysicalTypeChange={(value) => handleUpdateProperty(index, {
+                          items: { ...prop.items, physicalType: value || undefined }
+                        })}
+                      />
                     </div>
                   </div>
                 </div>
@@ -730,51 +630,31 @@ const SchemaNode = ({ data, id }) => {
                         </div>
 
                         {/* Right side: Type */}
-                        <div className="flex items-center gap-2 ml-2">
-                          {editingNestedProperty?.parentIndex === index &&
-                           editingNestedProperty?.nestedIndex === `items-${itemPropIndex}` &&
-                           editingNestedProperty?.field === 'logicalType' ? (
-                            <select
-                              value={editedNestedValue || ''}
-                              onChange={(e) => {
-                                setEditedNestedValue(e.target.value);
-                                const updatedItems = { ...prop.items };
-                                const updatedItemProperties = [...(updatedItems.properties || [])];
-                                updatedItemProperties[itemPropIndex] = {
-                                  ...updatedItemProperties[itemPropIndex],
-                                  logicalType: e.target.value || undefined
-                                };
-                                updatedItems.properties = updatedItemProperties;
-                                handleUpdateProperty(index, { items: updatedItems });
-                                setEditingNestedProperty(null);
-                              }}
-                              onBlur={() => setEditingNestedProperty(null)}
-                              className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                              autoFocus
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <option value="">Select...</option>
-                              {logicalTypeOptions.map((type) => (
-                                <option key={type} value={type}>
-                                  {type}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span
-                              className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
-                                !itemProp.logicalType ? 'italic text-gray-400' : ''
-                              }`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingNestedProperty({ parentIndex: index, nestedIndex: `items-${itemPropIndex}`, field: 'logicalType' });
-                                setEditedNestedValue(itemProp.logicalType || '');
-                              }}
-                              title="Click to edit type"
-                            >
-                              {itemProp.logicalType || 'no type'}
-                            </span>
-                          )}
+                        <div className="flex items-center gap-2 ml-2" onClick={(e) => e.stopPropagation()}>
+                          <TypeSelector
+                            logicalType={itemProp.logicalType}
+                            onLogicalTypeChange={(value) => {
+                              const updatedItems = { ...prop.items };
+                              const updatedItemProperties = [...(updatedItems.properties || [])];
+                              updatedItemProperties[itemPropIndex] = {
+                                ...updatedItemProperties[itemPropIndex],
+                                logicalType: value || undefined
+                              };
+                              updatedItems.properties = updatedItemProperties;
+                              handleUpdateProperty(index, { items: updatedItems });
+                            }}
+                            physicalType={itemProp.physicalType}
+                            onPhysicalTypeChange={(value) => {
+                              const updatedItems = { ...prop.items };
+                              const updatedItemProperties = [...(updatedItems.properties || [])];
+                              updatedItemProperties[itemPropIndex] = {
+                                ...updatedItemProperties[itemPropIndex],
+                                physicalType: value || undefined
+                              };
+                              updatedItems.properties = updatedItemProperties;
+                              handleUpdateProperty(index, { items: updatedItems });
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -807,46 +687,23 @@ const SchemaNode = ({ data, id }) => {
                       </div>
 
                       {/* Right side: Nested Items Type */}
-                      <div className="flex items-center gap-2 ml-2">
-                        {editingPropertyType === `${index}-items-items` ? (
-                          <select
-                            value={prop.items.items.logicalType || ''}
-                            onChange={(e) => {
-                              const newValue = e.target.value || undefined;
-                              handleUpdateProperty(index, {
-                                items: {
-                                  ...prop.items,
-                                  items: { ...prop.items.items, logicalType: newValue }
-                                }
-                              });
-                              setEditingPropertyType(null);
-                            }}
-                            onBlur={() => setEditingPropertyType(null)}
-                            className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                            autoFocus
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <option value="">Select...</option>
-                            {logicalTypeOptions.map((type) => (
-                              <option key={type} value={type}>
-                                {type}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span
-                            className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
-                              !prop.items.items.logicalType ? 'italic text-gray-400' : ''
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingPropertyType(`${index}-items-items`);
-                            }}
-                            title="Click to edit nested item type"
-                          >
-                            {prop.items.items.logicalType || 'no type'}
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2 ml-2" onClick={(e) => e.stopPropagation()}>
+                        <TypeSelector
+                          logicalType={prop.items.items.logicalType}
+                          onLogicalTypeChange={(value) => handleUpdateProperty(index, {
+                            items: {
+                              ...prop.items,
+                              items: { ...prop.items.items, logicalType: value || undefined }
+                            }
+                          })}
+                          physicalType={prop.items.items.physicalType}
+                          onPhysicalTypeChange={(value) => handleUpdateProperty(index, {
+                            items: {
+                              ...prop.items,
+                              items: { ...prop.items.items, physicalType: value || undefined }
+                            }
+                          })}
+                        />
                       </div>
                     </div>
                   </div>
@@ -924,42 +781,13 @@ const SchemaNode = ({ data, id }) => {
                     </div>
 
                     {/* Right side: Type */}
-                    <div className="flex items-center gap-2 ml-2">
-                      {editingNestedProperty?.parentIndex === index &&
-                       editingNestedProperty?.nestedIndex === nestedIndex &&
-                       editingNestedProperty?.field === 'logicalType' ? (
-                        <select
-                          value={editedNestedValue || ''}
-                          onChange={(e) => {
-                            setEditedNestedValue(e.target.value);
-                            handleSaveNestedProperty(index, nestedIndex, 'logicalType');
-                          }}
-                          onBlur={() => setEditingNestedProperty(null)}
-                          className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <option value="">Select...</option>
-                          {logicalTypeOptions.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span
-                          className={`text-gray-500 cursor-pointer hover:text-blue-600 ${
-                            !nestedProp.logicalType ? 'italic text-gray-400' : ''
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartEditNestedProperty(index, nestedIndex, 'logicalType', nestedProp.logicalType);
-                          }}
-                          title="Click to edit type"
-                        >
-                          {nestedProp.logicalType || 'no type'}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 ml-2" onClick={(e) => e.stopPropagation()}>
+                      <TypeSelector
+                        logicalType={nestedProp.logicalType}
+                        onLogicalTypeChange={(value) => handleUpdateNestedProperty(index, nestedIndex, { logicalType: value || undefined })}
+                        physicalType={nestedProp.physicalType}
+                        onPhysicalTypeChange={(value) => handleUpdateNestedProperty(index, nestedIndex, { physicalType: value || undefined })}
+                      />
                     </div>
                   </div>
                 </div>

@@ -627,7 +627,12 @@ const DiagramViewInner = () => {
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
-        onPaneClick={() => {
+        onPaneClick={(event) => {
+          // Don't close drawer if click was inside a HeadlessUI portal (popover, listbox, combobox)
+          const target = event.target;
+          if (target.closest('[data-headlessui-portal]') || target.closest('[id^="headlessui-"]')) {
+            return;
+          }
           handleCloseDrawer();
         }}
         fitView

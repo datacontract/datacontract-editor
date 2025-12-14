@@ -1,11 +1,10 @@
-import {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {useEditorStore} from '../../../store.js';
+import {memo, useEffect, useRef, useState} from 'react';
 import {Tooltip} from '../../ui/index.js';
-import {getSchemaEnumValues} from '../../../lib/schemaEnumExtractor.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
 import PropertyIndicators from './PropertyIndicators.jsx';
 import ItemsRow from './ItemsRow.jsx';
-import {getLogicalTypeIcon, fallbackLogicalTypeOptions} from './propertyIcons.js';
+import {getLogicalTypeIcon} from './propertyIcons.js';
+import {TypeSelector} from '../../ui/TypeSelector';
 
 /**
  * Recursive component to render a property and its sub-properties
@@ -32,8 +31,6 @@ const PropertyRow = ({
                      }) => {
     const [editingPropertyName, setEditingPropertyName] = useState(false);
     const [editedPropertyName, setEditedPropertyName] = useState('');
-    const [editingPropertyType, setEditingPropertyType] = useState(false);
-    const jsonSchema = useEditorStore((state) => state.schemaData);
     const inputRef = useRef(null);
 
     // Auto-edit when this is a newly added property
@@ -55,12 +52,6 @@ const PropertyRow = ({
             inputRef.current.select();
         }
     }, [editingPropertyName]);
-
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
 
     const currentPath = [...propPath, propIndex];
     const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
@@ -153,51 +144,14 @@ const PropertyRow = ({
                             </span>
                         )}
 
-                        {/* Property Type - inline select like diagram editor */}
-                        <div className="text-xs text-gray-600 flex items-center flex-shrink-0">
-                            {editingPropertyType ? (
-                                <select
-                                    value={property.logicalType || ''}
-                                    onChange={(e) => {
-                                        updateProperty(schemaIdx, currentPath, 'logicalType', e.target.value || undefined);
-                                        setEditingPropertyType(false);
-                                    }}
-                                    onBlur={() => setEditingPropertyType(false)}
-                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="">Select...</option>
-                                    {logicalTypeOptions.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap min-w-24"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSelectProperty(currentPath, property);
-                                        setEditingPropertyType(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onSelectProperty(currentPath, property);
-                                            setEditingPropertyType(true);
-                                        }
-                                    }}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label="Edit logical type"
-                                    title="Click or press Enter to edit type"
-                                >
-                  {property.logicalType || <span className="text-gray-400 italic">logicalType</span>}
-                </span>
-                            )}
+                        {/* Property Type - TypeSelector for logical and physical types */}
+                        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <TypeSelector
+                                logicalType={property.logicalType}
+                                onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
+                                physicalType={property.physicalType}
+                                onPhysicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'physicalType', value || undefined)}
+                            />
                         </div>
 
                         {/* Visual Indicators */}
