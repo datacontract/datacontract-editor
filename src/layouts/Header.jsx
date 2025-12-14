@@ -151,7 +151,7 @@ description:
     const handleExample = () => {
         if (window.confirm('Load an example data contract? Any unsaved changes will be lost.')) {
             const store = useEditorStore.getState();
-            store.setYaml(exampleYaml);
+            store.loadYaml(exampleYaml);
             // Clear save info when loading example - it's a new unsaved document
             store.clearSaveInfo();
             navigate('/overview');

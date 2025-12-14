@@ -68,7 +68,14 @@ export function defaultStoreConfig(set, get) {
 				// NOOP
 			}
 		},
-		loadYaml: (newYaml) => set({yaml: newYaml, baselineYaml: newYaml, isDirty: false}),
+		loadYaml: (newYaml) => {
+			try {
+				const yamlParts = Yaml.parse(newYaml);
+				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts});
+			} catch(e) {
+				// NOOP
+			}
+		},
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
