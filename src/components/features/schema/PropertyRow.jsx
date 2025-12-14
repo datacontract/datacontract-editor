@@ -75,8 +75,8 @@ const PropertyRow = ({
                 onClick={handleSelect}
             >
                 {/* Main row with name, type, description */}
-                <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center justify-between px-2 pr-2 py-1.5">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                         {/* Logical Type Icon */}
                         {(() => {
                             const IconComponent = getLogicalTypeIcon(property.logicalType);
@@ -87,7 +87,7 @@ const PropertyRow = ({
                             );
                         })()}
 
-                        {/* Property Name */}
+                        {/* Property Name - fixed width for alignment */}
                         {editingPropertyName ? (
                             <input
                                 type="text"
@@ -122,14 +122,13 @@ const PropertyRow = ({
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                                 ref={inputRef}
-                                className="bg-white px-2 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[8rem]"
+                                className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-32"
                                 placeholder="property name"
-                                size={editedPropertyName ? editedPropertyName.length : 16}
                                 autoFocus
                             />
                         ) : (
                             <span
-                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
+                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
                                     !property.name || property?.name?.toString().trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
                                 }`}
                                 onClick={(e) => {
@@ -144,8 +143,8 @@ const PropertyRow = ({
                             </span>
                         )}
 
-                        {/* Property Type - TypeSelector for logical and physical types */}
-                        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        {/* Property Type - min width for alignment */}
+                        <div className="min-w-20 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                             <TypeSelector
                                 logicalType={property.logicalType}
                                 onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
@@ -154,12 +153,14 @@ const PropertyRow = ({
                             />
                         </div>
 
-                        {/* Visual Indicators */}
-                        <PropertyIndicators property={property}/>
+                        {/* Visual Indicators - fixed width for alignment */}
+                        <div className="w-14 flex-shrink-0">
+                            <PropertyIndicators property={property}/>
+                        </div>
 
                         {/* Description preview */}
                         {property.description && (
-                            <span className="text-xs text-gray-400 truncate max-w-xs" title={property.description}>
+                            <span className="text-xs text-gray-400 truncate flex-1" title={property.description}>
                                 {property.description}
                             </span>
                         )}

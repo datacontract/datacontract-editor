@@ -48,7 +48,7 @@ const TypeSelector = ({
             `}
           >
             {/* Display type value */}
-            <span className="truncate max-w-[120px]">
+            <span>
               {displayType}
             </span>
 
