@@ -100,7 +100,10 @@ function createConfiguredStore(config) {
 					// NOOP
 				}
 			},
-			loadYaml: (newYaml) => set({ yaml: newYaml, baselineYaml: newYaml, isDirty: false }),
+			loadYaml: (newYaml) => {
+				get().setYaml(newYaml);
+				set({ baselineYaml: newYaml, isDirty: false });
+			},
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
