@@ -14,27 +14,28 @@ The customization system allows organizations to:
 Create a `customization.yaml` file in your project root or specify a path via the `CUSTOMIZATION_CONFIG` environment variable.
 
 ```yaml
+# customization.yaml
 dataContract:
-	# Each section can have standardProperties, customProperties, and customSections
-	root:
-		standardProperties: []
-		customProperties: []
-		customSections: []
+  # Each section can have standardProperties, customProperties, and customSections
+  root:
+    standardProperties: []
+    customProperties: []
+    customSections: []
+
+  schema:
+    standardProperties: []
+    customProperties: []
+    customSections: []
+
+  schema.properties:
+    standardProperties: []
+    customProperties: []
+    customSections: []
 	
-	schema:
-		standardProperties: []
-		customProperties: []
-		customSections: []
-	
-	schema.properties:
-		standardProperties: []
-		customProperties: []
-		customSections: []
-	
-	servers:
-		standardProperties: []
-		customProperties: []
-		customSections: []
+  servers:
+    standardProperties: []
+    customProperties: []
+    customSections: []
 ```
 
 ---
