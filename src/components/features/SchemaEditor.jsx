@@ -15,9 +15,12 @@ import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import {useShallow} from "zustand/react/shallow";
 import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
+import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const SchemaEditor = ({schemaIndex}) => {
     const jsonSchema = useEditorStore((state) => state.schemaData);
+    const yamlParts = useEditorStore((state) => state.yamlParts);
     const {
         schema,
         getValue,
@@ -30,6 +33,75 @@ const SchemaEditor = ({schemaIndex}) => {
         addSubProperty
     } = useSchemaOperations(schemaIndex);
     const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
+
+    // Get customization config for schema level
+    const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema');
+
+    // Check hidden status for standard properties
+    const isNameHidden = useIsPropertyHidden('schema', 'name');
+    const isPhysicalTypeHidden = useIsPropertyHidden('schema', 'physicalType');
+    const isPhysicalNameHidden = useIsPropertyHidden('schema', 'physicalName');
+    const isDescriptionHidden = useIsPropertyHidden('schema', 'description');
+    const isBusinessNameHidden = useIsPropertyHidden('schema', 'businessName');
+    const isDataGranularityDescriptionHidden = useIsPropertyHidden('schema', 'dataGranularityDescription');
+    const isTagsHidden = useIsPropertyHidden('schema', 'tags');
+    const isLogicalTypeHidden = useIsPropertyHidden('schema', 'logicalType');
+
+    // Convert array format to object lookup for UI components
+    const customPropertiesLookup = useMemo(() => {
+        const cp = schema?.[schemaIndex]?.customProperties;
+        if (!Array.isArray(cp)) return cp || {};
+        return cp.reduce((acc, item) => {
+            if (item?.property !== undefined) {
+                acc[item.property] = item.value;
+            }
+            return acc;
+        }, {});
+    }, [schema, schemaIndex]);
+
+    // Build context for condition evaluation
+    const schemaContext = useMemo(() => {
+        const currentSchema = schema?.[schemaIndex] || {};
+        return {
+            name: currentSchema.name,
+            physicalType: currentSchema.physicalType,
+            physicalName: currentSchema.physicalName,
+            description: currentSchema.description,
+            businessName: currentSchema.businessName,
+            logicalType: currentSchema.logicalType,
+            dataGranularityDescription: currentSchema.dataGranularityDescription,
+            ...customPropertiesLookup,
+        };
+    }, [schema, schemaIndex, customPropertiesLookup]);
+
+    // Handle custom property changes - stores as array format per ODCS standard
+    const updateCustomProperty = useCallback((propName, value) => {
+        const currentSchema = schema?.[schemaIndex] || {};
+        // Convert object format to array format if needed
+        let currentArray;
+        const cp = currentSchema.customProperties;
+        if (Array.isArray(cp)) {
+            currentArray = cp;
+        } else if (cp && typeof cp === 'object') {
+            currentArray = Object.entries(cp).map(([k, v]) => ({ property: k, value: v }));
+        } else {
+            currentArray = [];
+        }
+
+        if (value === undefined) {
+            const updated = currentArray.filter(item => item.property !== propName);
+            setValue(`schema[${schemaIndex}].customProperties`, updated.length > 0 ? updated : undefined);
+        } else {
+            const existingIndex = currentArray.findIndex(item => item.property === propName);
+            if (existingIndex >= 0) {
+                const updated = [...currentArray];
+                updated[existingIndex] = { property: propName, value };
+                setValue(`schema[${schemaIndex}].customProperties`, updated);
+            } else {
+                setValue(`schema[${schemaIndex}].customProperties`, [...currentArray, { property: propName, value }]);
+            }
+        }
+    }, [schema, schemaIndex, setValue]);
 
     // Selected property state for drawer
     const [selectedProperty, setSelectedProperty] = useState(null);
@@ -327,39 +399,41 @@ const SchemaEditor = ({schemaIndex}) => {
                                     {/* Basic Metadata */}
                                     <div className="space-y-4">
                                         {/* Name Field */}
-																				{ /* TODO: Add onchange logic */ }
-                                        <ValidatedInput
-                                            name={`schema-name-${schemaIndex}`}
-                                            label="Name"
-                                            value={schema[schemaIndex].name || ''}
-                                            onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
-                                            required={true}
-                                            tooltip="Technical name for the schema (required)"
-                                            placeholder="schema_name"
-                                        />
+                                        {!isNameHidden && (
+                                            <ValidatedInput
+                                                name={`schema-name-${schemaIndex}`}
+                                                label="Name"
+                                                value={schema[schemaIndex].name || ''}
+                                                onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
+                                                required={true}
+                                                tooltip="Technical name for the schema (required)"
+                                                placeholder="schema_name"
+                                            />
+                                        )}
 
                                         {/* Description Field */}
-                                        <div>
-                                            <div className="flex items-center gap-1 mb-1">
-                                                <label htmlFor={`schema-description-${schemaIndex}`}
-                                                       className="block text-xs font-medium leading-4 text-gray-900">
-                                                    Description
-                                                </label>
-                                                <Tooltip content="Description of what this schema contains">
-                                                    <QuestionMarkCircleIcon />
-                                                </Tooltip>
+                                        {!isDescriptionHidden && (
+                                            <div>
+                                                <div className="flex items-center gap-1 mb-1">
+                                                    <label htmlFor={`schema-description-${schemaIndex}`}
+                                                           className="block text-xs font-medium leading-4 text-gray-900">
+                                                        Description
+                                                    </label>
+                                                    <Tooltip content="Description of what this schema contains">
+                                                        <QuestionMarkCircleIcon />
+                                                    </Tooltip>
+                                                </div>
+                                                <textarea
+                                                    id={`schema-description-${schemaIndex}`}
+                                                    name={`schema-description-${schemaIndex}`}
+                                                    rows={2}
+                                                    value={schema[schemaIndex].description || ''}
+                                                    onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
+                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                    placeholder="Describe the schema..."
+                                                />
                                             </div>
-																					{ /* TODO: Add onchange logic */ }
-                                            <textarea
-                                                id={`schema-description-${schemaIndex}`}
-                                                name={`schema-description-${schemaIndex}`}
-                                                rows={2}
-                                                value={schema[schemaIndex].description || ''}
-                                                onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
-                                                className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                placeholder="Describe the schema..."
-                                            />
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* Advanced Metadata Section */}
@@ -376,146 +450,152 @@ const SchemaEditor = ({schemaIndex}) => {
                                                     <DisclosurePanel className="px-3 pt-3 pb-2">
                                                         <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                                                             {/* Business Name Field */}
-                                                            <div>
-                                                                <div className="flex items-center gap-1 mb-1">
-                                                                    <label htmlFor={`schema-business-name-${schemaIndex}`}
-                                                                           className="block text-xs font-medium leading-4 text-gray-900">
-                                                                        Business Name
-                                                                    </label>
-                                                                    <Tooltip content="Human-friendly name for the schema">
-                                                                        <QuestionMarkCircleIcon />
-                                                                    </Tooltip>
-                                                                </div>
-                                                                <input
-                                                                    type="text"
-                                                                    name={`schema-business-name-${schemaIndex}`}
-                                                                    id={`schema-business-name-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].businessName || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
-                                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                                    placeholder="Human readable name"
-                                                                />
-                                                            </div>
-
-                                                            {/* Physical Type Field */}
-                                                            <div>
-                                                                <div className="flex items-center gap-1 mb-1">
-                                                                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                                                                        Physical Type
-                                                                    </label>
-                                                                    <Tooltip content="Physical type of the schema (table, view, etc.)">
-                                                                        <QuestionMarkCircleIcon />
-                                                                    </Tooltip>
-                                                                </div>
-                                                                <div className="mt-1 grid grid-cols-1">
+                                                            {!isBusinessNameHidden && (
+                                                                <div>
+                                                                    <div className="flex items-center gap-1 mb-1">
+                                                                        <label htmlFor={`schema-business-name-${schemaIndex}`}
+                                                                               className="block text-xs font-medium leading-4 text-gray-900">
+                                                                            Business Name
+                                                                        </label>
+                                                                        <Tooltip content="Human-friendly name for the schema">
+                                                                            <QuestionMarkCircleIcon />
+                                                                        </Tooltip>
+                                                                    </div>
                                                                     <input
                                                                         type="text"
-                                                                        value={(() => {
-                                                                            const currentType = schema[schemaIndex].physicalType || 'table';
-                                                                            const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
-                                                                            return matchedOption ? matchedOption.name : currentType;
-                                                                        })()}
-                                                                        onChange={(e) => {
-                                                                            const inputValue = e.target.value;
-                                                                            const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
-                                                                            const typeValue = matchedOption ? matchedOption.id : inputValue;
-																																						// TODO: implement update
-                                                                            setValue(`schema[${schemaIndex}].physicalType`, typeValue);
-                                                                        }}
-                                                                        className="col-start-1 row-start-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                                        placeholder="table"
-                                                                        list={`schema-type-options-${schemaIndex}`}
+                                                                        name={`schema-business-name-${schemaIndex}`}
+                                                                        id={`schema-business-name-${schemaIndex}`}
+                                                                        value={schema[schemaIndex].businessName || ''}
+                                                                        onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
+                                                                        className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                                        placeholder="Human readable name"
                                                                     />
-                                                                    <datalist id={`schema-type-options-${schemaIndex}`}>
-                                                                        {schemaTypeOptions.map((option) => (
-                                                                            <option key={option.id} value={option.name}/>
-                                                                        ))}
-                                                                    </datalist>
                                                                 </div>
-                                                            </div>
+                                                            )}
+
+                                                            {/* Physical Type Field */}
+                                                            {!isPhysicalTypeHidden && (
+                                                                <div>
+                                                                    <div className="flex items-center gap-1 mb-1">
+                                                                        <label className="block text-xs font-medium leading-4 text-gray-900">
+                                                                            Physical Type
+                                                                        </label>
+                                                                        <Tooltip content="Physical type of the schema (table, view, etc.)">
+                                                                            <QuestionMarkCircleIcon />
+                                                                        </Tooltip>
+                                                                    </div>
+                                                                    <div className="mt-1 grid grid-cols-1">
+                                                                        <input
+                                                                            type="text"
+                                                                            value={(() => {
+                                                                                const currentType = schema[schemaIndex].physicalType || 'table';
+                                                                                const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
+                                                                                return matchedOption ? matchedOption.name : currentType;
+                                                                            })()}
+                                                                            onChange={(e) => {
+                                                                                const inputValue = e.target.value;
+                                                                                const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
+                                                                                const typeValue = matchedOption ? matchedOption.id : inputValue;
+                                                                                setValue(`schema[${schemaIndex}].physicalType`, typeValue);
+                                                                            }}
+                                                                            className="col-start-1 row-start-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                                            placeholder="table"
+                                                                            list={`schema-type-options-${schemaIndex}`}
+                                                                        />
+                                                                        <datalist id={`schema-type-options-${schemaIndex}`}>
+                                                                            {schemaTypeOptions.map((option) => (
+                                                                                <option key={option.id} value={option.name}/>
+                                                                            ))}
+                                                                        </datalist>
+                                                                    </div>
+                                                                </div>
+                                                            )}
 
                                                             {/* Physical Name Field */}
-                                                            <div>
-                                                                <div className="flex items-center gap-1 mb-1">
-                                                                    <label htmlFor={`schema-physical-name-${schemaIndex}`}
-                                                                           className="block text-xs font-medium leading-4 text-gray-900">
-                                                                        Physical Name
-                                                                    </label>
-                                                                    <Tooltip content="Physical name in the database/storage">
-                                                                        <QuestionMarkCircleIcon />
-                                                                    </Tooltip>
+                                                            {!isPhysicalNameHidden && (
+                                                                <div>
+                                                                    <div className="flex items-center gap-1 mb-1">
+                                                                        <label htmlFor={`schema-physical-name-${schemaIndex}`}
+                                                                               className="block text-xs font-medium leading-4 text-gray-900">
+                                                                            Physical Name
+                                                                        </label>
+                                                                        <Tooltip content="Physical name in the database/storage">
+                                                                            <QuestionMarkCircleIcon />
+                                                                        </Tooltip>
+                                                                    </div>
+                                                                    <input
+                                                                        type="text"
+                                                                        name={`schema-physical-name-${schemaIndex}`}
+                                                                        id={`schema-physical-name-${schemaIndex}`}
+                                                                        value={schema[schemaIndex].physicalName || ''}
+                                                                        onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
+                                                                        className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                                        placeholder="shipments_v1"
+                                                                    />
                                                                 </div>
-                                                                <input
-                                                                    type="text"
-                                                                    name={`schema-physical-name-${schemaIndex}`}
-                                                                    id={`schema-physical-name-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].physicalName || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
-                                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                                    placeholder="shipments_v1"
-                                                                />
-                                                            </div>
+                                                            )}
 
                                                             {/* Logical Type Field */}
-                                                            <div>
-                                                                <div className="flex items-center gap-1 mb-1">
-                                                                    <label htmlFor={`schema-logical-type-${schemaIndex}`}
-                                                                           className="block text-xs font-medium leading-4 text-gray-900">
-                                                                        Logical Type
-                                                                    </label>
-                                                                    <Tooltip content="Logical type of the schema (object, array, etc.)">
-                                                                        <QuestionMarkCircleIcon />
-                                                                    </Tooltip>
+                                                            {!isLogicalTypeHidden && (
+                                                                <div>
+                                                                    <div className="flex items-center gap-1 mb-1">
+                                                                        <label htmlFor={`schema-logical-type-${schemaIndex}`}
+                                                                               className="block text-xs font-medium leading-4 text-gray-900">
+                                                                            Logical Type
+                                                                        </label>
+                                                                        <Tooltip content="Logical type of the schema (object, array, etc.)">
+                                                                            <QuestionMarkCircleIcon />
+                                                                        </Tooltip>
+                                                                    </div>
+                                                                    <input
+                                                                        type="text"
+                                                                        name={`schema-logical-type-${schemaIndex}`}
+                                                                        id={`schema-logical-type-${schemaIndex}`}
+                                                                        value={schema[schemaIndex].logicalType || ''}
+                                                                        onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
+                                                                        className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                                        placeholder="object"
+                                                                    />
                                                                 </div>
-                                                                <input
-                                                                    type="text"
-                                                                    name={`schema-logical-type-${schemaIndex}`}
-                                                                    id={`schema-logical-type-${schemaIndex}`}
-                                                                    value={schema[schemaIndex].logicalType || ''}
-																																		// TODO: implement update
-                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
-                                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                                    placeholder="object"
-                                                                />
-                                                            </div>
+                                                            )}
                                                         </div>
 
                                                         {/* Data Granularity Description Field */}
-                                                        <div className="mt-4">
-                                                            <div className="flex items-center gap-1 mb-1">
-                                                                <label htmlFor={`schema-data-granularity-${schemaIndex}`}
-                                                                       className="block text-xs font-medium leading-4 text-gray-900">
-                                                                    Data Granularity Description
-                                                                </label>
-                                                                <Tooltip content="Describe the level of detail represented by one record">
-                                                                    <QuestionMarkCircleIcon />
-                                                                </Tooltip>
+                                                        {!isDataGranularityDescriptionHidden && (
+                                                            <div className="mt-4">
+                                                                <div className="flex items-center gap-1 mb-1">
+                                                                    <label htmlFor={`schema-data-granularity-${schemaIndex}`}
+                                                                           className="block text-xs font-medium leading-4 text-gray-900">
+                                                                        Data Granularity Description
+                                                                    </label>
+                                                                    <Tooltip content="Describe the level of detail represented by one record">
+                                                                        <QuestionMarkCircleIcon />
+                                                                    </Tooltip>
+                                                                </div>
+                                                                <textarea
+                                                                    id={`schema-data-granularity-${schemaIndex}`}
+                                                                    name={`schema-data-granularity-${schemaIndex}`}
+                                                                    rows={2}
+                                                                    value={schema[schemaIndex].dataGranularityDescription || ''}
+                                                                    onChange={(e) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, e.target.value)}
+                                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                                    placeholder="e.g., One record per customer per day"
+                                                                />
                                                             </div>
-                                                            <textarea
-                                                                id={`schema-data-granularity-${schemaIndex}`}
-                                                                name={`schema-data-granularity-${schemaIndex}`}
-                                                                rows={2}
-                                                                value={schema[schemaIndex].dataGranularityDescription || ''}
-																																// TODO: Implement update
-                                                                onChange={(e) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, e.target.value)}
-                                                                className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                                                                placeholder="e.g., One record per customer per day"
-                                                            />
-                                                        </div>
+                                                        )}
 
                                                         {/* Tags Field */}
-                                                        <div className="mt-4">
-                                                            <Tags
-                                                                label="Tags"
-                                                                value={schema[schemaIndex].tags || []}
-																																// TODO: Implement update
-                                                                onChange={(value) => setValue(`schema[${schemaIndex}].tags`, value)}
-                                                                tooltip="Tags for categorizing and organizing schemas"
-                                                                placeholder="Add a tag..."
-                                                            />
-                                                        </div>
+                                                        {!isTagsHidden && (
+                                                            <div className="mt-4">
+                                                                <Tags
+                                                                    label="Tags"
+                                                                    value={schema[schemaIndex].tags || []}
+                                                                    onChange={(value) => setValue(`schema[${schemaIndex}].tags`, value)}
+                                                                    tooltip="Tags for categorizing and organizing schemas"
+                                                                    placeholder="Add a tag..."
+                                                                />
+                                                            </div>
+                                                        )}
 
                                                         {/* Data Quality Section */}
                                                         <div className="mt-6">
@@ -549,12 +629,35 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             />
                                                         </div>
 
-                                                        {/* Custom Properties Section */}
+                                                        {/* Custom Sections from Customization */}
+                                                        <div className="mt-6">
+                                                            <CustomSections
+                                                                customSections={customSections}
+                                                                customProperties={customPropertyConfigs}
+                                                                values={customPropertiesLookup}
+                                                                onPropertyChange={updateCustomProperty}
+                                                                context={schemaContext}
+                                                                yamlParts={yamlParts}
+                                                            />
+                                                        </div>
+
+                                                        {/* Ungrouped Custom Properties */}
+                                                        <div className="mt-4">
+                                                            <UngroupedCustomProperties
+                                                                customProperties={customPropertyConfigs}
+                                                                customSections={customSections}
+                                                                values={customPropertiesLookup}
+                                                                onPropertyChange={updateCustomProperty}
+                                                                context={schemaContext}
+                                                                yamlParts={yamlParts}
+                                                            />
+                                                        </div>
+
+                                                        {/* Custom Properties Section (raw key-value editor) */}
                                                         <div className="mt-6">
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Custom Properties</h4>
                                                             <CustomPropertiesEditor
                                                                 value={schema[schemaIndex].customProperties}
-																																// TODO: Implement update
                                                                 onChange={(value) => setValue(`schema[${schemaIndex}].customProperties`, value)}
                                                                 showDescription={true}
                                                             />

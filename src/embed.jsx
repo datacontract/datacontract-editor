@@ -81,6 +81,10 @@ const DEFAULT_CONFIG = {
 
   // Base path for assets (workers, etc.) - auto-detected if not provided
   basePath: null,
+
+  // Customizations configuration
+  // See CUSTOMIZATION.md for full documentation
+  customizations: null,
 };
 
 /**
@@ -291,6 +295,7 @@ function createConfiguredStore(config) {
 				teams: config.teams,
 				domains: config.domains,
 				tests: config.tests,
+				customizations: config.customizations,
 			},
 			...actions,
 		};

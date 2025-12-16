@@ -345,6 +345,7 @@ export function defaultStoreConfig(set, get) {
 				dataContractCliApiServerUrl: null, // null means use default https://api.datacontract.com
 				apiKey: null, // Optional X-API-KEY for authentication
 			},
+			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
 		...actions,
 	};
@@ -371,8 +372,9 @@ const defaultEditorStore = create()(
 					}
 				}
 			},
-		}), {name: 'DataContract Editor Store'})
-)
+		})
+	)
+);
 
 /**
  * Hook that returns either the override store (when embedded) or the default store

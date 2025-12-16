@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
@@ -11,9 +11,94 @@ import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
+import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
+  const yamlParts = useEditorStore((state) => state.yamlParts);
+
+  // Get customization config for schema.properties level
+  const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema.properties');
+
+  // Check hidden status for standard properties
+  const isNameHidden = useIsPropertyHidden('schema.properties', 'name');
+  const isBusinessNameHidden = useIsPropertyHidden('schema.properties', 'businessName');
+  const isPhysicalNameHidden = useIsPropertyHidden('schema.properties', 'physicalName');
+  const isLogicalTypeHidden = useIsPropertyHidden('schema.properties', 'logicalType');
+  const isPhysicalTypeHidden = useIsPropertyHidden('schema.properties', 'physicalType');
+  const isDescriptionHidden = useIsPropertyHidden('schema.properties', 'description');
+  const isExamplesHidden = useIsPropertyHidden('schema.properties', 'examples');
+  const isRequiredHidden = useIsPropertyHidden('schema.properties', 'required');
+  const isUniqueHidden = useIsPropertyHidden('schema.properties', 'unique');
+  const isPrimaryKeyHidden = useIsPropertyHidden('schema.properties', 'primaryKey');
+  const isPartitionedHidden = useIsPropertyHidden('schema.properties', 'partitioned');
+  const isClassificationHidden = useIsPropertyHidden('schema.properties', 'classification');
+  const isCriticalDataElementHidden = useIsPropertyHidden('schema.properties', 'criticalDataElement');
+  const isEncryptedNameHidden = useIsPropertyHidden('schema.properties', 'encryptedName');
+  const isTransformSourceObjectsHidden = useIsPropertyHidden('schema.properties', 'transformSourceObjects');
+  const isTransformLogicHidden = useIsPropertyHidden('schema.properties', 'transformLogic');
+  const isTransformDescriptionHidden = useIsPropertyHidden('schema.properties', 'transformDescription');
+
+  // Get overrides for standard properties
+  const classificationOverride = useStandardPropertyOverride('schema.properties', 'classification');
+
+  // Convert array format to object lookup for UI components
+  const customPropertiesLookup = useMemo(() => {
+    const cp = property.customProperties;
+    if (!Array.isArray(cp)) return cp || {};
+    return cp.reduce((acc, item) => {
+      if (item?.property !== undefined) {
+        acc[item.property] = item.value;
+      }
+      return acc;
+    }, {});
+  }, [property.customProperties]);
+
+  // Build context for condition evaluation (includes property values + custom properties)
+  const propertyContext = useMemo(() => ({
+    name: property.name,
+    businessName: property.businessName,
+    physicalName: property.physicalName,
+    logicalType: property.logicalType,
+    physicalType: property.physicalType,
+    description: property.description,
+    required: property.required,
+    unique: property.unique,
+    primaryKey: property.primaryKey,
+    partitioned: property.partitioned,
+    classification: property.classification,
+    criticalDataElement: property.criticalDataElement,
+    ...customPropertiesLookup,
+  }), [property, customPropertiesLookup]);
+
+  // Handle custom property changes - stores as array format per ODCS standard
+  const updateCustomProperty = useCallback((propName, value) => {
+    // Convert object format to array format if needed
+    let currentArray;
+    const cp = property.customProperties;
+    if (Array.isArray(cp)) {
+      currentArray = cp;
+    } else if (cp && typeof cp === 'object') {
+      currentArray = Object.entries(cp).map(([k, v]) => ({ property: k, value: v }));
+    } else {
+      currentArray = [];
+    }
+
+    if (value === undefined) {
+      const updated = currentArray.filter(item => item.property !== propName);
+      onUpdate('customProperties', updated.length > 0 ? updated : undefined);
+    } else {
+      const existingIndex = currentArray.findIndex(item => item.property === propName);
+      if (existingIndex >= 0) {
+        const updated = [...currentArray];
+        updated[existingIndex] = { property: propName, value };
+        onUpdate('customProperties', updated);
+      } else {
+        onUpdate('customProperties', [...currentArray, { property: propName, value }]);
+      }
+    }
+  }, [property.customProperties, onUpdate]);
 
   // Dynamically get enum values from schema
   const qualityDimensionOptions = useMemo(() => {
@@ -54,56 +139,64 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               {/* Property Name */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Property Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={property.name || ''}
-                  onChange={(e) => updateField('name', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="property_name"
-                />
-              </div>
+              {!isNameHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Property Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={property.name || ''}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="property_name"
+                  />
+                </div>
+              )}
 
               {/* Business Name */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Business Name</label>
-                <input
-                  type="text"
-                  value={property.businessName || ''}
-                  onChange={(e) => updateField('businessName', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="Human-readable name"
-                />
-              </div>
+              {!isBusinessNameHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Business Name</label>
+                  <input
+                    type="text"
+                    value={property.businessName || ''}
+                    onChange={(e) => updateField('businessName', e.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="Human-readable name"
+                  />
+                </div>
+              )}
 
               {/* Physical Name */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Physical Name</label>
-                <input
-                  type="text"
-                  value={property.physicalName || ''}
-                  onChange={(e) => updateField('physicalName', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="Actual database column name"
-                />
-              </div>
+              {!isPhysicalNameHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Physical Name</label>
+                  <input
+                    type="text"
+                    value={property.physicalName || ''}
+                    onChange={(e) => updateField('physicalName', e.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="Actual database column name"
+                  />
+                </div>
+              )}
 
               {/* Logical Type */}
-              <EnumField
-                propertyPath="logicalType"
-                context="property"
-                value={property.logicalType || ''}
-                onChange={(value) => updateField('logicalType', value || undefined)}
-                label="Logical Type"
-                placeholder="Select..."
-                fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
-              />
+              {!isLogicalTypeHidden && (
+                <EnumField
+                  propertyPath="logicalType"
+                  context="property"
+                  value={property.logicalType || ''}
+                  onChange={(value) => updateField('logicalType', value || undefined)}
+                  label="Logical Type"
+                  placeholder="Select..."
+                  fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
+                />
+              )}
 
               {/* Array Item Type - only shown when logical type is array */}
-              {property.logicalType === 'array' && (
+              {!isLogicalTypeHidden && property.logicalType === 'array' && (
                 <EnumField
                   propertyPath="logicalType"
                   context="property"
@@ -119,49 +212,55 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               )}
 
               {/* Physical Type */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Physical Type</label>
-                <input
-                  type="text"
-                  value={property.physicalType || ''}
-                  onChange={(e) => updateField('physicalType', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="e.g., VARCHAR(255)"
-                />
-              </div>
+              {!isPhysicalTypeHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Physical Type</label>
+                  <input
+                    type="text"
+                    value={property.physicalType || ''}
+                    onChange={(e) => updateField('physicalType', e.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="e.g., VARCHAR(255)"
+                  />
+                </div>
+              )}
 
               {/* Description */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={property.description || ''}
-                  onChange={(e) => updateField('description', e.target.value)}
-                  rows={3}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="Describe this property..."
-                />
-              </div>
+              {!isDescriptionHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    value={property.description || ''}
+                    onChange={(e) => updateField('description', e.target.value)}
+                    rows={3}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="Describe this property..."
+                  />
+                </div>
+              )}
 
               {/* Examples */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Examples</label>
-                <textarea
-                  value={property.examples?.join('\n') || ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '') {
-                      updateField('examples', undefined);
-                    } else {
-                      const examples = value.split('\n');
-                      updateField('examples', examples);
-                    }
-                  }}
-                  rows={3}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="example1&#10;example2&#10;example3"
-                />
-                <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
-              </div>
+              {!isExamplesHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Examples</label>
+                  <textarea
+                    value={property.examples?.join('\n') || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        updateField('examples', undefined);
+                      } else {
+                        const examples = value.split('\n');
+                        updateField('examples', examples);
+                      }
+                    }}
+                    rows={3}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="example1&#10;example2&#10;example3"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
+                </div>
+              )}
             </DisclosurePanel>
           </>
         )}
@@ -430,100 +529,108 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               <div className="grid grid-cols-2 gap-3">
                 {/* Required */}
-                <div>
-                  <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">Required</label>
-                  <div className="grid grid-cols-1">
-                    <select
-                      id="required"
-                      value={property.required === true ? 'true' : property.required === false ? 'false' : ''}
-                      onChange={(e) => {
-                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
-                        updateField('required', newValue);
-                      }}
-                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
-                    >
-                      <option value="">Not set</option>
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                    />
+                {!isRequiredHidden && (
+                  <div>
+                    <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">Required</label>
+                    <div className="grid grid-cols-1">
+                      <select
+                        id="required"
+                        value={property.required === true ? 'true' : property.required === false ? 'false' : ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                          updateField('required', newValue);
+                        }}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">Not set</option>
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Unique */}
-                <div>
-                  <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">Unique</label>
-                  <div className="grid grid-cols-1">
-                    <select
-                      id="unique"
-                      value={property.unique === true ? 'true' : property.unique === false ? 'false' : ''}
-                      onChange={(e) => {
-                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
-                        updateField('unique', newValue);
-                      }}
-                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
-                    >
-                      <option value="">Not set</option>
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                    />
+                {!isUniqueHidden && (
+                  <div>
+                    <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">Unique</label>
+                    <div className="grid grid-cols-1">
+                      <select
+                        id="unique"
+                        value={property.unique === true ? 'true' : property.unique === false ? 'false' : ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                          updateField('unique', newValue);
+                        }}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">Not set</option>
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Primary Key */}
-                <div>
-                  <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">Primary Key</label>
-                  <div className="grid grid-cols-1">
-                    <select
-                      id="primaryKey"
-                      value={property.primaryKey === true ? 'true' : property.primaryKey === false ? 'false' : ''}
-                      onChange={(e) => {
-                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
-                        updateField('primaryKey', newValue);
-                      }}
-                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
-                    >
-                      <option value="">Not set</option>
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                    />
+                {!isPrimaryKeyHidden && (
+                  <div>
+                    <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">Primary Key</label>
+                    <div className="grid grid-cols-1">
+                      <select
+                        id="primaryKey"
+                        value={property.primaryKey === true ? 'true' : property.primaryKey === false ? 'false' : ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                          updateField('primaryKey', newValue);
+                        }}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">Not set</option>
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Partitioned */}
-                <div>
-                  <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">Partitioned</label>
-                  <div className="grid grid-cols-1">
-                    <select
-                      id="partitioned"
-                      value={property.partitioned === true ? 'true' : property.partitioned === false ? 'false' : ''}
-                      onChange={(e) => {
-                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
-                        updateField('partitioned', newValue);
-                      }}
-                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
-                    >
-                      <option value="">Not set</option>
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                    />
+                {!isPartitionedHidden && (
+                  <div>
+                    <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">Partitioned</label>
+                    <div className="grid grid-cols-1">
+                      <select
+                        id="partitioned"
+                        value={property.partitioned === true ? 'true' : property.partitioned === false ? 'false' : ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                          updateField('partitioned', newValue);
+                        }}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">Not set</option>
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Primary Key Position - only shown when primaryKey is checked */}
@@ -582,52 +689,82 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               {/* Classification */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Classification</label>
-                <input
-                  type="text"
-                  value={property.classification || ''}
-                  onChange={(e) => updateField('classification', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="e.g., confidential, public, internal"
-                />
-              </div>
+              {!isClassificationHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    {classificationOverride?.title || 'Classification'}
+                    {classificationOverride?.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  {classificationOverride?.enum ? (
+                    <div className="grid grid-cols-1">
+                      <select
+                        value={property.classification || ''}
+                        onChange={(e) => updateField('classification', e.target.value || undefined)}
+                        className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                      >
+                        <option value="">{classificationOverride?.placeholder || 'Select...'}</option>
+                        {classificationOverride.enum.map((opt) => (
+                          <option key={typeof opt === 'string' ? opt : opt.value} value={typeof opt === 'string' ? opt : opt.value}>
+                            {typeof opt === 'string' ? opt : opt.title}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      value={property.classification || ''}
+                      onChange={(e) => updateField('classification', e.target.value || undefined)}
+                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                      placeholder={classificationOverride?.placeholder || "e.g., confidential, public, internal"}
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Critical Data Element */}
-              <div>
-                <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">Critical Data Element</label>
-                <div className="grid grid-cols-1">
-                  <select
-                    id="criticalDataElement"
-                    value={property.criticalDataElement === true ? 'true' : property.criticalDataElement === false ? 'false' : ''}
-                    onChange={(e) => {
-                      const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
-                      updateField('criticalDataElement', newValue);
-                    }}
-                    className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
-                  >
-                    <option value="">Not set</option>
-                    <option value="false">False</option>
-                    <option value="true">True</option>
-                  </select>
-                  <ChevronDownIcon
-                    aria-hidden="true"
-                    className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
-                  />
+              {!isCriticalDataElementHidden && (
+                <div>
+                  <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">Critical Data Element</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="criticalDataElement"
+                      value={property.criticalDataElement === true ? 'true' : property.criticalDataElement === false ? 'false' : ''}
+                      onChange={(e) => {
+                        const newValue = e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined;
+                        updateField('criticalDataElement', newValue);
+                      }}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+                    >
+                      <option value="">Not set</option>
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Encrypted Name */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Encrypted Name</label>
-                <input
-                  type="text"
-                  value={property.encryptedName || ''}
-                  onChange={(e) => updateField('encryptedName', e.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="Encrypted field reference"
-                />
-              </div>
+              {!isEncryptedNameHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Encrypted Name</label>
+                  <input
+                    type="text"
+                    value={property.encryptedName || ''}
+                    onChange={(e) => updateField('encryptedName', e.target.value || undefined)}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="Encrypted field reference"
+                  />
+                </div>
+              )}
 
               {/* Tags */}
               <div>
@@ -655,39 +792,45 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               {/* Transform Source Objects */}
-              <ArrayInput
-                label="Transform Source Objects"
-                value={property.transformSourceObjects}
-                onChange={(value) => updateField('transformSourceObjects', value)}
-                placeholder="source_table_name"
-                helpText="List of source tables/objects used in transformations"
-              />
+              {!isTransformSourceObjectsHidden && (
+                <ArrayInput
+                  label="Transform Source Objects"
+                  value={property.transformSourceObjects}
+                  onChange={(value) => updateField('transformSourceObjects', value)}
+                  placeholder="source_table_name"
+                  helpText="List of source tables/objects used in transformations"
+                />
+              )}
 
               {/* Transform Logic */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Transform Logic</label>
-                <textarea
-                  value={property.transformLogic || ''}
-                  onChange={(e) => updateField('transformLogic', e.target.value)}
-                  rows={4}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono"
-                  placeholder="SQL or transformation code..."
-                />
-                <p className="mt-1 text-xs text-gray-500">Technical transformation implementation (SQL, etc.)</p>
-              </div>
+              {!isTransformLogicHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Transform Logic</label>
+                  <textarea
+                    value={property.transformLogic || ''}
+                    onChange={(e) => updateField('transformLogic', e.target.value || undefined)}
+                    rows={4}
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono"
+                    placeholder="SQL or transformation code..."
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Technical transformation implementation (SQL, etc.)</p>
+                </div>
+              )}
 
               {/* Transform Description */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Transform Description</label>
-                <textarea
-                  value={property.transformDescription || ''}
-                  onChange={(e) => updateField('transformDescription', e.target.value)}
-                  rows={3}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="Business-friendly explanation of transformation..."
-                />
-                <p className="mt-1 text-xs text-gray-500">Non-technical description of how field is derived</p>
-              </div>
+              {!isTransformDescriptionHidden && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Transform Description</label>
+                  <textarea
+                    value={property.transformDescription || ''}
+                    onChange={(e) => updateField('transformDescription', e.target.value || undefined)}
+                    rows={3}
+                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                    placeholder="Business-friendly explanation of transformation..."
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Non-technical description of how field is derived</p>
+                </div>
+              )}
             </DisclosurePanel>
           </>
         )}
@@ -755,7 +898,27 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         )}
       </Disclosure>
 
-      {/* Custom Properties Section */}
+      {/* Custom Sections from Customization */}
+      <CustomSections
+        customSections={customSections}
+        customProperties={customPropertyConfigs}
+        values={customPropertiesLookup}
+        onPropertyChange={updateCustomProperty}
+        context={propertyContext}
+        yamlParts={yamlParts}
+      />
+
+      {/* Ungrouped Custom Properties */}
+      <UngroupedCustomProperties
+        customProperties={customPropertyConfigs}
+        customSections={customSections}
+        values={customPropertiesLookup}
+        onPropertyChange={updateCustomProperty}
+        context={propertyContext}
+        yamlParts={yamlParts}
+      />
+
+      {/* Custom Properties Section (raw key-value editor) */}
       <Disclosure>
         {({ open }) => (
           <>

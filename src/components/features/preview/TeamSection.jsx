@@ -21,7 +21,10 @@ const TeamMember = memo(({ teamMember }) => {
 			member.replacedByUsername ||
 			(member.tags && Array.isArray(member.tags) && member.tags.length > 0) ||
 			(member.authoritativeDefinitions && Array.isArray(member.authoritativeDefinitions) && member.authoritativeDefinitions.length > 0) ||
-			(member.customProperties && Array.isArray(member.customProperties) && member.customProperties.length > 0);
+			(member.customProperties && (
+				Array.isArray(member.customProperties) ? member.customProperties.length > 0 :
+				typeof member.customProperties === 'object' && Object.keys(member.customProperties).length > 0
+			));
 	};
 
 	const hasMemberData = hasTeamMemberData(teamMember);
@@ -66,17 +69,25 @@ const TeamMember = memo(({ teamMember }) => {
 					))}
 				</div>
 			)}
-			{((teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0) || (teamMember.customProperties && teamMember.customProperties.length > 0)) && (
-				<div className="flex flex-wrap gap-2 mt-2">
-					{teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0 && (
-						<AuthoritativeDefinitionsPreview
-							definitions={teamMember.authoritativeDefinitions}/>
-					)}
-					{teamMember.customProperties && teamMember.customProperties.length > 0 && (
-						<CustomPropertiesPreview properties={teamMember.customProperties}/>
-					)}
-				</div>
-			)}
+			{(() => {
+				const hasAuthDefs = teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0;
+				const hasCustomProps = teamMember.customProperties && (
+					Array.isArray(teamMember.customProperties) ? teamMember.customProperties.length > 0 :
+					typeof teamMember.customProperties === 'object' && Object.keys(teamMember.customProperties).length > 0
+				);
+				if (!hasAuthDefs && !hasCustomProps) return null;
+				return (
+					<div className="flex flex-wrap gap-2 mt-2">
+						{hasAuthDefs && (
+							<AuthoritativeDefinitionsPreview
+								definitions={teamMember.authoritativeDefinitions}/>
+						)}
+						{hasCustomProps && (
+							<CustomPropertiesPreview properties={teamMember.customProperties}/>
+						)}
+					</div>
+				);
+			})()}
 		</div>
 	);
 }, (prevProps, nextProps) => {
@@ -157,29 +168,40 @@ const TeamSection = () => {
 							</div>
 						)}
 
-						{team.customProperties && Array.isArray(team.customProperties) && team.customProperties.length > 0 && (
-							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
-								<dd className="flex flex-wrap gap-x-4 gap-y-2">
-									{team.customProperties.map((customProp, index) => (
-										<div key={index} className="min-w-0">
-											<dt
-												className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
-												{customProp.property}
-												{customProp.description && (
-													<Tooltip content={customProp.description}>
-														<QuestionMarkCircleIcon />
-													</Tooltip>
-												)}
-											</dt>
-											<dd className="text-sm text-gray-900">
-												<PropertyValueRenderer value={customProp.value}/>
-											</dd>
-										</div>
-									))}
-								</dd>
-							</div>
-						)}
+						{team.customProperties && (
+							Array.isArray(team.customProperties) ? team.customProperties.length > 0 :
+							typeof team.customProperties === 'object' && Object.keys(team.customProperties).length > 0
+						) && (() => {
+							const normalizedProps = Array.isArray(team.customProperties)
+								? team.customProperties
+								: Object.entries(team.customProperties).map(([key, value]) => ({
+									property: key,
+									value: value,
+								}));
+							return (
+								<div>
+									<dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
+									<dd className="flex flex-wrap gap-x-4 gap-y-2">
+										{normalizedProps.map((customProp, index) => (
+											<div key={index} className="min-w-0">
+												<dt
+													className="text-xs font-medium text-gray-500 uppercase tracking-wide inline-flex items-center gap-1">
+													{customProp.property}
+													{customProp.description && (
+														<Tooltip content={customProp.description}>
+															<QuestionMarkCircleIcon />
+														</Tooltip>
+													)}
+												</dt>
+												<dd className="text-sm text-gray-900">
+													<PropertyValueRenderer value={customProp.value}/>
+												</dd>
+											</div>
+										))}
+									</dd>
+								</div>
+							);
+						})()}
 
 						{/* Team members */}
 						{teamMembers?.length > 0 && (

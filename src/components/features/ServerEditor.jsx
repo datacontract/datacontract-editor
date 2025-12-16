@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { useEditorStore } from '../../store.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -7,10 +8,83 @@ import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
 import {useShallow} from "zustand/react/shallow";
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
+import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const ServerEditor = ({ serverIndex }) => {
 	const servers = useEditorStore(useShallow((state) => state.getValue('servers'))) || {};
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
+	const yamlParts = useEditorStore((state) => state.yamlParts);
+
+  // Get customization config for servers level
+  const { customProperties: customPropertyConfigs, customSections } = useCustomization('servers');
+
+  // Check hidden status for standard properties
+  const isServerHidden = useIsPropertyHidden('servers', 'server');
+  const isTypeHidden = useIsPropertyHidden('servers', 'type');
+  const isEnvironmentHidden = useIsPropertyHidden('servers', 'environment');
+  const isDescriptionHidden = useIsPropertyHidden('servers', 'description');
+
+  // Convert array format to object lookup for UI components
+  const customPropertiesLookup = useMemo(() => {
+    const cp = servers?.[serverIndex]?.customProperties;
+    if (!Array.isArray(cp)) return cp || {};
+    return cp.reduce((acc, item) => {
+      if (item?.property !== undefined) {
+        acc[item.property] = item.value;
+      }
+      return acc;
+    }, {});
+  }, [servers, serverIndex]);
+
+  // Build context for condition evaluation
+  const serverContext = useMemo(() => {
+    const currentServer = servers?.[serverIndex] || {};
+    return {
+      server: currentServer.server,
+      type: currentServer.type,
+      environment: currentServer.environment,
+      description: currentServer.description,
+      ...customPropertiesLookup,
+    };
+  }, [servers, serverIndex, customPropertiesLookup]);
+
+  // Handle custom property changes - stores as array format per ODCS standard
+  const updateCustomProperty = useCallback((propName, value) => {
+    const currentServer = servers?.[serverIndex] || {};
+    // Convert object format to array format if needed
+    let currentArray;
+    const cp = currentServer.customProperties;
+    if (Array.isArray(cp)) {
+      currentArray = cp;
+    } else if (cp && typeof cp === 'object') {
+      currentArray = Object.entries(cp).map(([k, v]) => ({ property: k, value: v }));
+    } else {
+      currentArray = [];
+    }
+
+    let newCustomProps;
+    if (value === undefined) {
+      const updated = currentArray.filter(item => item.property !== propName);
+      newCustomProps = updated.length > 0 ? updated : undefined;
+    } else {
+      const existingIndex = currentArray.findIndex(item => item.property === propName);
+      if (existingIndex >= 0) {
+        const updated = [...currentArray];
+        updated[existingIndex] = { property: propName, value };
+        newCustomProps = updated;
+      } else {
+        newCustomProps = [...currentArray, { property: propName, value }];
+      }
+    }
+
+    const updatedServers = [...servers];
+    updatedServers[serverIndex] = {
+      ...currentServer,
+      customProperties: newCustomProps
+    };
+    setValue('servers', updatedServers);
+  }, [servers, serverIndex, setValue]);
 
   const typeOptions = [
     { id: 'api', name: 'api' },
@@ -153,81 +227,89 @@ const ServerEditor = ({ serverIndex }) => {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <ValidatedInput
-                  name="server"
-                  label="Server"
-                  value={servers[serverIndex].server || ''}
-                  onChange={(e) => updateServer('server', e.target.value)}
-                  required={true}
-                  placeholder="production-server"
-                />
-                <div>
-                  <Combobox
-                    label={
-                      <div className="flex items-center gap-1">
-                        <span>Environment</span>
-                        <Tooltip content="Deployment stage (prod, preprod, dev, uat)">
-                          <QuestionMarkCircleIcon />
-                        </Tooltip>
-                      </div>
-                    }
-                    options={environmentOptions}
-                    value={servers[serverIndex].environment || ''}
-                    onChange={(selectedValue) => updateServer('environment', selectedValue || '')}
-                    placeholder="Select environment..."
-                    acceptAnyInput={true}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      Description
-                    </label>
-                    <Tooltip content="Server details">
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <textarea
-                    rows={2}
-                    value={servers[serverIndex].description || ''}
-                    onChange={(e) => updateServer('description', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="Describe this server..."
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <ValidatedCombobox
-                    label="Type"
-                    tooltip="Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
+                {!isServerHidden && (
+                  <ValidatedInput
+                    name="server"
+                    label="Server"
+                    value={servers[serverIndex].server || ''}
+                    onChange={(e) => updateServer('server', e.target.value)}
                     required={true}
-                    options={typeOptions}
-                    value={servers[serverIndex].type || ''}
-                    onChange={(selectedValue) => updateServer('type', selectedValue || '')}
-                    placeholder="Select server type..."
-                    acceptAnyInput={true}
-                    renderSelectedIcon={(value) => {
-                      const IconComponent = serverIcons[value];
-                      return IconComponent ? (
-                        <div className="flex items-center justify-center w-5 h-5">
-                          <IconComponent />
-                        </div>
-                      ) : null;
-                    }}
-                    renderOption={(option) => {
-                      const IconComponent = serverIcons[option.id];
-                      return (
-                        <div className="flex items-center gap-2">
-                          {IconComponent && (
-                            <div className="flex items-center justify-center w-5 h-5 flex-shrink-0">
-                              <IconComponent />
-                            </div>
-                          )}
-                          <span className="block truncate">{option.name}</span>
-                        </div>
-                      );
-                    }}
+                    placeholder="production-server"
                   />
-                </div>
+                )}
+                {!isEnvironmentHidden && (
+                  <div>
+                    <Combobox
+                      label={
+                        <div className="flex items-center gap-1">
+                          <span>Environment</span>
+                          <Tooltip content="Deployment stage (prod, preprod, dev, uat)">
+                            <QuestionMarkCircleIcon />
+                          </Tooltip>
+                        </div>
+                      }
+                      options={environmentOptions}
+                      value={servers[serverIndex].environment || ''}
+                      onChange={(selectedValue) => updateServer('environment', selectedValue || '')}
+                      placeholder="Select environment..."
+                      acceptAnyInput={true}
+                    />
+                  </div>
+                )}
+                {!isDescriptionHidden && (
+                  <div className="sm:col-span-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="block text-xs font-medium leading-4 text-gray-900">
+                        Description
+                      </label>
+                      <Tooltip content="Server details">
+                        <QuestionMarkCircleIcon />
+                      </Tooltip>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={servers[serverIndex].description || ''}
+                      onChange={(e) => updateServer('description', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="Describe this server..."
+                    />
+                  </div>
+                )}
+                {!isTypeHidden && (
+                  <div className="sm:col-span-2">
+                    <ValidatedCombobox
+                      label="Type"
+                      tooltip="Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
+                      required={true}
+                      options={typeOptions}
+                      value={servers[serverIndex].type || ''}
+                      onChange={(selectedValue) => updateServer('type', selectedValue || '')}
+                      placeholder="Select server type..."
+                      acceptAnyInput={true}
+                      renderSelectedIcon={(value) => {
+                        const IconComponent = serverIcons[value];
+                        return IconComponent ? (
+                          <div className="flex items-center justify-center w-5 h-5">
+                            <IconComponent />
+                          </div>
+                        ) : null;
+                      }}
+                      renderOption={(option) => {
+                        const IconComponent = serverIcons[option.id];
+                        return (
+                          <div className="flex items-center gap-2">
+                            {IconComponent && (
+                              <div className="flex items-center justify-center w-5 h-5 flex-shrink-0">
+                                <IconComponent />
+                              </div>
+                            )}
+                            <span className="block truncate">{option.name}</span>
+                          </div>
+                        );
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* Type-specific fields */}
                 {servers[serverIndex].type === 'bigquery' && (
@@ -1252,7 +1334,31 @@ const ServerEditor = ({ serverIndex }) => {
                   />
                 </div>
 
-                {/* Custom Properties */}
+                {/* Custom Sections from Customization */}
+                <div className="sm:col-span-2">
+                  <CustomSections
+                    customSections={customSections}
+                    customProperties={customPropertyConfigs}
+                    values={customPropertiesLookup}
+                    onPropertyChange={updateCustomProperty}
+                    context={serverContext}
+                    yamlParts={yamlParts}
+                  />
+                </div>
+
+                {/* Ungrouped Custom Properties */}
+                <div className="sm:col-span-2">
+                  <UngroupedCustomProperties
+                    customProperties={customPropertyConfigs}
+                    customSections={customSections}
+                    values={customPropertiesLookup}
+                    onPropertyChange={updateCustomProperty}
+                    context={serverContext}
+                    yamlParts={yamlParts}
+                  />
+                </div>
+
+                {/* Custom Properties (raw key-value editor) */}
                 <div className="sm:col-span-2">
                   <CustomPropertiesEditor
                     value={servers[serverIndex].customProperties || []}

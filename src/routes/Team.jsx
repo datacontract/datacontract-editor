@@ -1,17 +1,46 @@
+import { useMemo, useCallback, useEffect } from 'react';
 import { useEditorStore } from '../store.js';
 import Tags from '../components/ui/Tags.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
 import {useShallow} from "zustand/react/shallow";
-import {useEffect} from "react";
+import { useCustomization, useIsPropertyHidden } from '../hooks/useCustomization.js';
+import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
 
 const Team = () => {
 	const team = useEditorStore(useShallow((state) => state.getValue('team')))
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
   const editorConfig = useEditorStore((state) => state.editorConfig);
+  const yamlParts = useEditorStore((state) => state.yamlParts);
 
 	const members = team && !Array.isArray(team) && team?.members ? team.members : [];
+
+  // Get customization config for team level
+  const { customProperties: customPropertyConfigs, customSections } = useCustomization('team');
+
+  // Check hidden status for standard properties
+  const isNameHidden = useIsPropertyHidden('team', 'name');
+  const isDescriptionHidden = useIsPropertyHidden('team', 'description');
+
+  // Convert array format to object lookup for UI components
+  const customPropertiesLookup = useMemo(() => {
+    const cp = team?.customProperties;
+    if (!Array.isArray(cp)) return cp || {};
+    return cp.reduce((acc, item) => {
+      if (item?.property !== undefined) {
+        acc[item.property] = item.value;
+      }
+      return acc;
+    }, {});
+  }, [team?.customProperties]);
+
+  // Build context for condition evaluation
+  const teamContext = useMemo(() => ({
+    name: team?.name,
+    description: team?.description,
+    ...customPropertiesLookup,
+  }), [team, customPropertiesLookup]);
 
 	// Handle old flat team structure
 	useEffect(() => {
@@ -54,6 +83,34 @@ const Team = () => {
   const updateTeamField = (field, value) => {
     updateTeamObject({ [field]: value || undefined });
   };
+
+  // Handle custom property changes - stores as array format per ODCS standard
+  const updateCustomProperty = useCallback((propName, value) => {
+    // Convert object format to array format if needed
+    let currentArray;
+    const cp = team?.customProperties;
+    if (Array.isArray(cp)) {
+      currentArray = cp;
+    } else if (cp && typeof cp === 'object') {
+      currentArray = Object.entries(cp).map(([k, v]) => ({ property: k, value: v }));
+    } else {
+      currentArray = [];
+    }
+
+    if (value === undefined) {
+      const updated = currentArray.filter(item => item.property !== propName);
+      updateTeamField('customProperties', updated.length > 0 ? updated : undefined);
+    } else {
+      const existingIndex = currentArray.findIndex(item => item.property === propName);
+      if (existingIndex >= 0) {
+        const updated = [...currentArray];
+        updated[existingIndex] = { property: propName, value };
+        updateTeamField('customProperties', updated);
+      } else {
+        updateTeamField('customProperties', [...currentArray, { property: propName, value }]);
+      }
+    }
+  }, [team?.customProperties, updateTeamField]);
 
   // Update members array
   const updateMembersArray = (members) => {
@@ -98,47 +155,51 @@ const Team = () => {
 
             <div className="space-y-4">
               {/* Team Name */}
-              <div>
-                <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                  Team Name
-                </label>
-                {editorConfig?.teams && editorConfig.teams.length > 0 ? (
-                  <select
-                    value={team?.name}
-                    onChange={(e) => updateTeamField('name', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                  >
-                    <option value="">Select a team...</option>
-                    {editorConfig.teams.map((editorConfigTeam) => (
-                      <option key={editorConfigTeam.id} value={editorConfigTeam.id}>
-                        {editorConfigTeam.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={team?.name}
-                    onChange={(e) => updateTeamField('name', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="Data Engineering Team"
-                  />
-                )}
-              </div>
+              {!isNameHidden && (
+                <div>
+                  <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                    Team Name
+                  </label>
+                  {editorConfig?.teams && editorConfig.teams.length > 0 ? (
+                    <select
+                      value={team?.name}
+                      onChange={(e) => updateTeamField('name', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    >
+                      <option value="">Select a team...</option>
+                      {editorConfig.teams.map((editorConfigTeam) => (
+                        <option key={editorConfigTeam.id} value={editorConfigTeam.id}>
+                          {editorConfigTeam.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={team?.name}
+                      onChange={(e) => updateTeamField('name', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="Data Engineering Team"
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Team Description */}
-              <div>
-                <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={team?.description}
-                  onChange={(e) => updateTeamField('description', e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                  placeholder="Description of the team..."
-                  rows={3}
-                />
-              </div>
+              {!isDescriptionHidden && (
+                <div>
+                  <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={team?.description}
+                    onChange={(e) => updateTeamField('description', e.target.value)}
+                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                    placeholder="Description of the team..."
+                    rows={3}
+                  />
+                </div>
+              )}
 
               {/* Team Tags */}
               <Tags
@@ -148,7 +209,27 @@ const Team = () => {
                 placeholder="Add a tag..."
               />
 
-              {/* Team Custom Properties */}
+              {/* Custom Sections from Customization */}
+              <CustomSections
+                customSections={customSections}
+                customProperties={customPropertyConfigs}
+                values={customPropertiesLookup}
+                onPropertyChange={updateCustomProperty}
+                context={teamContext}
+                yamlParts={yamlParts}
+              />
+
+              {/* Ungrouped Custom Properties */}
+              <UngroupedCustomProperties
+                customProperties={customPropertyConfigs}
+                customSections={customSections}
+                values={customPropertiesLookup}
+                onPropertyChange={updateCustomProperty}
+                context={teamContext}
+                yamlParts={yamlParts}
+              />
+
+              {/* Team Custom Properties (raw key-value editor) */}
               <CustomPropertiesEditor
                 value={team?.customProperties}
                 onChange={(value) => updateTeamField('customProperties', value)}

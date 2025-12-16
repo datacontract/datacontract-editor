@@ -1,4 +1,4 @@
-# Customization (TBD)
+# Customization
 
 This document describes how to customize the Data Contract Editor using a `customization.yaml` configuration file.
 

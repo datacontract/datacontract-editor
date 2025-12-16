@@ -10,21 +10,29 @@ import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
  * @param {Function} onChange - Callback when array changes
  * @param {boolean} showDescription - Whether to show description field (default: false)
  */
-const CustomPropertiesEditor = ({ value = [], onChange, showDescription = false }) => {
+const CustomPropertiesEditor = ({ value, onChange, showDescription = false }) => {
+  // Normalize value to array format
+  // Handle both array format [{property, value}] and object format {key: value}
+  const normalizedValue = Array.isArray(value)
+    ? value
+    : value && typeof value === 'object'
+      ? Object.entries(value).map(([key, val]) => ({ property: key, value: val }))
+      : [];
+
   const handleAdd = () => {
     const newItem = { property: '', value: '' };
     if (showDescription) newItem.description = '';
-    const updatedArray = [...value, newItem];
+    const updatedArray = [...normalizedValue, newItem];
     onChange(updatedArray);
   };
 
   const handleRemove = (index) => {
-    const updatedArray = value.filter((_, i) => i !== index);
+    const updatedArray = normalizedValue.filter((_, i) => i !== index);
     onChange(updatedArray.length > 0 ? updatedArray : undefined);
   };
 
   const handleUpdate = (index, fieldName, fieldValue) => {
-    const updatedArray = [...value];
+    const updatedArray = [...normalizedValue];
     updatedArray[index] = { ...updatedArray[index], [fieldName]: fieldValue };
     onChange(updatedArray);
   };
@@ -44,7 +52,7 @@ const CustomPropertiesEditor = ({ value = [], onChange, showDescription = false 
       </div>
 
       {/* Existing properties */}
-      {value.map((item, index) => (
+      {normalizedValue.map((item, index) => (
         <CustomPropertyCard
           key={index}
           item={item}
