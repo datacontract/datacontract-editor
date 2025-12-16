@@ -164,10 +164,8 @@ For `select` and `multiselect` types:
 
 ```yaml
 enum:
-  - value: "option1"
-    title: "Option 1"
-  - value: "option2"
-    title: "Option 2"
+  - "option1"
+  - "option2"
 ```
 
 ### Conditional Display
@@ -216,24 +214,17 @@ dataContract:
     standardProperties:
       - property: "status"
         enum:
-          - value: "draft"
-            title: "Draft"
-          - value: "in-review"
-            title: "In Review"
-          - value: "approved"
-            title: "Approved"
-          - value: "deprecated"
-            title: "Deprecated"
+          - "draft"
+          - "in-review"
+          - "approved"
+          - "deprecated"
 
       - property: "domain"
         required: true
         enum:
-          - value: "customer"
-            title: "Customer"
-          - value: "product"
-            title: "Product"
-          - value: "finance"
-            title: "Finance"
+          - "customer"
+          - "product"
+          - "finance"
 
       - property: "tenant"
         hidden: true
@@ -253,23 +244,17 @@ dataContract:
         type: "select"
         required: true
         enum:
-          - value: "public"
-            title: "Public"
-          - value: "internal"
-            title: "Internal"
-          - value: "confidential"
-            title: "Confidential"
+          - "public"
+          - "internal"
+          - "confidential"
 
       - property: "complianceFrameworks"
         title: "Compliance Frameworks"
         type: "multiselect"
         enum:
-          - value: "gdpr"
-            title: "GDPR"
-          - value: "hipaa"
-            title: "HIPAA"
-          - value: "sox"
-            title: "SOX"
+          - "gdpr"
+          - "hipaa"
+          - "sox"
 
     customSections:
       - section: "governance"
@@ -282,12 +267,9 @@ dataContract:
     standardProperties:
       - property: "physicalType"
         enum:
-          - value: "table"
-            title: "Table"
-          - value: "view"
-            title: "View"
-          - value: "topic"
-            title: "Topic"
+          - "table"
+          - "view"
+          - "topic"
 
     customProperties:
       - property: "retentionDays"
@@ -300,12 +282,9 @@ dataContract:
         title: "Archive Policy"
         type: "select"
         enum:
-          - value: "delete"
-            title: "Delete after retention"
-          - value: "archive-cold"
-            title: "Move to cold storage"
-          - value: "archive-glacier"
-            title: "Move to Glacier"
+          - "delete"
+          - "archive-cold"
+          - "archive-glacier"
 
     customSections:
       - section: "lifecycle"
@@ -319,14 +298,10 @@ dataContract:
       - property: "classification"
         required: true
         enum:
-          - value: "public"
-            title: "Public"
-          - value: "internal"
-            title: "Internal"
-          - value: "confidential"
-            title: "Confidential"
-          - value: "pii"
-            title: "PII"
+          - "public"
+          - "internal"
+          - "confidential"
+          - "pii"
 
       - property: "encryptedName"
         hidden: true
@@ -342,28 +317,20 @@ dataContract:
         title: "PII Category"
         type: "select"
         enum:
-          - value: "none"
-            title: "None"
-          - value: "direct-identifier"
-            title: "Direct Identifier"
-          - value: "quasi-identifier"
-            title: "Quasi Identifier"
-          - value: "sensitive"
-            title: "Sensitive Data"
+          - "none"
+          - "direct-identifier"
+          - "quasi-identifier"
+          - "sensitive"
 
       - property: "gdprLegalBasis"
         title: "GDPR Legal Basis"
         type: "select"
         condition: "piiCategory != 'none'"
         enum:
-          - value: "consent"
-            title: "Consent"
-          - value: "contract"
-            title: "Contract"
-          - value: "legal-obligation"
-            title: "Legal Obligation"
-          - value: "legitimate-interest"
-            title: "Legitimate Interest"
+          - "consent"
+          - "contract"
+          - "legal-obligation"
+          - "legitimate-interest"
 
       - property: "maskingRule"
         title: "Masking Rule"
@@ -383,23 +350,16 @@ dataContract:
     standardProperties:
       - property: "type"
         enum:
-          - value: "snowflake"
-            title: "Snowflake"
-          - value: "bigquery"
-            title: "BigQuery"
-          - value: "postgresql"
-            title: "PostgreSQL"
-          - value: "s3"
-            title: "AWS S3"
+          - "snowflake"
+          - "bigquery"
+          - "postgresql"
+          - "s3"
 
       - property: "environment"
         enum:
-          - value: "dev"
-            title: "Development"
-          - value: "staging"
-            title: "Staging"
-          - value: "prod"
-            title: "Production"
+          - "dev"
+          - "staging"
+          - "prod"
 
     customProperties:
       - property: "costCenter"
@@ -412,10 +372,8 @@ dataContract:
         title: "Maintenance Window"
         type: "select"
         enum:
-          - value: "sun-02-06"
-            title: "Sunday 02:00-06:00 UTC"
-          - value: "sat-02-06"
-            title: "Saturday 02:00-06:00 UTC"
+          - "sun-02-06"
+          - "sat-02-06"
 
     customSections:
       - section: "infrastructure"
@@ -452,12 +410,9 @@ dataContract:
         title: "Location"
         type: "select"
         enum:
-          - value: "us"
-            title: "United States"
-          - value: "eu"
-            title: "Europe"
-          - value: "apac"
-            title: "Asia Pacific"
+          - "us"
+          - "eu"
+          - "apac"
 
     customSections:
       - section: "member-details"
@@ -488,10 +443,7 @@ const editor = init({
         standardProperties: [
           {
             property: "status",
-            enum: [
-              { value: "draft", title: "Draft" },
-              { value: "active", title: "Active" }
-            ]
+            enum: ["draft", "active", "retired"]
           }
         ],
         customProperties: [
@@ -517,10 +469,7 @@ const editor = init({
             property: "piiCategory",
             title: "PII Category",
             type: "select",
-            enum: [
-              { value: "none", title: "None" },
-              { value: "direct", title: "Direct Identifier" }
-            ]
+            enum: ["none", "direct-identifier", "quasi-identifier"]
           }
         ],
         customSections: [

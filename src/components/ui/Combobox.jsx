@@ -37,9 +37,9 @@ const ComboboxComponent = ({
 
   const handleChange = (selectedOption) => {
     setQuery('')
-    // If acceptAnyInput is true and we get a string value, pass it directly
-    if (acceptAnyInput && typeof selectedOption === 'string') {
-      onChange(selectedOption)
+    // If the selected option is an object, extract the id/value
+    if (selectedOption && typeof selectedOption === 'object') {
+      onChange(selectedOption.id ?? selectedOption.value ?? selectedOption.name ?? selectedOption)
     } else {
       onChange(selectedOption)
     }

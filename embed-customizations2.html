@@ -40,13 +40,7 @@
             property: 'status',
             title: 'Contract Status',
             description: 'Current lifecycle stage of this contract',
-            enum: [
-              { value: 'draft', title: 'Draft' },
-              { value: 'review', title: 'Under Review' },
-              { value: 'approved', title: 'Approved' },
-              { value: 'active', title: 'Active' },
-              { value: 'deprecated', title: 'Deprecated' }
-            ]
+            enum: ['draft', 'review', 'approved', 'active', 'deprecated']
           },
           // Customize domain with enum
           // {
@@ -131,12 +125,7 @@
           {
             property: 'classification',
             title: 'Data Classification',
-            enum: [
-              { value: 'public', title: 'Public' },
-              { value: 'internal', title: 'Internal' },
-              { value: 'confidential', title: 'Confidential' },
-              { value: 'restricted', title: 'Restricted' }
-            ]
+            enum: ['public', 'internal', 'confidential', 'restricted']
           }
         ],
         customProperties: [
@@ -145,12 +134,7 @@
             title: 'PII Category',
             type: 'select',
             description: 'Type of personally identifiable information',
-            enum: [
-              { value: 'none', title: 'None' },
-              { value: 'direct', title: 'Direct Identifier' },
-              { value: 'indirect', title: 'Indirect Identifier' },
-              { value: 'sensitive', title: 'Sensitive PII' }
-            ]
+            enum: ['none', 'direct', 'indirect', 'sensitive']
           },
           {
             property: 'piiHandling',

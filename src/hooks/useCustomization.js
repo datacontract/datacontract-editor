@@ -2,6 +2,20 @@ import { useMemo } from 'react';
 import { useEditorStore } from '../store';
 
 /**
+ * Convert standardProperties from object format to array format
+ * Object format: { "status": { "enum": [...] } }
+ * Array format: [{ "property": "status", "enum": [...] }]
+ */
+function normalizeStandardProperties(standardProperties) {
+	if (!standardProperties) return [];
+	if (Array.isArray(standardProperties)) return standardProperties;
+	return Object.entries(standardProperties).map(([property, config]) => ({
+		property,
+		...config,
+	}));
+}
+
+/**
  * Hook to access customization config for a specific level
  * @param {string} level - Level key (e.g., 'root', 'schema', 'schema.properties')
  * @returns {Object} { standardProperties, customProperties, customSections }
@@ -12,7 +26,7 @@ export function useCustomization(level) {
 	return useMemo(() => {
 		const levelConfig = customizations?.dataContract?.[level] || {};
 		return {
-			standardProperties: levelConfig.standardProperties || [],
+			standardProperties: normalizeStandardProperties(levelConfig.standardProperties),
 			customProperties: levelConfig.customProperties || [],
 			customSections: levelConfig.customSections || [],
 		};
