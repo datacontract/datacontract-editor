@@ -214,7 +214,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                                 : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
                                         }`}
                                     >
-                                        <div className="flex size-4 shrink-0 items-center justify-center"
+                                        <div className="size-4 shrink-0"
                                              aria-hidden="true">
                                             {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
                                         </div>
@@ -261,7 +261,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                                 : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
                                         }`}
                                     >
-                                        <div className="flex size-4 shrink-0 items-center justify-center"
+                                        <div className="size-4 shrink-0"
                                              aria-hidden="true">
                                             {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
                                         </div>
@@ -303,7 +303,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                             : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
                                     }`}
                                 >
-                                    <div className="flex size-4 shrink-0 items-center justify-center"
+                                    <div className="size-4 shrink-0"
                                          aria-hidden="true">
                                         {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
                                     </div>
@@ -311,7 +311,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                 </Link>
                             ) : (
                                 <div className="flex flex-row items-center">
-                                    <div className="flex size-4 shrink-0 items-center justify-center"
+                                    <div className="size-4 shrink-0"
                                          aria-hidden="true">
                                         {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
                                     </div>
