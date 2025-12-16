@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useEditorStore, getFileStorageBackend } from "../store.js";
+import {useEditorStore, getFileStorageBackend, initialYaml} from "../store.js";
 import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { FileSelectionModal } from '../components/ui/FileSelectionModal.jsx';
@@ -31,7 +31,6 @@ const Header = () => {
     const setView = useEditorStore((state) => state.setView);
     const yaml = useEditorStore((state) => state.yaml);
     const yamlCursorLine = useEditorStore((state) => state.yamlCursorLine);
-    const isDirty = useEditorStore((state) => state.isDirty);
     const editorConfig = useEditorStore((state) => state.editorConfig);
 
     // Check if we're in server mode
@@ -126,15 +125,8 @@ const Header = () => {
     const handleNew = () => {
         if (window.confirm('Create a new data contract? Any unsaved changes will be lost.')) {
             // Clear the YAML and reset to a valid template with all required fields
-            const newYaml = `apiVersion: v3.1.0
-kind: DataContract
-name: ""
-id: ""
-version: "0.0.1"
-status: draft
-description:
-  purpose: ""
-`;
+            const newYaml = initialYaml;
+
             const store = useEditorStore.getState();
             store.setYaml(newYaml);
             store.setView('form');

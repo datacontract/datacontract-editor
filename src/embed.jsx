@@ -237,7 +237,8 @@ function createConfiguredStore(config) {
 			loadFromFile: async () => {
 				try {
 					const yamlContent = await storageBackend.loadYamlFile();
-					set({ yaml: yamlContent, baselineYaml: yamlContent, isDirty: false });
+					get().setYaml(yamlContent);
+					set({ baselineYaml: yamlContent });
 					return yamlContent;
 				} catch (error) {
 					if (error.message !== 'File selection cancelled') {
