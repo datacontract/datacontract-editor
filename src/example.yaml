@@ -76,7 +76,7 @@ schema:
         businessName: "Status"
         description: "The business status of the order"
         logicalType: "string"
-        physicalType: "TEXT"
+        physicalType: "text"
         examples:
           - "shipped"
         quality:
@@ -100,7 +100,7 @@ schema:
       - name: "line_item_id"
         logicalType: "string"
         description: "Unique identifier for the line item"
-        physicalType: "UUID"
+        physicalType: "uuid"
         examples:
           - "12c9ba21-0c44-4e29-ba72-b8fd01c1be30"
         logicalTypeOptions:
@@ -111,14 +111,14 @@ schema:
         logicalType: "string"
         businessName: "Stock Keeping Unit"
         description: "Identifier for the purchased product"
-        physicalType: "TEXT"
+        physicalType: "text"
         examples:
           - 111222333
         required: true
       - name: "price"
         logicalType: "integer"
         description: "Price in cents for this line item including tax"
-        physicalType: "INTEGER"
+        physicalType: "integer"
         examples:
           - 9999
         required: true
