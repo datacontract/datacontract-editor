@@ -32,7 +32,7 @@ const DEFAULT_CONFIG = {
   container: '#datacontract-editor',
 
   // Initial YAML content
-  yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: example-id\nversion: "0.0.1"\nstatus: draft\n',
+  yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: example-id\nversion: "0.0.1"\nstatus: draft\nname: Example Data Contract\n',
 
   // Schema URL for validation
   schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json',

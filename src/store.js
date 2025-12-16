@@ -311,7 +311,7 @@ export function defaultStoreConfig(set, get) {
 		},
 	};
 
-	const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n';
+	const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\nname: "Example Data Contract"\n';
 
 	return {
 		yaml: initialYaml,
