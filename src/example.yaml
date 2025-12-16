@@ -17,7 +17,7 @@ description:
       description: "Data contains personally identifiable information"
   authoritativeDefinitions:
     - url: "https://entropy-data.com/policies/gdpr-compliance"
-      type: "businessDefinition"
+      type: "GDPR Policy"
       description: "GDPR compliance policy for handling customer data"
 schema:
   - name: "orders"
