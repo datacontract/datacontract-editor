@@ -24,6 +24,18 @@
         tests: {
           enabled: true,
           dataContractCliApiServerUrl: 'https://api.datacontract.com'
+        },
+        // onSave callback - handles iOS/mobile where File System Access API isn't available
+        onSave: async (yaml) => {
+          if (navigator.share) {
+            try {
+              await navigator.share({ title: 'Data Contract', text: yaml });
+            } catch (err) {
+              if (err.name !== 'AbortError') {
+                console.log('Share failed:', err);
+              }
+            }
+          }
         }
       });
     </script>
