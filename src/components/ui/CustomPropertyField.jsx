@@ -193,7 +193,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
 			if (typeof item === 'string') {
 				return { id: item, name: item };
 			}
-			return { id: item.value, name: item.title || item.value };
+			return { id: item.value, name: item.label || item.title || item.value };
 		});
 	}, [enumOptions]);
 
@@ -225,7 +225,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
 			if (typeof item === 'string') {
 				return { value: item, label: item };
 			}
-			return { value: item.value, label: item.title || item.value };
+			return { value: item.value, label: item.label || item.title || item.value };
 		});
 	}, [enumOptions]);
 

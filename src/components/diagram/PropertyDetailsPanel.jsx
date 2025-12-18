@@ -705,7 +705,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                         <option value="">{classificationOverride?.placeholder || 'Select...'}</option>
                         {classificationOverride.enum.map((opt) => (
                           <option key={typeof opt === 'string' ? opt : opt.value} value={typeof opt === 'string' ? opt : opt.value}>
-                            {typeof opt === 'string' ? opt : opt.title}
+                            {typeof opt === 'string' ? opt : (opt.label || opt.title)}
                           </option>
                         ))}
                       </select>

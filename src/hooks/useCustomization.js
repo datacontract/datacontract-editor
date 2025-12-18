@@ -93,7 +93,7 @@ export function useUngroupedCustomProperties(level) {
 
 /**
  * Convert enum config to combobox options format
- * @param {Array} enumConfig - Array of { value, title } objects or strings
+ * @param {Array} enumConfig - Array of strings or { value, label/title } objects
  * @returns {Array} Array of { id, name } objects for ValidatedCombobox
  */
 export function convertEnumToOptions(enumConfig) {
@@ -103,7 +103,7 @@ export function convertEnumToOptions(enumConfig) {
 		if (typeof item === 'string') {
 			return { id: item, name: item };
 		}
-		return { id: item.value, name: item.title || item.value };
+		return { id: item.value, name: item.label || item.title || item.value };
 	});
 }
 

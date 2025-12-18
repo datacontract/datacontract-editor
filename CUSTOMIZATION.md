@@ -160,13 +160,25 @@ dataContract:
 
 ### Enum Definition
 
-For `select` and `multiselect` types:
+For `select` and `multiselect` types, enums can be defined in two formats:
 
+**Simple string array:**
 ```yaml
 enum:
   - "option1"
   - "option2"
 ```
+
+**Value/label objects** (when display label differs from stored value):
+```yaml
+enum:
+  - value: "opt1"
+    label: "Option One"
+  - value: "opt2"
+    label: "Option Two"
+```
+
+Note: `title` is also supported as an alias for `label` for backwards compatibility.
 
 ### Conditional Display
 
@@ -469,7 +481,11 @@ const editor = init({
             property: "piiCategory",
             title: "PII Category",
             type: "select",
-            enum: ["none", "direct-identifier", "quasi-identifier"]
+            enum: [
+              { value: "none", label: "None" },
+              { value: "direct-identifier", label: "Direct Identifier" },
+              { value: "quasi-identifier", label: "Quasi Identifier" }
+            ]
           }
         ],
         customSections: [
