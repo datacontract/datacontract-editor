@@ -266,6 +266,10 @@ function createConfiguredStore(config) {
 				await storageBackend.saveYamlFile(yaml, suggestedName);
 				set({ isDirty: false, baselineYaml: yaml });
 			},
+			toggleMobileSidebar: () => set((state) => ({
+				isMobileSidebarOpen: !state.isMobileSidebarOpen,
+			})),
+			closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
 		};
 
 		return {
@@ -277,6 +281,7 @@ function createConfiguredStore(config) {
 			isWarningsVisible: false,
 			isTestResultsVisible: false,
 			isTestRunning: false,
+			isMobileSidebarOpen: false,
 			testResults: [],
 			markers: [],
 			currentView: config.initialView,
