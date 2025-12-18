@@ -5,8 +5,9 @@ import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefini
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
 import {useShallow} from "zustand/react/shallow";
-import { useCustomization, useIsPropertyHidden } from '../hooks/useCustomization.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import { ValidatedCombobox } from '../components/ui/index.js';
 
 const Team = () => {
 	const team = useEditorStore(useShallow((state) => state.getValue('team')))
@@ -22,6 +23,10 @@ const Team = () => {
   // Check hidden status for standard properties
   const isNameHidden = useIsPropertyHidden('team', 'name');
   const isDescriptionHidden = useIsPropertyHidden('team', 'description');
+
+  // Get standard property overrides
+  const nameOverride = useStandardPropertyOverride('team', 'name');
+  const nameOptions = convertEnumToOptions(nameOverride?.enum);
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -156,33 +161,40 @@ const Team = () => {
             <div className="space-y-4">
               {/* Team Name */}
               {!isNameHidden && (
-                <div>
-                  <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                    Team Name
-                  </label>
-                  {editorConfig?.teams && editorConfig.teams.length > 0 ? (
-                    <select
-                      value={team?.name}
-                      onChange={(e) => updateTeamField('name', e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    >
-                      <option value="">Select a team...</option>
-                      {editorConfig.teams.map((editorConfigTeam) => (
-                        <option key={editorConfigTeam.id} value={editorConfigTeam.id}>
-                          {editorConfigTeam.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      value={team?.name}
-                      onChange={(e) => updateTeamField('name', e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                      placeholder="Data Engineering Team"
+                (() => {
+                  // Build options from customization enum or editorConfig.teams
+                  const teamOptions = nameOptions ||
+                    (editorConfig?.teams?.length > 0
+                      ? editorConfig.teams.map(t => ({ id: t.id, name: t.name }))
+                      : null);
+
+                  return teamOptions ? (
+                    <ValidatedCombobox
+                      name="teamName"
+                      label={nameOverride?.title || 'Team Name'}
+                      options={teamOptions}
+                      value={team?.name || ''}
+                      onChange={(selectedValue) => updateTeamField('name', selectedValue || undefined)}
+                      placeholder="Select a team..."
+                      tooltip={nameOverride?.description}
+                      acceptAnyInput={false}
+                      allowCustomValue={false}
                     />
-                  )}
-                </div>
+                  ) : (
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        {nameOverride?.title || 'Team Name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={team?.name || ''}
+                        onChange={(e) => updateTeamField('name', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="Data Engineering Team"
+                      />
+                    </div>
+                  );
+                })()
               )}
 
               {/* Team Description */}
