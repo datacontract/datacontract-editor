@@ -17,6 +17,20 @@ import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {restrictToVerticalAxis, restrictToParentElement} from '@dnd-kit/modifiers';
 
 const SchemaEditor = ({schemaIndex}) => {
     const jsonSchema = useEditorStore((state) => state.schemaData);
@@ -30,9 +44,36 @@ const SchemaEditor = ({schemaIndex}) => {
         handleSaveAndAddNext,
         updateProperty,
         removeProperty,
-        addSubProperty
+        addSubProperty,
+        reorderProperty
     } = useSchemaOperations(schemaIndex);
     const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
+
+    // Drag-and-drop sensors configuration
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // 8px threshold prevents accidental drags
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Handle drag end for property reordering
+    const handleDragEnd = useCallback((event) => {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+
+        // Extract indices from IDs (format: "prop-{index}")
+        const fromIndex = parseInt(active.id.toString().replace('prop-', ''), 10);
+        const toIndex = parseInt(over.id.toString().replace('prop-', ''), 10);
+
+        if (!isNaN(fromIndex) && !isNaN(toIndex)) {
+            reorderProperty([], fromIndex, toIndex);
+        }
+    }, [reorderProperty]);
 
     // Get customization config for schema level
     const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema');
@@ -688,32 +729,46 @@ const SchemaEditor = ({schemaIndex}) => {
                                                 </button>
                                             </div>
 
-                                            {/* Properties List */}
+                                            {/* Properties List with Drag-and-Drop */}
                                             {schema[schemaIndex].properties && schema[schemaIndex].properties.length > 0 ? (
-                                                <div className="rounded-b-md">
-                                                    {schema[schemaIndex].properties.map((property, propIndex) => (
-                                                        <PropertyRow
-                                                            key={propIndex}
-                                                            property={property}
-                                                            propIndex={propIndex}
-                                                            schemaIdx={schemaIndex}
-                                                            depth={0}
-                                                            propPath={[]}
-                                                            togglePropertyExpansion={togglePropertyExpansion}
-                                                            updateProperty={updateProperty}
-                                                            addSubProperty={addSubProperty}
-                                                            removeProperty={removeProperty}
-                                                            expandedProperties={expandedProperties}
-                                                            onSelectProperty={handleSelectProperty}
-                                                            selectedPropertyPath={selectedPropertyPath}
-                                                            totalPropertiesCount={schema[schemaIndex].properties.length}
-                                                            onSaveAndAddNext={handleSaveAndAddNextWrapper}
-                                                            autoEditNewProperty={autoEditPropertyIndex === propIndex}
-                                                            setValue={setValue}
-                                                            onAutoEditComplete={() => setAutoEditPropertyIndex(null)}
-                                                        />
-                                                    ))}
-                                                </div>
+                                                <DndContext
+                                                    sensors={sensors}
+                                                    collisionDetection={closestCenter}
+                                                    onDragEnd={handleDragEnd}
+                                                    modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                                                >
+                                                    <SortableContext
+                                                        items={schema[schemaIndex].properties.map((_, idx) => `prop-${idx}`)}
+                                                        strategy={verticalListSortingStrategy}
+                                                    >
+                                                        <div className="rounded-b-md">
+                                                            {schema[schemaIndex].properties.map((property, propIndex) => (
+                                                                <PropertyRow
+                                                                    key={`prop-${propIndex}`}
+                                                                    property={property}
+                                                                    propIndex={propIndex}
+                                                                    schemaIdx={schemaIndex}
+                                                                    depth={0}
+                                                                    propPath={[]}
+                                                                    togglePropertyExpansion={togglePropertyExpansion}
+                                                                    updateProperty={updateProperty}
+                                                                    addSubProperty={addSubProperty}
+                                                                    removeProperty={removeProperty}
+                                                                    expandedProperties={expandedProperties}
+                                                                    onSelectProperty={handleSelectProperty}
+                                                                    selectedPropertyPath={selectedPropertyPath}
+                                                                    totalPropertiesCount={schema[schemaIndex].properties.length}
+                                                                    onSaveAndAddNext={handleSaveAndAddNextWrapper}
+                                                                    autoEditNewProperty={autoEditPropertyIndex === propIndex}
+                                                                    setValue={setValue}
+                                                                    onAutoEditComplete={() => setAutoEditPropertyIndex(null)}
+                                                                    sortableId={`prop-${propIndex}`}
+                                                                    isDragEnabled={true}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </SortableContext>
+                                                </DndContext>
                                             ) : (
                                                 <div
                                                     className="px-4 py-8 text-center rounded-b-md cursor-pointer hover:bg-gray-50"

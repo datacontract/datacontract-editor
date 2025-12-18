@@ -1,8 +1,56 @@
-import { memo, useState, useEffect, useRef, Fragment } from 'react';
+import { memo, useState, useEffect, useRef, Fragment, useCallback } from 'react';
 import { Handle, Position, NodeToolbar, useReactFlow } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
 import { TypeSelector } from '../ui/TypeSelector';
 import { getLogicalTypeIcon } from '../features/schema/propertyIcons';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
+
+// Disable layout animation to prevent visual glitch on drop
+const animateLayoutChanges = () => false;
+
+// Sortable property row wrapper component
+const SortablePropertyRow = ({ id: propId, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: propId,
+    animateLayoutChanges,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? transition : 'none', // Only animate while dragging
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+    position: 'relative',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ dragHandleProps: { ...attributes, ...listeners }, isDragging })}
+    </div>
+  );
+};
 
 const SchemaNode = ({ data, id }) => {
   const { getNode } = useReactFlow();
@@ -24,6 +72,32 @@ const SchemaNode = ({ data, id }) => {
   const propertyRowsRef = useRef([]);
   const propertyHoverTimeoutRef = useRef(null);
   const openPropertyDetails = data.openPropertyDetails;
+
+  // Drag-and-drop sensors configuration
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px threshold prevents accidental drags and conflicts with React Flow
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for property reordering
+  const handleDragEnd = useCallback((event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    // Extract indices from IDs (format: "prop-{index}")
+    const fromIndex = parseInt(active.id.toString().replace('prop-', ''), 10);
+    const toIndex = parseInt(over.id.toString().replace('prop-', ''), 10);
+
+    if (!isNaN(fromIndex) && !isNaN(toIndex) && data.onReorderProperty) {
+      data.onReorderProperty(id, fromIndex, toIndex);
+    }
+  }, [data, id]);
 
   // Cleanup hover timeout on unmount
   useEffect(() => {
@@ -361,19 +435,31 @@ const SchemaNode = ({ data, id }) => {
           )}
         </div>
 
-        {/* Properties List */}
+        {/* Properties List with Drag-and-Drop */}
         <div className="bg-white rounded-b divide-y divide-[#E9EEF4]">
         {data.schema.properties && data.schema.properties.length > 0 ? (
-          data.schema.properties.map((prop, index) => {
-            const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
-                                          openPropertyDetails?.nestedIndex == null;
-            return (
-            <Fragment key={index}>
-              <div
-                className={`pl-2 pr-3 py-2 group relative cursor-pointer ${
-                  isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
-                }`}
-                onContextMenu={(e) => handlePropertyContextMenu(e, index)}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          >
+            <SortableContext
+              items={data.schema.properties.map((_, idx) => `prop-${idx}`)}
+              strategy={verticalListSortingStrategy}
+            >
+              {data.schema.properties.map((prop, index) => {
+                const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
+                                              openPropertyDetails?.nestedIndex == null;
+                return (
+                  <SortablePropertyRow key={`prop-${index}`} id={`prop-${index}`}>
+                    {({ dragHandleProps, isDragging }) => (
+                      <Fragment>
+                        <div
+                          className={`pl-2 pr-3 py-2 group relative cursor-pointer ${
+                            isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
+                          } ${isDragging ? 'shadow-lg bg-white' : ''}`}
+                          onContextMenu={(e) => handlePropertyContextMenu(e, index)}
                 onClick={() => {
                 // Cancel any pending hover timeout when clicking
                 if (propertyHoverTimeoutRef.current) {
@@ -432,11 +518,19 @@ const SchemaNode = ({ data, id }) => {
                     />
                   ) : (
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      {/* Type Icon left of column name */}
-                      {(() => {
-                        const TypeIcon = getLogicalTypeIcon(prop.logicalType);
-                        return TypeIcon ? <TypeIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" /> : null;
-                      })()}
+                      {/* Type Icon left of column name - also serves as drag handle */}
+                      {/* nodrag class prevents React Flow from dragging the node */}
+                      <span
+                        {...dragHandleProps}
+                        className="nodrag cursor-grab active:cursor-grabbing touch-none"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Drag to reorder"
+                      >
+                        {(() => {
+                          const TypeIcon = getLogicalTypeIcon(prop.logicalType);
+                          return TypeIcon ? <TypeIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" /> : null;
+                        })()}
+                      </span>
                       <span
                         className={`text-sm font-medium truncate cursor-pointer hover:text-indigo-600 ${
                           !prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'text-gray-400 italic' : 'text-gray-900'
@@ -794,9 +888,13 @@ const SchemaNode = ({ data, id }) => {
                 );
               })
             )}
-          </Fragment>
-          );
-          })
+                      </Fragment>
+                    )}
+                  </SortablePropertyRow>
+                );
+              })}
+            </SortableContext>
+          </DndContext>
         ) : (
           <div
             className="px-4 py-3 text-xs text-gray-400 italic cursor-pointer hover:bg-gray-50"

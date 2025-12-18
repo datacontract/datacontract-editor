@@ -5,6 +5,8 @@ import PropertyIndicators from './PropertyIndicators.jsx';
 import ItemsRow from './ItemsRow.jsx';
 import {getLogicalTypeIcon} from './propertyIcons.js';
 import {TypeSelector} from '../../ui/TypeSelector';
+import {useSortable} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 
 /**
  * Recursive component to render a property and its sub-properties
@@ -27,8 +29,35 @@ const PropertyRow = ({
                          onSaveAndAddNext,
                          autoEditNewProperty = false,
                          onAutoEditComplete,
-                         setValue // Pass setValue for ItemsRow updateItems callback
+                         setValue, // Pass setValue for ItemsRow updateItems callback
+                         sortableId, // Unique ID for sortable (provided by parent)
+                         isDragEnabled = false // Only enable at top-level when wrapped in DndContext
                      }) => {
+    // Disable layout animation to prevent visual glitch on drop
+    const animateLayoutChanges = () => false;
+
+    // Sortable hook for drag-and-drop
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: sortableId || `${schemaIdx}-${propIndex}`,
+        disabled: !isDragEnabled,
+        animateLayoutChanges,
+    });
+
+    const sortableStyle = isDragEnabled ? {
+        transform: CSS.Transform.toString(transform),
+        transition: isDragging ? transition : 'none', // Only animate while dragging
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1000 : 'auto',
+        position: 'relative',
+    } : {};
+
     const [editingPropertyName, setEditingPropertyName] = useState(false);
     const [editedPropertyName, setEditedPropertyName] = useState('');
     const inputRef = useRef(null);
@@ -70,22 +99,30 @@ const PropertyRow = ({
     return (
         <>
             <div
-                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
-                style={{paddingLeft: `${depth * 1.5}rem`}}
+                ref={isDragEnabled ? setNodeRef : undefined}
+                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'} ${isDragging ? 'shadow-lg bg-white' : ''}`}
+                style={{paddingLeft: `${depth * 1.5}rem`, ...sortableStyle}}
                 onClick={handleSelect}
             >
                 {/* Main row with name, type, description */}
                 <div className="flex items-center justify-between px-2 pr-2 py-1.5">
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        {/* Logical Type Icon */}
-                        {(() => {
-                            const IconComponent = getLogicalTypeIcon(property.logicalType);
-                            return IconComponent ? (
-                                <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-                            ) : (
-                                <div className="h-3.5 w-3.5 flex-shrink-0" />
-                            );
-                        })()}
+                        {/* Logical Type Icon - also serves as drag handle when drag is enabled */}
+                        <span
+                            {...(isDragEnabled ? { ...attributes, ...listeners } : {})}
+                            className={isDragEnabled ? "cursor-grab active:cursor-grabbing touch-none" : ""}
+                            onClick={(e) => isDragEnabled && e.stopPropagation()}
+                            title={isDragEnabled ? "Drag to reorder" : undefined}
+                        >
+                            {(() => {
+                                const IconComponent = getLogicalTypeIcon(property.logicalType);
+                                return IconComponent ? (
+                                    <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                                ) : (
+                                    <div className="h-3.5 w-3.5 flex-shrink-0" />
+                                );
+                            })()}
+                        </span>
 
                         {/* Property Name - fixed width for alignment */}
                         {editingPropertyName ? (

@@ -162,6 +162,30 @@ const DiagramViewInner = () => {
     }
   }, [parsedData, updateSchemas]);
 
+  // Handle reordering a property within a schema (drag-and-drop)
+  const handleReorderProperty = useCallback((nodeId, fromIndex, toIndex) => {
+    if (!parsedData?.schema) return;
+    if (fromIndex === toIndex) return;
+
+    const schemaIndex = parseInt(nodeId.replace('schema-', ''));
+    const updatedSchemas = [...parsedData.schema];
+
+    if (updatedSchemas[schemaIndex]) {
+      const schema = updatedSchemas[schemaIndex];
+      const properties = [...(schema.properties || [])];
+
+      // Perform reorder
+      const [removed] = properties.splice(fromIndex, 1);
+      properties.splice(toIndex, 0, removed);
+
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+      updateSchemas(updatedSchemas);
+    }
+  }, [parsedData, updateSchemas]);
+
   // Handle updating a schema
   const handleUpdateSchema = useCallback((nodeId, updatedSchema) => {
     if (!parsedData?.schema) return;
@@ -450,6 +474,7 @@ const DiagramViewInner = () => {
           onAddProperty: handleAddProperty,
           onAddNestedProperty: handleAddNestedProperty,
           onDeleteProperty: handleDeleteProperty,
+          onReorderProperty: handleReorderProperty,
           onUpdateSchema: handleUpdateSchema,
           onDeleteSchema: handleDeleteSchema,
           onShowPropertyDetails: handleShowPropertyDetails,
@@ -552,7 +577,7 @@ const DiagramViewInner = () => {
 
     setNodes(schemaNodes);
     setEdges(propertyEdges);
-  }, [parsedData, handleAddProperty, handleDeleteProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
+  }, [parsedData, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
 
   // Focus on selected schema when coming from sidebar
   useEffect(() => {
