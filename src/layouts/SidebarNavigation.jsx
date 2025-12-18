@@ -384,7 +384,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                     <linearGradient id="_Linear3Mobile" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(2.65528e-14,-433.64,433.64,2.65528e-14,132.5,586.64)"><stop offset="0" style={{stopColor:"rgb(217,70,239)",stopOpacity:1}}/><stop offset="0.39" style={{stopColor:"rgb(229,112,247)",stopOpacity:1}}/><stop offset="1" style={{stopColor:"rgb(232,121,249)",stopOpacity:1}}/></linearGradient>
                                 </defs>
                             </svg>
-                            <span className="text-sm font-medium text-gray-900">Menu</span>
+                            <span className="text-sm font-medium text-gray-900">Data Contract Editor</span>
                         </div>
                         <button
                             onClick={closeMobileSidebar}
