@@ -17,11 +17,15 @@ const FundamentalsSection = () => {
 	const tags = useEditorStore(useShallow(state => state.getValue('tags')));
 
 	// Check if section has any data
+	const hasCustomProperties = customProperties && (
+		Array.isArray(customProperties) ? customProperties.length > 0 :
+		typeof customProperties === 'object' && Object.keys(customProperties).length > 0
+	);
 	const hasData =
 		id || name || version ||
 		(tags && Array.isArray(tags) && tags.length > 0) ||
 		(authoritativeDefinitions && authoritativeDefinitions.length > 0) ||
-		(customProperties && customProperties.length > 0)
+		hasCustomProperties
 	;
 
 	if (!hasData) return null;

@@ -151,6 +151,43 @@ export function useSchemaOperations(schemaIndex) {
         }
     }, [schema, schemaIndex, getValue, setValue]);
 
+    // Reorder property within same parent (drag-and-drop)
+    const reorderProperty = useCallback((propPath, fromIndex, toIndex) => {
+        try {
+            if (!schema || !schema[schemaIndex]) {
+                return;
+            }
+            if (fromIndex === toIndex) {
+                return;
+            }
+
+            // Build path to the properties array containing the items to reorder
+            // propPath is the path to the parent, empty for top-level properties
+            let pathStr;
+            if (propPath.length === 0) {
+                // Top-level properties
+                pathStr = `schema[${schemaIndex}].properties`;
+            } else {
+                // Nested properties - use the path builder
+                pathStr = buildPropertiesArrayPath(schemaIndex, propPath.slice(0, -1), propPath[propPath.length - 1] === 'items');
+            }
+
+            const currentProperties = getValue(pathStr);
+            if (!Array.isArray(currentProperties)) {
+                return;
+            }
+
+            // Perform reorder
+            const reordered = [...currentProperties];
+            const [removed] = reordered.splice(fromIndex, 1);
+            reordered.splice(toIndex, 0, removed);
+
+            setValue(pathStr, reordered);
+        } catch (error) {
+            console.error('Error reordering property:', error);
+        }
+    }, [schema, schemaIndex, getValue, setValue]);
+
     return {
         schema,
         getValue,
@@ -160,6 +197,7 @@ export function useSchemaOperations(schemaIndex) {
         handleSaveAndAddNext,
         updateProperty,
         removeProperty,
-        addSubProperty
+        addSubProperty,
+        reorderProperty
     };
 }

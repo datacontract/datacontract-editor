@@ -162,6 +162,30 @@ const DiagramViewInner = () => {
     }
   }, [parsedData, updateSchemas]);
 
+  // Handle reordering a property within a schema (drag-and-drop)
+  const handleReorderProperty = useCallback((nodeId, fromIndex, toIndex) => {
+    if (!parsedData?.schema) return;
+    if (fromIndex === toIndex) return;
+
+    const schemaIndex = parseInt(nodeId.replace('schema-', ''));
+    const updatedSchemas = [...parsedData.schema];
+
+    if (updatedSchemas[schemaIndex]) {
+      const schema = updatedSchemas[schemaIndex];
+      const properties = [...(schema.properties || [])];
+
+      // Perform reorder
+      const [removed] = properties.splice(fromIndex, 1);
+      properties.splice(toIndex, 0, removed);
+
+      updatedSchemas[schemaIndex] = {
+        ...schema,
+        properties,
+      };
+      updateSchemas(updatedSchemas);
+    }
+  }, [parsedData, updateSchemas]);
+
   // Handle updating a schema
   const handleUpdateSchema = useCallback((nodeId, updatedSchema) => {
     if (!parsedData?.schema) return;
@@ -212,6 +236,7 @@ const DiagramViewInner = () => {
     const schemaIndex = parseInt(nodeId.replace('schema-', ''));
     const schema = parsedData.schema[schemaIndex];
     let property;
+    let propertyPath = `schema[${schemaIndex}].properties[${propertyIndex}]`;
 
     // Get the property (either top-level or nested)
     if (nestedIndex !== null && nestedIndex !== undefined) {
@@ -220,8 +245,10 @@ const DiagramViewInner = () => {
       if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
         const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
         property = parentProperty?.items?.properties?.[itemsPropIndex];
+        propertyPath = `schema[${schemaIndex}].properties[${propertyIndex}].items.properties[${itemsPropIndex}]`;
       } else {
         property = parentProperty?.properties?.[nestedIndex];
+        propertyPath = `schema[${schemaIndex}].properties[${propertyIndex}].properties[${nestedIndex}]`;
       }
     } else {
       property = schema?.properties?.[propertyIndex];
@@ -236,6 +263,7 @@ const DiagramViewInner = () => {
       propertyIndex,
       nestedIndex,
       property,
+      propertyPath,
     });
   }, [parsedData]);
 
@@ -277,106 +305,6 @@ const DiagramViewInner = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedProperty, handleDeleteProperty]);
-
-  // Handle property update from drawer
-  const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
-    if (!selectedProperty || !parsedData?.schema) return;
-
-    const { schemaIndex, propertyIndex, nestedIndex } = selectedProperty;
-    const updatedSchemas = [...parsedData.schema];
-    const schema = updatedSchemas[schemaIndex];
-
-    if (nestedIndex !== null && nestedIndex !== undefined) {
-      // Update nested property
-      const properties = [...(schema.properties || [])];
-      const parentProperty = { ...properties[propertyIndex] };
-
-      if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
-        // Update property within items
-        const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
-        const items = { ...parentProperty.items };
-        const itemsProperties = [...(items.properties || [])];
-        itemsProperties[itemsPropIndex] = updatedProperty;
-        items.properties = itemsProperties;
-        parentProperty.items = items;
-      } else {
-        // Update regular nested property
-        const nestedProperties = [...(parentProperty.properties || [])];
-        nestedProperties[nestedIndex] = updatedProperty;
-        parentProperty.properties = nestedProperties;
-      }
-
-      properties[propertyIndex] = parentProperty;
-      updatedSchemas[schemaIndex] = {
-        ...schema,
-        properties,
-      };
-    } else {
-      // Update top-level property
-      const properties = [...(schema.properties || [])];
-      properties[propertyIndex] = updatedProperty;
-      updatedSchemas[schemaIndex] = {
-        ...schema,
-        properties,
-      };
-    }
-
-    updateSchemas(updatedSchemas);
-
-    // Update the selected property to reflect changes
-    setSelectedProperty(prev => ({
-      ...prev,
-      property: updatedProperty
-    }));
-  }, [selectedProperty, parsedData, updateSchemas]);
-
-  // Handle property delete from drawer
-  const handleDrawerPropertyDelete = useCallback(() => {
-    if (!selectedProperty || !parsedData?.schema) return;
-
-    const { schemaIndex, propertyIndex, nestedIndex } = selectedProperty;
-    const updatedSchemas = [...parsedData.schema];
-    const schema = updatedSchemas[schemaIndex];
-
-    if (nestedIndex !== null && nestedIndex !== undefined) {
-      // Delete nested property
-      const properties = [...(schema.properties || [])];
-      const parentProperty = { ...properties[propertyIndex] };
-
-      if (typeof nestedIndex === 'string' && nestedIndex.startsWith('items-')) {
-        // Delete property within items
-        const itemsPropIndex = parseInt(nestedIndex.replace('items-', ''));
-        const items = { ...parentProperty.items };
-        const itemsProperties = [...(items.properties || [])];
-        itemsProperties.splice(itemsPropIndex, 1);
-        items.properties = itemsProperties;
-        parentProperty.items = items;
-      } else {
-        // Delete regular nested property
-        const nestedProperties = [...(parentProperty.properties || [])];
-        nestedProperties.splice(nestedIndex, 1);
-        parentProperty.properties = nestedProperties;
-      }
-
-      properties[propertyIndex] = parentProperty;
-      updatedSchemas[schemaIndex] = {
-        ...schema,
-        properties,
-      };
-    } else {
-      // Delete top-level property
-      const properties = [...(schema.properties || [])];
-      properties.splice(propertyIndex, 1);
-      updatedSchemas[schemaIndex] = {
-        ...schema,
-        properties,
-      };
-    }
-
-    updateSchemas(updatedSchemas);
-    handleCloseDrawer();
-  }, [selectedProperty, parsedData, updateSchemas, handleCloseDrawer]);
-
 
   // Validate connections: only allow left (source) to right (target)
   const isValidConnection = useCallback((connection) => {
@@ -546,6 +474,7 @@ const DiagramViewInner = () => {
           onAddProperty: handleAddProperty,
           onAddNestedProperty: handleAddNestedProperty,
           onDeleteProperty: handleDeleteProperty,
+          onReorderProperty: handleReorderProperty,
           onUpdateSchema: handleUpdateSchema,
           onDeleteSchema: handleDeleteSchema,
           onShowPropertyDetails: handleShowPropertyDetails,
@@ -648,7 +577,7 @@ const DiagramViewInner = () => {
 
     setNodes(schemaNodes);
     setEdges(propertyEdges);
-  }, [parsedData, handleAddProperty, handleDeleteProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
+  }, [parsedData, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
 
   // Focus on selected schema when coming from sidebar
   useEffect(() => {
@@ -723,7 +652,12 @@ const DiagramViewInner = () => {
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
-        onPaneClick={() => {
+        onPaneClick={(event) => {
+          // Don't close drawer if click was inside a HeadlessUI portal (popover, listbox, combobox)
+          const target = event.target;
+          if (target.closest('[data-headlessui-portal]') || target.closest('[id^="headlessui-"]')) {
+            return;
+          }
           handleCloseDrawer();
         }}
         fitView
@@ -812,9 +746,7 @@ const DiagramViewInner = () => {
       <PropertyDetailsDrawer
         open={selectedProperty !== null}
         onClose={handleCloseDrawer}
-        property={selectedProperty?.property}
-        onUpdate={handleDrawerPropertyUpdate}
-        onDelete={handleDrawerPropertyDelete}
+        propertyPath={selectedProperty?.propertyPath}
       />
     </div>
   );

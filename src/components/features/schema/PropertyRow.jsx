@@ -1,11 +1,12 @@
-import {memo, useEffect, useMemo, useRef, useState} from 'react';
-import {useEditorStore} from '../../../store.js';
+import {memo, useEffect, useRef, useState} from 'react';
 import {Tooltip} from '../../ui/index.js';
-import {getSchemaEnumValues} from '../../../lib/schemaEnumExtractor.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
 import PropertyIndicators from './PropertyIndicators.jsx';
 import ItemsRow from './ItemsRow.jsx';
-import {getLogicalTypeIcon, fallbackLogicalTypeOptions} from './propertyIcons.js';
+import {getLogicalTypeIcon} from './propertyIcons.js';
+import {TypeSelector} from '../../ui/TypeSelector';
+import {useSortable} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 
 /**
  * Recursive component to render a property and its sub-properties
@@ -28,12 +29,37 @@ const PropertyRow = ({
                          onSaveAndAddNext,
                          autoEditNewProperty = false,
                          onAutoEditComplete,
-                         setValue // Pass setValue for ItemsRow updateItems callback
+                         setValue, // Pass setValue for ItemsRow updateItems callback
+                         sortableId, // Unique ID for sortable (provided by parent)
+                         isDragEnabled = false // Only enable at top-level when wrapped in DndContext
                      }) => {
+    // Disable layout animation to prevent visual glitch on drop
+    const animateLayoutChanges = () => false;
+
+    // Sortable hook for drag-and-drop
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: sortableId || `${schemaIdx}-${propIndex}`,
+        disabled: !isDragEnabled,
+        animateLayoutChanges,
+    });
+
+    const sortableStyle = isDragEnabled ? {
+        transform: CSS.Transform.toString(transform),
+        transition: isDragging ? transition : 'none', // Only animate while dragging
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1000 : 'auto',
+        position: 'relative',
+    } : {};
+
     const [editingPropertyName, setEditingPropertyName] = useState(false);
     const [editedPropertyName, setEditedPropertyName] = useState('');
-    const [editingPropertyType, setEditingPropertyType] = useState(false);
-    const jsonSchema = useEditorStore((state) => state.schemaData);
     const inputRef = useRef(null);
 
     // Auto-edit when this is a newly added property
@@ -56,12 +82,6 @@ const PropertyRow = ({
         }
     }, [editingPropertyName]);
 
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
-
     const currentPath = [...propPath, propIndex];
     const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
     const isExpanded = expandedProperties.has(pathKey);
@@ -79,24 +99,32 @@ const PropertyRow = ({
     return (
         <>
             <div
-                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'}`}
-                style={{paddingLeft: `${depth * 1.5}rem`}}
+                ref={isDragEnabled ? setNodeRef : undefined}
+                className={`border-t border-gray-100 group cursor-pointer ${isSelected ? 'bg-indigo-50 hover:bg-indigo-100 ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50'} ${isDragging ? 'shadow-lg bg-white' : ''}`}
+                style={{paddingLeft: `${depth * 1.5}rem`, ...sortableStyle}}
                 onClick={handleSelect}
             >
                 {/* Main row with name, type, description */}
-                <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                        {/* Logical Type Icon */}
-                        {(() => {
-                            const IconComponent = getLogicalTypeIcon(property.logicalType);
-                            return IconComponent ? (
-                                <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-                            ) : (
-                                <div className="h-3.5 w-3.5 flex-shrink-0" />
-                            );
-                        })()}
+                <div className="flex items-center justify-between px-2 pr-2 py-1.5">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        {/* Logical Type Icon - also serves as drag handle when drag is enabled */}
+                        <span
+                            {...(isDragEnabled ? { ...attributes, ...listeners } : {})}
+                            className={isDragEnabled ? "cursor-grab active:cursor-grabbing touch-none" : ""}
+                            onClick={(e) => isDragEnabled && e.stopPropagation()}
+                            title={isDragEnabled ? "Drag to reorder" : undefined}
+                        >
+                            {(() => {
+                                const IconComponent = getLogicalTypeIcon(property.logicalType);
+                                return IconComponent ? (
+                                    <IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                                ) : (
+                                    <div className="h-3.5 w-3.5 flex-shrink-0" />
+                                );
+                            })()}
+                        </span>
 
-                        {/* Property Name */}
+                        {/* Property Name - fixed width for alignment */}
                         {editingPropertyName ? (
                             <input
                                 type="text"
@@ -131,14 +159,13 @@ const PropertyRow = ({
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                                 ref={inputRef}
-                                className="bg-white px-2 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[8rem]"
+                                className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-32"
                                 placeholder="property name"
-                                size={editedPropertyName ? editedPropertyName.length : 16}
                                 autoFocus
                             />
                         ) : (
                             <span
-                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
+                                className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${
                                     !property.name || property?.name?.toString().trim() === '' ? 'text-gray-400 italic' : 'text-gray-600'
                                 }`}
                                 onClick={(e) => {
@@ -153,59 +180,24 @@ const PropertyRow = ({
                             </span>
                         )}
 
-                        {/* Property Type - inline select like diagram editor */}
-                        <div className="text-xs text-gray-600 flex items-center flex-shrink-0">
-                            {editingPropertyType ? (
-                                <select
-                                    value={property.logicalType || ''}
-                                    onChange={(e) => {
-                                        updateProperty(schemaIdx, currentPath, 'logicalType', e.target.value || undefined);
-                                        setEditingPropertyType(false);
-                                    }}
-                                    onBlur={() => setEditingPropertyType(false)}
-                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="">Select...</option>
-                                    {logicalTypeOptions.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 whitespace-nowrap min-w-24"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSelectProperty(currentPath, property);
-                                        setEditingPropertyType(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onSelectProperty(currentPath, property);
-                                            setEditingPropertyType(true);
-                                        }
-                                    }}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label="Edit logical type"
-                                    title="Click or press Enter to edit type"
-                                >
-                  {property.logicalType || <span className="text-gray-400 italic">logicalType</span>}
-                </span>
-                            )}
+                        {/* Property Type - min width for alignment */}
+                        <div className="min-w-20 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <TypeSelector
+                                logicalType={property.logicalType}
+                                onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
+                                physicalType={property.physicalType}
+                                onPhysicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'physicalType', value || undefined)}
+                            />
                         </div>
 
-                        {/* Visual Indicators */}
-                        <PropertyIndicators property={property}/>
+                        {/* Visual Indicators - fixed width for alignment */}
+                        <div className="w-14 flex-shrink-0">
+                            <PropertyIndicators property={property}/>
+                        </div>
 
                         {/* Description preview */}
                         {property.description && (
-                            <span className="text-xs text-gray-400 truncate max-w-xs" title={property.description}>
+                            <span className="text-xs text-gray-400 truncate flex-1" title={property.description}>
                                 {property.description}
                             </span>
                         )}

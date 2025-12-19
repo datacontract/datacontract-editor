@@ -6,6 +6,8 @@ import * as Yaml from "yaml";
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
 
+export const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\nname: "Example Data Contract"\n';
+
 /**
  * Set the file storage backend to use for the editor
  * @param {FileStorageBackend} backend - The storage backend instance
@@ -68,7 +70,14 @@ export function defaultStoreConfig(set, get) {
 				// NOOP
 			}
 		},
-		loadYaml: (newYaml) => set({yaml: newYaml, baselineYaml: newYaml, isDirty: false}),
+		loadYaml: (newYaml) => {
+			try {
+				const yamlParts = Yaml.parse(newYaml);
+				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts});
+			} catch(e) {
+				// NOOP
+			}
+		},
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
@@ -101,6 +110,10 @@ export function defaultStoreConfig(set, get) {
 		removeNotification: (id) => set((state) => ({
 			notifications: state.notifications.filter(n => n.id !== id)
 		})),
+		toggleMobileSidebar: () => set((state) => ({
+			isMobileSidebarOpen: !state.isMobileSidebarOpen,
+		})),
+		closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
 		togglePreview: () => set((state) => ({
 			isPreviewVisible: !state.isPreviewVisible,
 			isWarningsVisible: state.isPreviewVisible ? false : false, // Close warnings when opening preview
@@ -237,10 +250,9 @@ export function defaultStoreConfig(set, get) {
 				}
 
 				// Set the loaded file info so subsequent saves update the same file
+				get().setYaml(yamlContent);
 				set({
-					yaml: yamlContent,
 					baselineYaml: yamlContent,
-					isDirty: false,
 					lastSaveInfo: filename ? {
 						filename: filename,
 						timestamp: new Date().toISOString(),
@@ -300,13 +312,13 @@ export function defaultStoreConfig(set, get) {
 		},
 	};
 
-	const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nname: ""\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\n';
 
 	return {
 		yaml: initialYaml,
 		yamlParts: Yaml.parse(initialYaml),
 		baselineYaml: initialYaml, // YAML at last save/load for diff comparison
 		isDirty: false,
+		isMobileSidebarOpen: false,
 		isPreviewVisible: true,
 		isWarningsVisible: false,
 		isTestResultsVisible: false,
@@ -333,6 +345,7 @@ export function defaultStoreConfig(set, get) {
 				dataContractCliApiServerUrl: null, // null means use default https://api.datacontract.com
 				apiKey: null, // Optional X-API-KEY for authentication
 			},
+			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
 		...actions,
 	};
@@ -345,8 +358,23 @@ const defaultEditorStore = create()(
 		persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: createJSONStorage(() => localStorage),
-		}), {name: 'DataContract Editor Store'})
-)
+			onRehydrateStorage: () => (state) => {
+				// Sync yamlParts from yaml when rehydrating from localStorage
+				if (state?.yaml) {
+					try {
+						const yamlParts = Yaml.parse(state.yaml);
+						// Use setState to update yamlParts after rehydration
+						setTimeout(() => {
+							defaultEditorStore.setState({ yamlParts });
+						}, 0);
+					} catch (e) {
+						console.warn('Failed to parse yaml during rehydration:', e);
+					}
+				}
+			},
+		})
+	)
+);
 
 /**
  * Hook that returns either the override store (when embedded) or the default store

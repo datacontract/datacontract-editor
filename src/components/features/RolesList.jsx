@@ -1,9 +1,12 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Tooltip } from '../ui/index.js';
 import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
+import { useEditorStore } from '../../store.js';
+import { useCustomization, useIsPropertyHidden } from '../../hooks/useCustomization.js';
+import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) => {
   const [lastAddedIndex, setLastAddedIndex] = useState(null);
@@ -98,25 +101,89 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
 };
 
 const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) => {
+  const yamlParts = useEditorStore((state) => state.yamlParts);
+
+  // Get customization config for roles level
+  const { customProperties: customPropertyConfigs, customSections } = useCustomization('roles');
+
+  // Check hidden status for standard properties
+  const isRoleHidden = useIsPropertyHidden('roles', 'role');
+  const isDescriptionHidden = useIsPropertyHidden('roles', 'description');
+  const isAccessHidden = useIsPropertyHidden('roles', 'access');
+  const isFirstLevelApproversHidden = useIsPropertyHidden('roles', 'firstLevelApprovers');
+  const isSecondLevelApproversHidden = useIsPropertyHidden('roles', 'secondLevelApprovers');
+
+  // Convert array format to object lookup for UI components
+  const customPropertiesLookup = useMemo(() => {
+    const cp = roleItem.customProperties;
+    if (!Array.isArray(cp)) return cp || {};
+    return cp.reduce((acc, item) => {
+      if (item?.property !== undefined) {
+        acc[item.property] = item.value;
+      }
+      return acc;
+    }, {});
+  }, [roleItem.customProperties]);
+
+  // Build context for condition evaluation
+  const roleContext = useMemo(() => ({
+    role: roleItem.role,
+    description: roleItem.description,
+    access: roleItem.access,
+    firstLevelApprovers: roleItem.firstLevelApprovers,
+    secondLevelApprovers: roleItem.secondLevelApprovers,
+    ...customPropertiesLookup,
+  }), [roleItem, customPropertiesLookup]);
+
+  // Handle custom property changes - stores as array format per ODCS standard
+  const updateCustomProperty = useCallback((propName, value) => {
+    // Convert object format to array format if needed
+    let currentArray;
+    const cp = roleItem.customProperties;
+    if (Array.isArray(cp)) {
+      currentArray = cp;
+    } else if (cp && typeof cp === 'object') {
+      currentArray = Object.entries(cp).map(([k, v]) => ({ property: k, value: v }));
+    } else {
+      currentArray = [];
+    }
+
+    if (value === undefined) {
+      const updated = currentArray.filter(item => item.property !== propName);
+      updateRole(index, 'customProperties', updated.length > 0 ? updated : undefined);
+    } else {
+      const existingIndex = currentArray.findIndex(item => item.property === propName);
+      if (existingIndex >= 0) {
+        const updated = [...currentArray];
+        updated[existingIndex] = { property: propName, value };
+        updateRole(index, 'customProperties', updated);
+      } else {
+        updateRole(index, 'customProperties', [...currentArray, { property: propName, value }]);
+      }
+    }
+  }, [roleItem.customProperties, index, updateRole]);
 
   return (
               <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2 grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-11">
-                      <ValidatedInput
-                        ref={(el) => roleInputRefs.current[index] = el}
-                        name={`role-${index}`}
-                        label="Role"
-                        value={roleItem.role || ''}
-                        onChange={(e) => updateRole(index, 'role', e.target.value)}
-                        required={true}
-                        tooltip="IAM role name"
-                        placeholder="arn:aws:iam::123456789:role/DataReader"
-                        className="bg-white"
-                        externalErrors={[]}
-                      />
-                    </div>
+                    {!isRoleHidden && (
+                      <div className="col-span-11">
+                        <ValidatedInput
+                          ref={(el) => roleInputRefs.current[index] = el}
+                          name={`role-${index}`}
+                          label="Role"
+                          value={roleItem.role || ''}
+                          onChange={(e) => updateRole(index, 'role', e.target.value)}
+                          required={true}
+                          tooltip="IAM role name"
+                          placeholder="arn:aws:iam::123456789:role/DataReader"
+                          className="bg-white"
+                          externalErrors={[]}
+                        />
+                      </div>
+                    )}
+                    {isRoleHidden && <div className="col-span-11"></div>}
                     <button
                       type="button"
                       onClick={() => removeRole(index)}
@@ -128,76 +195,109 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                       </svg>
                     </button>
                   </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      Access
-                    </label>
-                    <Tooltip content="The type of access provided by the IAM role (e.g. read or write)">
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
+                {!isAccessHidden && (
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="block text-xs font-medium leading-4 text-gray-900">
+                        Access
+                      </label>
+                      <Tooltip content="The type of access provided by the IAM role (e.g. read or write)">
+                        <QuestionMarkCircleIcon />
+                      </Tooltip>
+                    </div>
+                    <input
+                      type="text"
+                      value={roleItem.access || ''}
+                      onChange={(e) => updateRole(index, 'access', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="read"
+                    />
                   </div>
-                  <input
-                    type="text"
-                    value={roleItem.access || ''}
-                    onChange={(e) => updateRole(index, 'access', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="read"
-                  />
-                </div>
+                )}
+                {!isDescriptionHidden && (
+                  <div className="sm:col-span-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="block text-xs font-medium leading-4 text-gray-900">
+                        Description
+                      </label>
+                      <Tooltip content="Permission scope explanation">
+                        <QuestionMarkCircleIcon />
+                      </Tooltip>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={roleItem.description || ''}
+                      onChange={(e) => updateRole(index, 'description', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="Permission scope explanation..."
+                    />
+                  </div>
+                )}
+                {!isFirstLevelApproversHidden && (
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="block text-xs font-medium leading-4 text-gray-900">
+                        First Level Approvers
+                      </label>
+                      <Tooltip content="Primary approval authority">
+                        <QuestionMarkCircleIcon />
+                      </Tooltip>
+                    </div>
+                    <input
+                      type="text"
+                      value={roleItem.firstLevelApprovers || ''}
+                      onChange={(e) => updateRole(index, 'firstLevelApprovers', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="manager@example.com"
+                      data-1p-ignore
+                    />
+                  </div>
+                )}
+                {!isSecondLevelApproversHidden && (
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="block text-xs font-medium leading-4 text-gray-900">
+                        Second Level Approvers
+                      </label>
+                      <Tooltip content="Secondary approval authority">
+                        <QuestionMarkCircleIcon />
+                      </Tooltip>
+                    </div>
+                    <input
+                      type="text"
+                      value={roleItem.secondLevelApprovers || ''}
+                      onChange={(e) => updateRole(index, 'secondLevelApprovers', e.target.value)}
+                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                      placeholder="director@example.com"
+                      data-1p-ignore
+                    />
+                  </div>
+                )}
+
+                {/* Custom Sections from Customization */}
                 <div className="sm:col-span-2">
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      Description
-                    </label>
-                    <Tooltip content="Permission scope explanation">
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <textarea
-                    rows={2}
-                    value={roleItem.description || ''}
-                    onChange={(e) => updateRole(index, 'description', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="Permission scope explanation..."
+                  <CustomSections
+                    customSections={customSections}
+                    customProperties={customPropertyConfigs}
+                    values={customPropertiesLookup}
+                    onPropertyChange={updateCustomProperty}
+                    context={roleContext}
+                    yamlParts={yamlParts}
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      First Level Approvers
-                    </label>
-                    <Tooltip content="Primary approval authority">
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <input
-                    type="text"
-                    value={roleItem.firstLevelApprovers || ''}
-                    onChange={(e) => updateRole(index, 'firstLevelApprovers', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="manager@example.com"
-                    data-1p-ignore
+
+                {/* Ungrouped Custom Properties */}
+                <div className="sm:col-span-2">
+                  <UngroupedCustomProperties
+                    customProperties={customPropertyConfigs}
+                    customSections={customSections}
+                    values={customPropertiesLookup}
+                    onPropertyChange={updateCustomProperty}
+                    context={roleContext}
+                    yamlParts={yamlParts}
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <label className="block text-xs font-medium leading-4 text-gray-900">
-                      Second Level Approvers
-                    </label>
-                    <Tooltip content="Secondary approval authority">
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <input
-                    type="text"
-                    value={roleItem.secondLevelApprovers || ''}
-                    onChange={(e) => updateRole(index, 'secondLevelApprovers', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="director@example.com"
-                    data-1p-ignore
-                  />
-                </div>
+
                 <div className="sm:col-span-2">
                   <CustomPropertiesEditor
                     value={roleItem.customProperties || []}

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - Customization Example</title>
+    <link rel="stylesheet" href="./dist/datacontract-editor.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        html, body {
+            height: 100%;
+        }
+        #editor {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="editor"></div>
+
+<script type="module">
+    import { init } from './dist/datacontract-editor.es.js';
+
+    // Sample customizations configuration demonstrating all features
+    const customizations = {
+      dataContract: {
+        // Root level customizations
+        root: {
+        standardProperties: [
+          // Hide tenant field
+          { property: 'tenant', hidden: true },
+          // Customize status with fixed enum
+          {
+            property: 'status',
+            title: 'Contract Status',
+            description: 'Current lifecycle stage of this contract',
+            enum: ['draft', 'review', 'approved', 'active', 'deprecated']
+          },
+          // Customize domain with enum
+          // {
+          //   property: 'domain',
+          //   title: 'Business Domain',
+          //   enum: ['finance', 'marketing', 'sales', 'engineering', 'hr']
+          // }
+        ],
+        // customProperties: [
+        //   {
+        //     property: 'dataOwner',
+        //     title: 'Data Owner',
+        //     type: 'text',
+        //     description: 'Person responsible for the data',
+        //     required: true,
+        //     placeholder: 'john.doe@company.com'
+        //   },
+        //   {
+        //     property: 'costCenter',
+        //     title: 'Cost Center',
+        //     type: 'select',
+        //     description: 'Department cost center',
+        //     enum: ['CC-100', 'CC-200', 'CC-300', 'CC-400']
+        //   },
+        //   {
+        //     property: 'complianceFrameworks',
+        //     title: 'Compliance Frameworks',
+        //     type: 'multiselect',
+        //     description: 'Applicable compliance frameworks',
+        //     enum: ['GDPR', 'CCPA', 'HIPAA', 'SOX', 'PCI-DSS']
+        //   },
+        //   {
+        //     property: 'retentionDays',
+        //     title: 'Retention Period (Days)',
+        //     type: 'integer',
+        //     description: 'How long to retain data',
+        //     minimum: 1,
+        //     maximum: 3650,
+        //     placeholder: '365'
+        //   },
+        //   {
+        //     property: 'isPublic',
+        //     title: 'Public Dataset',
+        //     type: 'boolean',
+        //     description: 'Is this dataset publicly accessible?'
+        //   },
+        //   {
+        //     property: 'effectiveDate',
+        //     title: 'Effective Date',
+        //     type: 'date',
+        //     description: 'When this contract becomes effective'
+        //   },
+        //   {
+        //     property: 'notes',
+        //     title: 'Internal Notes',
+        //     type: 'textarea',
+        //     description: 'Internal notes about this contract',
+        //     rows: 4
+        //   }
+        // ],
+        // customSections: [
+        //   {
+        //     section: 'governance',
+        //     title: 'Governance',
+        //     customProperties: ['dataOwner', 'costCenter', 'complianceFrameworks']
+        //   },
+        //   {
+        //     section: 'lifecycle',
+        //     title: 'Lifecycle',
+        //     customProperties: ['retentionDays', 'effectiveDate', 'isPublic']
+        //   }
+        // ]
+      },
+
+      // Schema properties level customizations
+      'schema.properties': {
+        standardProperties: [
+          // Hide some advanced fields
+          { property: 'encryptedName', hidden: true },
+          { property: 'transformSourceObjects', hidden: true },
+          // Customize classification with fixed options
+          {
+            property: 'classification',
+            title: 'Data Classification',
+            enum: ['public', 'internal', 'confidential', 'restricted']
+          }
+        ],
+        customProperties: [
+          {
+            property: 'piiCategory',
+            title: 'PII Category',
+            type: 'select',
+            description: 'Type of personally identifiable information',
+            enum: ['none', 'direct', 'indirect', 'sensitive']
+          },
+          {
+            property: 'piiHandling',
+            title: 'PII Handling Instructions',
+            type: 'textarea',
+            description: 'How to handle this PII data',
+            condition: "piiCategory != 'none'"
+          },
+          {
+            property: 'maskingRequired',
+            title: 'Masking Required',
+            type: 'boolean',
+            description: 'Does this field require data masking?',
+            condition: "classification == 'confidential' || classification == 'restricted'"
+          },
+          {
+            property: 'gdprLegalBasis',
+            title: 'GDPR Legal Basis',
+            type: 'select',
+            description: 'Legal basis for processing under GDPR',
+            enum: ['consent', 'contract', 'legal_obligation', 'vital_interests', 'public_task', 'legitimate_interests'],
+            condition: "piiCategory != 'none'"
+          }
+        ],
+        customSections: [
+          {
+            section: 'privacy',
+            title: 'Privacy & Compliance',
+            customProperties: ['piiCategory', 'piiHandling', 'maskingRequired', 'gdprLegalBasis']
+          }
+        ]
+      },
+
+      // // Schema level customizations
+      // schema: {
+      //   standardProperties: [
+      //     { property: 'dataGranularityDescription', hidden: true }
+      //   ],
+      //   customProperties: [
+      //     {
+      //       property: 'dataRetentionPolicy',
+      //       title: 'Data Retention Policy',
+      //       type: 'select',
+      //       enum: ['30days', '90days', '1year', '3years', '7years', 'indefinite']
+      //     }
+      //   ]
+      // },
+			//
+      // // Server level customizations
+      // servers: {
+      //   customProperties: [
+      //     {
+      //       property: 'slaLevel',
+      //       title: 'SLA Level',
+      //       type: 'select',
+      //       enum: ['gold', 'silver', 'bronze']
+      //     },
+      //     {
+      //       property: 'maintenanceWindow',
+      //       title: 'Maintenance Window',
+      //       type: 'text',
+      //       placeholder: 'Sunday 2:00-4:00 UTC'
+      //     }
+      //   ]
+      // },
+
+				team: {
+				  standardProperties: [{
+						property: "name",
+						enum: [
+							"controlling-team",
+							 "data--ai",
+							"finance--legal"
+						]}]},
+
+      // Team level customizations
+      // team: {
+      //   customProperties: [
+      //     {
+      //       property: 'slackChannel',
+      //       title: 'Slack Channel',
+      //       type: 'text',
+      //       placeholder: '#data-team'
+      //     }
+      //   ]
+      // },
+
+        // Team members level customizations
+        // 'team.members': {
+        //   standardProperties: [
+        //     { property: 'dateOut', hidden: true }
+        //   ],
+        //   customProperties: [
+        //     {
+        //       property: 'department',
+        //       title: 'Department',
+        //       type: 'select',
+        //       enum: ['Engineering', 'Data Science', 'Analytics', 'Platform']
+        //     }
+        //   ]
+        // }
+      }
+    };
+
+    // Sample YAML with some custom properties pre-filled (using ODCS array format)
+    const sampleYaml = `apiVersion: "v3.1.0"
+kind: "DataContract"
+id: customization-test
+name: Customization Test Contract
+version: "1.0.0"
+status: draft
+domain: finance
+customProperties:
+  - property: dataOwner
+    value: jane.doe@company.com
+  - property: costCenter
+    value: CC-200
+  - property: complianceFrameworks
+    value:
+      - GDPR
+      - SOX
+  - property: retentionDays
+    value: 365
+  - property: isPublic
+    value: false
+schema:
+  - name: transactions
+    description: Financial transactions
+    physicalType: table
+    properties:
+      - name: customer_id
+        logicalType: string
+        description: Customer identifier
+        classification: confidential
+        customProperties:
+          - property: piiCategory
+            value: direct
+          - property: maskingRequired
+            value: true
+      - name: amount
+        logicalType: number
+        description: Transaction amount
+`;
+
+    // Initialize the editor with customizations
+    const editor = init({
+        container: '#editor',
+        yaml: sampleYaml,
+        customizations: customizations,
+        initialView: 'form',
+        showPreview: true,
+        tests: {
+            enabled: false
+        },
+        enablePersistence: false
+    });
+
+    console.log('Editor initialized with customizations');
+    console.log('Customizations config:', customizations);
+</script>
+</body>
+</html>

@@ -124,22 +124,33 @@ const ServerItem = memo(({ server }) => {
 								<dd className="mt-1 text-sm text-gray-900">{server.delimiter}</dd>
 							</div>
 						)}
-						{server.customProperties && Array.isArray(server.customProperties) && server.customProperties.map((customProperty, cpIndex) => (
-							<div key={cpIndex} className="flex flex-col">
-								<dt
-									className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1">
-									{customProperty.property}
-									{customProperty.description && (
-										<Tooltip content={customProperty.description}>
-											<QuestionMarkCircleIcon />
-										</Tooltip>
-									)}
-								</dt>
-								<dd className="mt-1 text-sm text-gray-900">
-									<PropertyValueRenderer value={customProperty.value}/>
-								</dd>
-							</div>
-						))}
+						{server.customProperties && (
+							Array.isArray(server.customProperties) ? server.customProperties.length > 0 :
+							typeof server.customProperties === 'object' && Object.keys(server.customProperties).length > 0
+						) && (() => {
+							const normalizedProps = Array.isArray(server.customProperties)
+								? server.customProperties
+								: Object.entries(server.customProperties).map(([key, value]) => ({
+									property: key,
+									value: value,
+								}));
+							return normalizedProps.map((customProperty, cpIndex) => (
+								<div key={cpIndex} className="flex flex-col">
+									<dt
+										className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1">
+										{customProperty.property}
+										{customProperty.description && (
+											<Tooltip content={customProperty.description}>
+												<QuestionMarkCircleIcon />
+											</Tooltip>
+										)}
+									</dt>
+									<dd className="mt-1 text-sm text-gray-900">
+										<PropertyValueRenderer value={customProperty.value}/>
+									</dd>
+								</div>
+							));
+						})()}
 						{server.roles && Array.isArray(server.roles) && server.roles.length > 0 && (
 							<div>
 								<dt className="text-sm font-medium text-gray-500 flex items-center gap-1">

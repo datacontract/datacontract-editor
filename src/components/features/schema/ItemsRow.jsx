@@ -1,10 +1,7 @@
-import {useMemo, useState} from 'react';
-import {useEditorStore} from '../../../store.js';
 import {Tooltip} from '../../ui/index.js';
-import {getSchemaEnumValues} from '../../../lib/schemaEnumExtractor.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
-import {getLogicalTypeIcon, fallbackLogicalTypeOptions} from './propertyIcons.js';
-import {buildItemsPath} from '../../../utils/schemaPathBuilder.js';
+import {getLogicalTypeIcon} from './propertyIcons.js';
+import {TypeSelector} from '../../ui/TypeSelector';
 
 /**
  * Component to render array items as a special node
@@ -27,15 +24,6 @@ const ItemsRow = ({
                       setValue,
                       PropertyRow // Passed to avoid circular dependency
                   }) => {
-    const [editingItemsType, setEditingItemsType] = useState(false);
-    const jsonSchema = useEditorStore((state) => state.schemaData);
-
-    // Get logical type options dynamically from schema
-    const logicalTypeOptions = useMemo(() => {
-        const schemaEnums = getSchemaEnumValues(jsonSchema, 'logicalType', 'property');
-        return schemaEnums || fallbackLogicalTypeOptions;
-    }, [jsonSchema]);
-
     const pathKey = `${schemaIdx}-${propPath.join('-')}-items`;
     const isExpanded = expandedProperties.has(pathKey);
     const isObject = items?.logicalType === 'object';
@@ -76,51 +64,14 @@ const ItemsRow = ({
                             {parentPropertyName}[]
                         </span>
 
-                        {/* Items Type - inline select */}
-                        <div className="text-xs text-gray-600 flex items-center">
-                            {editingItemsType ? (
-                                <select
-                                    value={items?.logicalType || ''}
-                                    onChange={(e) => {
-                                        updateItems('logicalType', e.target.value || undefined);
-                                        setEditingItemsType(false);
-                                    }}
-                                    onBlur={() => setEditingItemsType(false)}
-                                    className="px-1 py-0 text-xs border border-indigo-300 rounded focus:outline-none focus:border-indigo-500"
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="">Select...</option>
-                                    {logicalTypeOptions.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <span
-                                    className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSelectProperty(itemsPath, items);
-                                        setEditingItemsType(true);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onSelectProperty(itemsPath, items);
-                                            setEditingItemsType(true);
-                                        }
-                                    }}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label="Edit items type"
-                                    title="Click or press Enter to edit items type"
-                                >
-                                    {items?.logicalType || <span className="text-gray-400 italic">type</span>}
-                                </span>
-                            )}
+                        {/* Items Type - TypeSelector for logical and physical types */}
+                        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <TypeSelector
+                                logicalType={items?.logicalType}
+                                onLogicalTypeChange={(value) => updateItems('logicalType', value || undefined)}
+                                physicalType={items?.physicalType}
+                                onPhysicalTypeChange={(value) => updateItems('physicalType', value || undefined)}
+                            />
                         </div>
 
                         {/* Description hint */}

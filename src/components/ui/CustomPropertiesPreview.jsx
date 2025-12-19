@@ -4,11 +4,27 @@ import Tooltip from './Tooltip.jsx';
  * CustomPropertiesPreview component for displaying custom properties as pills
  * A compact preview component showing property-value pairs
  *
- * @param {Array} properties - Array of custom property objects with {property, value, description}
+ * @param {Array|Object} properties - Array of {property, value, description} objects OR an object with key-value pairs
  * @param {string} pillClassName - Additional CSS classes to apply to individual pills (e.g., "mr-1 mt-1")
  */
 const CustomPropertiesPreview = ({properties = [], pillClassName = ""}) => {
-	if (!properties || properties.length === 0) {
+	if (!properties) {
+		return null;
+	}
+
+	// Normalize properties to array format
+	// Handle both array format [{property, value, description}] and object format {key: value}
+	let normalizedProperties = [];
+	if (Array.isArray(properties)) {
+		normalizedProperties = properties;
+	} else if (typeof properties === 'object') {
+		normalizedProperties = Object.entries(properties).map(([key, value]) => ({
+			property: key,
+			value: value,
+		}));
+	}
+
+	if (normalizedProperties.length === 0) {
 		return null;
 	}
 
@@ -30,7 +46,7 @@ const CustomPropertiesPreview = ({properties = [], pillClassName = ""}) => {
 
 	return (
 		<>
-			{properties.map((prop, index) => {
+			{normalizedProperties.map((prop, index) => {
 				const pill = (
 					<span
 						className={`inline-flex items-center ${roundedClass} bg-yellow-50 ${paddingClass} text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 ${pillClassName} ${prop.description ? 'cursor-help' : ''}`}

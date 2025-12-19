@@ -101,7 +101,12 @@ function App({ storageBackend = null, editorConfig = null }) {
                     <div className="h-full flex flex-col">
                         <Header/>
                         <main className="flex flex-row w-full bg-white flex-1 overflow-hidden">
-                            <SidebarNavigation/>
+                            {/* Desktop sidebar - hidden on mobile */}
+                            <div className="hidden md:block">
+                                <SidebarNavigation/>
+                            </div>
+                            {/* Mobile sidebar overlay */}
+                            <SidebarNavigation isMobile={true}/>
                             <MainContent/>
                         </main>
                     </div>

@@ -32,7 +32,7 @@ const DEFAULT_CONFIG = {
   container: '#datacontract-editor',
 
   // Initial YAML content
-  yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: example-id\nversion: "0.0.1"\nstatus: draft\n',
+  yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: example-id\nversion: "0.0.1"\nstatus: draft\nname: Example Data Contract\n',
 
   // Schema URL for validation
   schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json',
@@ -81,6 +81,10 @@ const DEFAULT_CONFIG = {
 
   // Base path for assets (workers, etc.) - auto-detected if not provided
   basePath: null,
+
+  // Customizations configuration
+  // See CUSTOMIZATION.md for full documentation
+  customizations: null,
 };
 
 /**
@@ -100,7 +104,10 @@ function createConfiguredStore(config) {
 					// NOOP
 				}
 			},
-			loadYaml: (newYaml) => set({ yaml: newYaml, baselineYaml: newYaml, isDirty: false }),
+			loadYaml: (newYaml) => {
+				get().setYaml(newYaml);
+				set({ baselineYaml: newYaml, isDirty: false });
+			},
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
@@ -237,7 +244,8 @@ function createConfiguredStore(config) {
 			loadFromFile: async () => {
 				try {
 					const yamlContent = await storageBackend.loadYamlFile();
-					set({ yaml: yamlContent, baselineYaml: yamlContent, isDirty: false });
+					get().setYaml(yamlContent);
+					set({ baselineYaml: yamlContent });
 					return yamlContent;
 				} catch (error) {
 					if (error.message !== 'File selection cancelled') {
@@ -258,6 +266,10 @@ function createConfiguredStore(config) {
 				await storageBackend.saveYamlFile(yaml, suggestedName);
 				set({ isDirty: false, baselineYaml: yaml });
 			},
+			toggleMobileSidebar: () => set((state) => ({
+				isMobileSidebarOpen: !state.isMobileSidebarOpen,
+			})),
+			closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
 		};
 
 		return {
@@ -269,6 +281,7 @@ function createConfiguredStore(config) {
 			isWarningsVisible: false,
 			isTestResultsVisible: false,
 			isTestRunning: false,
+			isMobileSidebarOpen: false,
 			testResults: [],
 			markers: [],
 			currentView: config.initialView,
@@ -287,6 +300,7 @@ function createConfiguredStore(config) {
 				teams: config.teams,
 				domains: config.domains,
 				tests: config.tests,
+				customizations: config.customizations,
 			},
 			...actions,
 		};

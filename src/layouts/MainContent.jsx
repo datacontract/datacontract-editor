@@ -66,12 +66,24 @@ const MainContent = () => {
   // State for resizable panel width (percentage of left pane)
   const [leftPanePercent, setLeftPanePercent] = useState(50);
 
+  // Check if we're on a large screen (for responsive behavior)
+  // Using CSS classes for the responsive width instead of inline styles on mobile
+  const getLeftPaneStyle = () => {
+    // On mobile (< lg breakpoint), always use full width via CSS class
+    // On desktop with right pane visible, use percentage width
+    if (isRightPaneVisible) {
+      return { width: `${leftPanePercent}%` };
+    }
+    return {};
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-row w-full h-full">
+        {/* Main content - full width on mobile (via !important class), percentage on desktop when right pane visible */}
         <div
-          className="h-full"
-          style={{ width: isRightPaneVisible ? `${leftPanePercent}%` : '100%' }}
+          className={`h-full overflow-auto ${isRightPaneVisible ? 'max-lg:!w-full' : 'w-full'}`}
+          style={getLeftPaneStyle()}
         >
           {/* Always keep YAML editor mounted for validation */}
           <div className={currentView === 'yaml' ? 'h-full' : 'hidden'}>
@@ -161,12 +173,15 @@ const MainContent = () => {
             </Routes>
           )}
         </div>
+        {/* Right pane - hidden on mobile */}
         {isRightPaneVisible && (
-          <ResizeDivider onResize={setLeftPanePercent} />
+          <div className="hidden md:block">
+            <ResizeDivider onResize={setLeftPanePercent} />
+          </div>
         )}
         {isPreviewVisible && (
           <div
-            className="h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50"
+            className="hidden md:block h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50"
             style={{ width: `${100 - leftPanePercent}%` }}
           >
             <PreviewErrorBoundary>
@@ -176,7 +191,7 @@ const MainContent = () => {
         )}
         {isWarningsVisible && (
           <div
-            className="h-full"
+            className="hidden md:block h-full"
             style={{ width: `${100 - leftPanePercent}%` }}
           >
             <ErrorBoundary>
@@ -186,7 +201,7 @@ const MainContent = () => {
         )}
         {isTestResultsVisible && (
           <div
-            className="h-full"
+            className="hidden md:block h-full"
             style={{ width: `${100 - leftPanePercent}%` }}
           >
             <ErrorBoundary>

@@ -14,8 +14,10 @@ import DB2Icon from './db2.svg';
 import DenodoIcon from './denodo.svg';
 import DremioIcon from './dremio.svg';
 import DuckDBIcon from './duckdb.svg';
+import GCSIcon from './gcs.svg';
 import GlueIcon from './glue.svg';
 import HiveIcon from './hive.svg';
+import ImpalaIcon from './impala.svg';
 import InformixIcon from './informix.svg';
 import KafkaIcon from './kafka.svg';
 import KinesisIcon from './kinesis.svg';
@@ -34,6 +36,7 @@ import SQLServerIcon from './sqlserver.svg';
 import SynapseIcon from './synapse.svg';
 import TrinoIcon from './trino.svg';
 import VerticaIcon from './vertica.svg';
+import ZenIcon from './zen.svg';
 
 // Wrapper component to render SVG as img tag with consistent styling
 const IconWrapper = ({ src }) => <img src={src} className="w-5 h-5" alt="" />;
@@ -52,8 +55,10 @@ const serverIcons = {
   denodo: () => <IconWrapper src={DenodoIcon} />,
   dremio: () => <IconWrapper src={DremioIcon} />,
   duckdb: () => <IconWrapper src={DuckDBIcon} />,
+  gcs: () => <IconWrapper src={GCSIcon} />,
   glue: () => <IconWrapper src={GlueIcon} />,
   hive: () => <IconWrapper src={HiveIcon} />,
+  impala: () => <IconWrapper src={ImpalaIcon} />,
   informix: () => <IconWrapper src={InformixIcon} />,
   kafka: () => <IconWrapper src={KafkaIcon} />,
   kinesis: () => <IconWrapper src={KinesisIcon} />,
@@ -72,6 +77,7 @@ const serverIcons = {
   synapse: () => <IconWrapper src={SynapseIcon} />,
   trino: () => <IconWrapper src={TrinoIcon} />,
   vertica: () => <IconWrapper src={VerticaIcon} />,
+  zen: () => <IconWrapper src={ZenIcon} />,
 
   // Fallback for unknown server types
   database: () => <IconWrapper src={DatabaseIcon} />,
