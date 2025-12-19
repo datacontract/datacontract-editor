@@ -99,7 +99,10 @@ const ServerEditor = ({ serverIndex }) => {
     { id: 'denodo', name: 'denodo' },
     { id: 'dremio', name: 'dremio' },
     { id: 'duckdb', name: 'duckdb' },
+    { id: 'gcs', name: 'gcs' },
     { id: 'glue', name: 'glue' },
+    { id: 'hive', name: 'hive' },
+    { id: 'impala', name: 'impala' },
     { id: 'informix', name: 'informix' },
     { id: 'kafka', name: 'kafka' },
     { id: 'kinesis', name: 'kinesis' },
@@ -114,9 +117,11 @@ const ServerEditor = ({ serverIndex }) => {
     { id: 's3', name: 's3' },
     { id: 'sftp', name: 'sftp' },
     { id: 'snowflake', name: 'snowflake' },
+    { id: 'sqlserver', name: 'sqlserver' },
     { id: 'synapse', name: 'synapse' },
     { id: 'trino', name: 'trino' },
-    { id: 'vertica', name: 'vertica' }
+    { id: 'vertica', name: 'vertica' },
+    { id: 'zen', name: 'zen' }
   ];
 
   const environmentOptions = [
@@ -1100,6 +1105,185 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
+                    />
+                  </>
+                )}
+
+                {servers[serverIndex].type === 'gcs' && (
+                  <>
+                    <div className="sm:col-span-2">
+                      <ValidatedInput
+                        name="location"
+                        label="Location"
+                        value={servers[serverIndex].location || ''}
+                        onChange={(e) => updateServer('location', e.target.value)}
+                        required={true}
+                        placeholder="gs://bucket-name/path"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Format
+                      </label>
+                      <input
+                        type="text"
+                        value={servers[serverIndex].format || ''}
+                        onChange={(e) => updateServer('format', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="parquet"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Delimiter
+                      </label>
+                      <input
+                        type="text"
+                        value={servers[serverIndex].delimiter || ''}
+                        onChange={(e) => updateServer('delimiter', e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder=","
+                      />
+                    </div>
+                  </>
+                )}
+
+                {servers[serverIndex].type === 'hive' && (
+                  <>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={servers[serverIndex].host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        value={servers[serverIndex].port || ''}
+                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="10000"
+                      />
+                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={servers[serverIndex].database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
+                  </>
+                )}
+
+                {servers[serverIndex].type === 'impala' && (
+                  <>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={servers[serverIndex].host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        value={servers[serverIndex].port || ''}
+                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="21050"
+                      />
+                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={servers[serverIndex].database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="default"
+                    />
+                  </>
+                )}
+
+                {servers[serverIndex].type === 'sqlserver' && (
+                  <>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={servers[serverIndex].host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        value={servers[serverIndex].port || ''}
+                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="1433"
+                      />
+                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={servers[serverIndex].database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
+                    />
+                    <ValidatedInput
+                      name="schema"
+                      label="Schema"
+                      value={servers[serverIndex].schema || ''}
+                      onChange={(e) => updateServer('schema', e.target.value)}
+                      required={true}
+                      placeholder="dbo"
+                    />
+                  </>
+                )}
+
+                {servers[serverIndex].type === 'zen' && (
+                  <>
+                    <ValidatedInput
+                      name="host"
+                      label="Host"
+                      value={servers[serverIndex].host || ''}
+                      onChange={(e) => updateServer('host', e.target.value)}
+                      required={true}
+                      placeholder="localhost"
+                    />
+                    <div>
+                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        value={servers[serverIndex].port || ''}
+                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                        placeholder="50000"
+                      />
+                    </div>
+                    <ValidatedInput
+                      name="database"
+                      label="Database"
+                      value={servers[serverIndex].database || ''}
+                      onChange={(e) => updateServer('database', e.target.value)}
+                      required={true}
+                      placeholder="mydb"
                     />
                   </>
                 )}

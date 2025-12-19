@@ -97,6 +97,14 @@ export const physicalTypeMappings = {
     other: ['BOOLEAN', 'BINARY', 'ARRAY', 'MAP', 'STRUCT', 'UNIONTYPE'],
   },
 
+  // Impala
+  impala: {
+    text: ['STRING', 'VARCHAR', 'CHAR'],
+    numeric: ['TINYINT', 'SMALLINT', 'INT', 'BIGINT', 'FLOAT', 'DOUBLE', 'DECIMAL'],
+    datetime: ['TIMESTAMP'],
+    other: ['BOOLEAN', 'ARRAY', 'MAP', 'STRUCT'],
+  },
+
   // Trino / Presto
   trino: {
     text: ['VARCHAR', 'CHAR', 'VARBINARY', 'JSON', 'UUID'],
@@ -146,6 +154,12 @@ export const physicalTypeMappings = {
     datetime: ['date', 'time', 'timestamp'],
     other: ['boolean', 'list', 'map', 'struct', 'null'],
   },
+  gcs: {
+    text: ['string', 'binary'],
+    numeric: ['int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'float', 'double', 'decimal'],
+    datetime: ['date', 'time', 'timestamp'],
+    other: ['boolean', 'list', 'map', 'struct', 'null'],
+  },
   azure: {
     text: ['string', 'binary'],
     numeric: ['int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'float', 'double', 'decimal'],
@@ -171,6 +185,14 @@ export const physicalTypeMappings = {
     numeric: ['tinyint', 'smallint', 'int', 'integer', 'bigint', 'float', 'double', 'real', 'decimal'],
     datetime: ['date', 'time', 'time with time zone', 'timestamp', 'timestamp with time zone', 'interval year to month', 'interval day to second'],
     other: ['boolean', 'array', 'map', 'row', 'ipaddress', 'uuid', 'hyperloglog'],
+  },
+
+  // Zen (IBM Db2 Warehouse)
+  zen: {
+    text: ['VARCHAR', 'CHAR', 'CLOB', 'GRAPHIC', 'VARGRAPHIC', 'DBCLOB'],
+    numeric: ['SMALLINT', 'INTEGER', 'BIGINT', 'DECIMAL', 'NUMERIC', 'DECFLOAT', 'REAL', 'DOUBLE'],
+    datetime: ['DATE', 'TIME', 'TIMESTAMP'],
+    other: ['BOOLEAN', 'BLOB', 'BINARY', 'VARBINARY', 'XML', 'JSON'],
   },
 
   // Default fallback
