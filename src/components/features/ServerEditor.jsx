@@ -422,7 +422,7 @@ const ServerEditor = ({ serverIndex }) => {
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
-                      placeholder="mydb"
+                      placeholder="postgres"
                     />
                     <ValidatedInput
                       name="schema"
