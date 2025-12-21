@@ -129,6 +129,10 @@ export function defaultStoreConfig(set, get) {
 			isPreviewVisible: state.isTestResultsVisible ? false : false, // Close preview when opening test results
 			isWarningsVisible: state.isTestResultsVisible ? false : false, // Close warnings when opening test results
 		})),
+		toggleAiPanel: () => set((state) => ({
+			isAiPanelOpen: !state.isAiPanelOpen,
+		})),
+		closeAiPanel: () => set({ isAiPanelOpen: false }),
 		runTest: async (server) => {
 			const {yaml, editorConfig} = get();
 			set({isTestRunning: true});
@@ -233,6 +237,16 @@ export function defaultStoreConfig(set, get) {
 		},
 		clearTestResults: () => set({testResults: []}),
 		setMarkers: (markers) => set({markers}),
+		// AI pending change actions
+		setPendingAiChange: (change) => set({ pendingAiChange: change }),
+		clearPendingAiChange: () => set({ pendingAiChange: null }),
+		applyPendingAiChange: () => {
+			const { pendingAiChange } = get();
+			if (pendingAiChange?.isValid && pendingAiChange?.updatedYaml) {
+				actions.setYaml(pendingAiChange.updatedYaml);
+			}
+			set({ pendingAiChange: null });
+		},
 		setView: (view) => set({currentView: view}),
 		setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
 		setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
@@ -345,8 +359,14 @@ export function defaultStoreConfig(set, get) {
 				dataContractCliApiServerUrl: null, // null means use default https://api.datacontract.com
 				apiKey: null, // Optional X-API-KEY for authentication
 			},
+			ai: {
+				enabled: true, // Set to false to disable AI assistant
+				endpoint: 'http://localhost:3001/api/ai/chat', // Local dev server by default
+			},
 			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
+		isAiPanelOpen: false,
+		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
 		...actions,
 	};
 }
@@ -358,6 +378,26 @@ const defaultEditorStore = create()(
 		persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: createJSONStorage(() => localStorage),
+			merge: (persistedState, currentState) => {
+				// Deep merge editorConfig to preserve new defaults
+				const mergedEditorConfig = {
+					...currentState.editorConfig,
+					...persistedState?.editorConfig,
+					tests: {
+						...currentState.editorConfig?.tests,
+						...persistedState?.editorConfig?.tests,
+					},
+					ai: {
+						...currentState.editorConfig?.ai,
+						...persistedState?.editorConfig?.ai,
+					},
+				};
+				return {
+					...currentState,
+					...persistedState,
+					editorConfig: mergedEditorConfig,
+				};
+			},
 			onRehydrateStorage: () => (state) => {
 				// Sync yamlParts from yaml when rehydrating from localStorage
 				if (state?.yaml) {
@@ -371,6 +411,21 @@ const defaultEditorStore = create()(
 						console.warn('Failed to parse yaml during rehydration:', e);
 					}
 				}
+				// Ensure editorConfig.ai defaults are preserved (for old localStorage without ai config)
+				setTimeout(() => {
+					const currentState = defaultEditorStore.getState();
+					if (!currentState.editorConfig?.ai) {
+						defaultEditorStore.setState({
+							editorConfig: {
+								...currentState.editorConfig,
+								ai: {
+									enabled: true,
+									endpoint: 'http://localhost:3001/api/ai/chat',
+								},
+							},
+						});
+					}
+				}, 0);
 			},
 		})
 	)
@@ -412,6 +467,11 @@ export const setEditorConfig = (config) => {
 				...currentConfig.tests,
 				...config.tests,
 			} : currentConfig.tests,
+			// Deep merge the ai object if provided
+			ai: config.ai ? {
+				...currentConfig.ai,
+				...config.ai,
+			} : currentConfig.ai,
 		},
 	});
 };

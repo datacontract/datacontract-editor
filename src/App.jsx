@@ -5,6 +5,7 @@ import { useEditorStore, setFileStorageBackend, setEditorConfig } from './store.
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js';
 import { ToastContainer } from './components/ui/Toast.jsx';
 import { ErrorBoundary } from './components/error/index.js';
+import { AiDrawer } from './components/ai/index.js';
 
 /**
  * Main App component for the Data Contract Editor
@@ -111,6 +112,7 @@ function App({ storageBackend = null, editorConfig = null }) {
                         </main>
                     </div>
                     <ToastContainer />
+                    <AiDrawer />
                 </div>
             </HashRouter>
         </ErrorBoundary>
