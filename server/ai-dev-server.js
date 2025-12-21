@@ -30,13 +30,13 @@ const PROVIDERS = {
 	openai: {
 		name: 'OpenAI',
 		envKey: 'OPENAI_API_KEY',
-		defaultModel: 'gpt-4o',
+		defaultModel: 'gpt-5',
 		createModel: (modelId) => openai(modelId),
 	},
 	google: {
 		name: 'Google',
 		envKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
-		defaultModel: 'gemini-2.0-flash',
+		defaultModel: 'gemini-2.5-pro',
 		createModel: (modelId) => google(modelId),
 	},
 };
@@ -70,26 +70,19 @@ async function handleRequest(req, res) {
 		for await (const chunk of req) {
 			body += chunk;
 		}
-		const { messages, system, provider: reqProvider, model: reqModel } = JSON.parse(body);
+		const { messages, system } = JSON.parse(body);
 
-		// Determine provider (default to anthropic)
-		const providerKey = reqProvider || 'anthropic';
-		const providerConfig = PROVIDERS[providerKey];
+		// Find first provider with API key set
+		const [, providerConfig] = Object.entries(PROVIDERS)
+			.find(([, config]) => process.env[config.envKey]) || [];
 
 		if (!providerConfig) {
-			res.writeHead(400, { 'Content-Type': 'application/json' });
-			res.end(JSON.stringify({ error: `Unknown provider: ${providerKey}. Supported: ${Object.keys(PROVIDERS).join(', ')}` }));
-			return;
-		}
-
-		// Check for API key
-		if (!process.env[providerConfig.envKey]) {
 			res.writeHead(500, { 'Content-Type': 'application/json' });
-			res.end(JSON.stringify({ error: `${providerConfig.envKey} environment variable not set` }));
+			res.end(JSON.stringify({ error: 'No AI provider configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_GENERATIVE_AI_API_KEY.' }));
 			return;
 		}
 
-		const modelId = reqModel || providerConfig.defaultModel;
+		const modelId = providerConfig.defaultModel;
 
 		console.log('\n📥 REQUEST:');
 		console.log('Provider:', providerConfig.name);

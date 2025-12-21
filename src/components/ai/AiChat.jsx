@@ -38,13 +38,6 @@ const SUGGESTED_PROMPTS = [
 	"Add a description for all fields",
 ];
 
-// Available AI providers
-const AI_PROVIDERS = [
-	{ id: 'anthropic', name: 'Claude', model: 'claude-sonnet-4-20250514' },
-	{ id: 'openai', name: 'GPT-4o', model: 'gpt-4o' },
-	{ id: 'google', name: 'Gemini', model: 'gemini-2.0-flash' },
-];
-
 // Document icon for tool calls
 const DocumentIcon = ({ className }) => (
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -63,16 +56,9 @@ export default function AiChat() {
 	const processedToolCalls = useRef(new Set());
 	const [systemPrompt, setSystemPrompt] = useState(null); // null = loading
 	const systemPromptRef = useRef(null);
-	const [selectedProvider, setSelectedProvider] = useState(AI_PROVIDERS[0]);
-	const selectedProviderRef = useRef(AI_PROVIDERS[0]);
 
 	// Determine API endpoint
 	const aiEndpoint = editorConfig?.ai?.endpoint || '/api/ai/chat';
-
-	// Update ref when provider changes
-	useEffect(() => {
-		selectedProviderRef.current = selectedProvider;
-	}, [selectedProvider]);
 
 	// Build system prompt when yaml changes
 	useEffect(() => {
@@ -82,14 +68,10 @@ export default function AiChat() {
 		});
 	}, [yaml]);
 
-	// Create transport that uses refs for latest system prompt and provider
+	// Create transport that uses ref for latest system prompt
 	const transport = useMemo(() => new DefaultChatTransport({
 		api: aiEndpoint,
-		body: () => ({
-			system: systemPromptRef.current || '',
-			provider: selectedProviderRef.current?.id,
-			model: selectedProviderRef.current?.model,
-		}),
+		body: () => ({ system: systemPromptRef.current || '' }),
 	}), [aiEndpoint]);
 
 	const isPromptReady = systemPrompt !== null;
@@ -235,6 +217,20 @@ export default function AiChat() {
 									className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
 								>
 									<div className="max-w-[85%] space-y-2">
+										{/* Text content */}
+										{displayContent && (
+											<div
+												className={`rounded-lg px-3 py-2 text-sm ${
+													isError
+														? 'bg-red-50 text-red-700 border border-red-200'
+														: message.role === 'user'
+															? 'bg-indigo-600 text-white'
+															: 'bg-gray-100 text-gray-900'
+												}`}
+											>
+												<div className="whitespace-pre-wrap break-words">{displayContent}</div>
+											</div>
+										)}
 										{/* Tool call indicator */}
 										{hasToolCall && (
 											<div className="bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2 text-sm">
@@ -250,20 +246,6 @@ export default function AiChat() {
 														Review the changes in the preview dialog
 													</p>
 												)}
-											</div>
-										)}
-										{/* Text content */}
-										{displayContent && (
-											<div
-												className={`rounded-lg px-3 py-2 text-sm ${
-													isError
-														? 'bg-red-50 text-red-700 border border-red-200'
-														: message.role === 'user'
-															? 'bg-indigo-600 text-white'
-															: 'bg-gray-100 text-gray-900'
-												}`}
-											>
-												<div className="whitespace-pre-wrap break-words">{displayContent}</div>
 											</div>
 										)}
 									</div>
@@ -291,24 +273,6 @@ export default function AiChat() {
 
 			{/* Input area */}
 			<div className="border-t border-gray-200 p-4">
-				{/* Provider selector */}
-				<div className="flex gap-1 mb-2">
-					{AI_PROVIDERS.map((provider) => (
-						<button
-							key={provider.id}
-							type="button"
-							onClick={() => setSelectedProvider(provider)}
-							disabled={isLoading}
-							className={`px-2 py-1 text-xs rounded-md transition-colors ${
-								selectedProvider.id === provider.id
-									? 'bg-indigo-100 text-indigo-700 font-medium'
-									: 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-							} disabled:opacity-50`}
-						>
-							{provider.name}
-						</button>
-					))}
-				</div>
 				<form onSubmit={handleSubmit} className="flex gap-2">
 					<input
 						type="text"

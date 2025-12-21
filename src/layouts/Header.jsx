@@ -13,13 +13,6 @@ const HamburgerIcon = () => (
     </svg>
 );
 
-// Sparkles icon for AI button
-const SparklesIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.48.48 0 01.458.333l.5 1.5a.48.48 0 00.309.309l1.5.5a.48.48 0 010 .916l-1.5.5a.48.48 0 00-.309.309l-.5 1.5a.48.48 0 01-.916 0l-.5-1.5a.48.48 0 00-.309-.309l-1.5-.5a.48.48 0 010-.916l1.5-.5a.48.48 0 00.309-.309l.5-1.5A.48.48 0 0118 1.5zM16.5 15a.48.48 0 01.458.333l.5 1.5a.48.48 0 00.309.309l1.5.5a.48.48 0 010 .916l-1.5.5a.48.48 0 00-.309.309l-.5 1.5a.48.48 0 01-.916 0l-.5-1.5a.48.48 0 00-.309-.309l-1.5-.5a.48.48 0 010-.916l1.5-.5a.48.48 0 00.309-.309l.5-1.5A.48.48 0 0116.5 15z" clipRule="evenodd" />
-    </svg>
-);
-
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,11 +22,9 @@ const Header = () => {
     const toggleWarnings = useEditorStore((state) => state.toggleWarnings);
     const toggleTestResults = useEditorStore((state) => state.toggleTestResults);
     const toggleMobileSidebar = useEditorStore((state) => state.toggleMobileSidebar);
-    const toggleAiPanel = useEditorStore((state) => state.toggleAiPanel);
     const isPreviewVisible = useEditorStore((state) => state.isPreviewVisible);
     const isWarningsVisible = useEditorStore((state) => state.isWarningsVisible);
     const isTestResultsVisible = useEditorStore((state) => state.isTestResultsVisible);
-    const isAiPanelOpen = useEditorStore((state) => state.isAiPanelOpen);
     const testResults = useEditorStore((state) => state.testResults);
     const markers = useEditorStore((state) => state.markers);
     const currentView = useEditorStore((state) => state.currentView);
@@ -49,9 +40,6 @@ const Header = () => {
     // Get editor mode from config
     const editorMode = editorConfig?.mode || 'SERVER';
     const isEmbeddedMode = editorMode === 'EMBEDDED';
-
-    // Check if AI is enabled
-    const isAiEnabled = editorConfig?.ai?.enabled !== false;
 
     // Calculate problem count
     const totalCount = markers.length;
@@ -572,22 +560,6 @@ const Header = () => {
                     </span>
                 </button>
               </span>
-                    {/* AI Assistant button */}
-                    {isAiEnabled && (
-                        <button
-                            type="button"
-                            onClick={toggleAiPanel}
-                            title="AI Assistant"
-                            className={`relative ml-2 inline-flex items-center gap-1 rounded-md px-2 xl:px-3 py-1.5 text-xs font-semibold shadow-xs inset-ring-1 hover:cursor-pointer focus:z-10 transition-colors ${
-                                isAiPanelOpen
-                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white inset-ring-indigo-600'
-                                    : 'bg-white text-gray-900 inset-ring-gray-300 hover:bg-gray-50'
-                            }`}
-                        >
-                            <SparklesIcon className="size-4" />
-                            <span className="hidden lg:inline">AI</span>
-                        </button>
-                    )}
                 </div>
 
 

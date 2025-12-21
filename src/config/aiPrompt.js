@@ -22,7 +22,7 @@ IMPORTANT: When the user asks you to make changes to the contract (add, modify, 
 
 Do NOT just show YAML in your text response - use the updateContract tool so changes can be previewed and applied.
 
-ODCS v3.1.0 Schema (MUST follow exactly):
+ODCS v3.x Schema (MUST follow exactly, these are the most common attributes):
 
 Root fields:
 - apiVersion: "v3.1.0" (required)
@@ -44,6 +44,14 @@ schema (array of objects):
     - name: "TableName" (required)
       physicalName: "table_name"
       description: "Table description"
+      quality: (array, ONLY here or on properties - NEVER at root!)
+        - type: "library|text|sql|custom" (default: library)
+          description: "Business description"
+          metric: "nullValues|missingValues|invalidValues|duplicateValues|rowCount" (for library type)
+          query: "sql statement in dialect of the server" (for type sql)
+          mustBe|mustNotBe|mustBeGreaterThan|mustBeLessThan|mustBeGreaterOrEqualTo|mustBeLessOrEqualTo: number (for library metric or sql, very common is mustBe: 0)
+          mustBeBetween|mustNotBeBetween: [min, max] (alternative)
+          unit: "rows|percent" (optional, default rows)
       properties:
         - name: "column" (required)
           logicalType: string|integer|boolean|date|timestamp|number|array|object
@@ -61,6 +69,7 @@ schema (array of objects):
           examples: ["example1", "example2"] (optional)
           tags: ["pii", "sensitive"] (optional)
           classification: "confidential" (optional)
+          quality: (array, quality rules specific to this property)
 
 servers (array) - REQUIRED: server, type:
   servers:
