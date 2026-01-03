@@ -3,6 +3,7 @@ import { Tooltip } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
+import SparkleButton from '../components/ui/SparkleButton.jsx';
 import {useShallow} from "zustand/react/shallow";
 
 const TermsOfUse = () => {
@@ -21,13 +22,22 @@ const TermsOfUse = () => {
             <div className="space-y-3">
               {/* Purpose Field */}
               <div>
-                <div className="flex items-center gap-1 mb-1">
-                  <label htmlFor="description-purpose" className="block text-xs font-medium leading-4 text-gray-900">
-                    Purpose
-                  </label>
-                  <Tooltip content="Intended purpose for the provided data">
-                    <QuestionMarkCircleIcon />
-                  </Tooltip>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1">
+                    <label htmlFor="description-purpose" className="block text-xs font-medium leading-4 text-gray-900">
+                      Purpose
+                    </label>
+                    <Tooltip content="Intended purpose for the provided data">
+                      <QuestionMarkCircleIcon />
+                    </Tooltip>
+                  </div>
+                  <SparkleButton
+                    fieldName="Purpose"
+                    fieldPath="description.purpose"
+                    currentValue={description?.purpose}
+                    onSuggestion={(value) => setYamlValue('description.purpose', value)}
+                    placeholder="Intended purpose for the provided data"
+                  />
                 </div>
                 <textarea
                   id="description-purpose"
@@ -42,13 +52,22 @@ const TermsOfUse = () => {
 
               {/* Usage Field */}
               <div>
-                <div className="flex items-center gap-1 mb-1">
-                  <label htmlFor="description-usage" className="block text-xs font-medium leading-4 text-gray-900">
-                    Usage
-                  </label>
-                  <Tooltip content="How this data should be used">
-                    <QuestionMarkCircleIcon />
-                  </Tooltip>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1">
+                    <label htmlFor="description-usage" className="block text-xs font-medium leading-4 text-gray-900">
+                      Usage
+                    </label>
+                    <Tooltip content="How this data should be used">
+                      <QuestionMarkCircleIcon />
+                    </Tooltip>
+                  </div>
+                  <SparkleButton
+                    fieldName="Usage"
+                    fieldPath="description.usage"
+                    currentValue={description?.usage}
+                    onSuggestion={(value) => setYamlValue('description.usage', value)}
+                    placeholder="How this data should be used"
+                  />
                 </div>
                 <textarea
                   id="description-usage"
@@ -63,13 +82,22 @@ const TermsOfUse = () => {
 
               {/* Limitations Field */}
               <div>
-                <div className="flex items-center gap-1 mb-1">
-                  <label htmlFor="description-limitations" className="block text-xs font-medium leading-4 text-gray-900">
-                    Limitations
-                  </label>
-                  <Tooltip content="Technical, compliance, and legal limitations for data use">
-                    <QuestionMarkCircleIcon />
-                  </Tooltip>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1">
+                    <label htmlFor="description-limitations" className="block text-xs font-medium leading-4 text-gray-900">
+                      Limitations
+                    </label>
+                    <Tooltip content="Technical, compliance, and legal limitations for data use">
+                      <QuestionMarkCircleIcon />
+                    </Tooltip>
+                  </div>
+                  <SparkleButton
+                    fieldName="Limitations"
+                    fieldPath="description.limitations"
+                    currentValue={description?.limitations}
+                    onSuggestion={(value) => setYamlValue('description.limitations', value)}
+                    placeholder="Technical, compliance, and legal limitations for data use"
+                  />
                 </div>
                 <textarea
                   id="description-limitations"

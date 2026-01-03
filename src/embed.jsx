@@ -5,6 +5,8 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
+import { registerTool, unregisterTool, clearTools } from './services/aiService.js'
+import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -85,6 +87,17 @@ const DEFAULT_CONFIG = {
   // Customizations configuration
   // See CUSTOMIZATION.md for full documentation
   customizations: null,
+
+  // AI Assistant configuration
+  // Requires an OpenAI-compatible endpoint (OpenAI, Azure, Ollama, etc.)
+  ai: {
+    enabled: true,
+    endpoint: null, // e.g., 'https://api.openai.com/v1/chat/completions'
+    apiKey: null, // API key for the endpoint
+    model: 'gpt-4o', // Model to use
+    headers: {}, // Additional headers (for custom auth, etc.)
+    tools: [], // Additional custom tools (MCP-like)
+  },
 };
 
 /**
@@ -270,6 +283,23 @@ function createConfiguredStore(config) {
 				isMobileSidebarOpen: !state.isMobileSidebarOpen,
 			})),
 			closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
+			// AI panel actions
+			toggleAiPanel: () => set((state) => ({
+				isAiPanelOpen: !state.isAiPanelOpen,
+			})),
+			closeAiPanel: () => set({ isAiPanelOpen: false }),
+			openAiPanel: () => set({ isAiPanelOpen: true }),
+			// AI change management
+			setPendingAiChange: (change) => set({ pendingAiChange: change }),
+			clearPendingAiChange: () => set({ pendingAiChange: null }),
+			setLastAppliedAiChange: (change) => set({ lastAppliedAiChange: change }),
+			unapplyAiChange: () => {
+				const { lastAppliedAiChange } = get();
+				if (lastAppliedAiChange?.previousYaml) {
+					get().setYaml(lastAppliedAiChange.previousYaml);
+					set({ lastAppliedAiChange: null });
+				}
+			},
 		};
 
 		return {
@@ -282,6 +312,9 @@ function createConfiguredStore(config) {
 			isTestResultsVisible: false,
 			isTestRunning: false,
 			isMobileSidebarOpen: false,
+			isAiPanelOpen: false,
+			pendingAiChange: null,
+			lastAppliedAiChange: null,
 			testResults: [],
 			markers: [],
 			currentView: config.initialView,
@@ -301,6 +334,8 @@ function createConfiguredStore(config) {
 				domains: config.domains,
 				tests: config.tests,
 				customizations: config.customizations,
+				ai: config.ai,
+				csrf: config.csrf,
 			},
 			...actions,
 		};
@@ -348,6 +383,23 @@ export function init(userConfig = {}) {
   // Destroy existing instance if any
   if (activeEditorInstance) {
     activeEditorInstance.destroy();
+  }
+
+  // Clear any previously registered tools and re-register built-in tools
+  clearTools();
+  registerBuiltInTools();
+
+  // Register custom tools from config
+  if (config.ai?.tools?.length > 0) {
+    for (const tool of config.ai.tools) {
+      if (tool.name && tool.description && tool.parameters && tool.handler) {
+        registerTool(tool.name, {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.parameters,
+        }, tool.handler);
+      }
+    }
   }
 
   // Create the store with configuration
@@ -430,6 +482,7 @@ export function init(userConfig = {}) {
      * Destroy the editor instance
      */
     destroy() {
+      clearTools();
       root.unmount();
       setOverrideStore(null);
       activeEditorInstance = null;
@@ -442,6 +495,49 @@ export function init(userConfig = {}) {
      */
     getStore() {
       return globalEditorStore;
+    },
+
+    // AI Tool Management API
+    ai: {
+      /**
+       * Register a custom AI tool
+       * @param {object} tool - Tool definition with name, description, parameters, and handler
+       */
+      registerTool(tool) {
+        if (!tool.name || !tool.description || !tool.parameters || !tool.handler) {
+          throw new Error('Tool must have name, description, parameters, and handler');
+        }
+        registerTool(tool.name, {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.parameters,
+        }, tool.handler);
+      },
+
+      /**
+       * Unregister an AI tool by name
+       * @param {string} name - Tool name
+       */
+      unregisterTool(name) {
+        unregisterTool(name);
+      },
+
+      /**
+       * Clear all registered AI tools (except built-in ones)
+       */
+      clearTools() {
+        clearTools();
+      },
+
+      /**
+       * Tool creation helpers (MCP-like patterns)
+       */
+      helpers: toolTemplates,
+
+      /**
+       * Create a custom tool definition
+       */
+      createTool,
     },
   };
 

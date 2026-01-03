@@ -63,122 +63,112 @@ const MainContent = () => {
   // Determine if right pane should be shown
   const isRightPaneVisible = isPreviewVisible || isWarningsVisible || isTestResultsVisible;
 
-  // State for resizable panel width (percentage of left pane)
+  // State for resizable panel width (percentage of left pane relative to left+middle)
   const [leftPanePercent, setLeftPanePercent] = useState(50);
-
-  // Check if we're on a large screen (for responsive behavior)
-  // Using CSS classes for the responsive width instead of inline styles on mobile
-  const getLeftPaneStyle = () => {
-    // On mobile (< lg breakpoint), always use full width via CSS class
-    // On desktop with right pane visible, use percentage width
-    if (isRightPaneVisible) {
-      return { width: `${leftPanePercent}%` };
-    }
-    return {};
-  };
 
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-row w-full h-full">
-        {/* Main content - full width on mobile (via !important class), percentage on desktop when right pane visible */}
+        {/* Left pane - Editor */}
         <div
           className={`h-full overflow-auto ${isRightPaneVisible ? 'max-lg:!w-full' : 'w-full'}`}
-          style={getLeftPaneStyle()}
-        >
-          {/* Always keep YAML editor mounted for validation */}
-          <div className={currentView === 'yaml' ? 'h-full' : 'hidden'}>
-            <YamlEditor
-              ref={editorRef}
-              schemaUrl={schemaUrl}
-            />
+          style={isRightPaneVisible ? { width: `${leftPanePercent}%` } : {}}
+          >
+            {/* Always keep YAML editor mounted for validation */}
+            <div className={currentView === 'yaml' ? 'h-full' : 'hidden'}>
+              <YamlEditor
+                ref={editorRef}
+                schemaUrl={schemaUrl}
+              />
+            </div>
+            {currentView === 'diagram' && (
+              <DiagramErrorBoundary>
+                <Diagram />
+              </DiagramErrorBoundary>
+            )}
+            {currentView === 'form' && (
+              <Routes>
+                <Route path="/" element={
+                  <FormPageErrorBoundary pageName="Overview">
+                    <Overview />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/overview" element={
+                  <FormPageErrorBoundary pageName="Overview">
+                    <Overview />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/terms-of-use" element={
+                  <FormPageErrorBoundary pageName="Terms of Use">
+                    <TermsOfUse />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/schemas" element={
+                  <FormPageErrorBoundary pageName="Schemas">
+                    <Schemas />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/schemas/:schemaId" element={
+                  <FormPageErrorBoundary pageName="Schema">
+                    <Schema />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/pricing" element={
+                  <FormPageErrorBoundary pageName="Pricing">
+                    <Pricing />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/team" element={
+                  <FormPageErrorBoundary pageName="Team">
+                    <Team />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/support" element={
+                  <FormPageErrorBoundary pageName="Support">
+                    <Support />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/servers" element={
+                  <FormPageErrorBoundary pageName="Servers">
+                    <Servers />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/servers/:serverId" element={
+                  <FormPageErrorBoundary pageName="Server">
+                    <Server />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/roles" element={
+                  <FormPageErrorBoundary pageName="Roles">
+                    <Roles />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/sla" element={
+                  <FormPageErrorBoundary pageName="Service Level Agreement">
+                    <ServiceLevelAgreement />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/custom-properties" element={
+                  <FormPageErrorBoundary pageName="Custom Properties">
+                    <CustomProperties />
+                  </FormPageErrorBoundary>
+                } />
+                {/* Catch-all route for unmatched paths (e.g., /diagram during view transition) */}
+                <Route path="*" element={
+                  <FormPageErrorBoundary pageName="Overview">
+                    <Overview />
+                  </FormPageErrorBoundary>
+                } />
+              </Routes>
+            )}
           </div>
-          {currentView === 'diagram' && (
-            <DiagramErrorBoundary>
-              <Diagram />
-            </DiagramErrorBoundary>
-          )}
-          {currentView === 'form' && (
-            <Routes>
-              <Route path="/" element={
-                <FormPageErrorBoundary pageName="Overview">
-                  <Overview />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/overview" element={
-                <FormPageErrorBoundary pageName="Overview">
-                  <Overview />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/terms-of-use" element={
-                <FormPageErrorBoundary pageName="Terms of Use">
-                  <TermsOfUse />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/schemas" element={
-                <FormPageErrorBoundary pageName="Schemas">
-                  <Schemas />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/schemas/:schemaId" element={
-                <FormPageErrorBoundary pageName="Schema">
-                  <Schema />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/pricing" element={
-                <FormPageErrorBoundary pageName="Pricing">
-                  <Pricing />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/team" element={
-                <FormPageErrorBoundary pageName="Team">
-                  <Team />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/support" element={
-                <FormPageErrorBoundary pageName="Support">
-                  <Support />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/servers" element={
-                <FormPageErrorBoundary pageName="Servers">
-                  <Servers />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/servers/:serverId" element={
-                <FormPageErrorBoundary pageName="Server">
-                  <Server />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/roles" element={
-                <FormPageErrorBoundary pageName="Roles">
-                  <Roles />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/sla" element={
-                <FormPageErrorBoundary pageName="Service Level Agreement">
-                  <ServiceLevelAgreement />
-                </FormPageErrorBoundary>
-              } />
-              <Route path="/custom-properties" element={
-                <FormPageErrorBoundary pageName="Custom Properties">
-                  <CustomProperties />
-                </FormPageErrorBoundary>
-              } />
-              {/* Catch-all route for unmatched paths (e.g., /diagram during view transition) */}
-              <Route path="*" element={
-                <FormPageErrorBoundary pageName="Overview">
-                  <Overview />
-                </FormPageErrorBoundary>
-              } />
-            </Routes>
-          )}
-        </div>
-        {/* Right pane - hidden on mobile */}
+
+        {/* Resize divider between left and right panes */}
         {isRightPaneVisible && (
-          <div className="hidden md:block">
-            <ResizeDivider onResize={setLeftPanePercent} />
-          </div>
+          <ResizeDivider onResize={setLeftPanePercent} />
         )}
+
+        {/* Right pane - Preview/Warnings/Tests (mutually exclusive) */}
         {isPreviewVisible && (
           <div
             className="hidden md:block h-full p-4 overflow-y-auto overflow-x-hidden bg-gray-50"
