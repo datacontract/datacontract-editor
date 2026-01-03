@@ -29,13 +29,7 @@
     import { init } from './dist/datacontract-editor.es.js';
 
     // Function to load initial YAML content
-    // In a real application, this would fetch from your backend
     async function loadInitialYaml() {
-        // Example: Load from backend
-        // const response = await fetch('/api/contracts/latest');
-        // return await response.text();
-
-        // For this example, return a default contract
         return `apiVersion: "v3.1.0"
 kind: "DataContract"
 id: embed-example
@@ -50,7 +44,7 @@ servers:
 `;
     }
 
-    // Team and domain lists (for demonstration)
+    // Team and domain lists
     const teams = [
         { id: 'team-1', name: 'Data Engineering Team' },
         { id: 'team-2', name: 'Analytics Team' },
@@ -64,98 +58,331 @@ servers:
         { id: 'marketing', name: 'Marketing' }
     ];
 
-    // Load the initial YAML and initialize the editor
+    // =========================================================================
+    // Custom AI Tools - MCP-like extensibility
+    // =========================================================================
+
+    /**
+     * Example: Business Glossary Lookup Tool
+     * Allows AI to look up business term definitions
+     */
+    const businessGlossaryTool = {
+        name: 'lookupBusinessTerm',
+        description: 'Look up the definition of a business term from the company glossary. Use this when you need to understand what a field or concept means in the business context.',
+        parameters: {
+            type: 'object',
+            properties: {
+                term: {
+                    type: 'string',
+                    description: 'The business term to look up'
+                }
+            },
+            required: ['term']
+        },
+        handler: async ({ term }) => {
+            // Simulated glossary - in production, this would call your API
+            const glossary = {
+                'revenue': 'Total income generated from sales before any deductions',
+                'mrr': 'Monthly Recurring Revenue - predictable revenue from subscriptions',
+                'churn': 'Rate at which customers stop using the service',
+                'ltv': 'Lifetime Value - total revenue expected from a customer',
+                'cac': 'Customer Acquisition Cost - cost to acquire a new customer',
+                'arpu': 'Average Revenue Per User',
+                'nps': 'Net Promoter Score - customer loyalty metric',
+            };
+
+            const result = glossary[term.toLowerCase()];
+            if (result) {
+                return { term, definition: result, found: true };
+            }
+            return { term, found: false, message: `Term "${term}" not found in glossary` };
+        }
+    };
+
+    /**
+     * Example: Data Quality Validation Tool
+     * Allows AI to validate data contract against quality rules
+     */
+    const validateQualityTool = {
+        name: 'validateDataQuality',
+        description: 'Validate the data contract against enterprise data quality standards. Returns a list of quality issues and recommendations.',
+        parameters: {
+            type: 'object',
+            properties: {
+                checkType: {
+                    type: 'string',
+                    enum: ['all', 'naming', 'documentation', 'schema'],
+                    description: 'Type of quality check to perform'
+                }
+            },
+            required: ['checkType']
+        },
+        handler: async ({ checkType }, context) => {
+            // Access the current YAML from context
+            const yaml = context.yaml;
+            const issues = [];
+
+            // Simulated quality checks
+            if (checkType === 'all' || checkType === 'naming') {
+                if (yaml.includes('field1') || yaml.includes('col1')) {
+                    issues.push({
+                        type: 'naming',
+                        severity: 'warning',
+                        message: 'Generic field names detected. Use descriptive business names.'
+                    });
+                }
+            }
+
+            if (checkType === 'all' || checkType === 'documentation') {
+                if (!yaml.includes('description:')) {
+                    issues.push({
+                        type: 'documentation',
+                        severity: 'error',
+                        message: 'Missing descriptions. All fields should have descriptions.'
+                    });
+                }
+            }
+
+            if (checkType === 'all' || checkType === 'schema') {
+                if (!yaml.includes('type:')) {
+                    issues.push({
+                        type: 'schema',
+                        severity: 'warning',
+                        message: 'Some fields may be missing type definitions.'
+                    });
+                }
+            }
+
+            return {
+                checkType,
+                issueCount: issues.length,
+                issues,
+                passed: issues.filter(i => i.severity === 'error').length === 0
+            };
+        }
+    };
+
+    /**
+     * Example: Test Runner Tool
+     * Allows AI to execute data contract tests
+     */
+    const runTestsTool = {
+        name: 'runContractTests',
+        description: 'Execute tests against the data contract to verify it meets quality and schema requirements. Returns test results.',
+        parameters: {
+            type: 'object',
+            properties: {
+                server: {
+                    type: 'string',
+                    description: 'Optional server name to test against'
+                },
+                testType: {
+                    type: 'string',
+                    enum: ['schema', 'quality', 'all'],
+                    description: 'Type of tests to run'
+                }
+            },
+            required: []
+        },
+        handler: async ({ server, testType = 'all' }, context) => {
+            // In production, this would call your test API
+            // For demo, we'll use the editor's built-in test runner
+            try {
+                const store = context.editorConfig;
+                const testUrl = store?.tests?.dataContractCliApiServerUrl || 'https://api.datacontract.com';
+
+                // Simulated test result
+                return {
+                    testType,
+                    server: server || 'default',
+                    results: {
+                        passed: 8,
+                        failed: 2,
+                        skipped: 1,
+                        total: 11
+                    },
+                    summary: 'Most tests passed. 2 quality checks need attention.',
+                    testUrl
+                };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+    };
+
+    /**
+     * Example: Schema Suggestion Tool
+     * Allows AI to get schema suggestions from external catalog
+     */
+    const schemaSuggestionTool = {
+        name: 'getSchemaSuggestions',
+        description: 'Get schema suggestions from the enterprise data catalog based on a table or dataset name.',
+        parameters: {
+            type: 'object',
+            properties: {
+                tableName: {
+                    type: 'string',
+                    description: 'Name of the table or dataset to get suggestions for'
+                },
+                database: {
+                    type: 'string',
+                    description: 'Optional database name'
+                }
+            },
+            required: ['tableName']
+        },
+        handler: async ({ tableName, database }) => {
+            // Simulated catalog lookup
+            const suggestions = {
+                'customers': {
+                    fields: [
+                        { name: 'customer_id', type: 'string', description: 'Unique customer identifier' },
+                        { name: 'email', type: 'string', description: 'Customer email address' },
+                        { name: 'created_at', type: 'timestamp', description: 'Account creation timestamp' },
+                        { name: 'status', type: 'string', description: 'Customer status (active, inactive, churned)' }
+                    ],
+                    owner: 'Data Engineering Team',
+                    lastUpdated: '2024-01-15'
+                },
+                'orders': {
+                    fields: [
+                        { name: 'order_id', type: 'string', description: 'Unique order identifier' },
+                        { name: 'customer_id', type: 'string', description: 'Reference to customer' },
+                        { name: 'total_amount', type: 'decimal', description: 'Order total in cents' },
+                        { name: 'order_date', type: 'date', description: 'Date order was placed' }
+                    ],
+                    owner: 'Analytics Team',
+                    lastUpdated: '2024-01-20'
+                }
+            };
+
+            const key = tableName.toLowerCase();
+            if (suggestions[key]) {
+                return {
+                    tableName,
+                    database: database || 'default',
+                    ...suggestions[key],
+                    found: true
+                };
+            }
+            return { tableName, found: false, message: `No schema found for table "${tableName}"` };
+        }
+    };
+
+    // Load initial YAML and initialize
     const initialYaml = await loadInitialYaml();
 
-    // Initialize the editor
+    // Initialize the editor with AI configuration and custom tools
     const editor = init({
         container: '#editor',
-
-        // Use EMBEDDED mode to show Cancel/Delete/Save buttons
         mode: 'EMBEDDED',
-
-        // Initial YAML content from the load function
         yaml: initialYaml,
-
-        // Schema URL for validation
         schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
-
-        // Start in YAML view
         initialView: 'yaml',
 
-        // Custom save callback
+        // Callbacks
         onSave: (yaml) => {
-            console.log('✅ ✅ ✅ CUSTOM ONSAVE TRIGGERED! ✅ ✅ ✅');
-            console.log('YAML content:', yaml);
-            alert('Custom onSave was called! Config is working!');
-
-            // In a real application, you would send this to your backend:
-            // fetch('/api/contracts/save', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/yaml' },
-            //     body: yaml
-            // });
+            console.log('Save called with YAML:', yaml);
+            alert('Contract saved!');
         },
-
-        // Custom cancel callback (for EMBEDDED mode)
         onCancel: () => {
-            console.log('✅ Cancel button clicked!');
+            console.log('Cancel clicked');
             alert('Cancel was called!');
-            // In a real app, navigate back or close the editor
         },
-
-        // Custom delete callback (for EMBEDDED mode)
         onDelete: () => {
-            console.log('✅ Delete button clicked!');
+            console.log('Delete clicked');
             alert('Delete was called!');
-            // In a real app, send DELETE request to backend
         },
 
+        // Test configuration
         tests: {
             enabled: true,
             dataContractCliApiServerUrl: 'https://api.datacontract.com',
         },
 
-        // Optional teams and domains lists (if provided, dropdowns are used instead of text fields)
+        // Teams and domains
         teams: teams,
         domains: domains,
 
-        // Disable localStorage persistence (use your own backend)
+        // =====================================================================
+        // AI Configuration - OpenAI-compatible endpoint
+        // =====================================================================
+        ai: {
+            enabled: true,
+
+            // OpenAI-compatible endpoint (works with OpenAI, Azure, Ollama, OpenRouter, etc.)
+            // Azure example: 'https://your-resource.cognitiveservices.azure.com/openai/v1/chat/completions'
+            // OpenAI: 'https://api.openai.com/v1/chat/completions'
+            // Ollama: 'http://localhost:11434/v1/chat/completions'
+            endpoint: 'https://datacontract-editor-ai.cognitiveservices.azure.com/openai/v1/chat/completions',
+
+            // API Key
+            apiKey: '<your-api-key>',
+
+            // Model/deployment name
+            model: 'model-router',
+
+            // Auth header style: 'bearer' (default) or 'api-key' (Azure style)
+            authHeader: 'api-key',
+
+            // Custom headers (optional)
+            headers: {
+                // 'X-Custom-Header': 'value'
+            },
+
+            // Custom tools - MCP-like extensibility
+            tools: [
+                businessGlossaryTool,
+                validateQualityTool,
+                runTestsTool,
+                schemaSuggestionTool,
+            ],
+        },
+
         enablePersistence: false
     });
 
-    // Debug: Check if config was applied
-    console.log('🔍 DEBUG: Editor initialized');
-    console.log('🔍 Current YAML:', editor.getYaml());
-    console.log('🔍 Should contain "embed-example" ID');
+    console.log('Editor initialized with AI tools:', editor);
 
-    // Verify the YAML contains our custom content
-    if (editor.getYaml().includes('embed-example')) {
-        console.log('✅ ✅ ✅ CONFIG IS WORKING! ✅ ✅ ✅');
-    } else {
-        console.error('❌ ❌ ❌ CONFIG NOT APPLIED - Using default YAML! ❌ ❌ ❌');
-    }
+    // =========================================================================
+    // Runtime tool registration example
+    // =========================================================================
 
-    // Example: Subscribe to state changes for debugging (optional)
-    // editor.subscribe(() => {
-    //     console.log('Editor state changed');
-    //     console.log('- Current view:', editor.getView());
-    //     console.log('- Has unsaved changes:', editor.isDirty());
-    //     console.log('- Validation errors:', editor.getMarkers().length);
+    // You can also register tools after initialization
+    editor.ai.registerTool({
+        name: 'getSystemTime',
+        description: 'Get the current system time. Useful for adding timestamps.',
+        parameters: {
+            type: 'object',
+            properties: {
+                timezone: {
+                    type: 'string',
+                    description: 'Timezone (e.g., "UTC", "America/New_York")'
+                }
+            },
+            required: []
+        },
+        handler: async ({ timezone = 'UTC' }) => {
+            const now = new Date();
+            return {
+                iso: now.toISOString(),
+                formatted: now.toLocaleString('en-US', { timeZone: timezone }),
+                timezone
+            };
+        }
+    });
+
+    // Example using helper templates
+    // const lookupTool = editor.ai.helpers.createLookupTool({
+    //     name: 'lookupColumn',
+    //     description: 'Look up column metadata from the data dictionary',
+    //     lookupFn: async (query) => {
+    //         // Your lookup logic here
+    //         return [{ name: query, type: 'string', description: '...' }];
+    //     }
     // });
+    // lookupTool.register();
 
-    // Auto-save example (commented out by default)
-    // let saveTimeout;
-    // editor.subscribe((state) => {
-    //     clearTimeout(saveTimeout);
-    //     saveTimeout = setTimeout(() => {
-    //         if (editor.isDirty()) {
-    //             console.log('Auto-saving...');
-    //             const yaml = editor.getYaml();
-    //             // Send to your backend here
-    //         }
-    //     }, 2000);
-    // });
 </script>
 </body>
 </html>

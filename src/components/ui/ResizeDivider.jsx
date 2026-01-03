@@ -45,7 +45,7 @@ const ResizeDivider = ({ onResize, minLeftPercent = 20, maxLeftPercent = 80 }) =
     <div
       ref={containerRef}
       onMouseDown={handleMouseDown}
-      className="relative flex-shrink-0 cursor-col-resize w-px h-full bg-gray-300 hover:bg-blue-400 transition-colors"
+      className="relative flex-shrink-0 cursor-col-resize w-px h-full bg-gray-300 hover:bg-blue-400 transition-colors hidden md:block"
       title="Drag to resize"
     >
       {/* Invisible wider hit area */}

@@ -2,6 +2,7 @@ import {create} from 'zustand'
 import {devtools, persist, createJSONStorage} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
+import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -116,19 +117,24 @@ export function defaultStoreConfig(set, get) {
 		closeMobileSidebar: () => set({ isMobileSidebarOpen: false }),
 		togglePreview: () => set((state) => ({
 			isPreviewVisible: !state.isPreviewVisible,
-			isWarningsVisible: state.isPreviewVisible ? false : false, // Close warnings when opening preview
-			isTestResultsVisible: state.isPreviewVisible ? false : false, // Close test results when opening preview
+			isWarningsVisible: false,
+			isTestResultsVisible: false,
 		})),
 		toggleWarnings: () => set((state) => ({
 			isWarningsVisible: !state.isWarningsVisible,
-			isPreviewVisible: state.isWarningsVisible ? false : false, // Close preview when opening warnings
-			isTestResultsVisible: state.isWarningsVisible ? false : false, // Close test results when opening warnings
+			isPreviewVisible: false,
+			isTestResultsVisible: false,
 		})),
 		toggleTestResults: () => set((state) => ({
 			isTestResultsVisible: !state.isTestResultsVisible,
-			isPreviewVisible: state.isTestResultsVisible ? false : false, // Close preview when opening test results
-			isWarningsVisible: state.isTestResultsVisible ? false : false, // Close warnings when opening test results
+			isPreviewVisible: false,
+			isWarningsVisible: false,
 		})),
+		toggleAiPanel: () => set((state) => ({
+			isAiPanelOpen: !state.isAiPanelOpen,
+		})),
+		openAiPanel: () => set({ isAiPanelOpen: true }),
+		closeAiPanel: () => set({ isAiPanelOpen: false }),
 		runTest: async (server) => {
 			const {yaml, editorConfig} = get();
 			set({isTestRunning: true});
@@ -233,6 +239,26 @@ export function defaultStoreConfig(set, get) {
 		},
 		clearTestResults: () => set({testResults: []}),
 		setMarkers: (markers) => set({markers}),
+		// AI pending change actions
+		setPendingAiChange: (change) => set({ pendingAiChange: change }),
+		clearPendingAiChange: () => set({ pendingAiChange: null }),
+		applyPendingAiChange: () => {
+			const { pendingAiChange, yaml } = get();
+			if (pendingAiChange?.isValid && pendingAiChange?.updatedYaml) {
+				// Store original YAML for unapply
+				set({ lastAppliedAiChange: { originalYaml: yaml, summary: pendingAiChange.summary } });
+				actions.setYaml(pendingAiChange.updatedYaml);
+			}
+			set({ pendingAiChange: null });
+		},
+		unapplyAiChange: () => {
+			const { lastAppliedAiChange } = get();
+			if (lastAppliedAiChange?.originalYaml) {
+				actions.setYaml(lastAppliedAiChange.originalYaml);
+				set({ lastAppliedAiChange: null });
+			}
+		},
+		clearLastAppliedAiChange: () => set({ lastAppliedAiChange: null }),
 		setView: (view) => set({currentView: view}),
 		setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
 		setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
@@ -340,13 +366,13 @@ export function defaultStoreConfig(set, get) {
 			showDelete: true, // Show Delete button in EMBEDDED mode
 			teams: null,
 			domains: null,
-			tests: {
-				enabled: true,
-				dataContractCliApiServerUrl: null, // null means use default https://api.datacontract.com
-				apiKey: null, // Optional X-API-KEY for authentication
-			},
+			tests: DEFAULT_TESTS_CONFIG,
+			ai: DEFAULT_AI_CONFIG,
 			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
+		isAiPanelOpen: false,
+		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
+		lastAppliedAiChange: null, // { originalYaml, summary } - for unapply
 		...actions,
 	};
 }
@@ -358,6 +384,26 @@ const defaultEditorStore = create()(
 		persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: createJSONStorage(() => localStorage),
+			merge: (persistedState, currentState) => {
+				// Deep merge editorConfig to preserve new defaults
+				const mergedEditorConfig = {
+					...currentState.editorConfig,
+					...persistedState?.editorConfig,
+					tests: {
+						...currentState.editorConfig?.tests,
+						...persistedState?.editorConfig?.tests,
+					},
+					ai: {
+						...currentState.editorConfig?.ai,
+						...persistedState?.editorConfig?.ai,
+					},
+				};
+				return {
+					...currentState,
+					...persistedState,
+					editorConfig: mergedEditorConfig,
+				};
+			},
 			onRehydrateStorage: () => (state) => {
 				// Sync yamlParts from yaml when rehydrating from localStorage
 				if (state?.yaml) {
@@ -371,6 +417,24 @@ const defaultEditorStore = create()(
 						console.warn('Failed to parse yaml during rehydration:', e);
 					}
 				}
+				// Ensure editorConfig.ai defaults are preserved (for old localStorage without ai config)
+				setTimeout(() => {
+					const currentState = defaultEditorStore.getState();
+					if (!currentState.editorConfig?.ai) {
+						defaultEditorStore.setState({
+							editorConfig: {
+								...currentState.editorConfig,
+								ai: {
+									enabled: true,
+									endpoint: null,
+									apiKey: null,
+									model: 'gpt-4o',
+									headers: {},
+								},
+							},
+						});
+					}
+				}, 0);
 			},
 		})
 	)
@@ -412,6 +476,11 @@ export const setEditorConfig = (config) => {
 				...currentConfig.tests,
 				...config.tests,
 			} : currentConfig.tests,
+			// Deep merge the ai object if provided
+			ai: config.ai ? {
+				...currentConfig.ai,
+				...config.ai,
+			} : currentConfig.ai,
 		},
 	});
 };

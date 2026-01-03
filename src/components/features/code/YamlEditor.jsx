@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { configureMonacoYaml } from 'monaco-yaml';
 import { useEditorStore } from '../../../store.js';
+import { registerSchemaCompletionProvider } from '../../../services/schemaCompletionProvider.js';
 
 // Import Monaco workers setup
 import '../../../lib/monaco-workers.js';
@@ -17,6 +18,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
     const [diffRenderSideBySide, setDiffRenderSideBySide] = useState(true);
     const monacoYamlRef = useRef(null);
     const monacoRef = useRef(null);
+    const completionProviderRef = useRef(null);
     const setMarkers = useEditorStore((state) => state.setMarkers);
     const setSchemaInfo = useEditorStore((state) => state.setSchemaInfo);
     const baselineYaml = useEditorStore((state) => state.baselineYaml);
@@ -28,6 +30,11 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
         editorRef.current = editor;
         monacoRef.current = monaco;
         configureEditor(monaco);
+
+        // Register ODCS schema completion provider
+        if (!completionProviderRef.current) {
+            completionProviderRef.current = registerSchemaCompletionProvider(monaco);
+        }
 
         // Listen for marker changes and update the store
         const updateMarkers = () => {
@@ -63,6 +70,10 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
             markerDisposable.dispose();
             contentDisposable.dispose();
             cursorDisposable.dispose();
+            if (completionProviderRef.current) {
+                completionProviderRef.current.dispose();
+                completionProviderRef.current = null;
+            }
             setMarkers([]);
         });
     };

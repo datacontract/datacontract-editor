@@ -9,6 +9,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
+import SparkleButton from '../ui/SparkleButton.jsx';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
@@ -228,7 +229,16 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               {/* Description */}
               {!isDescriptionHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-gray-700">Description</label>
+                    <SparkleButton
+                      fieldName={`Description for "${property.name || 'property'}"`}
+                      fieldPath="property.description"
+                      currentValue={property.description}
+                      onSuggestion={(value) => updateField('description', value)}
+                      placeholder={`Description of the ${property.name || 'data'} field`}
+                    />
+                  </div>
                   <textarea
                     value={property.description || ''}
                     onChange={(e) => updateField('description', e.target.value)}
