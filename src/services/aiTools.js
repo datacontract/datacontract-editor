@@ -5,7 +5,7 @@
  * Custom tools can be registered for MCP-like extensibility.
  */
 
-import { registerTool } from './aiService.js';
+import { registerTool } from '../ai/aiService.js';
 import { validateYaml } from '../utils/validateYaml.js';
 
 // Cache for ODCS schema

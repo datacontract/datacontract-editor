@@ -176,15 +176,19 @@ export async function streamChatCompletion({
     temperature,
   };
 
-  // Add tools if any
-  const allTools = [...tools, ...getRegisteredTools()];
-  if (allTools.length > 0) {
-    body.tools = allTools;
-    body.tool_choice = 'auto';
+  // Add tools if enabled (default: true)
+  let toolCount = 0;
+  if (config.useTools !== false) {
+    const allTools = [...tools, ...getRegisteredTools()];
+    if (allTools.length > 0) {
+      body.tools = allTools;
+      body.tool_choice = 'auto';
+      toolCount = allTools.length;
+    }
   }
 
   // Make request
-  console.log('[AI] Request:', { endpoint, model, tools: allTools.length, messages });
+  console.log('[AI] Request:', { endpoint, model, tools: toolCount, messages });
   const response = await fetch(endpoint, {
     method: 'POST',
     headers,
@@ -239,7 +243,7 @@ export async function streamChatCompletion({
     },
   });
 
-  console.log('[AI] Response:', { contentLength: content.length, toolCalls: toolCalls.map(t => t.function?.name) });
+  console.log('[AI] Response:', { content, toolCalls: toolCalls.map(t => t.function?.name) });
   return { content, toolCalls };
 }
 

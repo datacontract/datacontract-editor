@@ -67,8 +67,8 @@ const MainContent = () => {
   const [leftPanePercent, setLeftPanePercent] = useState(50);
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex flex-row w-full h-full">
+    <div className="flex flex-col w-full h-full min-w-0">
+      <div className="flex flex-row w-full h-full min-w-0">
         {/* Left pane - Editor */}
         <div
           className={`h-full overflow-auto ${isRightPaneVisible ? 'max-lg:!w-full' : 'w-full'}`}

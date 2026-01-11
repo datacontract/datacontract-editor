@@ -3,7 +3,7 @@ import { Tooltip } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import SparkleButton from '../components/ui/SparkleButton.jsx';
+import { SparkleButton } from '../ai/index.js';
 import {useShallow} from "zustand/react/shallow";
 
 const TermsOfUse = () => {

@@ -11,6 +11,7 @@ import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
+import { SparkleButton } from '../../ai/index.js';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import {useShallow} from "zustand/react/shallow";
 import PropertyRow from './schema/PropertyRow.jsx';
@@ -455,14 +456,23 @@ const SchemaEditor = ({schemaIndex}) => {
                                         {/* Description Field */}
                                         {!isDescriptionHidden && (
                                             <div>
-                                                <div className="flex items-center gap-1 mb-1">
-                                                    <label htmlFor={`schema-description-${schemaIndex}`}
-                                                           className="block text-xs font-medium leading-4 text-gray-900">
-                                                        Description
-                                                    </label>
-                                                    <Tooltip content="Description of what this schema contains">
-                                                        <QuestionMarkCircleIcon />
-                                                    </Tooltip>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <label htmlFor={`schema-description-${schemaIndex}`}
+                                                               className="block text-xs font-medium leading-4 text-gray-900">
+                                                            Description
+                                                        </label>
+                                                        <Tooltip content="Description of what this schema contains">
+                                                            <QuestionMarkCircleIcon />
+                                                        </Tooltip>
+                                                    </div>
+                                                    <SparkleButton
+                                                        fieldName={`Description for "${schema[schemaIndex].name || 'schema'}"`}
+                                                        fieldPath={`schema[${schemaIndex}].description`}
+                                                        currentValue={schema[schemaIndex].description || ''}
+                                                        onSuggestion={(value) => setValue(`schema[${schemaIndex}].description`, value)}
+                                                        placeholder="Description of what this schema/table contains and its purpose"
+                                                    />
                                                 </div>
                                                 <textarea
                                                     id={`schema-description-${schemaIndex}`}
@@ -470,7 +480,7 @@ const SchemaEditor = ({schemaIndex}) => {
                                                     rows={2}
                                                     value={schema[schemaIndex].description || ''}
                                                     onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
-                                                    className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                                                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                                                     placeholder="Describe the schema..."
                                                 />
                                             </div>

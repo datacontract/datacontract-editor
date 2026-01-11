@@ -5,8 +5,7 @@ import { useEditorStore, setFileStorageBackend, setEditorConfig } from './store.
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js';
 import { ToastContainer } from './components/ui/Toast.jsx';
 import { ErrorBoundary } from './components/error/index.js';
-import { AiFloatingActionButton } from './components/ai/index.js';
-import AiSidebar from './components/ai/AiSidebar.jsx';
+import { AiFloatingActionButton, AiSidebar } from './ai/index.js';
 
 /**
  * Main App component for the Data Contract Editor
@@ -104,7 +103,7 @@ function App({ storageBackend = null, editorConfig = null }) {
                         {/* Main app content */}
                         <div className="flex flex-col flex-1 min-w-0 h-full">
                             <Header/>
-                            <main className="flex flex-row w-full bg-white flex-1 overflow-hidden">
+                            <main className="flex flex-row w-full bg-white flex-1 overflow-hidden min-w-0">
                                 {/* Desktop sidebar - hidden on mobile */}
                                 <div className="hidden md:block">
                                     <SidebarNavigation/>

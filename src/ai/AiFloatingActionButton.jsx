@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useEditorStore } from '../../store.js';
+import { useEditorStore } from '../store.js';
 
 // Sparkles icon for AI button with individual animated sparkles
 const SparklesIcon = ({ className, animate }) => (

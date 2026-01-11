@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { DiffEditor } from '@monaco-editor/react';
-import { useEditorStore } from '../../store.js';
+import { useEditorStore } from '../store.js';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
 // Icons

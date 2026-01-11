@@ -9,7 +9,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
-import SparkleButton from '../ui/SparkleButton.jsx';
+import { SparkleButton } from '../../ai/index.js';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
