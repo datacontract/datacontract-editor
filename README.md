@@ -51,6 +51,44 @@ docker run -d -p 4173:4173 datacontract/editor
 
 Then open http://localhost:4173
 
+#### Configure AI Assistant
+
+The AI Assistant is disabled by default in Docker. To enable it, provide your own OpenAI-compatible endpoint:
+
+**OpenAI:**
+```bash
+docker run -d -p 4173:4173 \
+  -e AI_ENDPOINT=https://api.openai.com/v1/chat/completions \
+  -e AI_API_KEY=sk-your-api-key \
+  -e AI_MODEL=gpt-4o \
+  datacontract/editor
+```
+
+**Azure OpenAI:**
+```bash
+docker run -d -p 4173:4173 \
+  -e AI_ENDPOINT=https://your-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview \
+  -e AI_API_KEY=your-azure-key \
+  -e AI_AUTH_HEADER=api-key \
+  datacontract/editor
+```
+
+**Local LLM (Ollama):**
+```bash
+docker run -d -p 4173:4173 \
+  -e AI_ENDPOINT=http://host.docker.internal:11434/v1/chat/completions \
+  -e AI_API_KEY=ollama \
+  -e AI_MODEL=llama3.2 \
+  datacontract/editor
+```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AI_ENDPOINT` | OpenAI-compatible chat completions URL | Hosted API |
+| `AI_API_KEY` | API key for authentication | Hosted API |
+| `AI_MODEL` | Model name | `gpt-4o` |
+| `AI_AUTH_HEADER` | Auth header: `bearer` or `api-key` | `bearer` |
+
 
 ### Data Contract CLI
 
