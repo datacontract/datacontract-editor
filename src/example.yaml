@@ -176,7 +176,7 @@ slaProperties:
   - property: "freshness"
     value: 24
     unit: "hours"
-    element: "orders.order_date"
+#    element: "orders.order_timestamp"
     driver: "operational"
     description: "Order data is refreshed within 24 hours of order placement"
   - property: "retention"
