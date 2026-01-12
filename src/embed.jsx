@@ -7,6 +7,7 @@ import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
+import { DEFAULT_AI_CONFIG } from './config/defaults.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -90,11 +91,9 @@ const DEFAULT_CONFIG = {
 
   // AI Assistant configuration
   // Requires an OpenAI-compatible endpoint (OpenAI, Azure, Ollama, etc.)
+  // Uses build-time defaults from VITE_AI_* env vars, can be overridden
   ai: {
-    enabled: true,
-    endpoint: null, // e.g., 'https://api.openai.com/v1/chat/completions'
-    apiKey: null, // API key for the endpoint
-    model: 'gpt-4o', // Model to use
+    ...DEFAULT_AI_CONFIG,
     headers: {}, // Additional headers (for custom auth, etc.)
     tools: [], // Additional custom tools (MCP-like)
   },
