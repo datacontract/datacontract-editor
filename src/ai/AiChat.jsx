@@ -68,7 +68,7 @@ TIP: When uncertain about ODCS schema (valid server types, field names, quality 
 
 IMPORTANT: When the user asks you to make changes to the contract (add, modify, or remove content):
 1. First call validateContract with your proposed YAML to check for errors
-2. If valid, use updateContract to apply the changes
+2. If valid, use updateContract tool to apply the changes (do not forget this!)
 3. Provide the COMPLETE updated YAML (not just the changed parts)
 4. Include a brief summary of what you changed
 5. The YAML MUST follow the ODCS v3.x schema structure below
