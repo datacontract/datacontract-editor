@@ -32,6 +32,11 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+        env: # Add environment variables here
+          VITE_AI_ENDPOINT: https://datacontract-editor-ai.cognitiveservices.azure.com/openai/v1/chat/completions
+          VITE_AI_MODEL: model-router
+          VITE_AI_AUTH_HEADER: api-key
+          VITE_AI_API_KEY: ${{ secrets.DATA_CONTRACT_AI_AZURE_API_KEY }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
