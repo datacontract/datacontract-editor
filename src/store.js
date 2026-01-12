@@ -412,13 +412,16 @@ const defaultEditorStore = create()(
 			},
 			onRehydrateStorage: () => (state) => {
 				// Sync yamlParts from yaml when rehydrating from localStorage
+				// setTimeout needed because defaultEditorStore isn't fully initialized yet
 				if (state?.yaml) {
-					try {
-						const yamlParts = Yaml.parse(state.yaml);
-						defaultEditorStore.setState({ yamlParts });
-					} catch (e) {
-						console.warn('Failed to parse yaml during rehydration:', e);
-					}
+					setTimeout(() => {
+						try {
+							const yamlParts = Yaml.parse(state.yaml);
+							defaultEditorStore.setState({ yamlParts });
+						} catch (e) {
+							console.warn('Failed to parse yaml during rehydration:', e);
+						}
+					}, 0);
 				}
 			},
 		})
