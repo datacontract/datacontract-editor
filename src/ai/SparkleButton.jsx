@@ -113,7 +113,7 @@ export default function SparkleButton({
 			)}
 
 			{/* Generate button */}
-			<Tooltip content={error && !showError ? error : `Generate ${fieldName} with AI`}>
+			<Tooltip content={error && !showError ? error : `Suggest ${fieldName} with AI`}>
 				<button
 					type="button"
 					onClick={handleClick}
@@ -121,7 +121,7 @@ export default function SparkleButton({
 					className={`inline-flex items-center justify-center p-1 rounded-md transition-colors
             ${isLoading ? 'text-indigo-400 cursor-wait' : 'text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50'}
             ${error && !isLoading ? 'text-red-400 hover:text-red-600' : ''}`}
-					aria-label={`Generate ${fieldName} with AI`}
+					aria-label={`Suggest ${fieldName} with AI`}
 				>
 					<SparklesIcon className={`h-4 w-4 ${isLoading ? 'animate-pulse' : ''}`} />
 				</button>

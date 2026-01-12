@@ -385,7 +385,10 @@ const defaultEditorStore = create()(
 			name: 'editor-store',
 			storage: createJSONStorage(() => localStorage),
 			merge: (persistedState, currentState) => {
-				// Deep merge editorConfig to preserve new defaults
+				// Deep merge editorConfig, ensuring empty strings don't override build-time defaults
+				const persistedAi = persistedState?.editorConfig?.ai || {};
+				const defaultAi = currentState.editorConfig?.ai || {};
+
 				const mergedEditorConfig = {
 					...currentState.editorConfig,
 					...persistedState?.editorConfig,
@@ -394,8 +397,11 @@ const defaultEditorStore = create()(
 						...persistedState?.editorConfig?.tests,
 					},
 					ai: {
-						...currentState.editorConfig?.ai,
-						...persistedState?.editorConfig?.ai,
+						...defaultAi,
+						...persistedAi,
+						// Prefer build-time defaults over empty persisted values
+						endpoint: persistedAi.endpoint || defaultAi.endpoint,
+						apiKey: persistedAi.apiKey || defaultAi.apiKey,
 					},
 				};
 				return {
@@ -409,32 +415,11 @@ const defaultEditorStore = create()(
 				if (state?.yaml) {
 					try {
 						const yamlParts = Yaml.parse(state.yaml);
-						// Use setState to update yamlParts after rehydration
-						setTimeout(() => {
-							defaultEditorStore.setState({ yamlParts });
-						}, 0);
+						defaultEditorStore.setState({ yamlParts });
 					} catch (e) {
 						console.warn('Failed to parse yaml during rehydration:', e);
 					}
 				}
-				// Ensure editorConfig.ai defaults are preserved (for old localStorage without ai config)
-				setTimeout(() => {
-					const currentState = defaultEditorStore.getState();
-					if (!currentState.editorConfig?.ai) {
-						defaultEditorStore.setState({
-							editorConfig: {
-								...currentState.editorConfig,
-								ai: {
-									enabled: true,
-									endpoint: null,
-									apiKey: null,
-									model: 'gpt-4o',
-									headers: {},
-								},
-							},
-						});
-					}
-				}, 0);
 			},
 		})
 	)
