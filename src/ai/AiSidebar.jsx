@@ -14,6 +14,13 @@ const XIcon = ({ className }) => (
 	</svg>
 );
 
+// Plus icon for new conversation
+const PlusIcon = ({ className }) => (
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+		<path d="M12 5v14M5 12h14" />
+	</svg>
+);
+
 // Sparkles icon for AI header
 const SparklesIcon = ({ className }) => (
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -29,6 +36,8 @@ const SparklesIcon = ({ className }) => (
 export default function AiSidebar() {
 	const isAiPanelOpen = useEditorStore((state) => state.isAiPanelOpen);
 	const closeAiPanel = useEditorStore((state) => state.closeAiPanel);
+	const resetAiChat = useEditorStore((state) => state.resetAiChat);
+	const aiChatHasMessages = useEditorStore((state) => state.aiChatHasMessages);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
 
 	const [width, setWidth] = useState(DEFAULT_WIDTH);
@@ -94,14 +103,28 @@ export default function AiSidebar() {
 								Data Contract Assistant
 							</h2>
 						</div>
-						<button
-							type="button"
-							onClick={closeAiPanel}
-							className="rounded-md text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
-						>
-							<span className="sr-only">Close panel</span>
-							<XIcon className="h-5 w-5" />
-						</button>
+						<div className="flex items-center gap-1">
+							{aiChatHasMessages && (
+								<button
+									type="button"
+									onClick={resetAiChat}
+									className="rounded-md text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white p-1"
+									title="New conversation"
+								>
+									<span className="sr-only">New conversation</span>
+									<PlusIcon className="h-5 w-5" />
+								</button>
+							)}
+							<button
+								type="button"
+								onClick={closeAiPanel}
+								className="rounded-md text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white p-1"
+								title="Close panel"
+							>
+								<span className="sr-only">Close panel</span>
+								<XIcon className="h-5 w-5" />
+							</button>
+						</div>
 					</div>
 				</div>
 

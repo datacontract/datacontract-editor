@@ -135,6 +135,8 @@ export function defaultStoreConfig(set, get) {
 		})),
 		openAiPanel: () => set({ isAiPanelOpen: true }),
 		closeAiPanel: () => set({ isAiPanelOpen: false }),
+		resetAiChat: () => set((state) => ({ aiChatResetKey: (state.aiChatResetKey || 0) + 1, aiChatHasMessages: false })),
+		setAiChatHasMessages: (hasMessages) => set({ aiChatHasMessages: hasMessages }),
 		runTest: async (server) => {
 			const {yaml, editorConfig} = get();
 			set({isTestRunning: true});
@@ -371,6 +373,8 @@ export function defaultStoreConfig(set, get) {
 			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
 		isAiPanelOpen: false,
+		aiChatResetKey: 0,
+		aiChatHasMessages: false,
 		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
 		lastAppliedAiChange: null, // { originalYaml, summary } - for unapply
 		...actions,

@@ -242,6 +242,8 @@ export default function AiChat() {
 	const setPendingAiChange = useEditorStore((state) => state.setPendingAiChange);
 	const lastAppliedAiChange = useEditorStore((state) => state.lastAppliedAiChange);
 	const unapplyAiChange = useEditorStore((state) => state.unapplyAiChange);
+	const aiChatResetKey = useEditorStore((state) => state.aiChatResetKey);
+	const setAiChatHasMessages = useEditorStore((state) => state.setAiChatHasMessages);
 	const messagesEndRef = useRef(null);
 	const [input, setInput] = useState('');
 	const [messages, setMessages] = useState([]);
@@ -265,6 +267,21 @@ export default function AiChat() {
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages]);
+
+	// Update store when messages change
+	useEffect(() => {
+		setAiChatHasMessages(messages.length > 0);
+	}, [messages, setAiChatHasMessages]);
+
+	// Reset chat when reset key changes
+	useEffect(() => {
+		if (aiChatResetKey > 0) {
+			setMessages([]);
+			setInput('');
+			setError(null);
+			abortControllerRef.current?.abort();
+		}
+	}, [aiChatResetKey]);
 
 	// Send message to AI
 	const sendMessage = useCallback(async (userMessage) => {
