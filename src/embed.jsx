@@ -343,7 +343,7 @@ function createConfiguredStore(config) {
   if (config.enablePersistence) {
     return create()(
       persist(storeConfig, {
-				name: 'datacontract.yaml',
+				name: 'editor-store',
 				storage: createJSONStorage(() => localStorage),
 		}))
   } else {
