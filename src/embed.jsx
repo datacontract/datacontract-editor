@@ -299,6 +299,9 @@ function createConfiguredStore(config) {
 					set({ lastAppliedAiChange: null });
 				}
 			},
+			// AI chat state
+			resetAiChat: () => set((state) => ({ aiChatResetKey: (state.aiChatResetKey || 0) + 1, aiChatHasMessages: false })),
+			setAiChatHasMessages: (hasMessages) => set({ aiChatHasMessages: hasMessages }),
 		};
 
 		return {
@@ -312,6 +315,8 @@ function createConfiguredStore(config) {
 			isTestRunning: false,
 			isMobileSidebarOpen: false,
 			isAiPanelOpen: false,
+			aiChatResetKey: 0,
+			aiChatHasMessages: false,
 			pendingAiChange: null,
 			lastAppliedAiChange: null,
 			testResults: [],
