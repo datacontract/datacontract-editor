@@ -34,15 +34,18 @@ export async function loadRuntimeConfig() {
 export function buildEditorConfig(runtimeConfig) {
   const config = {};
 
-  // Tests config - pass through directly
+  // Tests config - only include values that are explicitly set in runtime config
+  // to avoid overwriting user's persisted settings with null values
   if (runtimeConfig.tests !== undefined) {
     config.tests = {
       enabled: runtimeConfig.tests.enabled ?? true,
-      dataContractCliApiServerUrl: runtimeConfig.tests.dataContractCliApiServerUrl || null,
     };
-  } else {
-    config.tests = { enabled: true, dataContractCliApiServerUrl: null };
+    // Only include URL if explicitly set (not null/undefined/empty)
+    if (runtimeConfig.tests.dataContractCliApiServerUrl) {
+      config.tests.dataContractCliApiServerUrl = runtimeConfig.tests.dataContractCliApiServerUrl;
+    }
   }
+  // Don't set config.tests at all if no runtime config - let persisted values remain
 
   // AI config - pass through directly
   if (runtimeConfig.ai !== undefined) {
