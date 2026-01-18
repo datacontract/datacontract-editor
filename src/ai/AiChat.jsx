@@ -248,6 +248,7 @@ export default function AiChat() {
 	const [input, setInput] = useState('');
 	const [messages, setMessages] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [statusMessage, setStatusMessage] = useState(null);
 	const [error, setError] = useState(null);
 	const [systemPrompt, setSystemPrompt] = useState(null);
 	const abortControllerRef = useRef(null);
@@ -294,6 +295,7 @@ export default function AiChat() {
 
 		setError(null);
 		setIsLoading(true);
+		setStatusMessage('Thinking...');
 
 		// Add user message to conversation
 		const userMsg = { id: Date.now(), role: 'user', content: userMessage };
@@ -329,9 +331,18 @@ export default function AiChat() {
 				signal: abortControllerRef.current.signal,
 				callbacks: {
 					onContent: (chunk, content) => {
+						setStatusMessage('Generating...');
 						setMessages(prev => prev.map(m =>
 							m.id === assistantMsgId ? { ...m, content } : m
 						));
+					},
+					onToolCallsStart: (toolCalls) => {
+						const names = toolCalls.map(tc => tc.function?.name).filter(Boolean);
+						if (names.length === 1) {
+							setStatusMessage(`Calling ${names[0]}...`);
+						} else if (names.length > 1) {
+							setStatusMessage(`Calling ${names.length} tools...`);
+						}
 					},
 					onToolCallsComplete: (toolCalls, toolResults) => {
 						// Process each tool result for special handling
@@ -374,6 +385,7 @@ export default function AiChat() {
 			}
 		} finally {
 			setIsLoading(false);
+			setStatusMessage(null);
 			abortControllerRef.current = null;
 		}
 	}, [messages, systemPrompt, isPromptReady, isLoading, aiConfig, isAiConfigured, yaml, editorConfig, runTest, setPendingAiChange]);
@@ -506,8 +518,11 @@ export default function AiChat() {
 						))}
 						{isLoading && (
 							<div className="flex justify-start">
-								<div className="bg-gray-100 rounded-lg px-3 py-2">
+								<div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2">
 									<LoadingSpinner className="h-4 w-4 text-gray-500" />
+									{statusMessage && (
+										<span className="text-xs text-gray-500">{statusMessage}</span>
+									)}
 								</div>
 							</div>
 						)}
