@@ -6,13 +6,12 @@ import CustomPropertyField from './CustomPropertyField';
 /**
  * Renders a collapsible section containing custom properties
  *
- * @param {Object} sectionConfig - Section configuration { section, title, customProperties }
+ * @param {Object} sectionConfig - Section configuration { section, title, customProperties, expanded }
  * @param {Array} customPropertyConfigs - All custom property definitions for this level
  * @param {Object} values - Current values keyed by property name
  * @param {Function} onPropertyChange - Change handler (propertyName, value) => void
  * @param {Object} context - Data context for condition evaluation
  * @param {Object} yamlParts - Full YAML data for condition evaluation
- * @param {boolean} defaultOpen - Whether section is open by default
  */
 const CustomSection = ({
 	sectionConfig,
@@ -21,9 +20,8 @@ const CustomSection = ({
 	onPropertyChange,
 	context = {},
 	yamlParts = {},
-	defaultOpen = false,
 }) => {
-	const { title, customProperties: propertyNames = [] } = sectionConfig;
+	const { title, customProperties: propertyNames = [], expanded = false } = sectionConfig;
 
 	// Get property configs for properties in this section
 	const sectionProperties = useMemo(() => {
@@ -45,7 +43,7 @@ const CustomSection = ({
 	}), [context, values]);
 
 	return (
-		<Disclosure defaultOpen={defaultOpen}>
+		<Disclosure defaultOpen={expanded}>
 			{({ open }) => (
 				<>
 					<DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">

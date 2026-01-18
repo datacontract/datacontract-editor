@@ -211,6 +211,7 @@ dataContract:
       - section: "section-id"        # Unique section identifier
         title: "Section Label"       # UI section heading
         positionAfter: "overview"    # Position relative to existing sections
+        expanded: true               # Optional: expand section by default (default: false)
         customProperties:
           - propertyName             # Reference to custom property defined above
 ```
