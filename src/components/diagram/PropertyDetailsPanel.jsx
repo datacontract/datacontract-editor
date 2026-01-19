@@ -1055,7 +1055,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
       {/* Definition Selection Modal */}
       <DefinitionSelectionModal
         isOpen={isDefinitionModalOpen}
-        onClose={() => setIsDefinitionModalOpen(false)}
+        onClose={() => { setIsDefinitionModalOpen(false)} }
         onSelect={handleDefinitionSelect}
         onSearchDefinitions={editorConfig?.onSearchDefinitions}
       />
