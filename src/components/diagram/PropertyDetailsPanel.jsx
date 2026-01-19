@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
@@ -14,10 +14,15 @@ import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
+import { DefinitionSelectionModal } from '../ui/DefinitionSelectionModal.jsx';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const yamlParts = useEditorStore((state) => state.yamlParts);
+  const editorConfig = useEditorStore((state) => state.editorConfig);
+
+  // Modal state
+  const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
 
   // Get customization config for schema.properties level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema.properties');
@@ -40,6 +45,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const isTransformSourceObjectsHidden = useIsPropertyHidden('schema.properties', 'transformSourceObjects');
   const isTransformLogicHidden = useIsPropertyHidden('schema.properties', 'transformLogic');
   const isTransformDescriptionHidden = useIsPropertyHidden('schema.properties', 'transformDescription');
+
+  // Semantics enabled via embed config (not customization)
+  const isSemanticsEnabled = editorConfig?.semantics?.enabled ?? false;
 
   // Get overrides for standard properties
   const classificationOverride = useStandardPropertyOverride('schema.properties', 'classification');
@@ -125,6 +133,30 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const updateField = (field, value) => {
     onUpdate(field, value);
   };
+
+  // Get semantic definition from authoritative definitions (type === 'definition')
+  const semanticDefinition = useMemo(() => {
+    return property.authoritativeDefinitions?.find(d => d.type === 'definition');
+  }, [property.authoritativeDefinitions]);
+
+  // Remove semantic definition
+  const removeSemanticDefinition = useCallback(() => {
+    const filtered = property.authoritativeDefinitions?.filter(d => d.type !== 'definition');
+    updateField('authoritativeDefinitions', filtered?.length ? filtered : undefined);
+  }, [property.authoritativeDefinitions, updateField]);
+
+  // Handle definition selection from modal
+  const handleDefinitionSelect = useCallback((definition) => {
+    const newDef = { type: 'definition', url: definition.name };
+    const defs = property.authoritativeDefinitions || [];
+    updateField('authoritativeDefinitions', [...defs.filter(d => d.type !== 'definition'), newDef]);
+  }, [property.authoritativeDefinitions, updateField]);
+
+  // Get authoritative definitions excluding semantic definition (when semantics section visible)
+  const filteredAuthoritativeDefinitions = useMemo(() => {
+    if (!isSemanticsEnabled) return property.authoritativeDefinitions;
+    return property.authoritativeDefinitions?.filter(d => d.type !== 'definition');
+  }, [property.authoritativeDefinitions, isSemanticsEnabled]);
 
   return (
     <div className="space-y-1.5">
@@ -275,6 +307,54 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
           </>
         )}
       </Disclosure>
+
+      {/* Semantics Section */}
+      {isSemanticsEnabled && (
+        <Disclosure>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
+                <span>Semantics</span>
+                <ChevronRightIcon
+                  className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Definition</label>
+                  {semanticDefinition ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <a
+                        href={semanticDefinition.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-600 hover:underline truncate flex-1"
+                      >
+                        {semanticDefinition.url}
+                      </a>
+                      <button
+                        onClick={removeSemanticDefinition}
+                        className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : editorConfig?.onSearchDefinitions ? (
+                    <button
+                      onClick={() => setIsDefinitionModalOpen(true)}
+                      className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
+                      Find Definition
+                    </button>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">Definition lookup not configured</span>
+                  )}
+                </div>
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
+      )}
 
       {/* Logical Type Options Section */}
       <Disclosure>
@@ -879,8 +959,16 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             </DisclosureButton>
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               <AuthoritativeDefinitionsEditor
-                value={property.authoritativeDefinitions}
-                onChange={(value) => updateField('authoritativeDefinitions', value)}
+                value={filteredAuthoritativeDefinitions}
+                onChange={(value) => {
+                  // Preserve semantic definition when updating (if semantics section is enabled)
+                  if (isSemanticsEnabled && semanticDefinition) {
+                    const newValue = [...(value || []), semanticDefinition];
+                    updateField('authoritativeDefinitions', newValue.length ? newValue : undefined);
+                  } else {
+                    updateField('authoritativeDefinitions', value);
+                  }
+                }}
               />
             </DisclosurePanel>
           </>
@@ -963,6 +1051,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
           </button>
         </div>
       )}
+
+      {/* Definition Selection Modal */}
+      <DefinitionSelectionModal
+        isOpen={isDefinitionModalOpen}
+        onClose={() => setIsDefinitionModalOpen(false)}
+        onSelect={handleDefinitionSelect}
+        onSearchDefinitions={editorConfig?.onSearchDefinitions}
+      />
     </div>
   );
 };

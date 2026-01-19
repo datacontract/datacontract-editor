@@ -1,0 +1,291 @@
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+/**
+ * Modal component for selecting definitions from a searchable, paginated list
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the modal is open
+ * @param {Function} props.onClose - Callback when modal is closed
+ * @param {Function} props.onSelect - Callback when a definition is selected
+ * @param {Function} props.onSearchDefinitions - Async function to search definitions
+ */
+export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDefinitions }) {
+  const [definitions, setDefinitions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedDefinition, setSelectedDefinition] = useState(null);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 100;
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset to first page on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch definitions when modal opens or search/page changes
+  useEffect(() => {
+    if (isOpen && onSearchDefinitions) {
+      loadDefinitions();
+    }
+  }, [isOpen, debouncedSearch, page]);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedDefinition(null);
+      setError(null);
+    } else {
+      setSearch('');
+      setDebouncedSearch('');
+      setPage(1);
+      setDefinitions([]);
+    }
+  }, [isOpen]);
+
+  const loadDefinitions = async () => {
+    if (!onSearchDefinitions) {
+      setError('Search definitions callback not configured');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await onSearchDefinitions({
+        search: debouncedSearch,
+        page,
+        pageSize,
+      });
+      setDefinitions(result.definitions || []);
+      setTotal(result.total || 0);
+    } catch (err) {
+      setError(err.message || 'Failed to load definitions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelect = () => {
+    if (selectedDefinition) {
+      onSelect(selectedDefinition);
+      onClose();
+    }
+  };
+
+  const handleCancel = () => {
+    setSelectedDefinition(null);
+    onClose();
+  };
+
+  const totalPages = Math.ceil(total / pageSize);
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
+
+  // Extract owner from customProperties array
+  const getOwner = (definition) => {
+    if (!definition.customProperties) return null;
+    const ownerProp = definition.customProperties.find(p => p.property === 'owner');
+    return ownerProp?.value;
+  };
+
+  // Truncate description
+  const truncateDescription = (text, maxLength = 80) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-transparent"
+          onClick={handleCancel}
+        />
+
+        {/* Modal */}
+        <div
+          className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="border-b border-gray-200 bg-white px-6 py-4">
+            <h3 className="text-lg font-semibold text-gray-900">Find Definition</h3>
+            <p className="mt-1 text-sm text-gray-500">Select a semantic definition for this property</p>
+          </div>
+
+          {/* Search */}
+          <div className="border-b border-gray-200 bg-white px-6 py-3">
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search definitions..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="bg-white px-6 py-4">
+            {loading && (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
+                <span className="ml-3 text-sm text-gray-600">Loading definitions...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && definitions.length === 0 && (
+              <div className="py-8 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                <p className="mt-2 text-sm text-gray-500">
+                  {debouncedSearch ? 'No definitions found matching your search' : 'No definitions available'}
+                </p>
+              </div>
+            )}
+
+            {!loading && !error && definitions.length > 0 && (
+              <div className="max-h-96 overflow-y-auto">
+                <div className="space-y-2">
+                  {definitions.map((definition, index) => {
+                    const owner = getOwner(definition);
+                    return (
+                      <button
+                        key={definition.name || index}
+                        onClick={() => setSelectedDefinition(definition)}
+                        className={`w-full rounded-md px-4 py-3 text-left transition-colors ${
+                          selectedDefinition?.name === definition.name
+                            ? 'bg-indigo-50 ring-2 ring-indigo-600'
+                            : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
+                      >
+                        {/* Row 1: name and logicalType */}
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900 text-sm">{definition.name}</span>
+                          {definition.logicalType && (
+                            <span className="text-xs text-gray-500 font-mono">{definition.logicalType}</span>
+                          )}
+                        </div>
+
+                        {/* Row 2: businessName and owner */}
+                        <div className="flex items-center justify-between mt-0.5">
+                          {definition.businessName && (
+                            <span className="text-sm text-gray-700">{definition.businessName}</span>
+                          )}
+                          {owner && (
+                            <span className="text-xs text-gray-500">Owner: {owner}</span>
+                          )}
+                        </div>
+
+                        {/* Row 3: description */}
+                        {definition.description && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {truncateDescription(definition.description)}
+                          </p>
+                        )}
+
+                        {/* Row 4: tags */}
+                        {definition.tags && definition.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {definition.tags.map((tag, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {!loading && !error && totalPages > 1 && (
+            <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between">
+              <span className="text-sm text-gray-700">
+                Page {page} of {totalPages} ({total} total)
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => p - 1)}
+                  disabled={!hasPrev}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={!hasNext}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSelect}
+              disabled={!selectedDefinition}
+              className="rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Select
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
