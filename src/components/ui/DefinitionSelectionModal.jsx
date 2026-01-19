@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 
 /**
  * Modal component for selecting definitions from a searchable, paginated list
@@ -102,30 +102,40 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
     return text.slice(0, maxLength) + '...';
   };
 
-  if (!isOpen) return null;
+  return (
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
 
-  return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-transparent"
-          onClick={handleCancel}
-        />
-
-        {/* Modal */}
-        <div
-          className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="border-b border-gray-200 bg-white px-6 py-4">
-            <h3 className="text-lg font-semibold text-gray-900">Find Definition</h3>
-            <p className="mt-1 text-sm text-gray-500">Select a semantic definition for this property</p>
-          </div>
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <DialogPanel
+            transition
+            className="relative w-full max-w-2xl h-[600px] flex flex-col transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            {/* Header */}
+            <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 relative">
+              <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 pr-8">
+                Find Definition
+              </DialogTitle>
+              <p className="mt-1 text-sm text-gray-500 pr-8">Select a semantic definition for this property</p>
+              {/* Close button */}
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="absolute right-4 top-4 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
           {/* Search */}
-          <div className="border-b border-gray-200 bg-white px-6 py-3">
+          <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-3">
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -137,13 +147,14 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
                 placeholder="Search definitions..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                autoFocus
                 className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
             </div>
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 py-4">
+          <div className="flex-1 overflow-y-auto bg-white px-6 py-4">
             {loading && (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
@@ -178,12 +189,12 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
             )}
 
             {!loading && !error && definitions.length > 0 && (
-              <div className="max-h-96 overflow-y-auto">
-                <div className="space-y-2">
+              <div className="space-y-2 pr-2">
                   {definitions.map((definition, index) => {
                     const owner = getOwner(definition);
                     return (
                       <button
+                        type="button"
                         key={definition.name || index}
                         onClick={() => setSelectedDefinition(definition)}
                         className={`w-full rounded-md px-4 py-3 text-left transition-colors ${
@@ -233,14 +244,13 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
                       </button>
                     );
                   })}
-                </div>
               </div>
             )}
           </div>
 
           {/* Pagination */}
           {!loading && !error && totalPages > 1 && (
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between">
+            <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between">
               <span className="text-sm text-gray-700">
                 Page {page} of {totalPages} ({total} total)
               </span>
@@ -266,7 +276,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
           )}
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+          <div className="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
@@ -283,9 +293,9 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
               Select
             </button>
           </div>
+          </DialogPanel>
         </div>
       </div>
-    </div>,
-    document.body
+    </Dialog>
   );
 }

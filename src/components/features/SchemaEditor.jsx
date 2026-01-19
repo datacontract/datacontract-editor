@@ -243,8 +243,11 @@ const SchemaEditor = ({schemaIndex}) => {
 
             const isInsideProperties = propertiesContainerRef.current?.contains(event.target);
             const isInsideDrawer = drawerRef.current?.contains(event.target);
+            // Check if click is inside a dialog/modal (Headless UI adds data-headlessui-state)
+            const isInsideDialog = event.target.closest('[role="dialog"]') ||
+                                  event.target.closest('[data-headlessui-state]');
 
-            if (!isInsideProperties && !isInsideDrawer) {
+            if (!isInsideProperties && !isInsideDrawer && !isInsideDialog) {
                 setSelectedProperty(null);
                 setSelectedPropertyPath(null);
             }
