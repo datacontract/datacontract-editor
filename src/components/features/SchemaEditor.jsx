@@ -18,6 +18,7 @@ import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
+import { DefinitionSelectionModal } from '../ui/DefinitionSelectionModal.jsx';
 import {
     DndContext,
     closestCenter,
@@ -36,6 +37,7 @@ import {restrictToVerticalAxis, restrictToParentElement} from '@dnd-kit/modifier
 const SchemaEditor = ({schemaIndex}) => {
     const jsonSchema = useEditorStore((state) => state.schemaData);
     const yamlParts = useEditorStore((state) => state.yamlParts);
+    const editorConfig = useEditorStore((state) => state.editorConfig);
     const {
         schema,
         getValue,
@@ -49,6 +51,7 @@ const SchemaEditor = ({schemaIndex}) => {
         reorderProperty
     } = useSchemaOperations(schemaIndex);
     const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
+    const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
 
     // Drag-and-drop sensors configuration
     const sensors = useSensors(
@@ -353,6 +356,28 @@ const SchemaEditor = ({schemaIndex}) => {
         setSelectedProperty(null);
         setSelectedPropertyPath(null);
     }, []);
+
+    // Add property from a selected definition
+    // Only sets name and definition link - other values are inherited from the definition
+    const addPropertyFromDefinition = useCallback((definition) => {
+        try {
+            if (!schema || !schema[schemaIndex]) {
+                console.warn(`Schema at index ${schemaIndex} not found`);
+                return;
+            }
+
+            const currentProperties = schema[schemaIndex].properties || [];
+            const newProperty = {
+                name: definition.businessName || definition.name?.split('/').pop() || '',
+                authoritativeDefinitions: [{ type: 'definition', url: definition.name }],
+            };
+
+            setValue(`schema[${schemaIndex}].properties`, [...currentProperties, newProperty]);
+            setIsDefinitionModalOpen(false);
+        } catch (error) {
+            console.error('Error adding property from definition:', error);
+        }
+    }, [schema, schemaIndex, setValue]);
 
     // Handle property update from drawer
     // const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
@@ -729,17 +754,28 @@ const SchemaEditor = ({schemaIndex}) => {
                                             <div
                                                 className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 rounded-t-md">
                                                 <span className="text-sm font-medium text-gray-700">Properties</span>
-                                                <button
-                                                    onClick={() => addProperty()}
-                                                    className="text-gray-400 hover:text-indigo-600 cursor-pointer"
-                                                    title="Add property"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor"
-                                                         viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round"
-                                                              strokeWidth={2} d="M12 4v16m8-8H4"/>
-                                                    </svg>
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    {editorConfig?.semantics?.enabled && editorConfig?.onSearchDefinitions && (
+                                                        <button
+                                                            onClick={() => setIsDefinitionModalOpen(true)}
+																														className="rounded-sm bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"
+                                                            title="Add from Definition"
+                                                        >
+                                                            Add from Definition
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => addProperty()}
+                                                        className="text-gray-400 hover:text-indigo-600 cursor-pointer"
+                                                        title="Add property"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor"
+                                                             viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round"
+                                                                  strokeWidth={2} d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             {/* Properties List with Drag-and-Drop */}
@@ -825,6 +861,14 @@ const SchemaEditor = ({schemaIndex}) => {
 								onUpdate={(field, value) => setYamlValue(`${selectedProperty.propPath}.${field}`, value)}
                 onClose={handleCloseDrawer}
                 propertyPath={selectedPropertyPath}
+            />
+
+            {/* Definition Selection Modal */}
+            <DefinitionSelectionModal
+                isOpen={isDefinitionModalOpen}
+                onClose={() => setIsDefinitionModalOpen(false)}
+                onSelect={addPropertyFromDefinition}
+                onSearchDefinitions={editorConfig?.onSearchDefinitions}
             />
         </div>
     );

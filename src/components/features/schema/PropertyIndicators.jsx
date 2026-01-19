@@ -4,13 +4,25 @@ import AsteriskIcon from "../../ui/icons/AsteriskIcon.jsx";
 import LockClosedIcon from "../../ui/icons/LockClosedIcon.jsx";
 import CheckCircleIcon from "../../ui/icons/CheckCircleIcon.jsx";
 import LinkIcon from "../../ui/icons/LinkIcon.jsx";
+import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
 
 /**
  * Visual indicator badges component showing property metadata
- * Displays icons for primary key, required, classification, quality rules, and relationships
+ * Displays icons for primary key, required, classification, quality rules, relationships, and definitions
  */
 const PropertyIndicators = ({property}) => {
     const indicators = [];
+
+    // Check if property has a semantic definition attached
+    const hasDefinition = property.authoritativeDefinitions?.some(d => d.type === 'definition');
+    if (hasDefinition) {
+        const definition = property.authoritativeDefinitions.find(d => d.type === 'definition');
+        indicators.push(
+            <Tooltip key="def" content={`Definition: ${definition.url}`}>
+                <DefinitionIcon className="h-3.5 w-3.5 text-indigo-500"/>
+            </Tooltip>
+        );
+    }
 
     if (property.primaryKey) {
         indicators.push(

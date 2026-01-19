@@ -47,7 +47,7 @@ const DEFAULT_CONFIG = {
   availableViews: ['yaml', 'form', 'diagram'],
 
   // Initial view
-  initialView: 'yaml',
+  initialView: 'form',
 
   // Test configuration
   tests: {
