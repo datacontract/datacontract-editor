@@ -1,7 +1,8 @@
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
+import ExternalLinkIcon from '../ui/icons/ExternalLinkIcon.jsx';
 import ArrayInput from '../ui/ArrayInput.jsx';
 import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
@@ -23,6 +24,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
   // Modal state
   const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
+
+  // Definition data state
+  const [definitionData, setDefinitionData] = useState(null);
+  const [isFetchingDefinition, setIsFetchingDefinition] = useState(false);
 
   // Get customization config for schema.properties level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema.properties');
@@ -139,6 +144,50 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     return property.authoritativeDefinitions?.find(d => d.type === 'definition');
   }, [property.authoritativeDefinitions]);
 
+  // Check if definition URL is from same origin
+  const isSameOrigin = useCallback((url) => {
+    if (!url) return false;
+    try {
+      const definitionUrl = new URL(url, window.location.href);
+      return definitionUrl.origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // Fetch definition data when semantic definition URL is from same origin
+  useEffect(() => {
+    if (!semanticDefinition?.url) {
+      setDefinitionData(null);
+      return;
+    }
+
+    if (!isSameOrigin(semanticDefinition.url)) {
+      setDefinitionData(null);
+      return;
+    }
+
+    const fetchDefinition = async () => {
+      setIsFetchingDefinition(true);
+      try {
+        const response = await fetch(semanticDefinition.url);
+        if (response.ok) {
+          const data = await response.json();
+          setDefinitionData(data);
+        } else {
+          setDefinitionData(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch definition:', error);
+        setDefinitionData(null);
+      } finally {
+        setIsFetchingDefinition(false);
+      }
+    };
+
+    fetchDefinition();
+  }, [semanticDefinition?.url, isSameOrigin]);
+
   // Remove semantic definition
   const removeSemanticDefinition = useCallback(() => {
     const filtered = property.authoritativeDefinitions?.filter(d => d.type !== 'definition');
@@ -223,8 +272,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
                   label="Logical Type"
-                  placeholder="Select..."
+                  placeholder={definitionData?.logicalType ? `From definition: ${definitionData.logicalType}` : "Select..."}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
+                  className={definitionData?.logicalType && !property.logicalType ? 'text-blue-400' : ''}
                 />
               )}
 
@@ -252,8 +302,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     type="text"
                     value={property.physicalType || ''}
                     onChange={(e) => updateField('physicalType', e.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="e.g., VARCHAR(255)"
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.physicalType ? `From definition: ${definitionData.physicalType}` : "e.g., VARCHAR(255)"}
                   />
                 </div>
               )}
@@ -328,9 +378,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                         href={semanticDefinition.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-indigo-600 hover:underline truncate flex-1"
+                        className="text-xs text-indigo-600 hover:underline truncate flex-1 flex items-center gap-1"
                       >
-                        {semanticDefinition.url}
+                        <span>{semanticDefinition.url}</span>
+                        <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />
                       </a>
                       <button
                         onClick={removeSemanticDefinition}
@@ -376,8 +427,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                      placeholder="e.g., email, uri, uuid"
+                      className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
+                      placeholder={definitionData?.logicalTypeOptions?.format ? `From definition: ${definitionData.logicalTypeOptions.format}` : "e.g., email, uri, uuid"}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -517,8 +568,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                      placeholder="e.g., yyyy-MM-dd, ISO 8601"
+                      className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
+                      placeholder={definitionData?.logicalTypeOptions?.format ? `From definition: ${definitionData.logicalTypeOptions.format}` : "e.g., yyyy-MM-dd, ISO 8601"}
                     />
                     <p className="mt-1 text-xs text-gray-500">JDK DateTimeFormatter pattern</p>
                   </div>
