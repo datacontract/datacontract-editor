@@ -365,11 +365,12 @@ const SchemaEditor = ({schemaIndex}) => {
                 console.warn(`Schema at index ${schemaIndex} not found`);
                 return;
             }
+						console.log('Definition selected: ', definition);
 
             const currentProperties = schema[schemaIndex].properties || [];
             const newProperty = {
                 name: definition.businessName || definition.name?.split('/').pop() || '',
-                authoritativeDefinitions: [{ type: 'definition', url: definition.name }],
+                authoritativeDefinitions: [{ type: 'definition', url: definition.url }],
             };
 
             setValue(`schema[${schemaIndex}].properties`, [...currentProperties, newProperty]);
@@ -378,64 +379,6 @@ const SchemaEditor = ({schemaIndex}) => {
             console.error('Error adding property from definition:', error);
         }
     }, [schema, schemaIndex, setValue]);
-
-    // Handle property update from drawer
-    // const handleDrawerPropertyUpdate = useCallback((updatedProperty) => {
-    //     if (!selectedProperty) return;
-		//
-    //     try {
-		//
-    //         if (!schema || !schema[schemaIndex] || !schema[schemaIndex].properties) {
-    //             return;
-    //         }
-		//
-    //         const propPath = selectedProperty.propPath;
-		//
-    //         // Navigate to the target property using propPath
-    //         let targetProp = schema[schemaIndex].properties;
-    //         for (let i = 0; i < propPath.length; i++) {
-    //             // Check if current path segment is 'items'
-    //             if (propPath[i] === 'items') {
-    //                 targetProp = targetProp.items;
-    //             } else if (i < propPath.length - 1) {
-    //                 targetProp = targetProp[propPath[i]];
-    //                 // Only navigate to properties if next segment is not 'items'
-    //                 if (propPath[i + 1] !== 'items') {
-    //                     targetProp = targetProp.properties;
-    //                 }
-    //             } else {
-    //                 targetProp = targetProp[propPath[i]];
-    //             }
-    //         }
-		//
-    //         // Update all fields at once
-    //         Object.assign(targetProp, updatedProperty);
-		//
-    //         // Update the selected property to reflect changes
-		// 				// TODO: Make this work and more efficient
-    //         setSelectedProperty(prev => ({
-    //             ...prev,
-    //             property: updatedProperty
-    //         }));
-    //     } catch (error) {
-    //         console.error('Error updating property:', error);
-    //     }
-    // }, [selectedProperty, schemaIndex]);
-
-    // Handle property delete from drawer
-    // const handleDrawerPropertyDelete = useCallback(() => {
-    //     if (!selectedProperty) return;
-		//
-    //     const propPath = selectedProperty.propPath;
-    //     const propIdx = propPath[propPath.length - 1];
-		//
-    //     // For now, only support deleting top-level properties
-    //     if (propPath.length === 1 && typeof propIdx === 'number') {
-    //         removeProperty(schemaIndex, propIdx);
-    //     }
-		//
-    //     handleCloseDrawer();
-    // }, [selectedProperty, schemaIndex, removeProperty, handleCloseDrawer]);
 
     return (
         <div className="h-full flex flex-col bg-white">
@@ -858,7 +801,6 @@ const SchemaEditor = ({schemaIndex}) => {
             <PropertyDetailsDrawer
                 ref={drawerRef}
                 open={selectedProperty !== null}
-								onUpdate={(field, value) => setYamlValue(`${selectedProperty.propPath}.${field}`, value)}
                 onClose={handleCloseDrawer}
                 propertyPath={selectedPropertyPath}
             />
