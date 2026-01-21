@@ -46,7 +46,7 @@ const EnumField = ({
         onChange={onChange}
         disabled={disabled}
         label={label}
-        valueFromDefinition={valueFromDefinition}
+        fallbackValue={valueFromDefinition}
         className={className}
       />
     );

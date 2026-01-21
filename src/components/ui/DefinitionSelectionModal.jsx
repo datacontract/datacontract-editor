@@ -1,42 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { useEditorStore } from '../../store';
 
 /**
- * Modal component for selecting definitions from a searchable, paginated list
- * @param {Object} props
- * @param {boolean} props.isOpen - Whether the modal is open
- * @param {Function} props.onClose - Callback when modal is closed
- * @param {Function} props.onSelect - Callback when a definition is selected
- * @param {Function} props.onSearchDefinitions - Async function to search definitions
+ * Modal component for selecting definitions with client-side endless scrolling
+ * Uses fetchAllDefinitions from the store (provided by override store when semantics is enabled)
  */
-export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDefinitions }) {
-  const [definitions, setDefinitions] = useState([]);
+export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
+  const fetchAllDefinitions = useEditorStore((state) => state.fetchAllDefinitions);
+
+  const [allDefinitions, setAllDefinitions] = useState([]);
+  const [filteredDefinitions, setFilteredDefinitions] = useState([]);
+  const [displayedDefinitions, setDisplayedDefinitions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [selectedDefinition, setSelectedDefinition] = useState(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const pageSize = 100;
+
+  const scrollContainerRef = useRef(null);
+  const PAGE_SIZE = 50; // Number of items to load per scroll
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1); // Reset to first page on search
+      setDisplayCount(PAGE_SIZE); // Reset display count on search change
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch definitions when modal opens or search/page changes
+  // Fetch all definitions when modal opens
   useEffect(() => {
-    if (isOpen && onSearchDefinitions) {
-      loadDefinitions();
+    if (isOpen && fetchAllDefinitions) {
+      loadAllDefinitions();
     }
-  }, [isOpen, debouncedSearch, page]);
+  }, [isOpen]);
 
-  // Reset state when modal opens
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setSelectedDefinition(null);
@@ -44,33 +47,84 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
     } else {
       setSearch('');
       setDebouncedSearch('');
-      setPage(1);
-      setDefinitions([]);
+      setDisplayCount(PAGE_SIZE);
+      setAllDefinitions([]);
+      setFilteredDefinitions([]);
+      setDisplayedDefinitions([]);
     }
   }, [isOpen]);
 
-  const loadDefinitions = async () => {
-    if (!onSearchDefinitions) {
-      setError('Search definitions callback not configured');
+  // Filter definitions based on search
+  useEffect(() => {
+    if (!allDefinitions.length) {
+      setFilteredDefinitions([]);
+      return;
+    }
+
+    if (!debouncedSearch) {
+      setFilteredDefinitions(allDefinitions);
+      return;
+    }
+
+    const searchLower = debouncedSearch.toLowerCase();
+    const filtered = allDefinitions.filter(def => {
+      // Search in name, businessName, description, and tags
+      return (
+        def.name?.toLowerCase().includes(searchLower) ||
+        def.businessName?.toLowerCase().includes(searchLower) ||
+        def.description?.toLowerCase().includes(searchLower) ||
+        def.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    });
+
+    setFilteredDefinitions(filtered);
+  }, [debouncedSearch, allDefinitions]);
+
+  // Update displayed definitions when filtered list or display count changes
+  useEffect(() => {
+    setDisplayedDefinitions(filteredDefinitions.slice(0, displayCount));
+  }, [filteredDefinitions, displayCount]);
+
+  const loadAllDefinitions = async () => {
+    if (!fetchAllDefinitions) {
+      setError('Definition loading not configured. Semantics may not be enabled.');
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const result = await onSearchDefinitions({
-        search: debouncedSearch,
-        page,
-        pageSize,
-      });
-      setDefinitions(result.definitions || []);
-      setTotal(result.total || 0);
+      const result = await fetchAllDefinitions();
+      setAllDefinitions(result || []);
+      setFilteredDefinitions(result || []);
     } catch (err) {
+      console.error('Failed to load definitions:', err);
       setError(err.message || 'Failed to load definitions');
+      setAllDefinitions([]);
+      setFilteredDefinitions([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Handle scroll to load more items
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || loadingMore) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+    // Load more when scrolled 80% down
+    if (scrollPercentage > 0.8 && displayCount < filteredDefinitions.length) {
+      setLoadingMore(true);
+      // Simulate async loading for smooth UX
+      setTimeout(() => {
+        setDisplayCount(prev => Math.min(prev + PAGE_SIZE, filteredDefinitions.length));
+        setLoadingMore(false);
+      }, 100);
+    }
+  }, [displayCount, filteredDefinitions.length, loadingMore]);
 
   const handleSelect = () => {
     if (selectedDefinition) {
@@ -83,10 +137,6 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
     setSelectedDefinition(null);
     onClose();
   };
-
-  const totalPages = Math.ceil(total / pageSize);
-  const hasPrev = page > 1;
-  const hasNext = page < totalPages;
 
   // Extract owner from customProperties array
   const getOwner = (definition) => {
@@ -101,6 +151,9 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
+
+  const hasMore = displayCount < filteredDefinitions.length;
+  const showingCount = Math.min(displayCount, filteredDefinitions.length);
 
   return (
     <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
@@ -151,10 +204,21 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
                 className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
             </div>
+            {/* Results count */}
+            {!loading && filteredDefinitions.length > 0 && (
+              <div className="mt-2 text-xs text-gray-500">
+                Showing {showingCount} of {filteredDefinitions.length} definition{filteredDefinitions.length !== 1 ? 's' : ''}
+                {debouncedSearch && ` matching "${debouncedSearch}"`}
+              </div>
+            )}
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto bg-white px-6 py-4">
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto bg-white px-6 py-4"
+          >
             {loading && (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
@@ -177,7 +241,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
               </div>
             )}
 
-            {!loading && !error && definitions.length === 0 && (
+            {!loading && !error && filteredDefinitions.length === 0 && (
               <div className="py-8 text-center">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
@@ -188,17 +252,18 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
               </div>
             )}
 
-            {!loading && !error && definitions.length > 0 && (
+            {!loading && !error && displayedDefinitions.length > 0 && (
               <div className="space-y-2 pr-2">
-                  {definitions.map((definition, index) => {
+                  {displayedDefinitions.map((definition, index) => {
                     const owner = getOwner(definition);
+                    const isSelected = selectedDefinition?.url === definition.url;
                     return (
                       <button
                         type="button"
-                        key={definition.name || index}
+                        key={definition.url || definition.name || index}
                         onClick={() => setSelectedDefinition(definition)}
                         className={`w-full rounded-md px-4 py-3 text-left transition-colors ${
-                          selectedDefinition?.name === definition.name
+                          isSelected
                             ? 'bg-indigo-50 ring-2 ring-indigo-600'
                             : 'bg-gray-50 hover:bg-gray-100'
                         }`}
@@ -244,36 +309,23 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect, onSearchDe
                       </button>
                     );
                   })}
+
+                  {/* Loading more indicator */}
+                  {hasMore && (
+                    <div className="flex items-center justify-center py-4">
+                      {loadingMore ? (
+                        <>
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
+                          <span className="ml-2 text-xs text-gray-600">Loading more...</span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-500">Scroll to load more...</span>
+                      )}
+                    </div>
+                  )}
               </div>
             )}
           </div>
-
-          {/* Pagination */}
-          {!loading && !error && totalPages > 1 && (
-            <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between">
-              <span className="text-sm text-gray-700">
-                Page {page} of {totalPages} ({total} total)
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage(p => p - 1)}
-                  disabled={!hasPrev}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={!hasNext}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Footer */}
           <div className="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">

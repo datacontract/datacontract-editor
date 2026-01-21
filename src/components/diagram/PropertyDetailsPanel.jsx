@@ -1,5 +1,5 @@
-import { useMemo, useCallback, useState, useEffect } from 'react';
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
 import ExternalLinkIcon from '../ui/icons/ExternalLinkIcon.jsx';
@@ -11,18 +11,19 @@ import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
-import { SparkleButton } from '../../ai/index.js';
-import { useEditorStore } from '../../store.js';
-import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
-import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
-import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
-import { DefinitionSelectionModal } from '../ui/DefinitionSelectionModal.jsx';
-import { toAbsoluteUrl, isExternalUrl, parseDefinitionUrl } from '../../lib/urlUtils.js';
+import {SparkleButton} from '../../ai/index.js';
+import {useEditorStore} from '../../store.js';
+import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
+import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
+import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
+import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
+import {isExternalUrl, parseDefinitionUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const yamlParts = useEditorStore((state) => state.yamlParts);
   const editorConfig = useEditorStore((state) => state.editorConfig);
+  const getDefinition = useEditorStore((state) => state.getDefinition);
 
   // Modal state
   const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
@@ -116,30 +117,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     }
   }, [property.customProperties, onUpdate]);
 
-  // Dynamically get enum values from schema
-  const qualityDimensionOptions = useMemo(() => {
-    return getSchemaEnumValues(jsonSchema, 'quality.dimension', 'property') ||
-           ['accuracy', 'completeness', 'conformity', 'consistency', 'coverage', 'timeliness', 'uniqueness'];
-  }, [jsonSchema]);
-
-  const qualityTypeOptions = useMemo(() => {
-    return getSchemaEnumValues(jsonSchema, 'quality.type', 'property') ||
-           ['library', 'text', 'sql', 'custom'];
-  }, [jsonSchema]);
-
-  const qualityMetricOptions = useMemo(() => {
-    return getSchemaEnumValues(jsonSchema, 'quality.metric', 'property') ||
-           ['nullValues', 'missingValues', 'invalidValues', 'duplicateValues', 'rowCount'];
-  }, [jsonSchema]);
-
   const relationshipTypeOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'relationships.type', 'property') ||
            ['foreignKey', 'references', 'mapsTo'];
   }, [jsonSchema]);
 
-  const updateField = (field, value) => {
+  const updateField = useCallback((field, value) => {
     onUpdate(field, value);
-  };
+  }, [onUpdate]);
 
   // Get semantic definition from authoritative definitions (type === 'definition')
   const semanticDefinition = useMemo(() => {
@@ -157,23 +142,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
   const isSemanticDefinitionExternal = useMemo(() => {
     if (!semanticDefinition?.url) return false;
-
-    const external = isExternalUrl(semanticDefinition.url);
-    console.log('Is external URL:', external);
-    console.log('Current window.location.hostname:', window.location.hostname);
-    console.log('Current window.location.href:', window.location.href);
-
-    // Try to get the definition URL's hostname
-    try {
-      const defUrl = new URL(semanticDefinition.url, window.location.href);
-      console.log('Definition URL hostname:', defUrl.hostname);
-      console.log('Definition URL (full):', defUrl.href);
-      console.log('Hostnames match:', defUrl.hostname === window.location.hostname);
-    } catch (e) {
-      console.error('Error parsing definition URL:', e);
-    }
-
-    return external;
+		return isExternalUrl(semanticDefinition.url);
   }, [semanticDefinition?.url]);
 
   // Fetch definition data when semantic definition URL is available
@@ -193,26 +162,19 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     const fetchDefinition = async () => {
       setIsFetchingDefinition(true);
       try {
-        // Parse the definition URL to extract info and construct API endpoint
-        const parsedUrl = parseDefinitionUrl(semanticDefinitionAbsoluteUrl);
-
-        if (!parsedUrl) {
-          console.error('Unable to parse definition URL:', semanticDefinitionAbsoluteUrl);
-          setDefinitionData(null);
-          setIsFetchingDefinition(false);
-          return;
-        }
-
-        console.log('Parsed definition URL:', parsedUrl);
-        console.log('Fetching from API endpoint:', parsedUrl.apiUrl);
-
-        const response = await fetch(parsedUrl.apiUrl);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Fetched definition data:', data);
-          setDefinitionData(data);
+        // Use getDefinition from store (provided by override store when semantics is enabled)
+        if (getDefinition) {
+          console.log('Fetching definition from store:', semanticDefinitionAbsoluteUrl);
+          const data = await getDefinition(semanticDefinitionAbsoluteUrl);
+          if (data) {
+            console.log('Fetched definition data from store:', data);
+            setDefinitionData(data);
+          } else {
+            console.warn('No definition data returned from store for:', semanticDefinitionAbsoluteUrl);
+            setDefinitionData(null);
+          }
         } else {
-          console.error('Failed to fetch definition - HTTP', response.status, response.statusText);
+          console.warn('getDefinition not available - semantics may not be enabled');
           setDefinitionData(null);
         }
       } catch (error) {
@@ -224,7 +186,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     };
 
     fetchDefinition();
-  }, [semanticDefinitionAbsoluteUrl, isSemanticDefinitionExternal]);
+  }, [semanticDefinitionAbsoluteUrl, isSemanticDefinitionExternal, getDefinition]);
 
   // Remove semantic definition
   const removeSemanticDefinition = useCallback(() => {
@@ -375,9 +337,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
                   label="Logical Type"
-                  placeholder={definitionData?.logicalType || "Select..."}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
-                  className={definitionData?.logicalType && !property.logicalType ? 'text-blue-400' : ''}
                   valueFromDefinition={definitionData?.logicalType}
                 />
               )}
@@ -484,11 +444,11 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                           href={semanticDefinitionAbsoluteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-indigo-600 hover:underline flex items-center gap-1 min-w-0"
+                          className="text-xs text-indigo-600 hover:underline inline min-w-0"
                         >
-                          <span className="truncate">{semanticDefinitionAbsoluteUrl}</span>
+                          <span className="break-all">{semanticDefinitionAbsoluteUrl}</span>
                           {isSemanticDefinitionExternal && (
-                            <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />
+                            <ExternalLinkIcon className="h-3 w-3 inline-block ml-0.5 align-baseline" />
                           )}
                         </a>
                       </Tooltip>
@@ -496,13 +456,78 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       {/* Buttons - Right aligned */}
                       <div className="flex justify-end gap-2">
                         {!isSemanticDefinitionExternal && (
-                          <Tooltip content={buildDefinitionTooltip()}>
-                            <button
-                              className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                            >
-                              Show Details
-                            </button>
-                          </Tooltip>
+                          <Popover className="relative">
+                            {({ open }) => (
+                              <>
+                                <PopoverButton className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none">
+                                  Show Details
+                                </PopoverButton>
+                                <PopoverPanel
+                                  anchor="bottom end"
+                                  className="z-50 mt-2 rounded-md bg-gray-50 shadow-lg ring-1 ring-black/5 p-3 w-[350px]"
+                                >
+                                  {isFetchingDefinition ? (
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
+                                      <span className="text-gray-600">Loading definition...</span>
+                                    </div>
+                                  ) : !definitionData ? (
+                                    <div className="text-xs text-gray-600">
+                                      <div>Unable to load definition data.</div>
+                                      <div className="mt-1 text-gray-400">Check console for details.</div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      {/* Row 1: name and logicalType */}
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-medium text-gray-900 text-sm">{definitionData.name}</span>
+                                        {definitionData.logicalType && (
+                                          <span className="text-xs text-gray-500 font-mono">{definitionData.logicalType}</span>
+                                        )}
+                                      </div>
+
+                                      {/* Row 2: businessName and owner */}
+                                      <div className="flex items-center justify-between mt-0.5">
+                                        {definitionData.businessName && (
+                                          <span className="text-sm text-gray-700">{definitionData.businessName}</span>
+                                        )}
+                                        {(() => {
+                                          const ownerProp = definitionData.customProperties?.find(p => p.property === 'owner');
+                                          const owner = ownerProp?.value;
+                                          return owner ? (
+                                            <span className="text-xs text-gray-500">Owner: {owner}</span>
+                                          ) : null;
+                                        })()}
+                                      </div>
+
+                                      {/* Row 3: description */}
+                                      {definitionData.description && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          {definitionData.description.length > 200
+                                            ? definitionData.description.slice(0, 200) + '...'
+                                            : definitionData.description}
+                                        </p>
+                                      )}
+
+                                      {/* Row 4: tags */}
+                                      {definitionData.tags && definitionData.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                          {definitionData.tags.map((tag, i) => (
+                                            <span
+                                              key={i}
+                                              className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600"
+                                            >
+                                              {tag}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </PopoverPanel>
+                              </>
+                            )}
+                          </Popover>
                         )}
                         {/* Debug: Show why button might not appear */}
                         {process.env.NODE_ENV === 'development' && isSemanticDefinitionExternal && (
@@ -518,16 +543,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                         </button>
                       </div>
                     </div>
-                  ) : editorConfig?.onSearchDefinitions ? (
+                  ) : isSemanticsEnabled ? (
                     <button
                       onClick={() => setIsDefinitionModalOpen(true)}
                       className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       Find Definition
                     </button>
-                  ) : (
-                    <span className="text-xs text-gray-400 italic">Definition lookup not configured</span>
-                  )}
+                  ) : null}
                 </div>
               </DisclosurePanel>
             </>
@@ -1232,12 +1255,13 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
       )}
 
       {/* Definition Selection Modal */}
-      <DefinitionSelectionModal
-        isOpen={isDefinitionModalOpen}
-        onClose={() => { setIsDefinitionModalOpen(false)} }
-        onSelect={handleDefinitionSelect}
-        onSearchDefinitions={editorConfig?.onSearchDefinitions}
-      />
+      {isSemanticsEnabled && (
+        <DefinitionSelectionModal
+          isOpen={isDefinitionModalOpen}
+          onClose={() => { setIsDefinitionModalOpen(false)} }
+          onSelect={handleDefinitionSelect}
+        />
+      )}
     </div>
   );
 };

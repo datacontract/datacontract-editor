@@ -8,6 +8,7 @@ import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
+import { fetchAllDefinitions as fetchAllDefinitionsApi, definitionsArrayToMap } from './lib/definitionsApi.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -308,6 +309,34 @@ function createConfiguredStore(config) {
 			// AI chat state
 			resetAiChat: () => set((state) => ({ aiChatResetKey: (state.aiChatResetKey || 0) + 1, aiChatHasMessages: false })),
 			setAiChatHasMessages: (hasMessages) => set({ aiChatHasMessages: hasMessages }),
+			// Definitions functions for semantic definitions support
+			fetchAllDefinitions: async () => {
+				const { editorConfig } = get();
+				const org = editorConfig?.semantics?.organizationVanityUrl;
+
+				if (!org) {
+					console.warn('fetchAllDefinitions: organizationVanityUrl not configured in editorConfig.semantics');
+					return [];
+				}
+
+				try {
+					const definitions = await fetchAllDefinitionsApi(org);
+					const definitionsMap = definitionsArrayToMap(definitions, org);
+					set({ definitionsMap });
+					console.log("Got all definitions", definitionsMap);
+					return definitions;
+				} catch (error) {
+					console.error('Error in fetchAllDefinitions:', error);
+					return [];
+				}
+			},
+			getDefinition: (definitionUrl) => {
+				const { definitionsMap } = get();
+				if (!definitionsMap || typeof definitionsMap.get !== 'function') {
+					return null;
+				}
+				return definitionsMap.get(definitionUrl) || null;
+			},
 		};
 
 		return {
@@ -334,6 +363,7 @@ function createConfiguredStore(config) {
 			lastSaveInfo: null,
 			notifications: [],
 			selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
+			definitionsMap: new Map(), // Map<url, definition> for semantic definitions
 			// Store editor config for components to access
 			editorConfig: {
 				mode: config.mode,

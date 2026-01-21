@@ -24,9 +24,13 @@ const LogicalTypeCombobox = ({
   disabled = false,
   className = '',
   label = 'Logical Type',
-  valueFromDefinition = null,
+  fallbackValue = null,
 }) => {
   const [query, setQuery] = useState('');
+
+  // Effective value: use value if set, otherwise use fallback from definition
+  const effectiveValue = value || fallbackValue;
+  const isFromDefinition = !value && !!fallbackValue;
 
   // Filter types based on query
   const filteredTypes = useMemo(() => {
@@ -40,8 +44,8 @@ const LogicalTypeCombobox = ({
 
   const handleChange = (selectedValue) => {
     setQuery('');
-    // If empty string is selected, use "string" as default
-    onChange(selectedValue || 'string');
+    // Allow undefined/null to clear the value (will then use fallback)
+    onChange(selectedValue || undefined);
   };
 
   const handleInputChange = (event) => {
@@ -49,23 +53,20 @@ const LogicalTypeCombobox = ({
     setQuery(inputValue);
   };
 
-  // When input is blurred, if value is empty, set to "string"
+  // When input is blurred, update with current query if not empty
   const handleBlur = () => {
-    setQuery('');
-    if (!value || value.trim() === '') {
-      onChange('string');
+    if (query && query.trim() !== '') {
+      onChange(query.trim());
     }
+    setQuery('');
   };
 
-  // Check if current value matches definition (for blue highlighting)
-  const isFromDefinition = valueFromDefinition && value === valueFromDefinition;
-
-  const IconComponent = getLogicalTypeIcon(value);
+  const IconComponent = getLogicalTypeIcon(effectiveValue)
 
   return (
     <Combobox
       as="div"
-      value={value || ''}
+      value={effectiveValue || ''}
       onChange={handleChange}
       disabled={disabled}
       className={className}
@@ -77,11 +78,11 @@ const LogicalTypeCombobox = ({
       )}
       <div className="relative">
         <ComboboxInput
-          className={`w-full rounded-md border-0 bg-white py-1.5 pl-2 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${isFromDefinition ? 'text-blue-400' : 'text-gray-900'}`}
+          className={`w-full rounded-md border-0 bg-white py-1.5 pl-2 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${isFromDefinition ? 'text-blue-500' : 'text-gray-900'}`}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          displayValue={(item) => item || 'string'}
-          placeholder="string"
+          displayValue={(item) => item || ''}
+          placeholder={fallbackValue || 'Select type...'}
         />
         <ComboboxButton className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <ChevronDownIcon className="h-4 w-4 text-gray-400" />

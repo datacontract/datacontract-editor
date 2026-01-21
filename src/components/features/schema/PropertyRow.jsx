@@ -9,6 +9,7 @@ import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {toAbsoluteUrl} from "../../../lib/urlUtils.js";
 import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
+import {useEditorStore} from '../../../store.js';
 
 /**
  * Recursive component to render a property and its sub-properties
@@ -64,6 +65,12 @@ const PropertyRow = ({
 	const [editedPropertyName, setEditedPropertyName] = useState('');
 	const inputRef = useRef(null);
 
+	// Get definition data from store if available
+	const getDefinition = useEditorStore((state) => state.getDefinition);
+	const definitionUrl = property.authoritativeDefinitions?.find(d => d.type === 'definition')?.url;
+	const absoluteDefinitionUrl = definitionUrl ? toAbsoluteUrl(definitionUrl) : null;
+	const definition = absoluteDefinitionUrl ? getDefinition(absoluteDefinitionUrl) : null;
+
 	// Auto-edit when this is a newly added property
 	useEffect(() => {
 		if (autoEditNewProperty && depth === 0) {
@@ -87,12 +94,16 @@ const PropertyRow = ({
 	const currentPath = [...propPath, propIndex];
 	const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
 	const isExpanded = expandedProperties.has(pathKey);
-	const isObject = property.logicalType === 'object';
-	const isArray = property.logicalType === 'array';
+
+	// Determine effective logical type: use property's logicalType if set, otherwise use definition's
+	const effectiveLogicalType = property.logicalType || definition?.logicalType;
+	const isLogicalTypeFromDefinition = !property.logicalType && !!definition?.logicalType;
+
+	const isObject = effectiveLogicalType === 'object';
+	const isArray = effectiveLogicalType === 'array';
 	const hasSubProperties = property.properties && property.properties.length > 0;
 	const hasItems = property.items;
 	const isSelected = selectedPropertyPath === currentPath.join('-');
-	const definitionUrl = property.authoritativeDefinitions?.find(d => d.type === 'definition')?.url;
 
 	const handleSelect = (e) => {
 		e.stopPropagation();
@@ -118,7 +129,7 @@ const PropertyRow = ({
 							title={isDragEnabled ? "Drag to reorder" : undefined}
 						>
                             {(() => {
-															const IconComponent = getLogicalTypeIcon(property.logicalType);
+															const IconComponent = getLogicalTypeIcon(effectiveLogicalType);
 															return IconComponent ? (
 																<IconComponent className="h-3.5 w-3.5 text-gray-500 flex-shrink-0"/>
 															) : (
@@ -190,6 +201,8 @@ const PropertyRow = ({
 								onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
 								physicalType={property.physicalType}
 								onPhysicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'physicalType', value || undefined)}
+								fallbackLogicalType={definition?.logicalType}
+								isLogicalTypeFromDefinition={isLogicalTypeFromDefinition}
 							/>
 						</div>
 

@@ -12,7 +12,7 @@ const TypeSelectorPopover = ({
   onPhysicalTypeChange,
   serverType,
   disabled = false,
-  logicalTypeFromDefinition = null,
+  fallbackLogicalType = null,
 }) => {
   return (
     <div className="p-4 space-y-4 min-w-[280px]">
@@ -21,13 +21,13 @@ const TypeSelectorPopover = ({
         onChange={onLogicalTypeChange}
         disabled={disabled}
         label="Logical Type"
-        valueFromDefinition={logicalTypeFromDefinition}
+        fallbackValue={fallbackLogicalType}
       />
       <PhysicalTypeCombobox
         value={physicalType}
         onChange={onPhysicalTypeChange}
         serverType={serverType}
-        logicalType={logicalType}
+        logicalType={logicalType || fallbackLogicalType}
         disabled={disabled}
         label="Physical Type"
         placeholder="e.g., VARCHAR(255)"
