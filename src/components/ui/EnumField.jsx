@@ -3,6 +3,7 @@ import { useEditorStore } from '../../store';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor';
 import Combobox from './Combobox';
 import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
+import LogicalTypeCombobox from './TypeSelector/LogicalTypeCombobox';
 
 /**
  * A smart field component that dynamically renders enum-based dropdowns
@@ -19,6 +20,7 @@ import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
  * @param {boolean} [props.disabled=false] - Disable the field
  * @param {string} [props.className] - Additional CSS classes
  * @param {Array<string>} [props.fallbackOptions] - Fallback enum values if schema not loaded or enum not found
+ * @param {string} [props.valueFromDefinition] - Expected value from definition (to highlight in blue)
  */
 const EnumField = ({
   propertyPath,
@@ -31,9 +33,24 @@ const EnumField = ({
   disabled = false,
   className = '',
   fallbackOptions = [],
+  valueFromDefinition,
   ...props
 }) => {
   const schemaData = useEditorStore((state) => state.schemaData);
+
+  // Special handling for logicalType - use LogicalTypeCombobox
+  if (propertyPath === 'logicalType') {
+    return (
+      <LogicalTypeCombobox
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        label={label}
+        valueFromDefinition={valueFromDefinition}
+        className={className}
+      />
+    );
+  }
 
   // Extract enum values from schema
   const enumValues = useMemo(() => {
@@ -85,6 +102,8 @@ const EnumField = ({
   }
 
   // For strict enums, use a simple select dropdown
+  const isValueFromDefinition = valueFromDefinition && value === valueFromDefinition;
+
   return (
     <div className={className}>
       {label && (
@@ -97,7 +116,7 @@ const EnumField = ({
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+          className={`col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4 ${isValueFromDefinition ? 'text-blue-400' : 'text-gray-900'}`}
           {...props}
         >
           <option value="">{placeholder || 'Select...'}</option>

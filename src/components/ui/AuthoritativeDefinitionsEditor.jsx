@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
+import ExternalLinkIcon from './icons/ExternalLinkIcon.jsx';
+import Tooltip from './Tooltip.jsx';
+import { toAbsoluteUrl, isExternalUrl } from '../../lib/urlUtils.js';
 
 /**
  * AuthoritativeDefinitionsEditor component for editing authoritative definitions
@@ -65,10 +68,14 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
     return item.type || '';
   };
 
+  // Get absolute URL
+  const absoluteUrl = item.url ? toAbsoluteUrl(item.url) : null;
+  const isExternal = item.url ? isExternalUrl(item.url) : false;
+
   // Get truncated URL for display
   const getTruncatedUrl = () => {
-    if (!item.url) return null;
-    return item.url.length > 50 ? item.url.substring(0, 50) + '...' : item.url;
+    if (!absoluteUrl) return null;
+    return absoluteUrl.length > 50 ? absoluteUrl.substring(0, 50) + '...' : absoluteUrl;
   };
 
   return (
@@ -86,17 +93,20 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
               <span className="text-xs text-gray-500">• {getSummary()}</span>
             )}
           </div>
-          <div className="text-xs text-gray-600 mt-0.5 truncate">
+          <div className="text-xs text-gray-600 mt-0.5 flex items-center gap-1 min-w-0">
             {getTruncatedUrl() ? (
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-indigo-600 hover:text-indigo-800 hover:underline"
-              >
-                {getTruncatedUrl()}
-              </a>
+              <Tooltip content={absoluteUrl}>
+                <a
+                  href={absoluteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center gap-1 min-w-0"
+                >
+                  <span className="truncate">{getTruncatedUrl()}</span>
+                  {isExternal && <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />}
+                </a>
+              </Tooltip>
             ) : (
               <span className="italic text-gray-400">New definition</span>
             )}

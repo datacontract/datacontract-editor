@@ -10,12 +10,14 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import Tags from '../ui/Tags.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
+import Tooltip from '../ui/Tooltip.jsx';
 import { SparkleButton } from '../../ai/index.js';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 import { DefinitionSelectionModal } from '../ui/DefinitionSelectionModal.jsx';
+import { toAbsoluteUrl, isExternalUrl, parseDefinitionUrl } from '../../lib/urlUtils.js';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
@@ -141,28 +143,49 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
   // Get semantic definition from authoritative definitions (type === 'definition')
   const semanticDefinition = useMemo(() => {
-    return property.authoritativeDefinitions?.find(d => d.type === 'definition');
+    const def = property.authoritativeDefinitions?.find(d => d.type === 'definition');
+    console.log('Semantic definition found:', def);
+    return def;
   }, [property.authoritativeDefinitions]);
 
-  // Check if definition URL is from same origin
-  const isSameOrigin = useCallback((url) => {
-    if (!url) return false;
-    try {
-      const definitionUrl = new URL(url, window.location.href);
-      return definitionUrl.origin === window.location.origin;
-    } catch {
-      return false;
-    }
-  }, []);
+  // Get absolute URL and check if external
+  const semanticDefinitionAbsoluteUrl = useMemo(() => {
+    const url = semanticDefinition?.url ? toAbsoluteUrl(semanticDefinition.url) : null;
+    console.log('Absolute URL:', url, 'Original URL:', semanticDefinition?.url);
+    return url;
+  }, [semanticDefinition?.url]);
 
-  // Fetch definition data when semantic definition URL is from same origin
+  const isSemanticDefinitionExternal = useMemo(() => {
+    if (!semanticDefinition?.url) return false;
+
+    const external = isExternalUrl(semanticDefinition.url);
+    console.log('Is external URL:', external);
+    console.log('Current window.location.hostname:', window.location.hostname);
+    console.log('Current window.location.href:', window.location.href);
+
+    // Try to get the definition URL's hostname
+    try {
+      const defUrl = new URL(semanticDefinition.url, window.location.href);
+      console.log('Definition URL hostname:', defUrl.hostname);
+      console.log('Definition URL (full):', defUrl.href);
+      console.log('Hostnames match:', defUrl.hostname === window.location.hostname);
+    } catch (e) {
+      console.error('Error parsing definition URL:', e);
+    }
+
+    return external;
+  }, [semanticDefinition?.url]);
+
+  // Fetch definition data when semantic definition URL is available
   useEffect(() => {
-    if (!semanticDefinition?.url) {
+    if (!semanticDefinitionAbsoluteUrl) {
       setDefinitionData(null);
       return;
     }
 
-    if (!isSameOrigin(semanticDefinition.url)) {
+    // Only fetch for internal URLs to avoid CORS issues
+    if (isSemanticDefinitionExternal) {
+      console.log('Skipping fetch - external URL');
       setDefinitionData(null);
       return;
     }
@@ -170,11 +193,26 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     const fetchDefinition = async () => {
       setIsFetchingDefinition(true);
       try {
-        const response = await fetch(semanticDefinition.url);
+        // Parse the definition URL to extract info and construct API endpoint
+        const parsedUrl = parseDefinitionUrl(semanticDefinitionAbsoluteUrl);
+
+        if (!parsedUrl) {
+          console.error('Unable to parse definition URL:', semanticDefinitionAbsoluteUrl);
+          setDefinitionData(null);
+          setIsFetchingDefinition(false);
+          return;
+        }
+
+        console.log('Parsed definition URL:', parsedUrl);
+        console.log('Fetching from API endpoint:', parsedUrl.apiUrl);
+
+        const response = await fetch(parsedUrl.apiUrl);
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched definition data:', data);
           setDefinitionData(data);
         } else {
+          console.error('Failed to fetch definition - HTTP', response.status, response.statusText);
           setDefinitionData(null);
         }
       } catch (error) {
@@ -186,7 +224,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     };
 
     fetchDefinition();
-  }, [semanticDefinition?.url, isSameOrigin]);
+  }, [semanticDefinitionAbsoluteUrl, isSemanticDefinitionExternal]);
 
   // Remove semantic definition
   const removeSemanticDefinition = useCallback(() => {
@@ -194,9 +232,74 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     updateField('authoritativeDefinitions', filtered?.length ? filtered : undefined);
   }, [property.authoritativeDefinitions, updateField]);
 
+  // Build tooltip content for definition preview
+  const buildDefinitionTooltip = useCallback(() => {
+    if (isFetchingDefinition) {
+      return (
+        <div className="text-xs">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+            <span>Loading definition...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (!definitionData) {
+      return (
+        <div className="text-xs">
+          <div>Unable to load definition data.</div>
+          <div className="mt-1 text-gray-400">Check console for details.</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-xs space-y-1.5 max-w-sm">
+        <div className="font-semibold text-white mb-2">Definition Preview</div>
+        {definitionData.name && (
+          <div><span className="font-medium text-gray-300">Name:</span> <span className="text-white">{definitionData.name}</span></div>
+        )}
+        {definitionData.businessName && (
+          <div><span className="font-medium text-gray-300">Business Name:</span> <span className="text-white">{definitionData.businessName}</span></div>
+        )}
+        {definitionData.logicalType && (
+          <div><span className="font-medium text-gray-300">Logical Type:</span> <span className="text-white">{definitionData.logicalType}</span></div>
+        )}
+        {definitionData.physicalType && (
+          <div><span className="font-medium text-gray-300">Physical Type:</span> <span className="text-white">{definitionData.physicalType}</span></div>
+        )}
+        {definitionData.description && (
+          <div><span className="font-medium text-gray-300">Description:</span> <span className="text-white">{definitionData.description}</span></div>
+        )}
+        {definitionData.classification && (
+          <div><span className="font-medium text-gray-300">Classification:</span> <span className="text-white">{definitionData.classification}</span></div>
+        )}
+        {definitionData.examples && definitionData.examples.length > 0 && (
+          <div>
+            <span className="font-medium text-gray-300">Examples:</span>
+            <div className="ml-2 mt-1 space-y-0.5">
+              {definitionData.examples.map((ex, idx) => (
+                <div key={idx} className="text-white">• {ex}</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }, [definitionData, isFetchingDefinition]);
+
   // Handle definition selection from modal
   const handleDefinitionSelect = useCallback((definition) => {
-    const newDef = { type: 'definition', url: definition.name };
+    console.log('Selected definition from modal:', definition);
+
+    // Use the full URL if available, otherwise use name (which might be a path)
+    // The definition.name should contain the full URL like:
+    // http://localhost:8888/fabi-demo/definitions/fulfillment/shipment_id
+    const definitionUrl = definition.url || definition.name;
+    console.log('Using definition URL:', definitionUrl);
+
+    const newDef = { type: 'definition', url: definitionUrl };
     const defs = property.authoritativeDefinitions || [];
     updateField('authoritativeDefinitions', [...defs.filter(d => d.type !== 'definition'), newDef]);
   }, [property.authoritativeDefinitions, updateField]);
@@ -244,8 +347,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     type="text"
                     value={property.businessName || ''}
                     onChange={(e) => updateField('businessName', e.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Human-readable name"
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.businessName && !property.businessName ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.businessName || "Human-readable name"}
                   />
                 </div>
               )}
@@ -258,8 +361,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     type="text"
                     value={property.physicalName || ''}
                     onChange={(e) => updateField('physicalName', e.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Actual database column name"
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.physicalName && !property.physicalName ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.physicalName || "Actual database column name"}
                   />
                 </div>
               )}
@@ -272,9 +375,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
                   label="Logical Type"
-                  placeholder={definitionData?.logicalType ? `From definition: ${definitionData.logicalType}` : "Select..."}
+                  placeholder={definitionData?.logicalType || "Select..."}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   className={definitionData?.logicalType && !property.logicalType ? 'text-blue-400' : ''}
+                  valueFromDefinition={definitionData?.logicalType}
                 />
               )}
 
@@ -303,7 +407,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     value={property.physicalType || ''}
                     onChange={(e) => updateField('physicalType', e.target.value)}
                     className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.physicalType ? `From definition: ${definitionData.physicalType}` : "e.g., VARCHAR(255)"}
+                    placeholder={definitionData?.physicalType || "e.g., VARCHAR(255)"}
                   />
                 </div>
               )}
@@ -325,8 +429,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     value={property.description || ''}
                     onChange={(e) => updateField('description', e.target.value)}
                     rows={3}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Describe this property..."
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.description && !property.description ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.description || "Describe this property..."}
                   />
                 </div>
               )}
@@ -347,8 +451,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       }
                     }}
                     rows={3}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="example1&#10;example2&#10;example3"
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.examples && !property.examples ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.examples ? definitionData.examples.join('\n') : "example1\nexample2\nexample3"}
                   />
                   <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
                 </div>
@@ -373,22 +477,46 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Definition</label>
                   {semanticDefinition ? (
-                    <div className="flex items-center justify-between gap-2">
-                      <a
-                        href={semanticDefinition.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-indigo-600 hover:underline truncate flex-1 flex items-center gap-1"
-                      >
-                        <span>{semanticDefinition.url}</span>
-                        <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />
-                      </a>
-                      <button
-                        onClick={removeSemanticDefinition}
-                        className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                      >
-                        Remove
-                      </button>
+                    <div className="space-y-2">
+                      {/* Definition Link */}
+                      <Tooltip content={semanticDefinitionAbsoluteUrl}>
+                        <a
+                          href={semanticDefinitionAbsoluteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-indigo-600 hover:underline flex items-center gap-1 min-w-0"
+                        >
+                          <span className="truncate">{semanticDefinitionAbsoluteUrl}</span>
+                          {isSemanticDefinitionExternal && (
+                            <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />
+                          )}
+                        </a>
+                      </Tooltip>
+
+                      {/* Buttons - Right aligned */}
+                      <div className="flex justify-end gap-2">
+                        {!isSemanticDefinitionExternal && (
+                          <Tooltip content={buildDefinitionTooltip()}>
+                            <button
+                              className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            >
+                              Show Details
+                            </button>
+                          </Tooltip>
+                        )}
+                        {/* Debug: Show why button might not appear */}
+                        {process.env.NODE_ENV === 'development' && isSemanticDefinitionExternal && (
+                          <span className="text-xs text-gray-400 italic">
+                            (External URL)
+                          </span>
+                        )}
+                        <button
+                          onClick={removeSemanticDefinition}
+                          className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ) : editorConfig?.onSearchDefinitions ? (
                     <button
@@ -428,7 +556,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
                       className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.logicalTypeOptions?.format ? `From definition: ${definitionData.logicalTypeOptions.format}` : "e.g., email, uri, uuid"}
+                      placeholder={definitionData?.logicalTypeOptions?.format || "e.g., email, uri, uuid"}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -569,7 +697,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
                       className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.logicalTypeOptions?.format ? `From definition: ${definitionData.logicalTypeOptions.format}` : "e.g., yyyy-MM-dd, ISO 8601"}
+                      placeholder={definitionData?.logicalTypeOptions?.format || "e.g., yyyy-MM-dd, ISO 8601"}
                     />
                     <p className="mt-1 text-xs text-gray-500">JDK DateTimeFormatter pattern</p>
                   </div>
@@ -860,8 +988,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                       type="text"
                       value={property.classification || ''}
                       onChange={(e) => updateField('classification', e.target.value || undefined)}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                      placeholder={classificationOverride?.placeholder || "e.g., confidential, public, internal"}
+                      className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.classification && !property.classification ? 'placeholder:text-blue-400' : ''}`}
+                      placeholder={definitionData?.classification || (classificationOverride?.placeholder || "e.g., confidential, public, internal")}
                     />
                   )}
                 </div>
@@ -901,8 +1029,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     type="text"
                     value={property.encryptedName || ''}
                     onChange={(e) => updateField('encryptedName', e.target.value || undefined)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Encrypted field reference"
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.encryptedName && !property.encryptedName ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.encryptedName || "Encrypted field reference"}
                   />
                 </div>
               )}
@@ -951,8 +1079,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     value={property.transformLogic || ''}
                     onChange={(e) => updateField('transformLogic', e.target.value || undefined)}
                     rows={4}
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono"
-                    placeholder="SQL or transformation code..."
+                    className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono ${definitionData?.transformLogic && !property.transformLogic ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.transformLogic || "SQL or transformation code..."}
                   />
                   <p className="mt-1 text-xs text-gray-500">Technical transformation implementation (SQL, etc.)</p>
                 </div>
@@ -966,8 +1094,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                     value={property.transformDescription || ''}
                     onChange={(e) => updateField('transformDescription', e.target.value || undefined)}
                     rows={3}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Business-friendly explanation of transformation..."
+                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.transformDescription && !property.transformDescription ? 'placeholder:text-blue-400' : ''}`}
+                    placeholder={definitionData?.transformDescription || "Business-friendly explanation of transformation..."}
                   />
                   <p className="mt-1 text-xs text-gray-500">Non-technical description of how field is derived</p>
                 </div>

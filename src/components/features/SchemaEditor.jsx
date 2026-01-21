@@ -13,10 +13,9 @@ import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import { SparkleButton } from '../../ai/index.js';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
-import {useShallow} from "zustand/react/shallow";
 import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
-import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
+import { useCustomization, useIsPropertyHidden } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 import { DefinitionSelectionModal } from '../ui/DefinitionSelectionModal.jsx';
 import {
@@ -40,7 +39,6 @@ const SchemaEditor = ({schemaIndex}) => {
     const editorConfig = useEditorStore((state) => state.editorConfig);
     const {
         schema,
-        getValue,
         setValue,
         removeSchema,
         addProperty,
@@ -635,7 +633,6 @@ const SchemaEditor = ({schemaIndex}) => {
                                                             <h4 className="text-xs font-medium text-gray-900 mb-3">Authoritative Definitions</h4>
                                                             <AuthoritativeDefinitionsEditor
                                                                 value={schema[schemaIndex].authoritativeDefinitions}
-																																// TODO: Implement update
                                                                 onChange={(value) => setValue(`schema[${schemaIndex}].authoritativeDefinitions`, value)}
                                                             />
                                                         </div>

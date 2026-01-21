@@ -22,6 +22,7 @@ const TypeSelector = ({
   serverType: serverTypeProp,
   disabled = false,
   className = '',
+  logicalTypeFromDefinition,
 }) => {
   // Use provided server type or get from store
   const storeServerType = useActiveServerType();
@@ -29,6 +30,9 @@ const TypeSelector = ({
 
   // Display: physical type if set, otherwise logical type
   const displayType = physicalType || logicalType || 'Select type...';
+
+  // Check if logicalType matches definition (show in blue)
+  const isFromDefinition = logicalTypeFromDefinition && logicalType === logicalTypeFromDefinition && !physicalType;
 
   return (
     <Popover className={`relative ${className}`}>
@@ -38,7 +42,7 @@ const TypeSelector = ({
             disabled={disabled}
             className={`
               group inline-flex items-center rounded-md px-2 py-1 text-xs
-              text-gray-700 bg-white
+              ${isFromDefinition ? 'text-blue-400' : 'text-gray-700'} bg-white
               ring-inset
               hover:bg-gray-50 hover:ring-1 hover:ring-gray-300
               focus:outline-none focus:ring-2 focus:ring-indigo-500
@@ -73,6 +77,7 @@ const TypeSelector = ({
               }}
               serverType={serverType}
               disabled={disabled}
+              logicalTypeFromDefinition={logicalTypeFromDefinition}
             />
           </PopoverPanel>
         </>

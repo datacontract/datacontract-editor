@@ -5,6 +5,7 @@ import LockClosedIcon from "../../ui/icons/LockClosedIcon.jsx";
 import CheckCircleIcon from "../../ui/icons/CheckCircleIcon.jsx";
 import LinkIcon from "../../ui/icons/LinkIcon.jsx";
 import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
+import { toAbsoluteUrl } from "../../../lib/urlUtils.js";
 
 /**
  * Visual indicator badges component showing property metadata
@@ -13,16 +14,6 @@ import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
 const PropertyIndicators = ({property}) => {
     const indicators = [];
 
-    // Check if property has a semantic definition attached
-    const hasDefinition = property.authoritativeDefinitions?.some(d => d.type === 'definition');
-    if (hasDefinition) {
-        const definition = property.authoritativeDefinitions.find(d => d.type === 'definition');
-        indicators.push(
-            <Tooltip key="def" content={`Definition: ${definition.url}`}>
-                <DefinitionIcon className="h-3.5 w-3.5 text-indigo-500"/>
-            </Tooltip>
-        );
-    }
 
     if (property.primaryKey) {
         indicators.push(
