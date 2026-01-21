@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useEditorStore } from '../../store';
 
@@ -8,13 +8,13 @@ import { useEditorStore } from '../../store';
  */
 export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const fetchAllDefinitions = useEditorStore((state) => state.fetchAllDefinitions);
+  const definitionsMap = useEditorStore((state) => state.definitionsMap);
+  const isLoadingDefinitions = useEditorStore((state) => state.isLoadingDefinitions);
+  const definitionsLoadError = useEditorStore((state) => state.definitionsLoadError);
 
-  const [allDefinitions, setAllDefinitions] = useState([]);
   const [filteredDefinitions, setFilteredDefinitions] = useState([]);
   const [displayedDefinitions, setDisplayedDefinitions] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedDefinition, setSelectedDefinition] = useState(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -22,6 +22,12 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const scrollContainerRef = useRef(null);
   const PAGE_SIZE = 50; // Number of items to load per scroll
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
+
+  // Convert definitionsMap to array
+  const allDefinitions = useMemo(() => {
+    if (!definitionsMap || typeof definitionsMap.values !== 'function' || definitionsMap.size === 0) return [];
+    return Array.from(definitionsMap.values());
+  }, [definitionsMap]);
 
   // Debounce search input
   useEffect(() => {
@@ -32,23 +38,21 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch all definitions when modal opens
+  // Trigger loading if not loaded yet
   useEffect(() => {
-    if (isOpen && fetchAllDefinitions) {
-      loadAllDefinitions();
+    if (isOpen && !isLoadingDefinitions && allDefinitions.length === 0 && fetchAllDefinitions) {
+      fetchAllDefinitions();
     }
-  }, [isOpen]);
+  }, [isOpen, isLoadingDefinitions, allDefinitions.length, fetchAllDefinitions]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setSelectedDefinition(null);
-      setError(null);
     } else {
       setSearch('');
       setDebouncedSearch('');
       setDisplayCount(PAGE_SIZE);
-      setAllDefinitions([]);
       setFilteredDefinitions([]);
       setDisplayedDefinitions([]);
     }
@@ -85,27 +89,6 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
     setDisplayedDefinitions(filteredDefinitions.slice(0, displayCount));
   }, [filteredDefinitions, displayCount]);
 
-  const loadAllDefinitions = async () => {
-    if (!fetchAllDefinitions) {
-      setError('Definition loading not configured. Semantics may not be enabled.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await fetchAllDefinitions();
-      setAllDefinitions(result || []);
-      setFilteredDefinitions(result || []);
-    } catch (err) {
-      console.error('Failed to load definitions:', err);
-      setError(err.message || 'Failed to load definitions');
-      setAllDefinitions([]);
-      setFilteredDefinitions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Handle scroll to load more items
   const handleScroll = useCallback(() => {
@@ -205,7 +188,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
               />
             </div>
             {/* Results count */}
-            {!loading && filteredDefinitions.length > 0 && (
+            {!isLoadingDefinitions && filteredDefinitions.length > 0 && (
               <div className="mt-2 text-xs text-gray-500">
                 Showing {showingCount} of {filteredDefinitions.length} definition{filteredDefinitions.length !== 1 ? 's' : ''}
                 {debouncedSearch && ` matching "${debouncedSearch}"`}
@@ -219,14 +202,14 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
             onScroll={handleScroll}
             className="flex-1 overflow-y-auto bg-white px-6 py-4"
           >
-            {loading && (
+            {isLoadingDefinitions && (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
                 <span className="ml-3 text-sm text-gray-600">Loading definitions...</span>
               </div>
             )}
 
-            {error && (
+            {definitionsLoadError && (
               <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
@@ -235,13 +218,13 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm text-red-700">{definitionsLoadError}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {!loading && !error && filteredDefinitions.length === 0 && (
+            {!isLoadingDefinitions && !definitionsLoadError && filteredDefinitions.length === 0 && (
               <div className="py-8 text-center">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
@@ -252,7 +235,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
               </div>
             )}
 
-            {!loading && !error && displayedDefinitions.length > 0 && (
+            {!isLoadingDefinitions && !definitionsLoadError && displayedDefinitions.length > 0 && (
               <div className="space-y-2 pr-2">
                   {displayedDefinitions.map((definition, index) => {
                     const owner = getOwner(definition);

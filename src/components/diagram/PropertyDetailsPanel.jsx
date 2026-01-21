@@ -31,6 +31,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   // Definition data state
   const [definitionData, setDefinitionData] = useState(null);
   const [isFetchingDefinition, setIsFetchingDefinition] = useState(false);
+  const isLoadingDefinitions = useEditorStore((state) => state.isLoadingDefinitions);
 
   // Get customization config for schema.properties level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema.properties');
@@ -466,10 +467,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                                   anchor="bottom end"
                                   className="z-50 mt-2 rounded-md bg-gray-50 shadow-lg ring-1 ring-black/5 p-3 w-[350px]"
                                 >
-                                  {isFetchingDefinition ? (
+                                  {(isFetchingDefinition || isLoadingDefinitions) ? (
                                     <div className="flex items-center gap-2 text-xs">
                                       <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
-                                      <span className="text-gray-600">Loading definition...</span>
+                                      <span className="text-gray-600">
+                                        {isLoadingDefinitions ? 'Loading all definitions...' : 'Loading definition...'}
+                                      </span>
                                     </div>
                                   ) : !definitionData ? (
                                     <div className="text-xs text-gray-600">

@@ -272,16 +272,20 @@ export function defaultStoreConfig(set, get) {
 
 			if (!org) {
 				console.warn('fetchAllDefinitions: organizationVanityUrl not configured in editorConfig.semantics');
+				set({ isLoadingDefinitions: false, definitionsLoadError: 'Organization not configured' });
 				return [];
 			}
+
+			set({ isLoadingDefinitions: true, definitionsLoadError: null });
 
 			try {
 				const definitions = await fetchAllDefinitionsApi(org);
 				const definitionsMap = definitionsArrayToMap(definitions, org);
-				set({ definitionsMap });
+				set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
 				return definitions;
 			} catch (error) {
 				console.error('Error in fetchAllDefinitions:', error);
+				set({ isLoadingDefinitions: false, definitionsLoadError: error.message || 'Failed to load definitions' });
 				return [];
 			}
 		},
@@ -390,6 +394,8 @@ export function defaultStoreConfig(set, get) {
 		selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
 		selectedProperty: null, // { schemaIndex, propPath, property, onUpdate, onDelete } for property details drawer
 		definitionsMap: new Map(), // Map<url, definition> for semantic definitions
+		isLoadingDefinitions: false, // Whether definitions are currently being loaded
+		definitionsLoadError: null, // Error message if definitions failed to load
 		editorConfig: {
 			mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
 			onCancel: null,
