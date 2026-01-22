@@ -4,8 +4,6 @@ import AsteriskIcon from "../../ui/icons/AsteriskIcon.jsx";
 import LockClosedIcon from "../../ui/icons/LockClosedIcon.jsx";
 import CheckCircleIcon from "../../ui/icons/CheckCircleIcon.jsx";
 import LinkIcon from "../../ui/icons/LinkIcon.jsx";
-import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
-import { toAbsoluteUrl } from "../../../lib/urlUtils.js";
 
 /**
  * Visual indicator badges component showing property metadata

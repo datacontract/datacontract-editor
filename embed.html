@@ -130,36 +130,6 @@ servers:
         },
     ];
 
-    // Mock search callback
-    const onSearchDefinitions = async ({ search, page, pageSize }) => {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Filter by search term
-        let filtered = mockDefinitions;
-        if (search) {
-            const searchLower = search.toLowerCase();
-            filtered = mockDefinitions.filter(d =>
-                d.name.toLowerCase().includes(searchLower) ||
-                d.businessName.toLowerCase().includes(searchLower) ||
-                d.description.toLowerCase().includes(searchLower) ||
-                d.tags.some(t => t.toLowerCase().includes(searchLower))
-            );
-        }
-
-        // Paginate
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        const paginated = filtered.slice(start, end);
-
-        return {
-            definitions: paginated,
-            total: filtered.length,
-            page,
-            pageSize,
-        };
-    };
-
     // =========================================================================
     // Custom AI Tools - MCP-like extensibility
     // =========================================================================
@@ -395,11 +365,19 @@ servers:
             console.log('Delete clicked');
             alert('Delete was called!');
         },
-        onSearchDefinitions,
 
         // Semantics configuration
         semantics: {
             enabled: true,
+            organizationVanityUrl: "testorga",
+            // Provide mock definitions directly instead of fetching from API
+            definitionsProvider: async () => {
+                // Transform mock definitions to the format expected by the API
+                return mockDefinitions.map(def => ({
+                    ...def,
+                    url: `/testorga/definitions/${def.name}`,
+                }));
+            },
         },
 
         // Test configuration

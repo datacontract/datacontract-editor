@@ -69,11 +69,11 @@ const DEFAULT_CONFIG = {
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
-  onSearchDefinitions: null, // async ({ search, page, pageSize }) => { definitions, total, page, pageSize }
 
   // Semantics configuration (definition lookup feature)
   semantics: {
     enabled: false, // Set to true to enable Semantics section in property details
+    definitionsProvider: null, // Optional function that returns Promise<Array> of definitions (for mocking/testing)
   },
 
   // Optional lists for dropdowns (if not provided, text fields are used)
@@ -313,7 +313,25 @@ function createConfiguredStore(config) {
 			fetchAllDefinitions: async () => {
 				const { editorConfig } = get();
 				const org = editorConfig?.semantics?.organizationVanityUrl;
+				const definitionsProvider = editorConfig?.semantics?.definitionsProvider;
 
+				// If a custom definitions provider is configured, use it instead of API
+				if (definitionsProvider && typeof definitionsProvider === 'function') {
+					set({ isLoadingDefinitions: true, definitionsLoadError: null });
+					try {
+						const definitions = await definitionsProvider();
+						const definitionsMap = definitionsArrayToMap(definitions);
+						set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
+						console.log("Got all definitions from provider", definitionsMap);
+						return definitions;
+					} catch (error) {
+						console.error('Error in fetchAllDefinitions (provider):', error);
+						set({ isLoadingDefinitions: false, definitionsLoadError: error.message || 'Failed to load definitions' });
+						return [];
+					}
+				}
+
+				// Otherwise use the API
 				if (!org) {
 					console.warn('fetchAllDefinitions: organizationVanityUrl not configured in editorConfig.semantics');
 					set({ isLoadingDefinitions: false, definitionsLoadError: 'Organization not configured' });
@@ -324,7 +342,7 @@ function createConfiguredStore(config) {
 
 				try {
 					const definitions = await fetchAllDefinitionsApi(org);
-					const definitionsMap = definitionsArrayToMap(definitions, org);
+					const definitionsMap = definitionsArrayToMap(definitions);
 					set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
 					console.log("Got all definitions", definitionsMap);
 					return definitions;
@@ -376,7 +394,6 @@ function createConfiguredStore(config) {
 				onCancel: config.onCancel,
 				onDelete: config.onDelete,
 				showDelete: config.showDelete,
-				onSearchDefinitions: config.onSearchDefinitions,
 				semantics: config.semantics,
 				teams: config.teams,
 				domains: config.domains,
