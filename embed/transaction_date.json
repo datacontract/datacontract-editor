@@ -1,0 +1,9 @@
+{
+	"name": "finance/transaction_date",
+	"businessName": "Transaction Date",
+	"logicalType": "date",
+	"description": "Date when the financial transaction was recorded.",
+	"tags": ["finance", "temporal"],
+	"url": "/embed/transaction_date.json",
+	"customProperties": [{ "property": "owner", "value": "Finance Analytics" }]
+}

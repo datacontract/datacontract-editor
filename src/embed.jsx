@@ -47,7 +47,7 @@ const DEFAULT_CONFIG = {
   availableViews: ['yaml', 'form', 'diagram'],
 
   // Initial view
-  initialView: 'yaml',
+  initialView: 'form',
 
   // Test configuration
   tests: {
@@ -68,6 +68,9 @@ const DEFAULT_CONFIG = {
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
+
+  // Semantics configuration (definition lookup feature)
+  semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
 
   // Optional lists for dropdowns (if not provided, text fields are used)
   teams: null,         // Array of {id: string, name: string} or null
@@ -334,6 +337,7 @@ function createConfiguredStore(config) {
 				onCancel: config.onCancel,
 				onDelete: config.onDelete,
 				showDelete: config.showDelete,
+				semantics: config.semantics,
 				teams: config.teams,
 				domains: config.domains,
 				tests: config.tests,

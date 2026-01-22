@@ -114,11 +114,17 @@ const SchemaNode = ({ data, id }) => {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
-        setContextMenu(null);
+      // Check if click is inside a dialog/modal (Headless UI adds data-headlessui-state)
+      const isInsideDialog = event.target.closest('[role="dialog"]') ||
+                            event.target.closest('[data-headlessui-state]');
+
+      if (!isInsideDialog) {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+          setShowMenu(false);
+        }
+        if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+          setContextMenu(null);
+        }
       }
     };
 

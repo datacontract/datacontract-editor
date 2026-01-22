@@ -1,0 +1,9 @@
+{
+	"name": "fulfillment/order_id",
+	"businessName": "Order Identifier",
+	"logicalType": "string",
+	"description": "Unique identifier for customer orders. Generated at checkout and used throughout order lifecycle.",
+	"tags": ["order", "fulfillment"],
+	"url": "/embed/order_id.json",
+	"customProperties": [{ "property": "owner", "value": "Commerce Team" }]
+}

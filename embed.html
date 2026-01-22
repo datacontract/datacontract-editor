@@ -59,6 +59,10 @@ servers:
     ];
 
     // =========================================================================
+    // Mock Definition Search Callback
+    // =========================================================================
+
+    // =========================================================================
     // Custom AI Tools - MCP-like extensibility
     // =========================================================================
 
@@ -278,7 +282,7 @@ servers:
         mode: 'EMBEDDED',
         yaml: initialYaml,
         schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
-        initialView: 'yaml',
+        initialView: 'form',
 
         // Callbacks
         onSave: (yaml) => {
@@ -292,6 +296,15 @@ servers:
         onDelete: () => {
             console.log('Delete clicked');
             alert('Delete was called!');
+        },
+
+        // Semantics configuration
+        semantics: {
+            enabled: true,
+						baseUrl: "/embed/definitions.json",
+						queryParam: "q",
+						pageParam: "page",
+						definitionAcceptHeader: "application/json"
         },
 
         // Test configuration

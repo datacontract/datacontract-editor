@@ -1,0 +1,9 @@
+{
+	"name": "product/price",
+	"businessName": "Product Price",
+	"logicalType": "number",
+	"description": "Current retail price in cents. Updated daily from pricing engine.",
+	"tags": ["product", "pricing"],
+	"url": "/embed/price.json",
+	"customProperties": [{ "property": "owner", "value": "Pricing Team" }]
+}

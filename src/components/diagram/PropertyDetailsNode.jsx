@@ -20,7 +20,11 @@ const PropertyDetailsNode = ({ data }) => {
   // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) {
+      // Check if click is inside a dialog/modal (Headless UI adds data-headlessui-state)
+      const isInsideDialog = event.target.closest('[role="dialog"]') ||
+                            event.target.closest('[data-headlessui-state]');
+
+      if (panelRef.current && !panelRef.current.contains(event.target) && !isInsideDialog) {
         onClose();
       }
     };

@@ -7,10 +7,11 @@ import LinkIcon from "../../ui/icons/LinkIcon.jsx";
 
 /**
  * Visual indicator badges component showing property metadata
- * Displays icons for primary key, required, classification, quality rules, and relationships
+ * Displays icons for primary key, required, classification, quality rules, relationships, and definitions
  */
 const PropertyIndicators = ({property}) => {
     const indicators = [];
+
 
     if (property.primaryKey) {
         indicators.push(

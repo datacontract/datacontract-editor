@@ -1,0 +1,9 @@
+{
+	"name": "customer/email",
+	"businessName": "Customer Email Address",
+	"logicalType": "string",
+	"description": "Primary email address for customer communication and account identification.",
+	"tags": ["customer", "pii", "contact"],
+	"url": "/embed/email.json",
+	"customProperties": [{ "property": "owner", "value": "Customer Data Team" }]
+}

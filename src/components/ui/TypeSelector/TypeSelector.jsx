@@ -22,13 +22,21 @@ const TypeSelector = ({
   serverType: serverTypeProp,
   disabled = false,
   className = '',
+  fallbackLogicalType,
+  isLogicalTypeFromDefinition = false,
 }) => {
   // Use provided server type or get from store
   const storeServerType = useActiveServerType();
   const serverType = serverTypeProp || storeServerType;
 
-  // Display: physical type if set, otherwise logical type
-  const displayType = physicalType || logicalType || 'Select type...';
+  // Effective logical type: use property's logicalType if set, otherwise fallback from definition
+  const effectiveLogicalType = logicalType || fallbackLogicalType;
+
+  // Display: physical type if set, otherwise effective logical type
+  const displayType = physicalType || effectiveLogicalType || 'Select type...';
+
+  // Check if displaying type from definition (show in blue)
+  const shouldHighlightAsDefinition = isLogicalTypeFromDefinition && !physicalType;
 
   return (
     <Popover className={`relative ${className}`}>
@@ -38,7 +46,7 @@ const TypeSelector = ({
             disabled={disabled}
             className={`
               group inline-flex items-center rounded-md px-2 py-1 text-xs
-              text-gray-700 bg-white
+              ${shouldHighlightAsDefinition ? 'text-blue-500' : 'text-gray-700'} bg-white
               ring-inset
               hover:bg-gray-50 hover:ring-1 hover:ring-gray-300
               focus:outline-none focus:ring-2 focus:ring-indigo-500
@@ -73,6 +81,7 @@ const TypeSelector = ({
               }}
               serverType={serverType}
               disabled={disabled}
+              fallbackLogicalType={fallbackLogicalType}
             />
           </PopoverPanel>
         </>

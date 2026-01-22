@@ -1,0 +1,9 @@
+{
+	"name": "fulfillment/sku",
+	"businessName": "Stock Keeping Unit",
+	"logicalType": "string",
+	"description": "Unique identifier for products in inventory management systems. Used across all fulfillment operations.",
+	"tags": ["inventory", "product"],
+	"url": "/embed/sku.json",
+	"customProperties": [{ "property": "owner", "value": "Data Platform Team" }]
+}

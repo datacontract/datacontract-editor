@@ -1,4 +1,4 @@
-import LogicalTypeSelect from './LogicalTypeSelect';
+import LogicalTypeCombobox from './LogicalTypeCombobox';
 import PhysicalTypeCombobox from './PhysicalTypeCombobox';
 
 /**
@@ -12,20 +12,22 @@ const TypeSelectorPopover = ({
   onPhysicalTypeChange,
   serverType,
   disabled = false,
+  fallbackLogicalType = null,
 }) => {
   return (
     <div className="p-4 space-y-4 min-w-[280px]">
-      <LogicalTypeSelect
+      <LogicalTypeCombobox
         value={logicalType}
         onChange={onLogicalTypeChange}
         disabled={disabled}
         label="Logical Type"
+        fallbackValue={fallbackLogicalType}
       />
       <PhysicalTypeCombobox
         value={physicalType}
         onChange={onPhysicalTypeChange}
         serverType={serverType}
-        logicalType={logicalType}
+        logicalType={logicalType || fallbackLogicalType}
         disabled={disabled}
         label="Physical Type"
         placeholder="e.g., VARCHAR(255)"
