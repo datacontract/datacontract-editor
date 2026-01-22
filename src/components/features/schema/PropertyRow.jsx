@@ -9,7 +9,7 @@ import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {toAbsoluteUrl} from "../../../lib/urlUtils.js";
 import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
-import {useEditorStore} from '../../../store.js';
+import {useDefinition} from '../../../hooks/useDefinition.js';
 
 /**
  * Recursive component to render a property and its sub-properties
@@ -65,11 +65,34 @@ const PropertyRow = ({
 	const [editedPropertyName, setEditedPropertyName] = useState('');
 	const inputRef = useRef(null);
 
-	// Get definition data from store if available
-	const getDefinition = useEditorStore((state) => state.getDefinition);
+	// Get definition data using hook
+	const { getDefinition } = useDefinition();
+	const [definition, setDefinition] = useState(null);
 	const definitionUrl = property.authoritativeDefinitions?.find(d => d.type === 'definition')?.url;
 	const absoluteDefinitionUrl = definitionUrl ? toAbsoluteUrl(definitionUrl) : null;
-	const definition = absoluteDefinitionUrl ? getDefinition(absoluteDefinitionUrl) : null;
+
+	// Fetch definition data when URL changes
+	useEffect(() => {
+		if (!absoluteDefinitionUrl) {
+			setDefinition(null);
+			return;
+		}
+
+		let cancelled = false;
+
+		const fetchDef = async () => {
+			const data = await getDefinition(absoluteDefinitionUrl);
+			if (!cancelled) {
+				setDefinition(data);
+			}
+		};
+
+		fetchDef();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [absoluteDefinitionUrl, getDefinition]);
 
 	// Auto-edit when this is a newly added property
 	useEffect(() => {

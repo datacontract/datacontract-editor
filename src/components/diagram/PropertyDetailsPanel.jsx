@@ -17,13 +17,14 @@ import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
 import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
-import {isExternalUrl, parseDefinitionUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
+import {isExternalUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
+import {useDefinition} from '../../hooks/useDefinition.js';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const yamlParts = useEditorStore((state) => state.yamlParts);
   const editorConfig = useEditorStore((state) => state.editorConfig);
-  const getDefinition = useEditorStore((state) => state.getDefinition);
+  const { getDefinition } = useDefinition();
 
   // Modal state
   const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
@@ -31,7 +32,6 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   // Definition data state
   const [definitionData, setDefinitionData] = useState(null);
   const [isFetchingDefinition, setIsFetchingDefinition] = useState(false);
-  const isLoadingDefinitions = useEditorStore((state) => state.isLoadingDefinitions);
 
   // Get customization config for schema.properties level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('schema.properties');
@@ -56,7 +56,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const isTransformDescriptionHidden = useIsPropertyHidden('schema.properties', 'transformDescription');
 
   // Semantics enabled via embed config (not customization)
-  const isSemanticsEnabled = editorConfig?.semantics?.enabled ?? false;
+  const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl;
 
   // Get overrides for standard properties
   const classificationOverride = useStandardPropertyOverride('schema.properties', 'classification');
@@ -160,22 +160,16 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
       return;
     }
 
-    const fetchDefinition = async () => {
+    const fetchDefinitionData = async () => {
       setIsFetchingDefinition(true);
       try {
-        // Use getDefinition from store (provided by override store when semantics is enabled)
-        if (getDefinition) {
-          console.log('Fetching definition from store:', semanticDefinitionAbsoluteUrl);
-          const data = await getDefinition(semanticDefinitionAbsoluteUrl);
-          if (data) {
-            console.log('Fetched definition data from store:', data);
-            setDefinitionData(data);
-          } else {
-            console.warn('No definition data returned from store for:', semanticDefinitionAbsoluteUrl);
-            setDefinitionData(null);
-          }
+        console.log('Fetching definition:', semanticDefinitionAbsoluteUrl);
+        const data = await getDefinition(semanticDefinitionAbsoluteUrl);
+        if (data) {
+          console.log('Fetched definition data:', data);
+          setDefinitionData(data);
         } else {
-          console.warn('getDefinition not available - semantics may not be enabled');
+          console.warn('No definition data returned for:', semanticDefinitionAbsoluteUrl);
           setDefinitionData(null);
         }
       } catch (error) {
@@ -186,7 +180,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
       }
     };
 
-    fetchDefinition();
+    fetchDefinitionData();
   }, [semanticDefinitionAbsoluteUrl, isSemanticDefinitionExternal, getDefinition]);
 
   // Remove semantic definition
@@ -406,12 +400,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                                   anchor="bottom end"
                                   className="z-50 mt-2 rounded-md bg-gray-50 shadow-lg ring-1 ring-black/5 p-3 w-[350px]"
                                 >
-                                  {(isFetchingDefinition || isLoadingDefinitions) ? (
+                                  {isFetchingDefinition ? (
                                     <div className="flex items-center gap-2 text-xs">
                                       <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
-                                      <span className="text-gray-600">
-                                        {isLoadingDefinitions ? 'Loading all definitions...' : 'Loading definition...'}
-                                      </span>
+                                      <span className="text-gray-600">Loading definition...</span>
                                     </div>
                                   ) : !definitionData ? (
                                     <div className="text-xs text-gray-600">

@@ -1,113 +1,78 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { useEditorStore } from '../../store';
+import { useDefinition } from '../../hooks/useDefinition';
 
 /**
- * Modal component for selecting definitions with client-side endless scrolling
- * Uses fetchAllDefinitions from the store (provided by override store when semantics is enabled)
+ * Modal component for selecting definitions with server-side search
+ * Uses findDefinitions from the useDefinition hook for on-demand searching
  */
 export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
-  const fetchAllDefinitions = useEditorStore((state) => state.fetchAllDefinitions);
-  const definitionsMap = useEditorStore((state) => state.definitionsMap);
-  const isLoadingDefinitions = useEditorStore((state) => state.isLoadingDefinitions);
-  const definitionsLoadError = useEditorStore((state) => state.definitionsLoadError);
+  const { findDefinitions } = useDefinition();
 
-  const [filteredDefinitions, setFilteredDefinitions] = useState([]);
-  const [displayedDefinitions, setDisplayedDefinitions] = useState([]);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [definitions, setDefinitions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [selectedDefinition, setSelectedDefinition] = useState(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const scrollContainerRef = useRef(null);
-  const PAGE_SIZE = 50; // Number of items to load per scroll
-  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
-
-  // Convert definitionsMap to array
-  const allDefinitions = useMemo(() => {
-    if (!definitionsMap || typeof definitionsMap.values !== 'function' || definitionsMap.size === 0) return [];
-    return Array.from(definitionsMap.values());
-  }, [definitionsMap]);
+  const MAX_RESULTS = 50;
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setDisplayCount(PAGE_SIZE); // Reset display count on search change
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
-
-  // Trigger loading if not loaded yet
-  useEffect(() => {
-    if (isOpen && !isLoadingDefinitions && allDefinitions.length === 0 && fetchAllDefinitions) {
-      fetchAllDefinitions();
-    }
-  }, [isOpen, isLoadingDefinitions, allDefinitions.length, fetchAllDefinitions]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setSelectedDefinition(null);
-    } else {
       setSearch('');
       setDebouncedSearch('');
-      setDisplayCount(PAGE_SIZE);
-      setFilteredDefinitions([]);
-      setDisplayedDefinitions([]);
+      setDefinitions([]);
+      setError(null);
     }
   }, [isOpen]);
 
-  // Filter definitions based on search
+  // Fetch definitions based on search term
   useEffect(() => {
-    if (!allDefinitions.length) {
-      setFilteredDefinitions([]);
+    if (!isOpen || !debouncedSearch) {
+      setDefinitions([]);
       return;
     }
 
-    if (!debouncedSearch) {
-      setFilteredDefinitions(allDefinitions);
-      return;
-    }
+    let cancelled = false;
 
-    const searchLower = debouncedSearch.toLowerCase();
-    const filtered = allDefinitions.filter(def => {
-      // Search in name, businessName, description, and tags
-      return (
-        def.name?.toLowerCase().includes(searchLower) ||
-        def.businessName?.toLowerCase().includes(searchLower) ||
-        def.description?.toLowerCase().includes(searchLower) ||
-        def.tags?.some(tag => tag.toLowerCase().includes(searchLower))
-      );
-    });
+    const performSearch = async () => {
+      setIsLoading(true);
+      setError(null);
 
-    setFilteredDefinitions(filtered);
-  }, [debouncedSearch, allDefinitions]);
+      try {
+        const results = await findDefinitions(debouncedSearch, MAX_RESULTS);
+        if (!cancelled) {
+          setDefinitions(results);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Failed to search definitions');
+          setDefinitions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  // Update displayed definitions when filtered list or display count changes
-  useEffect(() => {
-    setDisplayedDefinitions(filteredDefinitions.slice(0, displayCount));
-  }, [filteredDefinitions, displayCount]);
+    performSearch();
 
-
-  // Handle scroll to load more items
-  const handleScroll = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container || loadingMore) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-
-    // Load more when scrolled 80% down
-    if (scrollPercentage > 0.8 && displayCount < filteredDefinitions.length) {
-      setLoadingMore(true);
-      // Simulate async loading for smooth UX
-      setTimeout(() => {
-        setDisplayCount(prev => Math.min(prev + PAGE_SIZE, filteredDefinitions.length));
-        setLoadingMore(false);
-      }, 100);
-    }
-  }, [displayCount, filteredDefinitions.length, loadingMore]);
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearch, isOpen, findDefinitions]);
 
   const handleSelect = () => {
     if (selectedDefinition) {
@@ -134,9 +99,6 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
-
-  const hasMore = displayCount < filteredDefinitions.length;
-  const showingCount = Math.min(displayCount, filteredDefinitions.length);
 
   return (
     <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
@@ -188,28 +150,30 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
               />
             </div>
             {/* Results count */}
-            {!isLoadingDefinitions && filteredDefinitions.length > 0 && (
+            {!isLoading && definitions.length > 0 && (
               <div className="mt-2 text-xs text-gray-500">
-                Showing {showingCount} of {filteredDefinitions.length} definition{filteredDefinitions.length !== 1 ? 's' : ''}
-                {debouncedSearch && ` matching "${debouncedSearch}"`}
+                Found {definitions.length} definition{definitions.length !== 1 ? 's' : ''} matching "{debouncedSearch}"
+                {definitions.length >= MAX_RESULTS && ` (limited to ${MAX_RESULTS} results)`}
+              </div>
+            )}
+            {/* Search prompt */}
+            {!isLoading && !error && !debouncedSearch && (
+              <div className="mt-2 text-xs text-gray-500">
+                Enter a search term to find definitions
               </div>
             )}
           </div>
 
           {/* Content */}
-          <div
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className="flex-1 overflow-y-auto bg-white px-6 py-4"
-          >
-            {isLoadingDefinitions && (
+          <div className="flex-1 overflow-y-auto bg-white px-6 py-4">
+            {isLoading && (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
-                <span className="ml-3 text-sm text-gray-600">Loading definitions...</span>
+                <span className="ml-3 text-sm text-gray-600">Searching definitions...</span>
               </div>
             )}
 
-            {definitionsLoadError && (
+            {error && (
               <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
@@ -218,26 +182,37 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-700">{definitionsLoadError}</p>
+                    <p className="text-sm text-red-700">{error}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {!isLoadingDefinitions && !definitionsLoadError && filteredDefinitions.length === 0 && (
+            {!isLoading && !error && !debouncedSearch && (
+              <div className="py-8 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <p className="mt-2 text-sm text-gray-500">
+                  Enter a search term to find definitions
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !error && debouncedSearch && definitions.length === 0 && (
               <div className="py-8 text-center">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                 </svg>
                 <p className="mt-2 text-sm text-gray-500">
-                  {debouncedSearch ? 'No definitions found matching your search' : 'No definitions available'}
+                  No definitions found matching "{debouncedSearch}"
                 </p>
               </div>
             )}
 
-            {!isLoadingDefinitions && !definitionsLoadError && displayedDefinitions.length > 0 && (
+            {!isLoading && !error && definitions.length > 0 && (
               <div className="space-y-2 pr-2">
-                  {displayedDefinitions.map((definition, index) => {
+                  {definitions.map((definition, index) => {
                     const owner = getOwner(definition);
                     const isSelected = selectedDefinition?.url === definition.url;
                     return (
@@ -292,20 +267,6 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                       </button>
                     );
                   })}
-
-                  {/* Loading more indicator */}
-                  {hasMore && (
-                    <div className="flex items-center justify-center py-4">
-                      {loadingMore ? (
-                        <>
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
-                          <span className="ml-2 text-xs text-gray-600">Loading more...</span>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-500">Scroll to load more...</span>
-                      )}
-                    </div>
-                  )}
               </div>
             )}
           </div>

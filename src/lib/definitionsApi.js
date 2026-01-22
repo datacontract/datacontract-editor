@@ -3,147 +3,112 @@
  */
 
 /**
- * Constructs the API base URL for the current organization
- * @param {string} org - Organization vanity URL
- * @returns {string|null} The API base URL or null if organization is not provided
+ * Fetch a single definition by ID from the API
+ * @param {string} baseUrl - API base URL
+ * @param {string} definitionId - Definition ID (e.g., "/testorga/definitions/fulfillment/sku")
+ * @returns {Promise<Object|null>} The definition object or null if not found
  */
-export const getApiBaseUrl = (org) => {
-    if (!org) return null;
-    return `/${org}/datacontract-editor-api`;
-};
-
-/**
- * Parses GitHub-style Link header to extract pagination URLs
- * @param {string} linkHeader - Link header value
- * @returns {Object} Object with next, prev, first, last URLs
- */
-const parseLinkHeader = (linkHeader) => {
-    const links = {};
-    if (!linkHeader) return links;
-
-    const parts = linkHeader.split(',');
-    for (const part of parts) {
-        const match = part.match(/<([^>]+)>;\s*rel="([^"]+)"/);
-        if (match) {
-            links[match[2]] = match[1];
-        }
-    }
-    return links;
-};
-
-/**
- * Fetches a single page of definitions from the backend
- * @param {string} org - Organization vanity URL
- * @param {number} page - Page number (0-indexed)
- * @returns {Promise<{content: Array, links: Object, hasNext: boolean}>}
- */
-export const fetchDefinitionsPage = async (org, page = 0) => {
-    const apiBaseUrl = getApiBaseUrl(org);
-    if (!apiBaseUrl) {
-        console.warn('Cannot fetch definitions: Organization not provided');
-        return { content: [], links: {}, hasNext: false };
+export const fetchDefinition = async (url) => {
+    if (!url) {
+        console.warn('Cannot fetch definition: baseUrl or definitionId not provided');
+        return null;
     }
 
     try {
-        const url = `${apiBaseUrl}/definitions?p=${page}`;
-        console.log('Fetching definitions page:', url);
-
+        // Remove leading slash from definitionId for URL construction
         const response = await fetch(url, {
             method: 'GET',
+					headers: {
+							Accept: 'application/json',
+					},
             mode: 'cors',
         });
 
         if (!response.ok) {
-            console.error(`Failed to fetch definitions page ${page}:`, response.status, response.statusText);
-            return { content: [], links: {}, hasNext: false };
+            console.error(`Failed to fetch definition ${url}:`, response.status, response.statusText);
+            return null;
         }
 
         const data = await response.json();
-        const linkHeader = response.headers.get('Link');
-        const links = parseLinkHeader(linkHeader);
-
-        return {
-            content: data,
-            links,
-            hasNext: !!links.next
-        };
+        return data;
     } catch (error) {
-        console.error(`Error fetching definitions page ${page}:`, error);
-        return { content: [], links: {}, hasNext: false };
+        console.error(`Error fetching definition ${url}:`, error);
+        return null;
     }
 };
 
 /**
- * Fetches all definitions from the backend using pagination
- * @param {string} org - Organization vanity URL
- * @param {Function} onProgress - Optional callback for progress updates (currentPage)
- * @returns {Promise<Array>} Array of all definitions
+ * Search definitions using server-side search with pagination
+ * @param {string} baseUrl - API base URL
+ * @param {string} searchTerm - Search term
+ * @param {number} maxResults - Maximum number of results to return
+ * @param {string} queryParam - Query parameter name (e.g., 'q' or 'query')
+ * @param {string} pageParam - Page parameter name (e.g., 'p' or 'page')
+ * @returns {Promise<Array>} Array of matching definitions
  */
-export const fetchAllDefinitions = async (org, onProgress = null) => {
-    const allDefinitions = [];
-    let currentPage = 0;
-    let hasMore = true;
+export const searchDefinitions = async (baseUrl, searchTerm, maxResults, queryParam = 'q', pageParam = 'p') => {
+    if (!baseUrl) {
+        console.warn('Cannot search definitions: baseUrl not provided');
+        return [];
+    }
+
+    const PAGE_SIZE = 100; // Server returns max 100 results per page
+    const numPages = Math.floor(maxResults / PAGE_SIZE) + (maxResults % PAGE_SIZE > 0 ? 1 : 0);
+    const allResults = [];
 
     try {
-        while (hasMore) {
-            const pageData = await fetchDefinitionsPage(org, currentPage);
+        // Fetch multiple pages if needed
+        for (let page = 0; page < numPages; page++) {
+            const url = `${baseUrl}?${queryParam}=${encodeURIComponent(searchTerm)}&${pageParam}=${page}`;
+            console.log(`Searching definitions (page ${page + 1}/${numPages}):`, url);
 
-            if (pageData.content && pageData.content.length > 0) {
-                allDefinitions.push(...pageData.content);
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+            });
+
+            if (!response.ok) {
+                console.error(`Failed to search definitions (page ${page}):`, response.status, response.statusText);
+                break; // Stop fetching if a page fails
             }
 
-            hasMore = pageData.hasNext;
+            const data = await response.json();
+            const pageResults = Array.isArray(data) ? data : [];
 
-            if (onProgress) {
-                onProgress(currentPage + 1);
+            allResults.push(...pageResults);
+
+            // Stop if we got fewer results than PAGE_SIZE (no more pages available)
+            if (pageResults.length < PAGE_SIZE) {
+                break;
             }
 
-            console.log(`Loaded definitions page ${currentPage + 1}, total definitions: ${allDefinitions.length}, hasMore: ${hasMore}`);
-
-            currentPage++;
-
-            // Safety check to prevent infinite loops
-            if (currentPage > 1000) {
-                console.error('Maximum page limit reached (1000 pages). Stopping pagination.');
+            // Stop if we've reached maxResults
+            if (allResults.length >= maxResults) {
                 break;
             }
         }
 
-        console.log(`Successfully loaded ${allDefinitions.length} definitions from ${currentPage} pages`);
-        return allDefinitions;
+        // Trim to maxResults
+        return allResults.slice(0, maxResults);
     } catch (error) {
-        console.error('Error fetching all definitions:', error);
-        return allDefinitions;
+        console.error('Error searching definitions:', error);
+        return allResults; // Return what we got so far
     }
 };
 
 /**
- * Builds a definition display URL from definition data
- * @param {Object} definition - Definition object from API
- * @param {string} organizationVanityUrl - Organization vanity URL
- * @returns {string|null} The display URL for the definition
+ * Extracts definition ID from a definition URL
+ * @param {string} url - Full definition URL (e.g., "https://example.com/testorga/definitions/fulfillment/sku")
+ * @returns {string|null} Definition ID (e.g., "/testorga/definitions/fulfillment/sku")
  */
-export const buildDefinitionUrl = (definition) => {
-    if (!definition) return null;
+export const extractDefinitionId = (url) => {
+    if (!url) return null;
 
-    return `${window.location.protocol}//${window.location.host}${definition.url}`;
-};
-
-/**
- * Converts an array of definitions to a map keyed by URL
- * @param {Array} definitions - Array of definition objects
- * @param {string} organizationVanityUrl - Organization vanity URL
- * @returns {Map<string, Object>} Map of URL -> definition data
- */
-export const definitionsArrayToMap = (definitions) => {
-    const definitionsMap = new Map();
-
-    for (const def of definitions) {
-        const url = buildDefinitionUrl(def);
-        if (url) {
-            definitionsMap.set(url, def);
-        }
+    try {
+        const urlObj = new URL(url);
+        return urlObj.pathname;
+    } catch (error) {
+        // If it's already a path (not a full URL), return as-is
+        return url.startsWith('/') ? url : `/${url}`;
     }
-
-    return definitionsMap;
 };

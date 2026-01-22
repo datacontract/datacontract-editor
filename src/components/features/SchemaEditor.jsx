@@ -699,7 +699,7 @@ const SchemaEditor = ({schemaIndex}) => {
 											className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 rounded-t-md">
 											<span className="text-sm font-medium text-gray-700">Properties</span>
 											<div className="flex items-center gap-2">
-												{editorConfig?.semantics?.enabled && (
+												{editorConfig?.semantics?.baseUrl && (
 													<button
 														onClick={() => setIsDefinitionModalOpen(true)}
 														className="rounded-sm bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"

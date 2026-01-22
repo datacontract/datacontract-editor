@@ -6,7 +6,6 @@ import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js';
 import { ToastContainer } from './components/ui/Toast.jsx';
 import { ErrorBoundary } from './components/error/index.js';
 import { AiFloatingActionButton, AiSidebar } from './ai/index.js';
-import { useAutoLoadDefinitions } from './hooks/useAutoLoadDefinitions.js';
 
 /**
  * Main App component for the Data Contract Editor
@@ -16,9 +15,6 @@ import { useAutoLoadDefinitions } from './hooks/useAutoLoadDefinitions.js';
  */
 function App({ storageBackend = null, editorConfig = null }) {
     const setYaml = useEditorStore((state) => state.setYaml);
-
-    // Auto-load definitions when semantics is enabled
-    useAutoLoadDefinitions();
 
     useEffect(() => {
         // Configure storage backend if provided

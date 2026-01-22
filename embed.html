@@ -62,74 +62,6 @@ servers:
     // Mock Definition Search Callback
     // =========================================================================
 
-    // Sample definitions data
-    const mockDefinitions = [
-        {
-            name: 'fulfillment/sku',
-            businessName: 'Stock Keeping Unit',
-            logicalType: 'string',
-            description: 'Unique identifier for products in inventory management systems. Used across all fulfillment operations.',
-            tags: ['inventory', 'product'],
-            customProperties: [{ property: 'owner', value: 'Data Platform Team' }]
-        },
-        {
-            name: 'fulfillment/order_id',
-            businessName: 'Order Identifier',
-            logicalType: 'string',
-            description: 'Unique identifier for customer orders. Generated at checkout and used throughout order lifecycle.',
-            tags: ['order', 'fulfillment'],
-            customProperties: [{ property: 'owner', value: 'Commerce Team' }]
-        },
-        {
-            name: 'customer/email',
-            businessName: 'Customer Email Address',
-            logicalType: 'string',
-            description: 'Primary email address for customer communication and account identification.',
-            tags: ['customer', 'pii', 'contact'],
-            customProperties: [{ property: 'owner', value: 'Customer Data Team' }]
-        },
-        {
-            name: 'customer/customer_id',
-            businessName: 'Customer Identifier',
-            logicalType: 'string',
-            description: 'Unique identifier for customers across all systems.',
-            tags: ['customer', 'identity'],
-            customProperties: [{ property: 'owner', value: 'Identity Team' }]
-        },
-        {
-            name: 'finance/revenue',
-            businessName: 'Revenue',
-            logicalType: 'number',
-            description: 'Total revenue amount in cents. Calculated from order totals after discounts and before taxes.',
-            tags: ['finance', 'metrics'],
-            customProperties: [{ property: 'owner', value: 'Finance Analytics' }]
-        },
-        {
-            name: 'finance/transaction_date',
-            businessName: 'Transaction Date',
-            logicalType: 'date',
-            description: 'Date when the financial transaction was recorded.',
-            tags: ['finance', 'temporal'],
-            customProperties: [{ property: 'owner', value: 'Finance Analytics' }]
-        },
-        {
-            name: 'product/category',
-            businessName: 'Product Category',
-            logicalType: 'string',
-            description: 'Primary category classification for products in the catalog.',
-            tags: ['product', 'catalog'],
-            customProperties: [{ property: 'owner', value: 'Catalog Team' }]
-        },
-        {
-            name: 'product/price',
-            businessName: 'Product Price',
-            logicalType: 'number',
-            description: 'Current retail price in cents. Updated daily from pricing engine.',
-            tags: ['product', 'pricing'],
-            customProperties: [{ property: 'owner', value: 'Pricing Team' }]
-        },
-    ];
-
     // =========================================================================
     // Custom AI Tools - MCP-like extensibility
     // =========================================================================
@@ -369,15 +301,9 @@ servers:
         // Semantics configuration
         semantics: {
             enabled: true,
-            organizationVanityUrl: "testorga",
-            // Provide mock definitions directly instead of fetching from API
-            definitionsProvider: async () => {
-                // Transform mock definitions to the format expected by the API
-                return mockDefinitions.map(def => ({
-                    ...def,
-                    url: `/testorga/definitions/${def.name}`,
-                }));
-            },
+						baseUrl: "/definitions.json",
+						queryParam: "q",
+						pageParam: "page",
         },
 
         // Test configuration

@@ -8,7 +8,6 @@ import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
-import { fetchAllDefinitions as fetchAllDefinitionsApi, definitionsArrayToMap } from './lib/definitionsApi.js'
 import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
@@ -71,10 +70,7 @@ const DEFAULT_CONFIG = {
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
 
   // Semantics configuration (definition lookup feature)
-  semantics: {
-    enabled: false, // Set to true to enable Semantics section in property details
-    definitionsProvider: null, // Optional function that returns Promise<Array> of definitions (for mocking/testing)
-  },
+  semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
 
   // Optional lists for dropdowns (if not provided, text fields are used)
   teams: null,         // Array of {id: string, name: string} or null
@@ -309,56 +305,6 @@ function createConfiguredStore(config) {
 			// AI chat state
 			resetAiChat: () => set((state) => ({ aiChatResetKey: (state.aiChatResetKey || 0) + 1, aiChatHasMessages: false })),
 			setAiChatHasMessages: (hasMessages) => set({ aiChatHasMessages: hasMessages }),
-			// Definitions functions for semantic definitions support
-			fetchAllDefinitions: async () => {
-				const { editorConfig } = get();
-				const org = editorConfig?.semantics?.organizationVanityUrl;
-				const definitionsProvider = editorConfig?.semantics?.definitionsProvider;
-
-				// If a custom definitions provider is configured, use it instead of API
-				if (definitionsProvider && typeof definitionsProvider === 'function') {
-					set({ isLoadingDefinitions: true, definitionsLoadError: null });
-					try {
-						const definitions = await definitionsProvider();
-						const definitionsMap = definitionsArrayToMap(definitions);
-						set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
-						console.log("Got all definitions from provider", definitionsMap);
-						return definitions;
-					} catch (error) {
-						console.error('Error in fetchAllDefinitions (provider):', error);
-						set({ isLoadingDefinitions: false, definitionsLoadError: error.message || 'Failed to load definitions' });
-						return [];
-					}
-				}
-
-				// Otherwise use the API
-				if (!org) {
-					console.warn('fetchAllDefinitions: organizationVanityUrl not configured in editorConfig.semantics');
-					set({ isLoadingDefinitions: false, definitionsLoadError: 'Organization not configured' });
-					return [];
-				}
-
-				set({ isLoadingDefinitions: true, definitionsLoadError: null });
-
-				try {
-					const definitions = await fetchAllDefinitionsApi(org);
-					const definitionsMap = definitionsArrayToMap(definitions);
-					set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
-					console.log("Got all definitions", definitionsMap);
-					return definitions;
-				} catch (error) {
-					console.error('Error in fetchAllDefinitions:', error);
-					set({ isLoadingDefinitions: false, definitionsLoadError: error.message || 'Failed to load definitions' });
-					return [];
-				}
-			},
-			getDefinition: (definitionUrl) => {
-				const { definitionsMap } = get();
-				if (!definitionsMap || typeof definitionsMap.get !== 'function') {
-					return null;
-				}
-				return definitionsMap.get(definitionUrl) || null;
-			},
 		};
 
 		return {
@@ -385,9 +331,6 @@ function createConfiguredStore(config) {
 			lastSaveInfo: null,
 			notifications: [],
 			selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
-			definitionsMap: new Map(), // Map<url, definition> for semantic definitions
-			isLoadingDefinitions: false, // Whether definitions are currently being loaded
-			definitionsLoadError: null, // Error message if definitions failed to load
 			// Store editor config for components to access
 			editorConfig: {
 				mode: config.mode,

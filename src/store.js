@@ -3,7 +3,6 @@ import {devtools, persist, createJSONStorage} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
-import { fetchAllDefinitions as fetchAllDefinitionsApi, definitionsArrayToMap } from './lib/definitionsApi.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -265,37 +264,6 @@ export function defaultStoreConfig(set, get) {
 		setView: (view) => set({currentView: view}),
 		setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
 		setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
-		// Definitions functions for semantic definitions support
-		fetchAllDefinitions: async () => {
-			const { editorConfig } = get();
-			const org = editorConfig?.semantics?.organizationVanityUrl;
-
-			if (!org) {
-				console.warn('fetchAllDefinitions: organizationVanityUrl not configured in editorConfig.semantics');
-				set({ isLoadingDefinitions: false, definitionsLoadError: 'Organization not configured' });
-				return [];
-			}
-
-			set({ isLoadingDefinitions: true, definitionsLoadError: null });
-
-			try {
-				const definitions = await fetchAllDefinitionsApi(org);
-				const definitionsMap = definitionsArrayToMap(definitions, org);
-				set({ definitionsMap, isLoadingDefinitions: false, definitionsLoadError: null });
-				return definitions;
-			} catch (error) {
-				console.error('Error in fetchAllDefinitions:', error);
-				set({ isLoadingDefinitions: false, definitionsLoadError: error.message || 'Failed to load definitions' });
-				return [];
-			}
-		},
-		getDefinition: (definitionUrl) => {
-			const { definitionsMap } = get();
-			if (!definitionsMap || typeof definitionsMap.get !== 'function') {
-				return null;
-			}
-			return definitionsMap.get(definitionUrl) || null;
-		},
 		loadFromFile: async (filename = null) => {
 			try {
 				const yamlContent = await fileStorageBackend.loadYamlFile(filename);
@@ -393,9 +361,6 @@ export function defaultStoreConfig(set, get) {
 		notifications: [], // { id, type, message, duration }
 		selectedDiagramSchemaIndex: null, // Currently selected schema in diagram view
 		selectedProperty: null, // { schemaIndex, propPath, property, onUpdate, onDelete } for property details drawer
-		definitionsMap: new Map(), // Map<url, definition> for semantic definitions
-		isLoadingDefinitions: false, // Whether definitions are currently being loaded
-		definitionsLoadError: null, // Error message if definitions failed to load
 		editorConfig: {
 			mode: 'SERVER', // SERVER, DESKTOP, or EMBEDDED
 			onCancel: null,
@@ -405,6 +370,7 @@ export function defaultStoreConfig(set, get) {
 			domains: null,
 			tests: DEFAULT_TESTS_CONFIG,
 			ai: DEFAULT_AI_CONFIG,
+			semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
 			customizations: null, // See CUSTOMIZATION.md for documentation
 		},
 		isAiPanelOpen: false,
