@@ -1,0 +1,9 @@
+{
+	"name": "finance/revenue",
+	"businessName": "Revenue",
+	"logicalType": "number",
+	"description": "Total revenue amount in cents. Calculated from order totals after discounts and before taxes.",
+	"tags": ["finance", "metrics"],
+	"url": "/embed/revenue.json",
+	"customProperties": [{ "property": "owner", "value": "Finance Analytics" }]
+}

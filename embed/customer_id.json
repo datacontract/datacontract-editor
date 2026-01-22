@@ -1,0 +1,9 @@
+{
+	"name": "customer/customer_id",
+	"businessName": "Customer Identifier",
+	"logicalType": "string",
+	"description": "Unique identifier for customers across all systems.",
+	"tags": ["customer", "identity"],
+	"url": "/embed/customer_id.json",
+	"customProperties": [{ "property": "owner", "value": "Identity Team" }]
+}

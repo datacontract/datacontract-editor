@@ -4,6 +4,6 @@
 	"logicalType": "string",
 	"description": "Unique identifier for products in inventory management systems. Used across all fulfillment operations.",
 	"tags": ["inventory", "product"],
-	"url": "/definitions/sku.json",
+	"url": "/embed/sku.json",
 	"customProperties": [{ "property": "owner", "value": "Data Platform Team" }]
 }

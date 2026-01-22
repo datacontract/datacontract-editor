@@ -16,7 +16,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const MAX_RESULTS = 50;
+  const MAX_RESULTS = 15;
 
   // Debounce search input
   useEffect(() => {
@@ -34,12 +34,13 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
       setDebouncedSearch('');
       setDefinitions([]);
       setError(null);
+			setDebouncedSearch('');
     }
   }, [isOpen]);
 
   // Fetch definitions based on search term
   useEffect(() => {
-    if (!isOpen || !debouncedSearch) {
+    if (!isOpen || debouncedSearch === null || debouncedSearch === undefined) {
       setDefinitions([]);
       return;
     }

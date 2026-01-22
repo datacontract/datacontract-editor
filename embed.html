@@ -301,9 +301,10 @@ servers:
         // Semantics configuration
         semantics: {
             enabled: true,
-						baseUrl: "/definitions.json",
+						baseUrl: "/embed/definitions.json",
 						queryParam: "q",
 						pageParam: "page",
+						definitionAcceptHeader: "application/json"
         },
 
         // Test configuration

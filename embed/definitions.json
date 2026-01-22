@@ -5,7 +5,7 @@
 		"logicalType": "string",
 		"description": "Unique identifier for products in inventory management systems. Used across all fulfillment operations.",
 		"tags": ["inventory", "product"],
-		"url": "/definitions/sku.json",
+		"url": "/embed/sku.json",
 		"customProperties": [{ "property": "owner", "value": "Data Platform Team" }]
 	},
 	{
@@ -14,6 +14,7 @@
 		"logicalType": "string",
 		"description": "Unique identifier for customer orders. Generated at checkout and used throughout order lifecycle.",
 		"tags": ["order", "fulfillment"],
+		"url": "/embed/order_id.json",
 		"customProperties": [{ "property": "owner", "value": "Commerce Team" }]
 	},
 	{
@@ -22,6 +23,7 @@
 		"logicalType": "string",
 		"description": "Primary email address for customer communication and account identification.",
 		"tags": ["customer", "pii", "contact"],
+		"url": "/embed/email.json",
 		"customProperties": [{ "property": "owner", "value": "Customer Data Team" }]
 	},
 	{
@@ -30,6 +32,7 @@
 		"logicalType": "string",
 		"description": "Unique identifier for customers across all systems.",
 		"tags": ["customer", "identity"],
+		"url": "/embed/customer_id.json",
 		"customProperties": [{ "property": "owner", "value": "Identity Team" }]
 	},
 	{
@@ -38,6 +41,7 @@
 		"logicalType": "number",
 		"description": "Total revenue amount in cents. Calculated from order totals after discounts and before taxes.",
 		"tags": ["finance", "metrics"],
+		"url": "/embed/revenue.json",
 		"customProperties": [{ "property": "owner", "value": "Finance Analytics" }]
 	},
 	{
@@ -46,6 +50,7 @@
 		"logicalType": "date",
 		"description": "Date when the financial transaction was recorded.",
 		"tags": ["finance", "temporal"],
+		"url": "/embed/transaction_date.json",
 		"customProperties": [{ "property": "owner", "value": "Finance Analytics" }]
 	},
 	{
@@ -54,6 +59,7 @@
 		"logicalType": "string",
 		"description": "Primary category classification for products in the catalog.",
 		"tags": ["product", "catalog"],
+		"url": "/embed/category.json",
 		"customProperties": [{ "property": "owner", "value": "Catalog Team" }]
 	},
 	{
@@ -62,6 +68,7 @@
 		"logicalType": "number",
 		"description": "Current retail price in cents. Updated daily from pricing engine.",
 		"tags": ["product", "pricing"],
+		"url": "/embed/price.json",
 		"customProperties": [{ "property": "owner", "value": "Pricing Team" }]
 	}
 ]

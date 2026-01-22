@@ -1,0 +1,9 @@
+{
+	"name": "product/category",
+	"businessName": "Product Category",
+	"logicalType": "string",
+	"description": "Primary category classification for products in the catalog.",
+	"tags": ["product", "catalog"],
+	"url": "/embed/category.json",
+	"customProperties": [{ "property": "owner", "value": "Catalog Team" }]
+}

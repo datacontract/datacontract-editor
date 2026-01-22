@@ -22,7 +22,7 @@ export function useDefinition() {
             return null;
         }
 
-        return await fetchDefinition(definitionUrl);
+        return await fetchDefinition(definitionUrl, semantics.definitionAcceptHeader);
     }, []);
 
     /**
@@ -44,8 +44,8 @@ export function useDefinition() {
         const queryParam = semantics.queryParam || 'q';
         const pageParam = semantics.pageParam || 'p';
 
-        return await searchDefinitions(semantics.baseUrl, searchTerm, maxResults, queryParam, pageParam);
-    }, [semantics?.baseUrl, semantics?.queryParam, semantics?.pageParam]);
+        return await searchDefinitions(semantics.baseUrl, searchTerm, maxResults, queryParam, pageParam, semantics.definitionAcceptHeader);
+    }, [semantics?.baseUrl, semantics?.queryParam, semantics?.pageParam, semantics?.definitionAcceptHeader]);
 
     return {
         getDefinition,
