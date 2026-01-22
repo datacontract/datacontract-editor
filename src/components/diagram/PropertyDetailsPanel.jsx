@@ -195,72 +195,11 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     updateField('authoritativeDefinitions', filtered?.length ? filtered : undefined);
   }, [property.authoritativeDefinitions, updateField]);
 
-  // Build tooltip content for definition preview
-  const buildDefinitionTooltip = useCallback(() => {
-    if (isFetchingDefinition) {
-      return (
-        <div className="text-xs">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
-            <span>Loading definition...</span>
-          </div>
-        </div>
-      );
-    }
-
-    if (!definitionData) {
-      return (
-        <div className="text-xs">
-          <div>Unable to load definition data.</div>
-          <div className="mt-1 text-gray-400">Check console for details.</div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="text-xs space-y-1.5 max-w-sm">
-        <div className="font-semibold text-white mb-2">Definition Preview</div>
-        {definitionData.name && (
-          <div><span className="font-medium text-gray-300">Name:</span> <span className="text-white">{definitionData.name}</span></div>
-        )}
-        {definitionData.businessName && (
-          <div><span className="font-medium text-gray-300">Business Name:</span> <span className="text-white">{definitionData.businessName}</span></div>
-        )}
-        {definitionData.logicalType && (
-          <div><span className="font-medium text-gray-300">Logical Type:</span> <span className="text-white">{definitionData.logicalType}</span></div>
-        )}
-        {definitionData.physicalType && (
-          <div><span className="font-medium text-gray-300">Physical Type:</span> <span className="text-white">{definitionData.physicalType}</span></div>
-        )}
-        {definitionData.description && (
-          <div><span className="font-medium text-gray-300">Description:</span> <span className="text-white">{definitionData.description}</span></div>
-        )}
-        {definitionData.classification && (
-          <div><span className="font-medium text-gray-300">Classification:</span> <span className="text-white">{definitionData.classification}</span></div>
-        )}
-        {definitionData.examples && definitionData.examples.length > 0 && (
-          <div>
-            <span className="font-medium text-gray-300">Examples:</span>
-            <div className="ml-2 mt-1 space-y-0.5">
-              {definitionData.examples.map((ex, idx) => (
-                <div key={idx} className="text-white">• {ex}</div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }, [definitionData, isFetchingDefinition]);
-
   // Handle definition selection from modal
   const handleDefinitionSelect = useCallback((definition) => {
-    console.log('Selected definition from modal:', definition);
 
     // Use the full URL if available, otherwise use name (which might be a path)
-    // The definition.name should contain the full URL like:
-    // http://localhost:8888/fabi-demo/definitions/fulfillment/shipment_id
     const definitionUrl = definition.url || definition.name;
-    console.log('Using definition URL:', definitionUrl);
 
     const newDef = { type: 'definition', url: definitionUrl };
     const defs = property.authoritativeDefinitions || [];
@@ -531,12 +470,6 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                               </>
                             )}
                           </Popover>
-                        )}
-                        {/* Debug: Show why button might not appear */}
-                        {process.env.NODE_ENV === 'development' && isSemanticDefinitionExternal && (
-                          <span className="text-xs text-gray-400 italic">
-                            (External URL)
-                          </span>
                         )}
                         <button
                           onClick={removeSemanticDefinition}
