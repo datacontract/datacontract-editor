@@ -203,7 +203,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   // Get authoritative definitions excluding semantic definition (when semantics section visible)
   const filteredAuthoritativeDefinitions = useMemo(() => {
     if (!isSemanticsEnabled) return property.authoritativeDefinitions;
-    return property.authoritativeDefinitions?.filter(d => d.type !== 'definition');
+    return property.authoritativeDefinitions; //?.filter(d => d.type !== 'definition');
   }, [property.authoritativeDefinitions, isSemanticsEnabled]);
 
   return (
