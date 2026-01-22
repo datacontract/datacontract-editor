@@ -175,6 +175,43 @@
         ]
       },
 
+      // Description (Terms of Use) level customizations
+      description: {
+        standardProperties: [
+          // Hide limitations field
+          { property: 'limitations', hidden: true },
+          // Customize purpose field
+          {
+            property: 'purpose',
+            title: 'Business Purpose',
+            description: 'Why this data exists and its intended business use'
+          }
+        ],
+        customProperties: [
+          {
+            property: 'dataClassification',
+            title: 'Data Classification',
+            type: 'select',
+            description: 'Classification level for this data',
+            enum: ['Public', 'Internal', 'Confidential', 'Restricted']
+          },
+          {
+            property: 'retentionPolicy',
+            title: 'Retention Policy',
+            type: 'text',
+            description: 'Data retention requirements',
+            placeholder: 'e.g., 7 years per compliance'
+          }
+        ],
+        customSections: [
+          {
+            section: 'compliance',
+            title: 'Compliance Info',
+            customProperties: ['dataClassification', 'retentionPolicy']
+          }
+        ]
+      },
+
       // Schema level customizations
       schema: {
         standardProperties: [
