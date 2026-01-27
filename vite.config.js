@@ -2,6 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json')
+const monacoVersion = pkg.dependencies['@monaco-editor/react'].replace(/[^\d.]/g, '')
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -21,10 +26,10 @@ export default defineConfig(({ mode }) => ({
   },
   worker: {
     format: 'es',
-    // Output workers to assets directory
+    // Output workers with version-based names for stable caching
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/[name]-[hash].js'
+        entryFileNames: `assets/[name]-${monacoVersion}.js`
       }
     }
   },
@@ -48,10 +53,17 @@ export default defineConfig(({ mode }) => ({
           if (assetInfo.name === 'style.css') return 'datacontract-editor.css';
           return assetInfo.name;
         },
-        // Ensure workers are placed in assets/
+        // Split Monaco into its own chunk for stable caching
+        manualChunks: {
+          monaco: ['monaco-editor', '@monaco-editor/react', 'monaco-yaml']
+        },
+        // Use version-based names for Monaco chunk, hash for others
         chunkFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'monaco') {
+            return `monaco-${monacoVersion}.js`;
+          }
           if (chunkInfo.name.includes('worker')) {
-            return 'assets/[name]-[hash].js';
+            return `assets/[name]-${monacoVersion}.js`;
           }
           return '[name]-[hash].js';
         }
