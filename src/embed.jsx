@@ -68,6 +68,7 @@ const DEFAULT_CONFIG = {
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
+  saveLabel: 'Save',   // string - custom label for Save button in EMBEDDED mode
 
   // Semantics configuration (definition lookup feature)
   semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
@@ -337,6 +338,7 @@ function createConfiguredStore(config) {
 				onCancel: config.onCancel,
 				onDelete: config.onDelete,
 				showDelete: config.showDelete,
+				saveLabel: config.saveLabel,
 				semantics: config.semantics,
 				teams: config.teams,
 				domains: config.domains,

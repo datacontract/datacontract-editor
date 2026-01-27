@@ -586,7 +586,7 @@ const Header = () => {
                                 className="inline-flex items-center justify-center gap-1 md:gap-2 rounded-md bg-indigo-600 px-2 md:px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500 hover:cursor-pointer"
                                 onClick={handleSave}
                             >
-                                Save
+                                {editorConfig?.saveLabel || 'Save'}
                             </button>
                         </>
                     ) : (
