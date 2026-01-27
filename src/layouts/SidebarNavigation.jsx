@@ -2,81 +2,10 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {useEditorStore} from "../store.js";
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
+import {useCallback, useMemo} from "react";
 
-const SidebarNavigation = ({ isMobile = false }) => {
-	const schemas = useEditorStore(useShallow((state) => state.getValue('schema')));
-	const servers = useEditorStore(useShallow((state) => state.getValue('servers')));
-    const setView = useEditorStore((state) => state.setView);
-    const currentView = useEditorStore((state) => state.currentView);
-    const selectedDiagramSchemaIndex = useEditorStore((state) => state.selectedDiagramSchemaIndex);
-    const isMobileSidebarOpen = useEditorStore((state) => state.isMobileSidebarOpen);
-    const closeMobileSidebar = useEditorStore((state) => state.closeMobileSidebar);
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    // Get colored icon for server type
-  const getServerTypeIcon = (type) => {
-    if (!type) {
-            return serverIcons.custom();
-        }
-
-        const IconComponent = serverIcons[type];
-    if (IconComponent) {
-      return <IconComponent />;
-    }
-
-    // Default to custom icon if type not found
-    return serverIcons.custom();
-    };
-
-    const handleNavigationClick = (e, item) => {
-        e.preventDefault();
-
-        // Close mobile sidebar when navigating
-        if (isMobile) {
-            closeMobileSidebar();
-        }
-
-        switch (currentView) {
-            case 'form':
-                // Navigate to the form
-                navigate(item.path);
-                break;
-            case 'yaml':
-                navigate('/yaml');
-                break;
-            case 'diagram':
-                // For schemas section, handle differently
-                if (item.yamlProperty === 'schema') {
-                    // Check if this is the parent "Schemas" item or a specific schema
-                    const schemaIndexMatch = item.path.match(/^\/schemas\/(\d+)$/);
-                    if (schemaIndexMatch) {
-                        // Navigate to diagram with focus on specific schema
-                        const schemaIndex = parseInt(schemaIndexMatch[1], 10);
-                        navigate('/diagram', { state: { focusSchemaIndex: schemaIndex } });
-                    } else if (item.path === '/schemas') {
-                        // Clicking parent "Schemas" - navigate to diagram and fit all
-                        navigate('/diagram');
-                    } else {
-                        // Fallback to form view for unexpected paths
-                        setView('form');
-                        navigate(item.path);
-                    }
-                } else {
-                    // For non-schema items, switch to form view
-                    setView('form');
-                    navigate(item.path);
-                }
-                break;
-            default:
-                // Default to form view
-                setView('form');
-                navigate(item.path);
-                break;
-        }
-    };
-
-    const navigationItems = [
+// Static navigation items - defined outside component to avoid recreation
+const navigationItems = [
         {
             id: 'overview',
             title: 'Fundamentals',
@@ -194,10 +123,113 @@ const SidebarNavigation = ({ isMobile = false }) => {
                 </svg>
             )
         }
-    ];
+];
 
-    // Mobile drawer content
-    const sidebarContent = (
+// Reusable class names
+const ACTIVE_CLASSES = 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600';
+const INACTIVE_CLASSES = 'hover:bg-gray-100 hover:text-indigo-600 border-transparent';
+const NAV_LINK_BASE = 'flex flex-row items-center py-1 transition-colors -mx-4 pl-4 pr-4 border-l-2';
+const SUB_LINK_BASE = 'flex items-center py-1 transition-colors -mx-4 pl-10 pr-4 border-l-2';
+
+// Get colored icon for server type - defined outside component
+const getServerTypeIcon = (type) => {
+    if (!type) return serverIcons.custom();
+    const IconComponent = serverIcons[type];
+    return IconComponent ? <IconComponent /> : serverIcons.custom();
+};
+
+// Schema icon used in sub-items
+const SchemaIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" version="1.1">
+        <path d="M2.896272 2.940456C1.7469839999999999 3.133584 0.8508720000000001 4.081176 0.721656 5.240016C0.685776 5.561808 0.685776 18.438192 0.721656 18.759984000000003C0.8346240000000001 19.773096000000002 1.534992 20.636928 2.50668 20.9616C2.933976 21.104376000000002 2.328408 21.095807999999998 12 21.095807999999998C21.642167999999998 21.095807999999998 21.03768 21.104256000000003 21.48 20.963352C22.450704 20.654112 23.16468 19.779312 23.278344 18.759984000000003C23.314224000000003 18.438192 23.314224000000003 5.561808 23.278344 5.240016C23.148168 4.072488000000001 22.248504 3.128088 21.087 2.939712C20.896272 2.908776 19.719648000000003 2.904504 11.976 2.906568C4.749672 2.908488 3.0488399999999998 2.914824 2.896272 2.940456M2.972544 4.471584C2.62116 4.591368 2.336256 4.893576 2.245248 5.243040000000001C2.213424 5.365248 2.208 5.614296 2.208 6.95304L2.208 8.52 12 8.52L21.792 8.52 21.792 6.95304C21.792 5.614296 21.786576 5.365248 21.754752 5.243040000000001C21.662088 4.887192000000001 21.359928 4.5732 21.004488000000002 4.463424C20.852712 4.416552 20.748264 4.416 11.99148 4.4166240000000005L3.132 4.417248 2.972544 4.471584M2.208 12.096L2.208 14.16 4.968 14.16L7.728 14.16 7.728 12.096L7.728 10.032 4.968 10.032L2.208 10.032 2.208 12.096M9.24 12.096L9.24 14.16 12 14.16L14.76 14.16 14.76 12.096L14.76 10.032 12 10.032L9.24 10.032 9.24 12.096M16.272000000000002 12.096L16.272000000000002 14.16 19.032 14.16L21.792 14.16 21.792 12.096L21.792 10.032 19.032 10.032L16.272000000000002 10.032 16.272000000000002 12.096M2.208 17.130959999999998C2.208 18.393792 2.21352 18.635160000000003 2.245248 18.75696C2.3379119999999998 19.112808 2.640072 19.4268 2.995512 19.536576C3.1438800000000002 19.582416 3.226104 19.584 5.43852 19.584L7.728 19.584 7.728 17.616L7.728 15.648 4.968 15.648L2.208 15.648 2.208 17.130959999999998M9.24 17.616L9.24 19.584 12 19.584L14.76 19.584 14.76 17.616L14.76 15.648 12 15.648L9.24 15.648 9.24 17.616M16.272000000000002 17.616L16.272000000000002 19.584 18.56148 19.584C20.773896 19.584 20.85612 19.582416 21.004488000000002 19.536576C21.359928 19.4268 21.662088 19.112808 21.754752 18.75696C21.78648 18.635160000000003 21.792 18.393792 21.792 17.130959999999998L21.792 15.648 19.032 15.648L16.272000000000002 15.648 16.272000000000002 17.616" stroke="none" fill="currentColor" fillRule="evenodd" strokeWidth="0.024"/>
+    </svg>
+);
+
+// Reusable navigation link component
+const NavLink = ({ item, isActive, onClick }) => (
+    <Link
+        to={item.path}
+        onClick={onClick}
+        className={`${NAV_LINK_BASE} ${isActive ? ACTIVE_CLASSES : INACTIVE_CLASSES}`}
+    >
+        <div className="size-4 shrink-0" aria-hidden="true">
+            {item.icon || <div className="size-2 rounded-full bg-gray-300" />}
+        </div>
+        <p className="ml-1.5 text-sm font-medium">{item.title}</p>
+    </Link>
+);
+
+const SidebarNavigation = ({ isMobile = false }) => {
+    // Consolidated store access - single subscription with useShallow
+    const {
+        schemas,
+        servers,
+        setView,
+        currentView,
+        selectedDiagramSchemaIndex,
+        isMobileSidebarOpen,
+        closeMobileSidebar
+    } = useEditorStore(useShallow((state) => ({
+        schemas: state.getValue('schema'),
+        servers: state.getValue('servers'),
+        setView: state.setView,
+        currentView: state.currentView,
+        selectedDiagramSchemaIndex: state.selectedDiagramSchemaIndex,
+        isMobileSidebarOpen: state.isMobileSidebarOpen,
+        closeMobileSidebar: state.closeMobileSidebar
+    })));
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Memoized navigation handler
+    const handleNavigationClick = useCallback((e, item) => {
+        e.preventDefault();
+
+        if (isMobile) closeMobileSidebar();
+
+        switch (currentView) {
+            case 'form':
+                navigate(item.path);
+                break;
+            case 'yaml':
+                navigate('/yaml');
+                break;
+            case 'diagram':
+                if (item.yamlProperty === 'schema') {
+                    const schemaIndexMatch = item.path.match(/^\/schemas\/(\d+)$/);
+                    if (schemaIndexMatch) {
+                        navigate('/diagram', { state: { focusSchemaIndex: parseInt(schemaIndexMatch[1], 10) } });
+                    } else if (item.path === '/schemas') {
+                        navigate('/diagram');
+                    } else {
+                        setView('form');
+                        navigate(item.path);
+                    }
+                } else {
+                    setView('form');
+                    navigate(item.path);
+                }
+                break;
+            default:
+                setView('form');
+                navigate(item.path);
+        }
+    }, [isMobile, currentView, navigate, setView, closeMobileSidebar]);
+
+    // Helper to determine if a path is active
+    const isPathActive = useCallback((path) => location.pathname === path, [location.pathname]);
+
+    // Helper to determine if schema sub-item is active
+    const isSchemaActive = useCallback((index) =>
+        currentView === 'diagram'
+            ? selectedDiagramSchemaIndex === index
+            : location.pathname === `/schemas/${index}`,
+        [currentView, selectedDiagramSchemaIndex, location.pathname]
+    );
+
+    // Sidebar content - memoized to prevent recreation
+    const sidebarContent = useMemo(() => (
         <>
             <nav className="flex mt-2 w-full" aria-label="Progress">
                 <ol role="list" className="space-y-3 w-full">
@@ -205,24 +237,14 @@ const SidebarNavigation = ({ isMobile = false }) => {
                         <li key={item.id}>
                             {item.id === 'schemas' ? (
                                 <div>
-                                    <Link
-                                        to={item.path}
+                                    <NavLink
+                                        item={item}
+                                        isActive={isPathActive(item.path)}
                                         onClick={(e) => handleNavigationClick(e, item)}
-                                        className={`flex flex-row items-center py-1 transition-colors -mx-4 pl-4 pr-4 border-l-2 ${
-                                            location.pathname === item.path
-                                                ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
-                                                : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
-                                        }`}
-                                    >
-                                        <div className="size-4 shrink-0"
-                                             aria-hidden="true">
-                                            {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
-                                        </div>
-                                        <p className="ml-1.5 text-sm font-medium">{item.title}</p>
-                                    </Link>
-                                    {schemas && schemas.length > 0 && (
+                                    />
+                                    {schemas?.length > 0 && (
                                         <ol className="mt-1 space-y-0.5">
-                                            {schemas.filter(schema => schema).map((schema, index) => (
+                                            {schemas.filter(Boolean).map((schema, index) => (
                                                 <li key={index}>
                                                     <Link
                                                         to={`/schemas/${index}`}
@@ -230,18 +252,10 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                                             path: `/schemas/${index}`,
                                                             yamlProperty: 'schema'
                                                         })}
-                                                        className={`flex items-center text-sm py-1 transition-colors -mx-4 pl-10 pr-4 border-l-2 ${
-                                                            (currentView === 'diagram'
-                                                                ? selectedDiagramSchemaIndex === index
-                                                                : location.pathname === `/schemas/${index}`)
-                                                                ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
-                                                                : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
-                                                        }`}
+                                                        className={`${SUB_LINK_BASE} text-sm ${isSchemaActive(index) ? ACTIVE_CLASSES : INACTIVE_CLASSES}`}
                                                     >
                                                         <div className="w-3 h-3 mr-1.5 shrink-0">
-																													<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" version="1.1">
-																														<path d="M2.896272 2.940456C1.7469839999999999 3.133584 0.8508720000000001 4.081176 0.721656 5.240016C0.685776 5.561808 0.685776 18.438192 0.721656 18.759984000000003C0.8346240000000001 19.773096000000002 1.534992 20.636928 2.50668 20.9616C2.933976 21.104376000000002 2.328408 21.095807999999998 12 21.095807999999998C21.642167999999998 21.095807999999998 21.03768 21.104256000000003 21.48 20.963352C22.450704 20.654112 23.16468 19.779312 23.278344 18.759984000000003C23.314224000000003 18.438192 23.314224000000003 5.561808 23.278344 5.240016C23.148168 4.072488000000001 22.248504 3.128088 21.087 2.939712C20.896272 2.908776 19.719648000000003 2.904504 11.976 2.906568C4.749672 2.908488 3.0488399999999998 2.914824 2.896272 2.940456M2.972544 4.471584C2.62116 4.591368 2.336256 4.893576 2.245248 5.243040000000001C2.213424 5.365248 2.208 5.614296 2.208 6.95304L2.208 8.52 12 8.52L21.792 8.52 21.792 6.95304C21.792 5.614296 21.786576 5.365248 21.754752 5.243040000000001C21.662088 4.887192000000001 21.359928 4.5732 21.004488000000002 4.463424C20.852712 4.416552 20.748264 4.416 11.99148 4.4166240000000005L3.132 4.417248 2.972544 4.471584M2.208 12.096L2.208 14.16 4.968 14.16L7.728 14.16 7.728 12.096L7.728 10.032 4.968 10.032L2.208 10.032 2.208 12.096M9.24 12.096L9.24 14.16 12 14.16L14.76 14.16 14.76 12.096L14.76 10.032 12 10.032L9.24 10.032 9.24 12.096M16.272000000000002 12.096L16.272000000000002 14.16 19.032 14.16L21.792 14.16 21.792 12.096L21.792 10.032 19.032 10.032L16.272000000000002 10.032 16.272000000000002 12.096M2.208 17.130959999999998C2.208 18.393792 2.21352 18.635160000000003 2.245248 18.75696C2.3379119999999998 19.112808 2.640072 19.4268 2.995512 19.536576C3.1438800000000002 19.582416 3.226104 19.584 5.43852 19.584L7.728 19.584 7.728 17.616L7.728 15.648 4.968 15.648L2.208 15.648 2.208 17.130959999999998M9.24 17.616L9.24 19.584 12 19.584L14.76 19.584 14.76 17.616L14.76 15.648 12 15.648L9.24 15.648 9.24 17.616M16.272000000000002 17.616L16.272000000000002 19.584 18.56148 19.584C20.773896 19.584 20.85612 19.582416 21.004488000000002 19.536576C21.359928 19.4268 21.662088 19.112808 21.754752 18.75696C21.78648 18.635160000000003 21.792 18.393792 21.792 17.130959999999998L21.792 15.648 19.032 15.648L16.272000000000002 15.648 16.272000000000002 17.616" stroke="none" fill="currentColor" fillRule="evenodd" strokeWidth="0.024"></path>
-																													</svg>
+                                                            <SchemaIcon />
                                                         </div>
                                                         {schema.name || schema.businessName || 'Untitled Schema'}
                                                     </Link>
@@ -252,24 +266,14 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                 </div>
                             ) : item.id === 'servers' ? (
                                 <div>
-                                    <Link
-                                        to={item.path}
+                                    <NavLink
+                                        item={item}
+                                        isActive={isPathActive(item.path)}
                                         onClick={(e) => handleNavigationClick(e, item)}
-                                        className={`flex flex-row items-center py-1 transition-colors -mx-4 pl-4 pr-4 border-l-2 ${
-                                            location.pathname === item.path
-                                                ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
-                                                : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
-                                        }`}
-                                    >
-                                        <div className="size-4 shrink-0"
-                                             aria-hidden="true">
-                                            {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
-                                        </div>
-                                        <p className="ml-1.5 text-sm font-medium">{item.title}</p>
-                                    </Link>
-                                    {servers && servers.length > 0 && (
+                                    />
+                                    {servers?.length > 0 && (
                                         <ol className="mt-1 space-y-0.5">
-                                            {servers.filter(server => server).map((server, index) => (
+                                            {servers.filter(Boolean).map((server, index) => (
                                                 <li key={index}>
                                                     <Link
                                                         to={`/servers/${index}`}
@@ -277,46 +281,22 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                                             path: `/servers/${index}`,
                                                             yamlProperty: 'servers'
                                                         })}
-                                                        className={`flex items-center gap-1.5 text-xs py-1 transition-colors -mx-4 pl-10 pr-4 border-l-2 ${
-                                                            location.pathname === `/servers/${index}`
-                                                                ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
-                                                                : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
-                                                        }`}
+                                                        className={`${SUB_LINK_BASE} gap-1.5 text-xs ${isPathActive(`/servers/${index}`) ? ACTIVE_CLASSES : INACTIVE_CLASSES}`}
                                                     >
-                                                        <span
-                                                            className="shrink-0">{getServerTypeIcon(server?.type)}</span>
-                                                        <span
-                                                            className="flex-1 truncate">{server?.server || `Server ${index + 1}`}</span>
+                                                        <span className="shrink-0">{getServerTypeIcon(server?.type)}</span>
+                                                        <span className="flex-1 truncate">{server?.server || `Server ${index + 1}`}</span>
                                                     </Link>
                                                 </li>
                                             ))}
                                         </ol>
                                     )}
                                 </div>
-                            ) : item.path ? (
-                                <Link
-                                    to={item.path}
-                                    onClick={(e) => handleNavigationClick(e, item)}
-                                    className={`flex flex-row items-center py-1 transition-colors -mx-4 pl-4 pr-4 border-l-2 ${
-                                        location.pathname === item.path
-                                            ? 'bg-indigo-50 text-indigo-600 font-semibold border-indigo-600'
-                                            : 'hover:bg-gray-100 hover:text-indigo-600 border-transparent'
-                                    }`}
-                                >
-                                    <div className="size-4 shrink-0"
-                                         aria-hidden="true">
-                                        {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
-                                    </div>
-                                    <p className="ml-1.5 text-sm font-medium">{item.title}</p>
-                                </Link>
                             ) : (
-                                <div className="flex flex-row items-center">
-                                    <div className="size-4 shrink-0"
-                                         aria-hidden="true">
-                                        {item.icon || <div className="size-2 rounded-full bg-gray-300"></div>}
-                                    </div>
-                                    <p className="ml-1.5 text-sm font-medium">{item.title}</p>
-                                </div>
+                                <NavLink
+                                    item={item}
+                                    isActive={isPathActive(item.path)}
+                                    onClick={(e) => handleNavigationClick(e, item)}
+                                />
                             )}
                         </li>
                     ))}
@@ -362,7 +342,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                 </a>
             </div>
         </>
-    );
+    ), [schemas, servers, handleNavigationClick, isPathActive, isSchemaActive]);
 
     // Mobile drawer mode
     if (isMobile) {

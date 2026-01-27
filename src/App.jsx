@@ -15,6 +15,7 @@ import { AiFloatingActionButton, AiSidebar } from './ai/index.js';
  */
 function App({ storageBackend = null, editorConfig = null }) {
     const setYaml = useEditorStore((state) => state.setYaml);
+    const currentView = useEditorStore((state) => state.currentView);
 
     useEffect(() => {
         // Configure storage backend if provided
@@ -104,12 +105,16 @@ function App({ storageBackend = null, editorConfig = null }) {
                         <div className="flex flex-col flex-1 min-w-0 h-full">
                             <Header/>
                             <main className="flex flex-row w-full bg-white flex-1 overflow-hidden min-w-0">
-                                {/* Desktop sidebar - hidden on mobile */}
-                                <div className="hidden md:block">
-                                    <SidebarNavigation/>
-                                </div>
-                                {/* Mobile sidebar overlay */}
-                                <SidebarNavigation isMobile={true}/>
+                                {currentView === 'form' && (
+                                    <>
+                                        {/* Desktop sidebar - hidden on mobile */}
+                                        <div className="hidden md:block">
+                                            <SidebarNavigation/>
+                                        </div>
+                                        {/* Mobile sidebar overlay */}
+                                        <SidebarNavigation isMobile={true}/>
+                                    </>
+                                )}
                                 <MainContent/>
                             </main>
                         </div>
