@@ -497,6 +497,8 @@ const Header = () => {
                         onClick={toggleWarnings}
                         title="Validation"
                         className={`relative -ml-px inline-flex items-center px-2 xl:px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 transition-colors ${
+                          editorConfig?.tests?.enabled === false ? 'rounded-r-md' : ''
+                        } ${
                           isWarningsVisible
                             ? 'bg-gray-100'
                             : 'bg-white'
@@ -521,6 +523,7 @@ const Header = () => {
                       )}
                     </span>
                 </button>
+                {editorConfig?.tests?.enabled !== false && (
                 <button type="button"
                         onClick={toggleTestResults}
                         title="Tests"
@@ -559,6 +562,7 @@ const Header = () => {
                       )}
                     </span>
                 </button>
+                )}
               </span>
                 </div>
 

@@ -51,7 +51,7 @@ const DEFAULT_CONFIG = {
 
   // Test configuration
   tests: {
-    enabled: true,
+    enabled: false,
     dataContractCliApiServerUrl: null, // null means use relative /test endpoint
     showSettings: true, // Show settings button to configure API server URL
     helpText: null, // Custom help text (HTML string) - replaces default CLI instructions
