@@ -2,12 +2,13 @@ import {create} from 'zustand'
 import {devtools, persist, createJSONStorage} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
+import { stringifyYaml } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
 
-export const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: draft\nname: "Example Data Contract"\n';
+export const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n';
 
 /**
  * Set the file storage backend to use for the editor
@@ -82,7 +83,7 @@ export function defaultStoreConfig(set, get) {
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
-			set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts), isDirty: true})
+			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 		},
 		clearSaveInfo: () => set({lastSaveInfo: null}),
 		addNotification: (notification) => {
