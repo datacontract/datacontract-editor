@@ -14,6 +14,7 @@ const Overview = () => {
 	const id = useEditorStore(useShallow((state) => state.getValue('id')));
 	const name = useEditorStore(useShallow((state) => state.getValue('name')));
 	const version = useEditorStore(useShallow((state) => state.getValue('version')));
+	const dataProduct = useEditorStore(useShallow((state) => state.getValue('dataProduct')));
 	const status = useEditorStore(useShallow((state) => state.getValue('status')));
 	const domain = useEditorStore(useShallow((state) => state.getValue('domain')));
 	const tenant = useEditorStore(useShallow((state) => state.getValue('tenant')));
@@ -26,6 +27,7 @@ const Overview = () => {
 	const setId = (newValue) => setValue('id', newValue);
 	const setName = (newValue) => setValue('name', newValue);
 	const setVersion = (newValue) => setValue('version', newValue);
+	const setDataProduct = (newValue) => setValue('dataProduct', newValue);
 	const setStatus = (newValue) => setValue('status', newValue);
 	const setDomain = (newValue) => setValue('domain', newValue);
 	const setTenant = (newValue) => setValue('tenant', newValue);
@@ -40,6 +42,7 @@ const Overview = () => {
 	// Check hidden status for each standard property
 	const isNameHidden = useIsPropertyHidden('root', 'name');
 	const isVersionHidden = useIsPropertyHidden('root', 'version');
+	const isDataProductHidden = useIsPropertyHidden('root', 'dataProduct');
 	const isIdHidden = useIsPropertyHidden('root', 'id');
 	const isStatusHidden = useIsPropertyHidden('root', 'status');
 	const isDomainHidden = useIsPropertyHidden('root', 'domain');
@@ -49,6 +52,7 @@ const Overview = () => {
 	// Get overrides for standard properties
 	const nameOverride = useStandardPropertyOverride('root', 'name');
 	const versionOverride = useStandardPropertyOverride('root', 'version');
+	const dataProductOverride = useStandardPropertyOverride('root', 'dataProduct');
 	const idOverride = useStandardPropertyOverride('root', 'id');
 	const statusOverride = useStandardPropertyOverride('root', 'status');
 	const domainOverride = useStandardPropertyOverride('root', 'domain');
@@ -135,9 +139,9 @@ const Overview = () => {
 
 	// Build context for condition evaluation
 	const rootContext = useMemo(() => ({
-		id, name, version, status, domain, tenant, tags,
+		id, name, version, dataProduct, status, domain, tenant, tags,
 		...customPropertiesLookup,
-	}), [id, name, version, status, domain, tenant, tags, customPropertiesLookup]);
+	}), [id, name, version, dataProduct, status, domain, tenant, tags, customPropertiesLookup]);
 
 	return (
 		<div className="h-full flex flex-col bg-white">
@@ -237,6 +241,20 @@ const Overview = () => {
 										acceptAnyInput={!domainOverride?.enum}
 										required={domainOverride?.required ?? false}
 										tooltip={domainOverride?.description || "Business domain or category of this data contract"}
+										externalErrors={[]}
+									/>
+								)}
+
+								{/* Data Product Field */}
+								{!isDataProductHidden && (
+									<ValidatedInput
+										name="dataProduct"
+										label={dataProductOverride?.title || "Data Product"}
+										value={dataProduct}
+										onChange={(e) => setDataProduct(e.target.value)}
+										required={dataProductOverride?.required ?? false}
+										tooltip={dataProductOverride?.description || "Data product identifier or name"}
+										placeholder={dataProductOverride?.placeholder || "Enter data product"}
 										externalErrors={[]}
 									/>
 								)}
