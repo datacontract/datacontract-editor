@@ -70,9 +70,8 @@ const RolesSection = () => {
 		<section>
 			<div className="px-4 sm:px-0">
 				<h1 className="text-base font-semibold leading-6 text-gray-900" id="roles">Roles</h1>
-				<p className="text-sm text-gray-500">Support and communication channels help consumers find help
-					regarding
-					their use of the data contract</p>
+				<p className="text-sm text-gray-500">Roles that a consumer may need to access the dataset, 
+					depending on the type of access they require</p>
 			</div>
 			<ul role="list"
 				className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
