@@ -4,7 +4,7 @@ export default () => <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.o
   <circle cx="27" cy="8" r="3" fill="#34439E"/>
   <circle cx="27" cy="8" r="3" fill="url(#paint2_linear_87_7777)"/>
   <circle cx="18" cy="6" r="4" fill="url(#paint3_linear_87_7777)"/>
-  <mask id="mask0_87_7777" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="9" y="0" width="16" height="30">
+  <mask id="mask0_87_7777" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="9" y="0" width="16" height="30">
     <path d="M17 10C19.7615 10 22 7.76147 22 5C22 2.23853 19.7615 0 17 0C14.2385 0 12 2.23853 12 5C12 7.76147 14.2385 10 17 10Z" fill="url(#paint4_linear_87_7777)"/>
     <path d="M10.2258 11C9.54883 11 9 11.5488 9 12.2258V22C9 26.4183 12.5817 30 17 30C21.4183 30 25 26.4183 25 22V12.2258C25 11.5488 24.4512 11 23.7742 11H10.2258Z" fill="url(#paint5_linear_87_7777)"/>
   </mask>
