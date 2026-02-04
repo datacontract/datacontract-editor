@@ -22,6 +22,10 @@ export function IconResolver({ url, type, className = "h-4 w-4" }) {
     return keywords.some(keyword => str.includes(keyword));
   };
 
+	const startsWithAny = (str, keywords) => {
+		return keywords.some(keyword => str.startsWith(keyword));
+	};
+
   const getIconType = (url, type) => {
     // If type is explicitly provided, use it for mapping
     if (type) {
@@ -38,7 +42,7 @@ export function IconResolver({ url, type, className = "h-4 w-4" }) {
       if (lowerType.includes('confluent')) return 'confluent';
       if (lowerType.includes('openmetadata')) return 'openmetadata';
       if (lowerType.includes('schemaregistry')) return 'confluent-schema-registry';
-      if (containsAny(lowerType, ['kafka', 'mep'])) return 'kafka';
+      if (startsWithAny(lowerType, ['kafka', 'mep'])) return 'kafka';
       if (lowerType.includes('mssql')) return 'mssql';
       if (lowerType.includes('postgres')) return 'postgres';
       if (lowerType.includes('s3')) return 's3';
