@@ -36,6 +36,10 @@ dataContract:
     standardProperties: []
     customProperties: []
     customSections: []
+
+yamlFormat:
+  removeTrailingWhitespace: true # default: true
+  addFinalNewline: true          # default: true
 ```
 
 ---

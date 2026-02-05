@@ -10,6 +10,25 @@ const defaultOptions = {
   defaultKeyType: 'PLAIN',
 };
 
+let yamlFormatConfig = { removeTrailingWhitespace: true, addFinalNewline: true };
+
+export function setYamlFormatConfig(config) {
+  yamlFormatConfig = { ...yamlFormatConfig, ...config };
+}
+
+export function applyYamlFormat(str) {
+  if (!str) return str;
+  if (yamlFormatConfig.removeTrailingWhitespace !== false) {
+    str = str.replace(/[ \t]+$/gm, '');
+  }
+  if (yamlFormatConfig.addFinalNewline !== false) {
+    if (!str.endsWith('\n')) str += '\n';
+  } else {
+    str = str.replace(/\n+$/, '');
+  }
+  return str;
+}
+
 /**
  * Stringify a JavaScript object to YAML with consistent formatting.
  * @param {any} value - The value to stringify
@@ -17,7 +36,8 @@ const defaultOptions = {
  * @returns {string} The YAML string
  */
 export function stringifyYaml(value, options = {}) {
-  return YAML.stringify(value, { ...defaultOptions, ...options });
+  const raw = YAML.stringify(value, { ...defaultOptions, ...options });
+  return applyYamlFormat(raw);
 }
 
 /**

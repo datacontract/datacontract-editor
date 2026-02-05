@@ -2,7 +2,7 @@ import {create} from 'zustand'
 import {devtools, persist, createJSONStorage} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
-import { stringifyYaml } from './utils/yaml.js';
+import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
@@ -477,4 +477,7 @@ export const setEditorConfig = (config) => {
 			} : currentConfig.ai,
 		},
 	});
+	if (config.customizations?.yamlFormat) {
+		setYamlFormatConfig(config.customizations.yamlFormat);
+	}
 };

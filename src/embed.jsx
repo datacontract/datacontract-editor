@@ -12,6 +12,7 @@ import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
 import * as Yaml from "yaml";
+import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 
 /**
  * Data Contract Editor - Embeddable Component
@@ -128,7 +129,7 @@ function createConfiguredStore(config) {
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
-				set({yamlParts: newYamlParts, yaml: Yaml.stringify(newYamlParts), isDirty: true})
+				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 			},
 			markClean: () => set({ isDirty: false }),
 			clearSaveInfo: () => set({ lastSaveInfo: null }),
@@ -412,6 +413,11 @@ export function init(userConfig = {}) {
         }, tool.handler);
       }
     }
+  }
+
+  // Apply yamlFormat customizations before creating the store
+  if (config.customizations?.yamlFormat) {
+    setYamlFormatConfig(config.customizations.yamlFormat);
   }
 
   // Create the store with configuration
