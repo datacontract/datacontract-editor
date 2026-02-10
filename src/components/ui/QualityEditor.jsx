@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
+import ValidatedCombobox from './ValidatedCombobox.jsx';
 import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 
@@ -393,17 +394,21 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
             <div className="mt-3">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Operator</label>
-                  <select
+                  <ValidatedCombobox
+                    name="operator"
+                    label="Operator"
+                    options={operatorOptions.map(op => ({ id: op.value, name: op.label }))}
                     value={selectedOperator || ''}
-                    onChange={(e) => handleOperatorChange(e.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  >
-                    <option value="">Select operator...</option>
-                    {operatorOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                    onChange={handleOperatorChange}
+                    placeholder="Select operator..."
+                    required={true}
+                    acceptAnyInput={false}
+                    displayValue={(val) => {
+                      if (val && typeof val === 'object') return val.name || '';
+                      const found = operatorOptions.find(o => o.value === val);
+                      return found ? found.label : val || '';
+                    }}
+                  />
                 </div>
 
                 <div>
