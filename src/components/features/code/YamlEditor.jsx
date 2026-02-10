@@ -195,14 +195,40 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
     useEffect(() => {
         const scrollToLine = location.state?.scrollToLine;
         if (scrollToLine && editorRef.current) {
-            // Use Monaco editor API to scroll to and reveal the line
             editorRef.current.revealLineInCenter(scrollToLine);
-            // Also set cursor position to that line
             editorRef.current.setPosition({ lineNumber: scrollToLine, column: 1 });
-            // Focus the editor
             editorRef.current.focus();
         }
     }, [location.state?.scrollToLine]);
+
+    // Scroll to position when requested via store (e.g., from parse error modal)
+    const pendingScrollToPos = useEditorStore((state) => state.pendingScrollToPos);
+    useEffect(() => {
+        if (pendingScrollToPos && editorRef.current && monacoRef.current) {
+            const { line, col } = pendingScrollToPos;
+            const editor = editorRef.current;
+            const monaco = monacoRef.current;
+
+            editor.revealLineInCenter(line);
+            editor.setPosition({ lineNumber: line, column: col || 1 });
+            editor.focus();
+
+            // Highlight the error line for 1 second
+            const decorations = editor.deltaDecorations([], [{
+                range: new monaco.Range(line, 1, line, 1),
+                options: {
+                    isWholeLine: true,
+                    className: 'yaml-error-line-highlight',
+                    overviewRuler: { color: '#ef4444', position: monaco.editor.OverviewRulerLane.Full },
+                },
+            }]);
+            setTimeout(() => {
+                editor.deltaDecorations(decorations, []);
+            }, 1000);
+
+            useEditorStore.setState({ pendingScrollToPos: null });
+        }
+    }, [pendingScrollToPos]);
 
     return (
         <div className="h-full w-full flex flex-col">

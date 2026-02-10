@@ -16,6 +16,7 @@ import { AiFloatingActionButton, AiSidebar } from './ai/index.js';
 function App({ storageBackend = null, editorConfig = null }) {
     const setYaml = useEditorStore((state) => state.setYaml);
     const currentView = useEditorStore((state) => state.currentView);
+    const yamlParseError = useEditorStore((state) => state.yamlParseError);
 
     useEffect(() => {
         // Configure storage backend if provided
@@ -105,7 +106,7 @@ function App({ storageBackend = null, editorConfig = null }) {
                         <div className="flex flex-col flex-1 min-w-0 h-full">
                             <Header/>
                             <main className="flex flex-row w-full bg-white flex-1 overflow-hidden min-w-0">
-                                {currentView === 'form' && (
+                                {currentView === 'form' && !yamlParseError && (
                                     <>
                                         {/* Desktop sidebar - hidden on mobile */}
                                         <div className="hidden md:block">

@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  onConfirm, 
-  onCancel, 
-  confirmText = 'Confirm', 
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  onConfirm,
+  onCancel,
+  confirmText = 'Confirm',
   cancelText = 'Cancel',
   type = 'default' // 'default', 'warning', 'danger'
 }) => {
@@ -19,13 +19,13 @@ const Modal = ({
         onClose();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden';
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
@@ -49,15 +49,15 @@ const Modal = ({
   const modalContent = (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      <div
+        className="fixed inset-0 bg-black/75 transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Modal container */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div 
-          className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
+        <div
+          className="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -68,15 +68,15 @@ const Modal = ({
               </h3>
             </div>
           )}
-          
+
           {/* Content */}
           <div className="px-6 py-4">
             {children}
           </div>
-          
+
           {/* Footer */}
           {(onConfirm || onCancel) && (
-            <div className="bg-gray-50 px-6 py-3 flex flex-row-reverse gap-3">
+            <div className="bg-white px-6 py-3 flex flex-row-reverse gap-3">
               {onConfirm && (
                 <button
                   type="button"
@@ -97,7 +97,7 @@ const Modal = ({
               )}
             </div>
           )}
-          
+
           {/* Close button */}
           <button
             type="button"

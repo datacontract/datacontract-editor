@@ -4,6 +4,7 @@ import { YamlEditor, DataContractPreview, TestResultsPanel } from "../components
 import WarningsPanel from "../components/features/WarningsPanel.jsx";
 import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
 import { useEditorStore } from "../store.js";
+import YamlParseErrorPage from "../components/features/code/YamlParseErrorPage.jsx";
 import { PreviewErrorBoundary, DiagramErrorBoundary, FormPageErrorBoundary, ErrorBoundary } from "../components/error/index.js";
 import ResizeDivider from "../components/ui/ResizeDivider.jsx";
 
@@ -13,6 +14,7 @@ const MainContent = () => {
   const isTestResultsVisible = useEditorStore((state) => state.isTestResultsVisible);
   const currentView = useEditorStore((state) => state.currentView);
   const setView = useEditorStore((state) => state.setView);
+  const yamlParseError = useEditorStore((state) => state.yamlParseError);
 
   // Use schema URL from store if provided (e.g., from embed config), otherwise use default
   const schemaUrl = useEditorStore((state) => state.schemaUrl) ||
@@ -82,11 +84,26 @@ const MainContent = () => {
               />
             </div>
             {currentView === 'diagram' && (
-              <DiagramErrorBoundary>
-                <Diagram />
-              </DiagramErrorBoundary>
+              yamlParseError ? (
+                <YamlParseErrorPage onSwitchToYaml={() => {
+                  setView('yaml');
+                  const pos = useEditorStore.getState().yamlParseErrorPos;
+                  if (pos) useEditorStore.setState({ pendingScrollToPos: pos });
+                }} />
+              ) : (
+                <DiagramErrorBoundary>
+                  <Diagram />
+                </DiagramErrorBoundary>
+              )
             )}
             {currentView === 'form' && (
+              yamlParseError ? (
+                <YamlParseErrorPage onSwitchToYaml={() => {
+                  setView('yaml');
+                  const pos = useEditorStore.getState().yamlParseErrorPos;
+                  if (pos) useEditorStore.setState({ pendingScrollToPos: pos });
+                }} />
+              ) : (
               <Routes>
                 <Route path="/" element={
                   <FormPageErrorBoundary pageName="Overview">
@@ -160,6 +177,7 @@ const MainContent = () => {
                   </FormPageErrorBoundary>
                 } />
               </Routes>
+              )
             )}
           </div>
 

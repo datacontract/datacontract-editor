@@ -115,3 +115,14 @@
 	}
 
 }
+
+.yaml-error-line-highlight {
+	background-color: rgba(239, 68, 68, 0.15);
+	animation: error-highlight-fade 1s ease-out forwards;
+}
+
+@keyframes error-highlight-fade {
+	0% { background-color: rgba(239, 68, 68, 0.25); }
+	70% { background-color: rgba(239, 68, 68, 0.15); }
+	100% { background-color: transparent; }
+}

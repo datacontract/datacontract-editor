@@ -4,6 +4,7 @@ import {useEditorStore, getFileStorageBackend, initialYaml} from "../store.js";
 import {stringifyYaml, parseYaml} from '../utils/yaml.js';
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/react';
 import {FileSelectionModal} from '../components/ui/FileSelectionModal.jsx';
+import Modal from '../components/ui/Modal.jsx';
 import exampleYaml from '../example.yaml?raw';
 
 // Hamburger menu icon component
@@ -32,6 +33,7 @@ const Header = () => {
 	const yaml = useEditorStore((state) => state.yaml);
 	const yamlCursorLine = useEditorStore((state) => state.yamlCursorLine);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
+	const yamlParseError = useEditorStore((state) => state.yamlParseError);
 	const contractName = useEditorStore((state) => state.getValue('name'));
 
 	// Check if we're in server mode
@@ -41,6 +43,7 @@ const Header = () => {
 	// Get editor mode from config
 	const editorMode = editorConfig?.mode || 'SERVER';
 	const isEmbeddedMode = editorMode === 'EMBEDDED';
+	const [showParseErrorModal, setShowParseErrorModal] = useState(false);
 
 	// Calculate problem count
 	const totalCount = markers.length;
@@ -69,13 +72,17 @@ const Header = () => {
 	};
 
 	const handleSave = async () => {
+		if (yamlParseError) {
+			setShowParseErrorModal(true);
+			return;
+		}
 		try {
 			// Parse YAML to check for required fields
 			let parsedYaml;
 			try {
 				parsedYaml = parseYaml(yaml);
 			} catch (parseError) {
-				alert('Cannot save: YAML is invalid. Please fix syntax errors first.');
+				setShowParseErrorModal(true);
 				return;
 			}
 
@@ -167,7 +174,7 @@ const Header = () => {
 
 	// Determine which form to navigate to based on cursor position in YAML
 	const determineFormFromYamlLine = (lineNumber) => {
-		if (!yaml || lineNumber < 1) {
+		if (!yaml || lineNumber < 1 || yamlParseError) {
 			return '/overview';
 		}
 
@@ -723,6 +730,42 @@ const Header = () => {
 					</div>
 				</div>
 			</nav>
+
+
+			<Modal
+				isOpen={showParseErrorModal}
+				onClose={() => setShowParseErrorModal(false)}
+				onConfirm={() => {
+					setShowParseErrorModal(false);
+					setView('yaml');
+					const pos = useEditorStore.getState().yamlParseErrorPos;
+					if (pos) useEditorStore.setState({ pendingScrollToPos: pos });
+				}}
+				confirmText="Go to YAML view"
+				onCancel={() => setShowParseErrorModal(false)}
+				cancelText="Close"
+			>
+				<div className="flex gap-4">
+					<div className="flex-shrink-0">
+						<div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+							<svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+							</svg>
+						</div>
+					</div>
+					<div className="min-w-0">
+						<h3 className="text-base font-semibold text-gray-900">Cannot save</h3>
+						<p className="mt-1 text-sm text-gray-500">
+							The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first.
+						</p>
+						{yamlParseError && (
+							<p className="mt-3 rounded bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 font-mono break-words whitespace-pre-wrap">
+								{yamlParseError}
+							</p>
+						)}
+					</div>
+				</div>
+			</Modal>
 		</>
 	);
 };

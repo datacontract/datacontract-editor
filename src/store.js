@@ -61,21 +61,42 @@ export function setValueWithPath(obj, path, value) {
 	return newObj;
 }
 
+function extractParseErrorMessage(e) {
+	try {
+		if (e?.message) return String(e.message);
+	} catch {
+		// ignore
+	}
+	return 'Unknown YAML parse error';
+}
+
+function extractParseErrorPos(e) {
+	try {
+		const pos = e?.linePos?.[0];
+		if (pos && typeof pos.line === 'number') {
+			return { line: pos.line, col: typeof pos.col === 'number' ? pos.col : 1 };
+		}
+	} catch {
+		// ignore
+	}
+	return null;
+}
+
 export function defaultStoreConfig(set, get) {
 	// Define action functions to ensure stable references
 	const actions = {
 		setYaml: (newYaml) => {
 			try {
 				const yamlParts = Yaml.parse(newYaml);
-				set({yaml: newYaml, isDirty: true, yamlParts});
+				set({yaml: newYaml, isDirty: true, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
 			} catch(e) {
-				// NOOP
+				set({yaml: newYaml, isDirty: true, yamlParseError: extractParseErrorMessage(e), yamlParseErrorPos: extractParseErrorPos(e)});
 			}
 		},
 		loadYaml: (newYaml) => {
 			try {
 				const yamlParts = Yaml.parse(newYaml);
-				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts});
+				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
 			} catch(e) {
 				// NOOP
 			}
@@ -354,6 +375,9 @@ export function defaultStoreConfig(set, get) {
 		isTestRunning: false,
 		testResults: [],
 		markers: [],
+		yamlParseError: null,
+		yamlParseErrorPos: null,
+		pendingScrollToPos: null,
 		currentView: 'form', // 'yaml' or 'form'
 		schemaUrl: null,
 		schemaData: null,
