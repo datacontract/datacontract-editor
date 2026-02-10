@@ -70,6 +70,12 @@ const ServerItem = memo(({ server }) => {
 								<dd className="mt-1 text-sm text-gray-900">{server.account}</dd>
 							</div>
 						)}
+						{server.catalog && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Catalog</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.catalog}</dd>
+							</div>
+						)}
 						{server.database && (
 							<div className="flex flex-col">
 								<dt className="text-sm font-medium text-gray-500">Database</dt>
@@ -122,6 +128,42 @@ const ServerItem = memo(({ server }) => {
 							<div className="flex flex-col">
 								<dt className="text-sm font-medium text-gray-500">Delimiter</dt>
 								<dd className="mt-1 text-sm text-gray-900">{server.delimiter}</dd>
+							</div>
+						)}
+						{server.stagingDir && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Staging Dir</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.stagingDir}</dd>
+							</div>
+						)}
+						{server.stream && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Stream</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.stream}</dd>
+							</div>
+						)}
+						{server.serviceName && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Service Name</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.serviceName}</dd>
+							</div>
+						)}
+						{server.warehouse && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Warehouse</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.warehouse}</dd>
+							</div>
+						)}
+						{server.region && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Region</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.region}</dd>
+							</div>
+						)}
+						{server.regionName && (
+							<div className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">Region Name</dt>
+								<dd className="mt-1 text-sm text-gray-900">{server.regionName}</dd>
 							</div>
 						)}
 						{server.customProperties && (
