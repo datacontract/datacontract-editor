@@ -22,7 +22,7 @@ export function useDefinition() {
             return null;
         }
 
-        return await fetchDefinition(definitionUrl, semantics.definitionAcceptHeader);
+        return await fetchDefinition(definitionUrl, semantics?.definitionAcceptHeader);
     }, []);
 
     /**
