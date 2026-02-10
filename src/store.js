@@ -61,7 +61,7 @@ export function setValueWithPath(obj, path, value) {
 	return newObj;
 }
 
-function extractParseErrorMessage(e) {
+export function extractParseErrorMessage(e) {
 	try {
 		if (e?.message) return String(e.message);
 	} catch {
@@ -70,7 +70,7 @@ function extractParseErrorMessage(e) {
 	return 'Unknown YAML parse error';
 }
 
-function extractParseErrorPos(e) {
+export function extractParseErrorPos(e) {
 	try {
 		const pos = e?.linePos?.[0];
 		if (pos && typeof pos.line === 'number') {

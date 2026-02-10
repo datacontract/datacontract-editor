@@ -759,7 +759,7 @@ const Header = () => {
 							The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first.
 						</p>
 						{yamlParseError && (
-							<p className="mt-3 rounded bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 font-mono break-words whitespace-pre-wrap">
+							<p className="mt-3 rounded bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 font-mono whitespace-pre-wrap">
 								{yamlParseError}
 							</p>
 						)}

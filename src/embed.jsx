@@ -4,7 +4,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
-import {getValueWithPath, setOverrideStore, setValueWithPath,} from './store.js'
+import {getValueWithPath, setOverrideStore, setValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
@@ -117,9 +117,9 @@ function createConfiguredStore(config) {
 			setYaml: (newYaml) => {
 				try {
 					const yamlParts = Yaml.parse(newYaml);
-					set({yaml: newYaml, isDirty: true, yamlParts});
+					set({yaml: newYaml, isDirty: true, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
 				} catch(e) {
-					// NOOP
+					set({yaml: newYaml, isDirty: true, yamlParseError: extractParseErrorMessage(e), yamlParseErrorPos: extractParseErrorPos(e)});
 				}
 			},
 			loadYaml: (newYaml) => {
@@ -327,6 +327,9 @@ function createConfiguredStore(config) {
 			lastAppliedAiChange: null,
 			testResults: [],
 			markers: [],
+			yamlParseError: null,
+			yamlParseErrorPos: null,
+			pendingScrollToPos: null,
 			currentView: config.initialView,
 			schemaUrl: config.schemaUrl,
 			schemaData: null,

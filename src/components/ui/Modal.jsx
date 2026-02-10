@@ -57,7 +57,7 @@ const Modal = ({
       {/* Modal container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
+          className="relative w-full max-w-3xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
