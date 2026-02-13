@@ -6,8 +6,10 @@ import * as YAML from 'yaml';
  * - PLAIN for keys (e.g., name: not "name":)
  */
 const defaultOptions = {
+  lineWidth: 0,
   defaultStringType: 'QUOTE_DOUBLE',
   defaultKeyType: 'PLAIN',
+  doubleQuotedAsJSON: true,
 };
 
 let yamlFormatConfig = { removeTrailingWhitespace: true, addFinalNewline: true };
@@ -36,7 +38,15 @@ export function applyYamlFormat(str) {
  * @returns {string} The YAML string
  */
 export function stringifyYaml(value, options = {}) {
-  const raw = YAML.stringify(value, { ...defaultOptions, ...options });
+  const doc = new YAML.Document(value);
+  YAML.visit(doc, {
+    Scalar(key, node) {
+      if (typeof node.value === "string" && node.value.includes("\n")) {
+        node.type = "BLOCK_LITERAL";
+      }
+    },
+  });
+  const raw = doc.toString( { ...defaultOptions, ...options });
   return applyYamlFormat(raw);
 }
 
