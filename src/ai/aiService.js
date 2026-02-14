@@ -172,7 +172,7 @@ export async function streamChatCompletion({
     model,
     messages,
     stream: true,
-    max_tokens: maxTokens,
+    max_completion_tokens: maxTokens,
     temperature,
   };
 
