@@ -38,6 +38,7 @@ const DiagramViewInner = () => {
   const location = useLocation();
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const lastFocusedIndexRef = useRef(null);
+  const hasAutoLayouted = useRef(false);
 
   // Track selected property for drawer
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -463,12 +464,15 @@ const DiagramViewInner = () => {
       return;
     }
 
+    // Use dagre layout for initial positions, fall back to grid
+    const layoutedSchemas = getLayoutedElements(parsedData.schema);
+
     const schemaNodes = parsedData.schema
       .filter(schema => schema != null)
       .map((schema, index) => ({
         id: `schema-${index}`,
         type: 'schemaNode',
-        position: getGridPosition(index),
+        position: layoutedSchemas[index]?.position || getGridPosition(index),
         data: {
           schema,
           onAddProperty: handleAddProperty,
@@ -578,6 +582,16 @@ const DiagramViewInner = () => {
     setNodes(schemaNodes);
     setEdges(propertyEdges);
   }, [parsedData, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
+
+  // Fit view after initial auto-layout
+  useEffect(() => {
+    if (!hasAutoLayouted.current && reactFlowInstance && nodes.length > 0) {
+      hasAutoLayouted.current = true;
+      setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.3, duration: 300 });
+      }, 50);
+    }
+  }, [reactFlowInstance, nodes.length]);
 
   // Focus on selected schema when coming from sidebar
   useEffect(() => {
