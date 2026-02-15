@@ -61,6 +61,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality
           dimensionOptions={qualityDimensionOptions}
           onUpdate={updateRule}
           onRemove={removeRule}
+          context={context}
         />
       ))}
 
@@ -75,7 +76,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality
   );
 };
 
-const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) => {
+const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState(null);
@@ -142,13 +143,11 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
     if (rule.metric) parts.push(`Metric: ${rule.metric}`);
     if (rule.dimension) parts.push(`Dimension: ${rule.dimension}`);
 
-    // Show operator summary
-    const operators = ['mustBe', 'mustNotBe', 'mustBeGreaterThan', 'mustBeGreaterOrEqualTo',
-                       'mustBeLessThan', 'mustBeLessOrEqualTo', 'mustBeBetween', 'mustNotBeBetween'];
-    const activeOperators = operators.filter(op => rule[op] !== undefined);
-    if (activeOperators.length > 0) {
-      parts.push(`Operators: ${activeOperators.length}`);
-    }
+    // Show operator summary with actual symbol and value
+    const activeOps = operatorOptions.filter(op => rule[op.value] !== undefined);
+    activeOps.forEach(op => {
+      parts.push(`${op.value} ${rule[op.value]}${rule.unit === 'percent' ? '%' : ''}`);
+    });
 
     return parts.length > 0 ? parts.join(' • ') : 'New rule';
   };
@@ -327,7 +326,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove }) 
                 </div>
               )}
 
-              {rule.metric === 'duplicateValues' && (
+              {rule.metric === 'duplicateValues' && context === 'schema' && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Properties (one per line)</label>
                   <textarea
