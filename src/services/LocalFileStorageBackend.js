@@ -1,4 +1,5 @@
 import { FileStorageBackend } from './FileStorageBackend.js';
+import yaml from 'js-yaml';
 
 /**
  * Local file storage backend that uses browser File APIs
@@ -32,6 +33,18 @@ export class LocalFileStorageBackend extends FileStorageBackend {
   async saveYamlFile(yamlContent, suggestedName = 'datacontract.yaml', existingFilename = null) {
     if (!yamlContent.trim()) {
       throw new Error('No content to save');
+    }
+
+    // Parse YAML to extract id and version for filename
+    let filename = suggestedName;
+    try {
+      const dataContract = yaml.load(yamlContent);
+      const id = dataContract.id ? `${dataContract.id}` : "data-contract";
+      const version = dataContract.version ? `version-${dataContract.version}` : "version_00";
+      filename = `${id}-${version}.yaml`;
+    } catch (e) {
+      // If parsing fails, use suggestedName
+      console.warn('Could not parse YAML for filename, using default:', e);
     }
 
     if (this.supportsFileSystemAccess) {
