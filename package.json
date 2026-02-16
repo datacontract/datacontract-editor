@@ -42,7 +42,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
-    "monaco-editor": "0.54.0",
+    "monaco-editor": "0.55.1",
     "monaco-yaml": "^5.4.0",
     "open": "^10.1.0",
     "path-browserify": "^1.0.1",
