@@ -48,9 +48,9 @@ export class LocalFileStorageBackend extends FileStorageBackend {
     }
 
     if (this.supportsFileSystemAccess) {
-      return this._saveWithFileSystemAccess(yamlContent, suggestedName);
+      return this._saveWithFileSystemAccess(yamlContent, filename);
     } else {
-      return this._saveWithDownload(yamlContent, suggestedName);
+      return this._saveWithDownload(yamlContent, filename);
     }
   }
 
