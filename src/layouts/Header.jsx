@@ -6,6 +6,7 @@ import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/react';
 import {FileSelectionModal} from '../components/ui/FileSelectionModal.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import exampleYaml from '../example.yaml?raw';
+import exportYamlToPdf from '../utils/exportYamlToPdf.js';
 
 // Hamburger menu icon component
 const HamburgerIcon = () => (
@@ -115,6 +116,46 @@ const Header = () => {
 			alert(`Failed to save file: ${error.message}`);
 		}
 	};
+
+  const handleSavePdf = async () => {
+    try {
+        // Parse YAML to check for required fields
+        let parsedYaml;
+        try {
+            parsedYaml = parseYaml(yaml);
+        } catch (parseError) {
+            alert('Cannot save: YAML is invalid. Please fix syntax errors first.');
+            return;
+        }
+
+        // Check for all required fundamental fields
+        const requiredFields = [
+            { field: 'name', label: 'Name' },
+            { field: 'version', label: 'Version' },
+            { field: 'status', label: 'Status' },
+            { field: 'id', label: 'ID' }
+        ];
+
+        const missingFields = requiredFields.filter(({ field }) =>
+            !parsedYaml[field] || parsedYaml[field].trim() === ''
+        );
+
+        if (missingFields.length > 0) {
+            const missingFieldsList = missingFields.map(({ label }) => label).join(', ');
+            alert(`Cannot save: Missing required fields: ${missingFieldsList}\n\nPlease fill in all required fields in the Overview section.`);
+            return;
+        }
+
+        // Export Yaml as PDF
+        await exportYamlToPdf();
+    } catch (error) {
+        if (error.name === 'AbortError' || error.message === 'File selection cancelled') {
+            return;
+        }
+        console.error('Error saving PDF:', error);
+        alert(`Failed to save PDF: ${error.message}`);
+    }
+ };
 
 	const handleCancel = () => {
 		if (editorConfig?.onCancel) {
@@ -717,7 +758,18 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
 															</svg>
-															Save
+															Save YAML
+                            </button>
+                          </MenuItem>
+                          <MenuItem>
+                            <button
+                              onClick={handleSavePdf}
+                              className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+                            >
+                              <svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                              </svg>
+                              Save PDF                            
 														</button>
 													</MenuItem>
 												</div>
