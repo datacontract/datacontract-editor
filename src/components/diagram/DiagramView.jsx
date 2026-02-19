@@ -22,6 +22,37 @@ const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: '#b1b1b7' },
 };
 
+const getStorageKey = (contractId) => `diagram-positions-${contractId}`;
+
+const getDiagramPositions = (contractId) => {
+  if (!contractId) return null;
+  try {
+    const raw = localStorage.getItem(getStorageKey(contractId));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveDiagramPositions = (contractId, nodes) => {
+  if (!contractId) return;
+  const posMap = {};
+  nodes.forEach(n => {
+    const name = n.data?.schema?.name;
+    if (name) posMap[name] = { x: n.position.x, y: n.position.y };
+  });
+  try {
+    localStorage.setItem(getStorageKey(contractId), JSON.stringify(posMap));
+  } catch { /* ignore quota errors */ }
+};
+
+const clearDiagramPositions = (contractId) => {
+  if (!contractId) return;
+  try {
+    localStorage.removeItem(getStorageKey(contractId));
+  } catch { /* ignore */ }
+};
+
 const DiagramViewInner = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
@@ -39,6 +70,8 @@ const DiagramViewInner = () => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const lastFocusedIndexRef = useRef(null);
   const hasAutoLayouted = useRef(false);
+  const hasInitialLayout = useRef(false);
+  const saveTimerRef = useRef(null);
 
   // Track selected property for drawer
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -72,6 +105,8 @@ const DiagramViewInner = () => {
     }
   }, [yaml]);
 
+  const contractId = parsedData?.id || parsedData?.name || null;
+
   // Update YAML with modified schemas
   const updateSchemas = useCallback((updatedSchemas) => {
     if (!parsedData) return;
@@ -81,10 +116,17 @@ const DiagramViewInner = () => {
     setYaml(newYaml);
   }, [parsedData, setYaml]);
 
-  // Handle node changes (but don't save positions to YAML)
+  // Handle node changes — debounce-save positions to localStorage
   const handleNodesChange = useCallback((changes) => {
     onNodesChange(changes);
-  }, [onNodesChange]);
+    const hasPositionChange = changes.some(c => c.type === 'position' && c.position);
+    if (hasPositionChange && contractId) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        setNodes(cur => { saveDiagramPositions(contractId, cur); return cur; });
+      }, 500);
+    }
+  }, [onNodesChange, contractId, setNodes]);
 
   // Handle adding a new property to a schema
   const handleAddProperty = useCallback((nodeId, newProperty) => {
@@ -435,17 +477,18 @@ const DiagramViewInner = () => {
   const handleAutoLayout = useCallback(() => {
     if (!parsedData?.schema || !nodes.length) return;
 
+    clearDiagramPositions(contractId);
     const layoutedSchemas = getLayoutedElements(parsedData.schema);
 
-    // Update node positions in ReactFlow state only, don't save to YAML
-    setNodes(currentNodes =>
-      currentNodes.map((node, index) => ({
+    setNodes(currentNodes => {
+      const updated = currentNodes.map((node, index) => ({
         ...node,
         position: layoutedSchemas[index]?.position || node.position
-      }))
-    );
+      }));
+      saveDiagramPositions(contractId, updated);
+      return updated;
+    });
 
-    // Automatically fit view after layout with a small delay
     if (reactFlowInstance) {
       setTimeout(() => {
         reactFlowInstance.fitView({
@@ -454,25 +497,35 @@ const DiagramViewInner = () => {
         });
       }, 50);
     }
-  }, [parsedData, nodes, setNodes, reactFlowInstance]);
+  }, [parsedData, contractId, nodes, setNodes, reactFlowInstance]);
 
   // Convert schemas to nodes and edges
   useEffect(() => {
     if (!parsedData?.schema || !Array.isArray(parsedData.schema)) {
       setNodes([]);
       setEdges([]);
+      hasInitialLayout.current = false;
       return;
     }
 
-    // Use dagre layout for initial positions, fall back to grid
-    const layoutedSchemas = getLayoutedElements(parsedData.schema);
+    // On first load, try localStorage positions, then fall back to Dagre
+    const savedPositions = !hasInitialLayout.current
+      ? getDiagramPositions(contractId)
+      : null;
+    const layoutedSchemas = !hasInitialLayout.current && !savedPositions
+      ? getLayoutedElements(parsedData.schema)
+      : null;
 
     const schemaNodes = parsedData.schema
       .filter(schema => schema != null)
-      .map((schema, index) => ({
+      .map((schema, index) => {
+        // Priority: saved > dagre > grid fallback
+        const savedPos = savedPositions?.[schema?.name];
+        const dagrePos = layoutedSchemas?.[index]?.position;
+        return {
         id: `schema-${index}`,
         type: 'schemaNode',
-        position: layoutedSchemas[index]?.position || getGridPosition(index),
+        position: savedPos || dagrePos || getGridPosition(index),
         data: {
           schema,
           onAddProperty: handleAddProperty,
@@ -487,7 +540,8 @@ const DiagramViewInner = () => {
             nestedIndex: selectedProperty.nestedIndex
           } : null,
         },
-      }));
+      };
+      });
 
     // Build edges from property relationships
     const propertyEdges = [];
@@ -579,9 +633,47 @@ const DiagramViewInner = () => {
         });
       });
 
-    setNodes(schemaNodes);
+    // Preserve existing node positions — only new nodes get layout-computed positions
+    setNodes(currentNodes => {
+      // Build position map from current nodes keyed by schema name
+      const posMap = {};
+      currentNodes.forEach(n => {
+        if (n.data?.schema?.name) {
+          posMap[n.data.schema.name] = n.position;
+        }
+      });
+
+      // Initial load: no existing nodes, use saved/dagre positions directly
+      if (currentNodes.length === 0) {
+        hasInitialLayout.current = true;
+        saveDiagramPositions(contractId, schemaNodes);
+        return schemaNodes;
+      }
+
+      const result = schemaNodes.map(sn => {
+        const name = sn.data?.schema?.name;
+        if (name && posMap[name]) {
+          return { ...sn, position: posMap[name] };
+        }
+        // New node: place to the right of existing nodes, vertically centered
+        let maxRight = -Infinity;
+        let minY = Infinity;
+        let maxBottom = -Infinity;
+        currentNodes.forEach(n => {
+          const right = n.position.x + (n.measured?.width || 300);
+          if (right > maxRight) maxRight = right;
+          if (n.position.y < minY) minY = n.position.y;
+          const bottom = n.position.y + (n.measured?.height || 200);
+          if (bottom > maxBottom) maxBottom = bottom;
+        });
+        const centerY = (minY + maxBottom) / 2;
+        return { ...sn, position: { x: maxRight + 80, y: centerY } };
+      });
+      saveDiagramPositions(contractId, result);
+      return result;
+    });
     setEdges(propertyEdges);
-  }, [parsedData, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
+  }, [parsedData, contractId, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, updateSchemas, setNodes, setEdges]);
 
   // Fit view after initial auto-layout
   useEffect(() => {
@@ -633,11 +725,11 @@ const DiagramViewInner = () => {
     }
   }, [location.state?.focusSchemaIndex, reactFlowInstance, nodes, setNodes, setSelectedDiagramSchemaIndex]);
 
-  // Clear selected schema when leaving diagram view
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // Cleanup: clear selected schema when component unmounts (leaving diagram view)
       setSelectedDiagramSchemaIndex(null);
+      clearTimeout(saveTimerRef.current);
     };
   }, [setSelectedDiagramSchemaIndex]);
 
