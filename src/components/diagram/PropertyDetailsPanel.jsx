@@ -19,12 +19,15 @@ import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
 import {isExternalUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
 import {useDefinition} from '../../hooks/useDefinition.js';
+import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
+import {useActiveServerType} from '../../hooks/useActiveServerType.js';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const yamlParts = useEditorStore((state) => state.yamlParts);
   const editorConfig = useEditorStore((state) => state.editorConfig);
   const { getDefinition } = useDefinition();
+  const serverType = useActiveServerType();
 
   // Modal state
   const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
@@ -294,16 +297,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
               {/* Physical Type */}
               {!isPhysicalTypeHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Physical Type</label>
-                  <input
-                    type="text"
-                    value={property.physicalType || ''}
-                    onChange={(e) => updateField('physicalType', e.target.value)}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.physicalType || "e.g., VARCHAR(255)"}
-                  />
-                </div>
+                <PhysicalTypeCombobox
+                  value={property.physicalType}
+                  onChange={(value) => updateField('physicalType', value || undefined)}
+                  serverType={serverType}
+                  logicalType={property.logicalType}
+                  label="Physical Type"
+                  placeholder={definitionData?.physicalType || "e.g., VARCHAR(255)"}
+                />
               )}
 
               {/* Description */}
