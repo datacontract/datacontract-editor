@@ -1,21 +1,13 @@
-import {useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import {Combobox, ComboboxInput, ComboboxOption, ComboboxOptions} from '@headlessui/react';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
-
-const FIXED_OPTIONS = [
-  'pii', 'gdpr', 'finance', 'analytics', 'internal', 'public',
-  'deprecated', 'experimental', 'critical', 'sensitive',
-];
-const MANAGED_DEMO = new Map(FIXED_OPTIONS.map((tag) => [tag.toLowerCase(), {
-  tag: tag
-}]));
 
 const TagsInput = ({
                      label = "Tags",
                      value = [],
                      onChange,
-                     managedTagsMap = MANAGED_DEMO,
+                     managedTags = [],
                      allowUnmanagedTags = true,
                      placeholder = "Add a tag...",
                      tooltip,
@@ -24,22 +16,25 @@ const TagsInput = ({
   const [newTag, setNewTag] = useState('');
   const inputRef = useRef(null);
 
+  const managedTagsMap = useMemo(() => {
+    return new Map(managedTags.map(managedTag => [managedTag.tag.toLowerCase(), managedTag]));
+  }, [managedTags]);
+
   // Filter out already-added tags and match query
-  const suggestedTags = Array.from(managedTagsMap.entries()).filter(
+  const suggestedTags = useMemo(() => Array.from(managedTagsMap.entries()).filter(
     ([key, managedTag]) =>
       !value.includes(managedTag.tag) &&
-      (newTag === '' || key.includes(newTag.toLowerCase()))
-  ).map(([, managedTag]) => managedTag.tag);
+      (newTag === '' || key.includes(newTag.trim().toLowerCase()))
+  ).map(([, managedTag]) => managedTag.tag), [managedTagsMap, value, newTag]);
 
-  const newTagAlreadyExists = value.some((existingTag) => existingTag.toLowerCase() === newTag.trim().toLowerCase())
-  const newTagCannotBeAdded = newTagAlreadyExists || suggestedTags.length === 0 && !allowUnmanagedTags;
+  const doesTagExist = (tag) => value.some((existingTag) => existingTag.toLowerCase() === tag.trim().toLowerCase());
+  const canTagBeAdded = (tag) => !doesTagExist(tag) && (allowUnmanagedTags || suggestedTags.length > 0);
 
   const handleAdd = (tag) => {
-    const trimmedTag = tag.trim();
-    if (!trimmedTag || value.includes(trimmedTag)) return;
-    if (!allowUnmanagedTags && !managedTagsMap.has(trimmedTag.toLowerCase())) return;
+    if (!tag) return;
+    if (!canTagBeAdded(tag)) return;
 
-    const updatedTags = [...value, trimmedTag];
+    const updatedTags = [...value, tag.trim()];
     onChange(updatedTags);
     setNewTag('');
   };
@@ -160,10 +155,10 @@ const TagsInput = ({
                   ))
                 ) : (
                   newTag ? (
-                    newTagAlreadyExists ? (
+                    doesTagExist(newTag) ? (
                       <div className="px-3 py-2 text-gray-400">Tag '{newTag.trim()}' already exists</div>
                     ) : (
-                      !newTagCannotBeAdded ? (
+                      canTagBeAdded(newTag) ? (
                         <ComboboxOption
                           key={newTag.trim()}
                           value={newTag.trim()}
@@ -180,7 +175,7 @@ const TagsInput = ({
           <button
             type="button"
             onClick={() => handleAdd(newTag)}
-            disabled={newTagCannotBeAdded}
+            disabled={!canTagBeAdded(newTag)}
             className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 transition-colors"
           >
             Add

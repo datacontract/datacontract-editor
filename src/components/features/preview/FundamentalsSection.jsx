@@ -16,6 +16,8 @@ const FundamentalsSection = () => {
 	const contractCreatedTs = useEditorStore(useShallow(state => state.getValue('contractCreatedTs')));
 	const tags = useEditorStore(useShallow(state => state.getValue('tags')));
 
+  const editorConfig = useEditorStore((state) => state.editorConfig)
+
 	// Check if section has any data
 	const hasCustomProperties = customProperties && (
 		Array.isArray(customProperties) ? customProperties.length > 0 :
@@ -122,7 +124,7 @@ const FundamentalsSection = () => {
 							<div className="sm:col-span-2">
 								<dt className="text-sm font-medium text-gray-500">Tags</dt>
 								<dd className="mt-1 text-sm text-gray-900">
-                  <Tags tags={tags}/>
+                  <Tags tags={tags} managedTags={editorConfig.managedTags} />
 								</dd>
 							</div>
 						)}

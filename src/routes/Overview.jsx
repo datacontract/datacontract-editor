@@ -142,10 +142,6 @@ const Overview = () => {
 		...customPropertiesLookup,
 	}), [id, name, version, status, domain, tenant, tags, customPropertiesLookup]);
 
-  const managedTagsMap = useMemo(() => {
-    return new Map(editorConfig.managedTags.map(managedTag => [managedTag.tag.toLowerCase(), managedTag]));
-  }, [editorConfig.managedTags]);
-
 	return (
 		<div className="h-full flex flex-col bg-white">
 			<div className="flex-1 overflow-y-auto p-4">
@@ -257,7 +253,7 @@ const Overview = () => {
 											onChange={(value) => setTags('tags', value)}
 											tooltip={tagsOverride?.description || "Categorize your data contract with tags"}
 											placeholder={tagsOverride?.placeholder || "Add a tag..."}
-                      managedTagsMap={managedTagsMap}
+                      managedTags={editorConfig.managedTags}
                       allowUnmanagedTags={editorConfig.allowUnmanagedTags}
 										/>
 									</div>
