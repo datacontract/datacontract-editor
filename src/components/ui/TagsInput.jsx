@@ -21,11 +21,12 @@ const TagsInput = ({
   }, [managedTags]);
 
   // Filter out already-added tags and match query
-  const suggestedTags = useMemo(() => Array.from(managedTagsMap.entries()).filter(
-    ([key, managedTag]) =>
+  const suggestedTags = useMemo(() => Array.from(managedTagsMap.entries())
+    .filter(([key, managedTag]) =>
       !value.includes(managedTag.tag) &&
-      (newTag === '' || key.includes(newTag.trim().toLowerCase()))
-  ).map(([, managedTag]) => managedTag.tag), [managedTagsMap, value, newTag]);
+      (newTag === '' || key.includes(newTag.trim().toLowerCase())))
+    .map(([, managedTag]) => managedTag.tag), [managedTagsMap, value, newTag])
+    .slice(0, 100);
 
   const doesTagExist = (tag) => value.some((existingTag) => existingTag.toLowerCase() === tag.trim().toLowerCase());
   const canTagBeAdded = (tag) => !doesTagExist(tag) && (allowUnmanagedTags || suggestedTags.length > 0);
