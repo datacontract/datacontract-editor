@@ -1,14 +1,17 @@
-import { useMemo, useCallback } from 'react';
-import { useEditorStore } from '../store.js';
-import { ValidatedCombobox } from '../components/ui/index.js';
+import {useCallback, useMemo} from 'react';
+import {useEditorStore} from '../store.js';
+import {ValidatedCombobox} from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
-import Tooltip from '../components/ui/Tooltip.jsx';
 import TagsInput from '../components/ui/TagsInput.jsx';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import { useShallow } from "zustand/react/shallow";
-import { useCustomization, useStandardPropertyOverride, useIsPropertyHidden, convertEnumToOptions } from '../hooks/useCustomization.js';
-import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import {useShallow} from "zustand/react/shallow";
+import {
+  convertEnumToOptions,
+  useCustomization,
+  useIsPropertyHidden,
+  useStandardPropertyOverride
+} from '../hooks/useCustomization.js';
+import {CustomSections, UngroupedCustomProperties} from '../components/ui/CustomSection.jsx';
 
 const Overview = () => {
 	const id = useEditorStore(useShallow((state) => state.getValue('id')));
@@ -139,6 +142,10 @@ const Overview = () => {
 		...customPropertiesLookup,
 	}), [id, name, version, status, domain, tenant, tags, customPropertiesLookup]);
 
+  const managedTagsMap = useMemo(() => {
+    return new Map(editorConfig.managedTags.map(managedTag => [managedTag.tag.toLowerCase(), managedTag]));
+  }, [editorConfig.managedTags]);
+
 	return (
 		<div className="h-full flex flex-col bg-white">
 			<div className="flex-1 overflow-y-auto p-4">
@@ -250,6 +257,8 @@ const Overview = () => {
 											onChange={(value) => setTags('tags', value)}
 											tooltip={tagsOverride?.description || "Categorize your data contract with tags"}
 											placeholder={tagsOverride?.placeholder || "Add a tag..."}
+                      managedTagsMap={managedTagsMap}
+                      allowUnmanagedTags={editorConfig.allowUnmanagedTags}
 										/>
 									</div>
 								)}

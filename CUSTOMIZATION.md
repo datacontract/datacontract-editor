@@ -44,7 +44,7 @@ yamlFormat:
 
 ---
 
-## 1. Levels
+## Levels
 
 Each level corresponds to a location in the ODCS data contract where customizations can be applied.
 
@@ -62,7 +62,7 @@ Each level corresponds to a location in the ODCS data contract where customizati
 
 ---
 
-## 2. Standard Properties
+## 1. Standard Properties
 
 Modify the behavior of existing ODCS standard properties, or hide them entirely.
 
@@ -118,7 +118,7 @@ dataContract:
 
 ---
 
-## 3. Custom Properties
+## 2. Custom Properties
 
 Define custom properties to capture additional metadata.
 
@@ -202,7 +202,7 @@ Examples:
 
 ---
 
-## 4. Custom Sections
+## 3. Custom Sections
 
 Group custom properties into collapsible UI sections in the editor.
 
@@ -221,7 +221,7 @@ dataContract:
 ```
 
 
-## 5. Complete Example
+## Complete Example
 
 ```yaml
 # customization.yaml
@@ -443,7 +443,7 @@ dataContract:
 
 
 
-## 6. Loading Customizations
+## Loading Customizations
 
 ### Programmatic (Recommended)
 
