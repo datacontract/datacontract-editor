@@ -1,9 +1,9 @@
 import {Fragment, memo} from 'react';
-import Tag from '../../ui/Tag.jsx';
+import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
-import { getQualityCheckIcon } from '../../ui/icons/QualityCheckIcons.jsx';
+import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import {useEditorStore} from "../../../store.js";
@@ -141,11 +141,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 							</Tooltip>
 						)}
 						<CustomPropertiesPreview properties={property.customProperties} pillClassName="mr-1 mt-1"/>
-						{property.tags && Array.isArray(property.tags) && property.tags.map((tag, idx) => (
-							<Tag key={idx} className="mr-1 mt-1">
-								{tag}
-							</Tag>
-						))}
+            {property.tags && Array.isArray(property.tags) && <Tags tags={property.tags}/>}
 						{property.logicalTypeOptions?.format && (
 							<Tooltip content={
 								<div className="space-y-1">
@@ -277,15 +273,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 								<div className="text-sm font-normal text-gray-400">No description</div>
 							)}
 							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1"/>
-							{schema && schema.tags && schema.tags.length > 0 && (
-								<div className="mt-1">
-									{schema.tags.map((tag, idx) => (
-										<Tag key={idx} className="mr-1 mt-1">
-											{tag}
-										</Tag>
-									))}
-								</div>
-							)}
+              {schema && schema.tags && schema.tags.length > 0 && <Tags tags={schema.tags}/>}
 							{schema && schema.quality && schema.quality.length > 0 && (
 								<div className="mt-2">
 									{schema.quality.map((qualityCheck, idx) => {

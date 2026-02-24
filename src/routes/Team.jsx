@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useEffect } from 'react';
 import { useEditorStore } from '../store.js';
-import Tags from '../components/ui/Tags.jsx';
+import TagsInput from '../components/ui/TagsInput.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
@@ -214,7 +214,7 @@ const Team = () => {
               )}
 
               {/* Team Tags */}
-              <Tags
+              <TagsInput
                 label="Tags"
                 value={team?.tags}
                 onChange={(value) => updateTeamField('tags', value)}

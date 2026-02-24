@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import ValidatedInput from './ValidatedInput';
 import { ValidatedCombobox } from './index';
-import Tags from './Tags';
+import TagsInput from './TagsInput.jsx';
 import Tooltip from './Tooltip';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
@@ -410,7 +410,7 @@ const ArrayField = ({ config, value, onChange, errors }) => {
 
 	return (
 		<div>
-			<Tags
+			<TagsInput
 				label={title}
 				value={value || []}
 				onChange={(val) => onChange(val && val.length > 0 ? val : undefined)}

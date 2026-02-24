@@ -4,7 +4,7 @@ import { ValidatedCombobox } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import Tooltip from '../components/ui/Tooltip.jsx';
-import Tags from '../components/ui/Tags.jsx';
+import TagsInput from '../components/ui/TagsInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import { useShallow } from "zustand/react/shallow";
 import { useCustomization, useStandardPropertyOverride, useIsPropertyHidden, convertEnumToOptions } from '../hooks/useCustomization.js';
@@ -244,7 +244,7 @@ const Overview = () => {
 								{/* Tags Field */}
 								{!isTagsHidden && (
 									<div className="sm:col-span-2">
-										<Tags
+										<TagsInput
 											label={tagsOverride?.title || "Tags"}
 											value={tags}
 											onChange={(value) => setTags('tags', value)}

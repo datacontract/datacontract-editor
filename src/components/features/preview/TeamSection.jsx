@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import Tag from '../../ui/Tag.jsx';
+import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import PropertyValueRenderer from '../../ui/PropertyValueRenderer.jsx';
 import { IconResolver } from '../../ui/IconResolver.jsx';
@@ -60,15 +60,7 @@ const TeamMember = memo(({ teamMember }) => {
 					<span>Replaced by: {teamMember.replacedByUsername}</span>
 				)}
 			</div>
-			{teamMember.tags && Array.isArray(teamMember.tags) && teamMember.tags.length > 0 && (
-				<div className="flex gap-1 flex-wrap mt-1">
-					{teamMember.tags.map((tag, idx) => (
-						<Tag key={idx} className="px-1.5 py-0.5">
-							{tag}
-						</Tag>
-					))}
-				</div>
-			)}
+			{teamMember.tags && Array.isArray(teamMember.tags) && teamMember.tags.length > 0 && <Tags tags={teamMember.tags}/> }
 			{(() => {
 				const hasAuthDefs = teamMember.authoritativeDefinitions && teamMember.authoritativeDefinitions.length > 0;
 				const hasCustomProps = teamMember.customProperties && (
@@ -158,13 +150,7 @@ const TeamSection = () => {
 						{team.tags && Array.isArray(team.tags) && team.tags.length > 0 && (
 							<div>
 								<dt className="text-sm font-medium text-gray-500 mb-2">Tags</dt>
-								<dd className="flex gap-1 items-center text-xs text-gray-500 flex-wrap">
-									{team.tags.map((tag, index) => (
-										<Tag key={index}>
-											{tag}
-										</Tag>
-									))}
-								</dd>
+								<dd><Tags tags={team.tags}/></dd>
 							</div>
 						)}
 

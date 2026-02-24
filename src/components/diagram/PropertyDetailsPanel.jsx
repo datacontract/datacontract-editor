@@ -8,7 +8,7 @@ import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
-import Tags from '../ui/Tags.jsx';
+import TagsInput from '../ui/TagsInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
 import {SparkleButton} from '../../ai/index.js';
@@ -989,7 +989,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
               {/* Tags */}
               <div>
-                <Tags
+                <TagsInput
                   label="Tags"
                   value={property.tags || []}
                   onChange={(value) => updateField('tags', value)}

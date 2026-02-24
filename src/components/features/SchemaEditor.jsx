@@ -2,7 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useEditorStore} from '../../store.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
-import Tags from '../ui/Tags.jsx';
+import TagsInput from '../ui/TagsInput.jsx';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipEditor from '../ui/RelationshipEditor.jsx';
@@ -611,7 +611,7 @@ const SchemaEditor = ({schemaIndex}) => {
 													{/* Tags Field */}
 													{!isTagsHidden && (
 														<div className="mt-4">
-															<Tags
+															<TagsInput
 																label="Tags"
 																value={schema[schemaIndex].tags || []}
 																onChange={(value) => setValue(`schema[${schemaIndex}].tags`, value)}
