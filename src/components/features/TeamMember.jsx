@@ -101,6 +101,8 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
               placeholder="user@example.com"
               required={true}
               className="bg-white"
+              validationKey={`team.members.${index}.username`}
+              validationSection="Team Members"
               data-1p-ignore
             />
           )}
@@ -232,6 +234,8 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           onPropertyChange={updateCustomProperty}
           context={memberContext}
           yamlParts={yamlParts}
+          validationKeyPrefix={`team.members.${index}`}
+          validationSection="Team Members"
         />
 
         {/* Ungrouped Custom Properties */}
@@ -242,6 +246,8 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           onPropertyChange={updateCustomProperty}
           context={memberContext}
           yamlParts={yamlParts}
+          validationKeyPrefix={`team.members.${index}`}
+          validationSection="Team Members"
         />
 
         {/* Custom Properties (raw key-value editor) */}

@@ -180,6 +180,8 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                           placeholder="arn:aws:iam::123456789:role/DataReader"
                           className="bg-white"
                           externalErrors={[]}
+                          validationKey={`roles.${index}.role`}
+                          validationSection="Roles"
                         />
                       </div>
                     )}
@@ -283,6 +285,8 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     onPropertyChange={updateCustomProperty}
                     context={roleContext}
                     yamlParts={yamlParts}
+                    validationKeyPrefix={`roles.${index}`}
+                    validationSection="Roles"
                   />
                 </div>
 
@@ -295,6 +299,8 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     onPropertyChange={updateCustomProperty}
                     context={roleContext}
                     yamlParts={yamlParts}
+                    validationKeyPrefix={`roles.${index}`}
+                    validationSection="Roles"
                   />
                 </div>
 

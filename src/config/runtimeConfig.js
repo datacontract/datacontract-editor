@@ -65,5 +65,8 @@ export function buildEditorConfig(runtimeConfig) {
   // If runtimeConfig.ai is undefined, don't set config.ai
   // This lets store.js defaults be used for editor.datacontract.com
 
+  // Customizations - pass through directly, or explicitly clear persisted value
+  config.customizations = runtimeConfig.customizations || null;
+
   return config;
 }

@@ -20,8 +20,10 @@ const CustomSection = ({
 	onPropertyChange,
 	context = {},
 	yamlParts = {},
+	validationKeyPrefix,
+	validationSection,
 }) => {
-	const { title, customProperties: propertyNames = [], expanded = false } = sectionConfig;
+	const { title, description, customProperties: propertyNames = [], expanded = false } = sectionConfig;
 
 	// Get property configs for properties in this section
 	const sectionProperties = useMemo(() => {
@@ -35,6 +37,11 @@ const CustomSection = ({
 		return null;
 	}
 
+	// Auto-expand if any property in the section is required
+	const hasRequiredField = useMemo(() => {
+		return sectionProperties.some((p) => p.required);
+	}, [sectionProperties]);
+
 	// Build context including current custom property values
 	const extendedContext = useMemo(() => ({
 		...context,
@@ -43,7 +50,7 @@ const CustomSection = ({
 	}), [context, values]);
 
 	return (
-		<Disclosure defaultOpen={expanded}>
+		<Disclosure defaultOpen={expanded || hasRequiredField}>
 			{({ open }) => (
 				<>
 					<DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
@@ -52,7 +59,10 @@ const CustomSection = ({
 							className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
 						/>
 					</DisclosureButton>
-					<DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-3">
+					<DisclosurePanel className="px-2 pb-1 text-xs text-gray-500 space-y-3">
+						{description && (
+							<p className="mt-1 text-xs leading-4 text-gray-500">{description}</p>
+						)}
 						{sectionProperties.map((propConfig) => (
 							<CustomPropertyField
 								key={propConfig.property}
@@ -61,6 +71,8 @@ const CustomSection = ({
 								onChange={(val) => onPropertyChange(propConfig.property, val)}
 								context={extendedContext}
 								yamlParts={yamlParts}
+								validationKey={validationKeyPrefix ? `${validationKeyPrefix}.custom.${propConfig.property}` : undefined}
+								validationSection={validationSection}
 							/>
 						))}
 					</DisclosurePanel>
@@ -88,6 +100,8 @@ export const CustomSections = ({
 	onPropertyChange,
 	context = {},
 	yamlParts = {},
+	validationKeyPrefix,
+	validationSection,
 }) => {
 	if (!customSections || customSections.length === 0) {
 		return null;
@@ -104,6 +118,8 @@ export const CustomSections = ({
 					onPropertyChange={onPropertyChange}
 					context={context}
 					yamlParts={yamlParts}
+					validationKeyPrefix={validationKeyPrefix}
+					validationSection={validationSection}
 				/>
 			))}
 		</>
@@ -127,6 +143,8 @@ export const UngroupedCustomProperties = ({
 	onPropertyChange,
 	context = {},
 	yamlParts = {},
+	validationKeyPrefix,
+	validationSection,
 }) => {
 	// Get property names that are in sections
 	const groupedNames = useMemo(() => {
@@ -163,6 +181,8 @@ export const UngroupedCustomProperties = ({
 					onChange={(val) => onPropertyChange(propConfig.property, val)}
 					context={extendedContext}
 					yamlParts={yamlParts}
+					validationKey={validationKeyPrefix ? `${validationKeyPrefix}.custom.${propConfig.property}` : undefined}
+					validationSection={validationSection}
 				/>
 			))}
 		</div>

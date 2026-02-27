@@ -26,3 +26,6 @@ dist-ssr
 # local templates
 /templates
 /.playwright-mcp
+
+# dev-only runtime config (served as /config.json in dev server only)
+dev-config.json

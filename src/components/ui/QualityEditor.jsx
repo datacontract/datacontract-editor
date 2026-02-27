@@ -407,6 +407,8 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                       const found = operatorOptions.find(o => o.value === val);
                       return found ? found.label : val || '';
                     }}
+                    validationKey={`quality.${index}.operator`}
+                    validationSection="Quality"
                   />
                 </div>
 

@@ -88,6 +88,7 @@ const TextField = ({ config, value, onChange, errors }) => {
 			tooltip={description}
 			placeholder={placeholder}
 			externalErrors={errors}
+			skipInternalValidation
 		/>
 	);
 };
@@ -208,6 +209,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
 			required={required}
 			tooltip={description}
 			externalErrors={errors}
+			skipInternalValidation
 		/>
 	);
 };
@@ -376,6 +378,7 @@ const UrlField = ({ config, value, onChange, errors }) => {
 			tooltip={description}
 			placeholder={placeholder || 'https://example.com'}
 			externalErrors={errors}
+			skipInternalValidation
 		/>
 	);
 };
@@ -397,6 +400,7 @@ const EmailField = ({ config, value, onChange, errors }) => {
 			tooltip={description}
 			placeholder={placeholder || 'user@example.com'}
 			externalErrors={errors}
+			skipInternalValidation
 		/>
 	);
 };
@@ -434,7 +438,7 @@ const ArrayField = ({ config, value, onChange, errors }) => {
  * @param {Object} context - Current data context for condition evaluation
  * @param {Object} yamlParts - Full YAML data for condition evaluation
  */
-const CustomPropertyField = ({ config, value, onChange, context = {}, yamlParts = {} }) => {
+const CustomPropertyField = ({ config, value, onChange, context = {}, yamlParts = {}, validationKey, validationSection }) => {
 	const { type = 'text', condition } = config;
 
 	// Evaluate condition - hide field if condition not met

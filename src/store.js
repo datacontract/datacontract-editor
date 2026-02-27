@@ -320,16 +320,7 @@ export function defaultStoreConfig(set, get) {
 			const {yaml, lastSaveInfo} = get();
 			const dataContract = Yaml.parse(yaml);
 
-			// Validate required fundamental fields
-			const requiredFields = ['name', 'version', 'status', 'id'];
-			const missingFields = requiredFields.filter(field => !dataContract[field] || dataContract[field].trim() === '');
-
-			if (missingFields.length > 0) {
-				const missingFieldsList = missingFields.join(', ');
-				throw new Error(`Cannot save: Missing required fields: ${missingFieldsList}`);
-			}
-
-			const dataContractName = dataContract.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+			const dataContractName = (dataContract.name || 'untitled').replace(/[^a-zA-Z0-9_-]/g, '_');
 			const suggestedFilename = `${suggestedName || dataContractName}.yaml`;
 
 			// If we have a previous save, pass the filename to update the existing file

@@ -65,11 +65,12 @@ const SchemasEditor = () => {
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="relative">
             <h3 className="text-base font-semibold leading-6 text-gray-900">Schemas</h3>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Data models describing the structure, fields, and types of the datasets in this contract.</p>
             <button
               onClick={addSchema}
-              className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="absolute top-0 right-0 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               <svg className="-ml-0.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />

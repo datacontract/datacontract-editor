@@ -3,48 +3,10 @@ import Combobox from './Combobox.jsx';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
 
+
 /**
  * A self-validating combobox component that shows errors when required field is empty.
- * Combines the template structure from Overview.jsx (lines 191-210) with validation logic from ValidatedInput.jsx.
- *
- * Features:
- * - Automatic validation for required fields
- * - Shows red ring when field has errors
- * - Displays error messages below the combobox
- * - Includes label with optional tooltip
- * - Shows "Required" indicator when field is required
- * - Supports ref forwarding for auto-focus functionality
- *
- * @example
- * ```jsx
- * <ValidatedCombobox
- *   name="status"
- *   label="Status"
- *   options={[
- *     { id: 'draft', name: 'draft' },
- *     { id: 'active', name: 'active' }
- *   ]}
- *   value={formData.status}
- *   onChange={(value) => updateField('status', value)}
- *   placeholder="Select a status..."
- *   required={true}
- *   tooltip="Current status of the data contract"
- *   externalErrors={[]}
- * />
- * ```
- *
- * @param {Object} props - Component props
- * @param {string} props.name - Field name (used for error message ID)
- * @param {string} props.label - Label text displayed above the combobox
- * @param {Array} props.options - Array of options for the dropdown
- * @param {string} props.value - Current selected value
- * @param {Function} props.onChange - Callback when value changes
- * @param {boolean} [props.required=false] - Whether the field is required
- * @param {string} [props.tooltip] - Optional tooltip text
- * @param {string} [props.placeholder] - Placeholder text
- * @param {Array} [props.externalErrors=[]] - External validation errors to display
- * @param {boolean} [props.acceptAnyInput=true] - Allow custom text input
- * @param {boolean} [props.disabled=false] - Disable the combobox
+ * Combines the template structure from Overview.jsx with validation logic from ValidatedInput.jsx.
  */
 const ValidatedCombobox = forwardRef(({
   name,
@@ -64,21 +26,37 @@ const ValidatedCombobox = forwardRef(({
   allowCustomValue = true,
   acceptAnyInput = true,
   disabled = false,
+  pattern,
+  patternMessage,
+  validationKey,
+  validationSection,
+  skipInternalValidation = false,
   ...props
 }, ref) => {
 
   // Internal validation - check if required field is empty
-  const hasInternalError = required && (!value || value.trim === '' || (typeof value === 'string' && value.trim() === ''));
+  const hasInternalError = !skipInternalValidation && required && (!value || value.trim === '' || (typeof value === 'string' && value.trim() === ''));
 
-  // Combine internal and external errors
-  const hasError = hasInternalError || externalErrors.length > 0;
+  // Pattern validation
+  const hasPatternError = !skipInternalValidation && pattern && value && typeof value === 'string' && value.trim() !== '' && (() => {
+    try {
+      return !new RegExp(pattern).test(value);
+    } catch {
+      return false;
+    }
+  })();
 
   // Prepare error messages
   const errorMessages = [];
   if (hasInternalError) {
     errorMessages.push('This field is required');
   }
+  if (hasPatternError) {
+    errorMessages.push(patternMessage || `Value must match pattern: ${pattern}`);
+  }
   errorMessages.push(...externalErrors);
+
+  const hasError = errorMessages.length > 0;
 
   return (
     <div>

@@ -3,6 +3,7 @@ import { useEditorStore } from '../store.js';
 import { Tooltip } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
+import ValidatedTextarea from '../components/ui/ValidatedTextarea.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import { SparkleButton } from '../ai/index.js';
 import { useShallow } from "zustand/react/shallow";
@@ -82,103 +83,82 @@ const TermsOfUse = () => {
 
           {/* Terms of Use Section */}
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Terms of Use</h3>
-            <p className="text-sm text-gray-500 mb-4">High level description of the dataset including purpose, usage guidelines, and limitations.</p>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Terms of Use</h3>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">High level description of the dataset including purpose, usage guidelines, and limitations.</p>
             <div className="space-y-3">
               {/* Purpose Field */}
               {!isPurposeHidden && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1">
-                    <label htmlFor="description-purpose" className="block text-xs font-medium leading-4 text-gray-900">
-                      {purposeOverride?.title || 'Purpose'}
-                    </label>
-                    <Tooltip content={purposeOverride?.description || "Intended purpose for the provided data"}>
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <SparkleButton
-                    fieldName={purposeOverride?.title || "Purpose"}
-                    fieldPath="description.purpose"
-                    currentValue={description?.purpose}
-                    onSuggestion={(value) => setYamlValue('description.purpose', value)}
-                    placeholder={purposeOverride?.description || "Intended purpose for the provided data"}
-                  />
-                </div>
-                <textarea
-                  id="description-purpose"
+                <ValidatedTextarea
                   name="description-purpose"
-                  rows={3}
+                  label={purposeOverride?.title || 'Purpose'}
                   value={description?.purpose}
                   onChange={(e) => setYamlValue('description.purpose', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+                  required={purposeOverride?.required}
+                  minLength={purposeOverride?.minLength}
+                  maxLength={purposeOverride?.maxLength}
+                  tooltip={purposeOverride?.description || "Intended purpose for the provided data"}
                   placeholder={purposeOverride?.placeholder || "Describe the purpose of this data contract..."}
+                  rows={3}
+                  actions={
+                    <SparkleButton
+                      fieldName={purposeOverride?.title || "Purpose"}
+                      fieldPath="description.purpose"
+                      currentValue={description?.purpose}
+                      onSuggestion={(value) => setYamlValue('description.purpose', value)}
+                      placeholder={purposeOverride?.description || "Intended purpose for the provided data"}
+                    />
+                  }
                 />
-              </div>
               )}
 
               {/* Usage Field */}
               {!isUsageHidden && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1">
-                    <label htmlFor="description-usage" className="block text-xs font-medium leading-4 text-gray-900">
-                      {usageOverride?.title || 'Usage'}
-                    </label>
-                    <Tooltip content={usageOverride?.description || "How this data should be used"}>
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <SparkleButton
-                    fieldName={usageOverride?.title || "Usage"}
-                    fieldPath="description.usage"
-                    currentValue={description?.usage}
-                    onSuggestion={(value) => setYamlValue('description.usage', value)}
-                    placeholder={usageOverride?.description || "How this data should be used"}
-                  />
-                </div>
-                <textarea
-                  id="description-usage"
+                <ValidatedTextarea
                   name="description-usage"
-                  rows={3}
+                  label={usageOverride?.title || 'Usage'}
                   value={description?.usage}
                   onChange={(e) => setYamlValue('description.usage', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+                  required={usageOverride?.required}
+                  minLength={usageOverride?.minLength}
+                  maxLength={usageOverride?.maxLength}
+                  tooltip={usageOverride?.description || "How this data should be used"}
                   placeholder={usageOverride?.placeholder || "Describe how to use this data..."}
+                  rows={3}
+                  actions={
+                    <SparkleButton
+                      fieldName={usageOverride?.title || "Usage"}
+                      fieldPath="description.usage"
+                      currentValue={description?.usage}
+                      onSuggestion={(value) => setYamlValue('description.usage', value)}
+                      placeholder={usageOverride?.description || "How this data should be used"}
+                    />
+                  }
                 />
-              </div>
               )}
 
               {/* Limitations Field */}
               {!isLimitationsHidden && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1">
-                    <label htmlFor="description-limitations" className="block text-xs font-medium leading-4 text-gray-900">
-                      {limitationsOverride?.title || 'Limitations'}
-                    </label>
-                    <Tooltip content={limitationsOverride?.description || "Technical, compliance, and legal limitations for data use"}>
-                      <QuestionMarkCircleIcon />
-                    </Tooltip>
-                  </div>
-                  <SparkleButton
-                    fieldName={limitationsOverride?.title || "Limitations"}
-                    fieldPath="description.limitations"
-                    currentValue={description?.limitations}
-                    onSuggestion={(value) => setYamlValue('description.limitations', value)}
-                    placeholder={limitationsOverride?.description || "Technical, compliance, and legal limitations for data use"}
-                  />
-                </div>
-                <textarea
-                  id="description-limitations"
+                <ValidatedTextarea
                   name="description-limitations"
-                  rows={3}
+                  label={limitationsOverride?.title || 'Limitations'}
                   value={description?.limitations}
                   onChange={(e) => setYamlValue('description.limitations', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
+                  required={limitationsOverride?.required}
+                  minLength={limitationsOverride?.minLength}
+                  maxLength={limitationsOverride?.maxLength}
+                  tooltip={limitationsOverride?.description || "Technical, compliance, and legal limitations for data use"}
                   placeholder={limitationsOverride?.placeholder || "Describe any limitations or constraints..."}
+                  rows={3}
+                  actions={
+                    <SparkleButton
+                      fieldName={limitationsOverride?.title || "Limitations"}
+                      fieldPath="description.limitations"
+                      currentValue={description?.limitations}
+                      onSuggestion={(value) => setYamlValue('description.limitations', value)}
+                      placeholder={limitationsOverride?.description || "Technical, compliance, and legal limitations for data use"}
+                    />
+                  }
                 />
-              </div>
               )}
 
               {/* Authoritative Definitions Field */}
@@ -200,6 +180,8 @@ const TermsOfUse = () => {
                   onPropertyChange={updateCustomProperty}
                   context={descriptionContext}
                   yamlParts={yamlParts}
+                  validationKeyPrefix="description"
+                  validationSection="Terms of Use"
                 />
               )}
 
@@ -211,6 +193,8 @@ const TermsOfUse = () => {
                 onPropertyChange={updateCustomProperty}
                 context={descriptionContext}
                 yamlParts={yamlParts}
+                validationKeyPrefix="description"
+                validationSection="Terms of Use"
               />
 
               {/* Fallback Custom Properties Editor (only if no custom schema defined) */}

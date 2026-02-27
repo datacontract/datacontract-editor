@@ -44,7 +44,6 @@ const Header = () => {
 	const editorMode = editorConfig?.mode || 'SERVER';
 	const isEmbeddedMode = editorMode === 'EMBEDDED';
 	const [showParseErrorModal, setShowParseErrorModal] = useState(false);
-
 	// Calculate problem count
 	const totalCount = markers.length;
 
@@ -77,30 +76,11 @@ const Header = () => {
 			return;
 		}
 		try {
-			// Parse YAML to check for required fields
-			let parsedYaml;
+			// Parse YAML to verify it's valid
 			try {
-				parsedYaml = parseYaml(yaml);
+				parseYaml(yaml);
 			} catch (parseError) {
 				setShowParseErrorModal(true);
-				return;
-			}
-
-			// Check for all required fundamental fields
-			const requiredFields = [
-				{field: 'name', label: 'Name'},
-				{field: 'version', label: 'Version'},
-				{field: 'status', label: 'Status'},
-				{field: 'id', label: 'ID'}
-			];
-
-			const missingFields = requiredFields.filter(({field}) =>
-				!parsedYaml[field] || parsedYaml[field].trim() === ''
-			);
-
-			if (missingFields.length > 0) {
-				const missingFieldsList = missingFields.map(({label}) => label).join(', ');
-				alert(`Cannot save: Missing required fields: ${missingFieldsList}\n\nPlease fill in all required fields in the Overview section.`);
 				return;
 			}
 
@@ -766,6 +746,7 @@ const Header = () => {
 					</div>
 				</div>
 			</Modal>
+
 		</>
 	);
 };

@@ -3,15 +3,36 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 import { createRequire } from 'module'
+import { readFileSync } from 'fs'
 
 const require = createRequire(import.meta.url)
 const pkg = require('./package.json')
 const monacoVersion = pkg.dependencies['@monaco-editor/react'].replace(/[^\d.]/g, '')
 
+// Dev-only plugin to serve dev-config.json as /config.json
+function devConfigPlugin() {
+  return {
+    name: 'dev-config',
+    configureServer(server) {
+      server.middlewares.use('/config.json', (req, res) => {
+        try {
+          const content = readFileSync(resolve(__dirname, 'dev-config.json'), 'utf-8');
+          res.setHeader('Content-Type', 'application/json');
+          res.end(content);
+        } catch {
+          res.statusCode = 404;
+          res.end();
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
   plugins: [
     tailwindcss(),
-    react()
+    react(),
+    mode === 'custom' && devConfigPlugin(),
   ],
   // Use relative base for assets to support context paths
   base: './',

@@ -82,6 +82,8 @@ dataContract:
         patternMessage: "Error message" # Custom validation message
         default: "value"              # Set default value
         hidden: true                  # Hide from the editor
+        minLength: 1                  # Minimum length (for text fields)
+        maxLength: 255                # Maximum length (for text fields)
 ```
 
 ### Available Properties by Level

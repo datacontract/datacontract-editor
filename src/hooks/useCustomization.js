@@ -125,5 +125,9 @@ export function applyOverrides(override, defaults = {}) {
 		pattern: override.pattern || defaults.pattern,
 		patternMessage: override.patternMessage || defaults.patternMessage,
 		defaultValue: override.default ?? defaults.defaultValue,
+		minLength: override.minLength ?? defaults.minLength,
+		maxLength: override.maxLength ?? defaults.maxLength,
+		minimum: override.minimum ?? defaults.minimum,
+		maximum: override.maximum ?? defaults.maximum,
 	};
 }

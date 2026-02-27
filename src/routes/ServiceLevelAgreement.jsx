@@ -101,7 +101,7 @@ const ServiceLevelAgreement = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Service Level Agreement</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Service Level Agreement</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
               Performance and availability commitments with enforcement parameters.
             </p>
@@ -122,6 +122,8 @@ const ServiceLevelAgreement = () => {
                           className="bg-white"
                           tooltip="SLA metric identifier"
                           placeholder="latency"
+                          validationKey={`sla.${index}.property`}
+                          validationSection="SLA"
                         />
                         <div>
                           <div className="flex items-center gap-1 mb-1">

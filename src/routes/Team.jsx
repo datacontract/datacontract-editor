@@ -153,7 +153,7 @@ const Team = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Team</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Team</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
               Team information and members.
             </p>
@@ -229,6 +229,8 @@ const Team = () => {
                 onPropertyChange={updateCustomProperty}
                 context={teamContext}
                 yamlParts={yamlParts}
+                validationKeyPrefix="team"
+                validationSection="Team"
               />
 
               {/* Ungrouped Custom Properties */}
@@ -239,6 +241,8 @@ const Team = () => {
                 onPropertyChange={updateCustomProperty}
                 context={teamContext}
                 yamlParts={yamlParts}
+                validationKeyPrefix="team"
+                validationSection="Team"
               />
 
               {/* Team Custom Properties (raw key-value editor) */}

@@ -1135,6 +1135,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         onPropertyChange={updateCustomProperty}
         context={propertyContext}
         yamlParts={yamlParts}
+        validationKeyPrefix={`schema.properties.${property.name}`}
+        validationSection="Schema Properties"
       />
 
       {/* Ungrouped Custom Properties */}
@@ -1145,6 +1147,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
         onPropertyChange={updateCustomProperty}
         context={propertyContext}
         yamlParts={yamlParts}
+        validationKeyPrefix={`schema.properties.${property.name}`}
+        validationSection="Schema Properties"
       />
 
       {/* Custom Properties Section (raw key-value editor) */}

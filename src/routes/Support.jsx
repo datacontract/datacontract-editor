@@ -86,6 +86,8 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             required={true}
             className="bg-white"
             placeholder="support-slack"
+            validationKey={`support.${index}.channel`}
+            validationSection="Support"
           />
         )}
         <div>
@@ -217,6 +219,8 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             onPropertyChange={updateCustomProperty}
             context={supportContext}
             yamlParts={yamlParts}
+            validationKeyPrefix={`support.${index}`}
+            validationSection="Support"
           />
         </div>
 
@@ -229,6 +233,8 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             onPropertyChange={updateCustomProperty}
             context={supportContext}
             yamlParts={yamlParts}
+            validationKeyPrefix={`support.${index}`}
+            validationSection="Support"
           />
         </div>
       </div>
@@ -300,7 +306,7 @@ const Support = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900 mb-3">Support</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Support</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
               Communication channels for dataset assistance.
             </p>

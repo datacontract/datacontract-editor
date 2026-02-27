@@ -210,26 +210,25 @@ const ServerEditor = ({ serverIndex }) => {
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-base font-semibold leading-6 text-gray-900">
-                {servers[serverIndex].server || `Server ${serverIndex + 1}`}
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to remove this server?')) {
-                    removeServer();
-                  }
-                }}
-                className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors"
-                title="Remove Server"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
+          <div className="relative">
+            <h3 className="text-base font-semibold leading-6 text-gray-900">
+              {servers[serverIndex].server || `Server ${serverIndex + 1}`}
+            </h3>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Connection details and configuration for the data source or platform serving this data contract.</p>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to remove this server?')) {
+                  removeServer();
+                }
+              }}
+              className="absolute top-0 right-0 p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors"
+              title="Remove Server"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {!isServerHidden && (
@@ -240,6 +239,8 @@ const ServerEditor = ({ serverIndex }) => {
                     onChange={(e) => updateServer('server', e.target.value)}
                     required={true}
                     placeholder="production-server"
+                    validationKey={`servers.${serverIndex}.server`}
+                    validationSection="Servers"
                   />
                 )}
                 {!isEnvironmentHidden && (
@@ -291,6 +292,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(selectedValue) => updateServer('type', selectedValue || '')}
                       placeholder="Select server type..."
                       acceptAnyInput={true}
+                      validationKey={`servers.${serverIndex}.type`}
+                      validationSection="Servers"
                       renderSelectedIcon={(value) => {
                         const IconComponent = serverIcons[value];
                         return IconComponent ? (
@@ -332,6 +335,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('project', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="my-project"
+                        validationKey={`servers.${serverIndex}.project`}
+                        validationSection="Servers"
                       />
                     </div>
                     <div>
@@ -347,6 +352,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('dataset', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="my_dataset"
+                        validationKey={`servers.${serverIndex}.dataset`}
+                        validationSection="Servers"
                       />
                     </div>
                   </>
@@ -367,6 +374,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('account', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="account-name"
+                        validationKey={`servers.${serverIndex}.account`}
+                        validationSection="Servers"
                       />
                     </div>
                     <div>
@@ -382,6 +391,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('database', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="MY_DATABASE"
+                        validationKey={`servers.${serverIndex}.database`}
+                        validationSection="Servers"
                       />
                     </div>
                     <div>
@@ -397,6 +408,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('schema', e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="MY_SCHEMA"
+                        validationKey={`servers.${serverIndex}.schema`}
+                        validationSection="Servers"
                       />
                     </div>
 										<div>
@@ -427,6 +440,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -436,6 +451,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="5432"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -444,6 +461,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="postgres"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -452,6 +471,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -466,6 +487,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="s3://bucket-name/path"
+                        validationKey={`servers.${serverIndex}.location`}
+                        validationSection="Servers"
                       />
                     </div>
                     <div>
@@ -504,6 +527,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -512,6 +537,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -537,6 +564,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
                       placeholder="hive_metastore"
+                      validationKey={`servers.${serverIndex}.catalog`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -545,6 +574,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -570,6 +601,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('location', e.target.value)}
                       required={true}
                       placeholder="abfss://container@storage.dfs.core.windows.net/path"
+                      validationKey={`servers.${serverIndex}.location`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="format"
@@ -578,6 +611,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
                       placeholder="parquet"
+                      validationKey={`servers.${serverIndex}.format`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -603,6 +638,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('account', e.target.value)}
                       required={true}
                       placeholder="123456789012"
+                      validationKey={`servers.${serverIndex}.account`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -611,6 +648,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="my_database"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -636,6 +675,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('stagingDir', e.target.value)}
                       required={true}
                       placeholder="s3://bucket/athena-results/"
+                      validationKey={`servers.${serverIndex}.stagingDir`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -644,6 +685,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -669,6 +712,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="broker:9092"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -694,6 +739,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="workspace.sql.azuresynapse.net"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -703,6 +750,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="1433"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -711,6 +760,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -725,6 +776,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="https://api.example.com/v1"
+                        validationKey={`servers.${serverIndex}.location`}
+                        validationSection="Servers"
                       />
                     </div>
                   </>
@@ -739,6 +792,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -748,6 +803,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="9000"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -756,6 +813,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -769,6 +828,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -778,6 +839,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="3306"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -786,6 +849,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -794,6 +859,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -807,6 +874,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -816,6 +885,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="50000"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -824,6 +895,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -837,6 +910,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -846,6 +921,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="9999"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -859,6 +936,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -868,6 +947,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="31010"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -881,6 +962,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="/path/to/database.duckdb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -894,6 +977,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -902,6 +987,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -935,6 +1022,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('path', e.target.value)}
                       required={true}
                       placeholder="/path/to/data"
+                      validationKey={`servers.${serverIndex}.path`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="format"
@@ -943,6 +1032,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
                       placeholder="csv"
+                      validationKey={`servers.${serverIndex}.format`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -956,6 +1047,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -965,6 +1058,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="3306"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -973,6 +1068,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -986,6 +1083,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -995,6 +1094,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="1521"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="serviceName"
@@ -1003,6 +1104,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('serviceName', e.target.value)}
                       required={true}
                       placeholder="ORCL"
+                      validationKey={`servers.${serverIndex}.serviceName`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1017,6 +1120,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1030,6 +1135,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('project', e.target.value)}
                       required={true}
                       placeholder="my-project"
+                      validationKey={`servers.${serverIndex}.project`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1044,6 +1151,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="sftp://host/path/to/file"
+                        validationKey={`servers.${serverIndex}.location`}
+                        validationSection="Servers"
                       />
                     </div>
                   </>
@@ -1058,6 +1167,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -1067,6 +1178,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="8080"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="catalog"
@@ -1075,6 +1188,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
                       placeholder="hive"
+                      validationKey={`servers.${serverIndex}.catalog`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -1083,6 +1198,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1096,6 +1213,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="port"
@@ -1105,6 +1224,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
                       required={true}
                       placeholder="5433"
+                      validationKey={`servers.${serverIndex}.port`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="database"
@@ -1113,6 +1234,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -1121,6 +1244,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="public"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1135,6 +1260,8 @@ const ServerEditor = ({ serverIndex }) => {
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
                         placeholder="gs://bucket-name/path"
+                        validationKey={`servers.${serverIndex}.location`}
+                        validationSection="Servers"
                       />
                     </div>
                     <div>
@@ -1173,6 +1300,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -1193,6 +1322,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1206,6 +1337,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -1226,6 +1359,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="default"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1239,6 +1374,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -1259,6 +1396,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                     <ValidatedInput
                       name="schema"
@@ -1267,6 +1406,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
                       placeholder="dbo"
+                      validationKey={`servers.${serverIndex}.schema`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1280,6 +1421,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
                       placeholder="localhost"
+                      validationKey={`servers.${serverIndex}.host`}
+                      validationSection="Servers"
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
@@ -1300,6 +1443,8 @@ const ServerEditor = ({ serverIndex }) => {
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
                       placeholder="mydb"
+                      validationKey={`servers.${serverIndex}.database`}
+                      validationSection="Servers"
                     />
                   </>
                 )}
@@ -1543,6 +1688,8 @@ const ServerEditor = ({ serverIndex }) => {
                     onPropertyChange={updateCustomProperty}
                     context={serverContext}
                     yamlParts={yamlParts}
+                    validationKeyPrefix={`servers.${serverIndex}`}
+                    validationSection="Servers"
                   />
                 </div>
 
@@ -1555,6 +1702,8 @@ const ServerEditor = ({ serverIndex }) => {
                     onPropertyChange={updateCustomProperty}
                     context={serverContext}
                     yamlParts={yamlParts}
+                    validationKeyPrefix={`servers.${serverIndex}`}
+                    validationSection="Servers"
                   />
                 </div>
 

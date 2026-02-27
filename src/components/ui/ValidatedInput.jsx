@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
 
+
 /**
  * A self-validating input component that shows errors when required field is empty
  * Follows Tailwind UI patterns for form validation
@@ -17,21 +18,63 @@ const ValidatedInput = forwardRef(({
   placeholder,
   className = '',
   externalErrors = [],
+  pattern,
+  patternMessage,
+  minLength,
+  maxLength,
+  minimum,
+  maximum,
+  validationKey,
+  validationSection,
+  skipInternalValidation = false,
   ...props
 }, ref) => {
 
   // Internal validation - check if required field is empty
-  const hasInternalError = required && (!value || value.toString().trim() === '');
+  const hasInternalError = !skipInternalValidation && required && (!value || value.toString().trim() === '');
+
+  // Pattern validation
+  const hasPatternError = !skipInternalValidation && pattern && value && typeof value === 'string' && value.trim() !== '' && (() => {
+    try {
+      return !new RegExp(pattern).test(value);
+    } catch {
+      return false;
+    }
+  })();
+
+  // Length validation
+  const trimmed = value && typeof value === 'string' ? value.trim() : '';
+  const hasMinLengthError = !skipInternalValidation && minLength !== undefined && trimmed !== '' && trimmed.length < minLength;
+  const hasMaxLengthError = !skipInternalValidation && maxLength !== undefined && trimmed !== '' && trimmed.length > maxLength;
+
+  // Numeric range validation
+  const numericValue = value !== undefined && value !== null && value !== '' ? Number(value) : NaN;
+  const hasMinimumError = !skipInternalValidation && minimum !== undefined && !isNaN(numericValue) && numericValue < minimum;
+  const hasMaximumError = !skipInternalValidation && maximum !== undefined && !isNaN(numericValue) && numericValue > maximum;
 
   // Combine internal and external errors
-  const hasError = hasInternalError || externalErrors.length > 0;
-
-  // Prepare error messages
   const errorMessages = [];
   if (hasInternalError) {
     errorMessages.push('This field is required');
   }
+  if (hasPatternError) {
+    errorMessages.push(patternMessage || `Value must match pattern: ${pattern}`);
+  }
+  if (hasMinLengthError) {
+    errorMessages.push(`Minimum length is ${minLength} (currently ${trimmed.length})`);
+  }
+  if (hasMaxLengthError) {
+    errorMessages.push(`Maximum length is ${maxLength} (currently ${trimmed.length})`);
+  }
+  if (hasMinimumError) {
+    errorMessages.push(`Minimum value is ${minimum}`);
+  }
+  if (hasMaximumError) {
+    errorMessages.push(`Maximum value is ${maximum}`);
+  }
   errorMessages.push(...externalErrors);
+
+  const hasError = errorMessages.length > 0;
 
   // Determine ring color based on error state
   const ringClass = hasError
