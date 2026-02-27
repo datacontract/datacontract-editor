@@ -167,7 +167,9 @@ const TagsInput = ({
                         >
                           Add tag '{newTag.trim()}'
                         </ComboboxOption>
-                      ) : null
+                      ) : (
+                        <div className="px-3 py-2 text-gray-400">According to the organization settings, only managed tags are permitted.</div>
+                      )
                     )
                   ) : null)}
               </ComboboxOptions>

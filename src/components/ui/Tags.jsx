@@ -9,7 +9,7 @@ const Tags = memo(({tags, managedTags = []}) => {
     {tags.map(tag => {
       const managedTag = managedTagsMap.get(tag.toLowerCase());
       return managedTag ? (
-        <a href={managedTag.url ?? null} target="_blank" className="badge--indigo m-0.5">
+        <a href={managedTag.href ?? null} target="_blank" className="badge--indigo m-0.5">
           <svg className="size-1.5 fill-indigo-500" viewBox="0 0 6 6" aria-hidden="true">
             <circle cx="3" cy="3" r="3"/>
           </svg>
