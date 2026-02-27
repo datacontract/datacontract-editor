@@ -29,7 +29,7 @@ const TagsInput = ({
     .slice(0, 100);
 
   const doesTagExist = (tag) => value.some((existingTag) => existingTag.toLowerCase() === tag.trim().toLowerCase());
-  const canTagBeAdded = (tag) => !doesTagExist(tag) && (allowUnmanagedTags || suggestedTags.length > 0);
+  const canTagBeAdded = (tag) => !doesTagExist(tag) && (allowUnmanagedTags || managedTagsMap.has(tag.trim().toLowerCase()));
 
   const handleAdd = (tag) => {
     if (!tag) return;
