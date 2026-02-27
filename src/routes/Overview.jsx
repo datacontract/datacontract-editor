@@ -9,13 +9,9 @@ import {
   convertEnumToOptions,
   useCustomization,
   useIsPropertyHidden,
-  useStandardPropertyOverride,
-  applyOverrides
+  useStandardPropertyOverride
 } from '../hooks/useCustomization.js';
 import {CustomSections, UngroupedCustomProperties} from '../components/ui/CustomSection.jsx';
-import Tooltip from '../components/ui/Tooltip.jsx';
-import Tags from '../components/ui/Tags.jsx';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 
 const Overview = () => {
 	const id = useEditorStore(useShallow((state) => state.getValue('id')));
