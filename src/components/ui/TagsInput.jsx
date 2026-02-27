@@ -139,6 +139,14 @@ const TagsInput = ({
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onBlur={() => {
+                  // HeadlessUI resets input DOM value on close; restore it immediately
+                  requestAnimationFrame(() => {
+                    if (inputRef.current) {
+                      inputRef.current.value = newTag;
+                    }
+                  });
+                }}
                 placeholder={placeholder}
                 className="w-full rounded-md bg-white border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
               />
