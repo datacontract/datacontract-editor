@@ -1,4 +1,4 @@
-import Tag from '../../ui/Tag.jsx';
+import Tags from '../../ui/Tags.jsx';
 import { IconResolver } from '../../ui/IconResolver.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
@@ -15,6 +15,8 @@ const FundamentalsSection = () => {
 	const domain = useEditorStore(useShallow(state => state.getValue('domain')));
 	const contractCreatedTs = useEditorStore(useShallow(state => state.getValue('contractCreatedTs')));
 	const tags = useEditorStore(useShallow(state => state.getValue('tags')));
+
+  const editorConfig = useEditorStore((state) => state.editorConfig)
 
 	// Check if section has any data
 	const hasCustomProperties = customProperties && (
@@ -122,13 +124,7 @@ const FundamentalsSection = () => {
 							<div className="sm:col-span-2">
 								<dt className="text-sm font-medium text-gray-500">Tags</dt>
 								<dd className="mt-1 text-sm text-gray-900">
-									<div className="flex gap-y-1 items-center text-xs text-gray-500 flex-wrap">
-										{tags.map((tag, index) => (
-											<Tag key={index} className="mr-1 mb-1">
-												{tag}
-											</Tag>
-										))}
-									</div>
+                  <Tags tags={tags} managedTags={editorConfig.managedTags} />
 								</dd>
 							</div>
 						)}

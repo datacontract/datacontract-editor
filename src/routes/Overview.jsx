@@ -1,14 +1,17 @@
-import { useMemo, useCallback } from 'react';
-import { useEditorStore } from '../store.js';
-import { ValidatedCombobox } from '../components/ui/index.js';
+import {useCallback, useMemo} from 'react';
+import {useEditorStore} from '../store.js';
+import {ValidatedCombobox} from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
-import Tooltip from '../components/ui/Tooltip.jsx';
-import Tags from '../components/ui/Tags.jsx';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
-import { useShallow } from "zustand/react/shallow";
-import { useCustomization, useStandardPropertyOverride, useIsPropertyHidden, convertEnumToOptions, applyOverrides } from '../hooks/useCustomization.js';
-import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import TagsInput from '../components/ui/TagsInput.jsx';
+import {useShallow} from "zustand/react/shallow";
+import {
+  convertEnumToOptions,
+  useCustomization,
+  useIsPropertyHidden,
+  useStandardPropertyOverride
+} from '../hooks/useCustomization.js';
+import {CustomSections, UngroupedCustomProperties} from '../components/ui/CustomSection.jsx';
 
 const Overview = () => {
 	const id = useEditorStore(useShallow((state) => state.getValue('id')));
@@ -269,12 +272,14 @@ const Overview = () => {
 								{/* Tags Field */}
 								{!isTagsHidden && (
 									<div className="sm:col-span-2">
-										<Tags
+										<TagsInput
 											label={tagsOverride?.title || "Tags"}
 											value={tags}
 											onChange={(value) => setTags('tags', value)}
 											tooltip={tagsOverride?.description || "Categorize your data contract with tags"}
 											placeholder={tagsOverride?.placeholder || "Add a tag..."}
+                      managedTags={editorConfig.managedTags}
+                      allowUnmanagedTags={editorConfig.allowUnmanagedTags}
 										/>
 									</div>
 								)}

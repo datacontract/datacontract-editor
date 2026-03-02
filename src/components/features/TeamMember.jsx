@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import Tags from '../ui/Tags.jsx';
+import TagsInput from '../ui/TagsInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -219,7 +219,7 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
         </div>
 
         {/* Tags */}
-        <Tags
+        <TagsInput
           label="Tags"
           value={member.tags || []}
           onChange={(value) => onUpdate(index, 'tags', value)}

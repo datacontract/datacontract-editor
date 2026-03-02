@@ -75,6 +75,9 @@ const DEFAULT_CONFIG = {
   // Semantics configuration (definition lookup feature)
   semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
 
+  managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
+  allowUnmanagedTags: true,
+
   // Optional lists for dropdowns (if not provided, text fields are used)
   teams: null,         // Array of {id: string, name: string} or null
   domains: null,       // Array of {id: string, name: string} or null
@@ -346,6 +349,8 @@ function createConfiguredStore(config) {
 				saveLabel: config.saveLabel,
 				titlePrefix: config.titlePrefix,
 				semantics: config.semantics,
+        managedTags: config.managedTags,
+        allowUnmanagedTags: config.allowUnmanagedTags,
 				teams: config.teams,
 				domains: config.domains,
 				tests: config.tests,

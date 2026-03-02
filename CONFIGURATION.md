@@ -96,7 +96,7 @@ Any OpenAI-compatible chat completions API, e.g. OpenAI, Azure, Ollama, OpenRout
 
 ```javascript
 tests: {
-  enabled: true,                           // Enable test runner
+  enabled: true,                    // Enable test runner
   dataContractCliApiServerUrl: 'https://api.datacontract.com',  // Test server URL
 }
 ```
@@ -133,6 +133,8 @@ init({
   // Features
   tests: { ... },
   ai: { ... },
+  managedTags: [{ tag: 'tag-1', href: 'https://example.com/tag-1' }],
+  allowUnmanagedTags: true,          // allow to use tags that are not specified as managed (default: true)
 
   // Advanced
   enablePersistence: false,          // localStorage persistence
