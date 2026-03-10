@@ -119,7 +119,8 @@ export const GET_JSON_SCHEMA_TOOL = {
  * Handler for updateContract tool
  */
 async function handleUpdateContract({ updatedYaml, summary }, context) {
-  const validation = await validateYaml(updatedYaml);
+  const customizations = context.editorConfig?.customizations || null;
+  const validation = await validateYaml(updatedYaml, customizations);
 
   return {
     updatedYaml,
@@ -148,7 +149,8 @@ async function handleValidateContract({ yaml }, context) {
     return { isValid: false, errors: [{ message: 'No YAML content to validate' }] };
   }
 
-  const validation = await validateYaml(yamlToValidate);
+  const customizations = context.editorConfig?.customizations || null;
+  const validation = await validateYaml(yamlToValidate, customizations);
   return {
     isValid: validation.isValid,
     errors: validation.errors,
