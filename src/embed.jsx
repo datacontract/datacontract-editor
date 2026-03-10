@@ -177,20 +177,27 @@ function createConfiguredStore(config) {
 				isWarningsVisible: state.isTestResultsVisible ? false : false,
 			})),
 			runTest: async (server) => {
-				const { yaml } = get();
+				const { yaml, editorConfig } = get();
 				set({ isTestRunning: true });
 				try {
-					// Build the test endpoint URL
-					const baseUrl = config.tests?.dataContractCliApiServerUrl || '';
+					// Build the test endpoint URL - read from store state to pick up settings changes
+					const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || config.tests?.dataContractCliApiServerUrl || '';
 					const testEndpoint = `${baseUrl}/test`;
 					const url = server
 						? `${testEndpoint}?server=${encodeURIComponent(server)}`
 						: testEndpoint;
+
+					// Build headers with optional API key
+					const headers = {
+						'Content-Type': 'text/plain',
+					};
+					if (editorConfig?.tests?.apiKey) {
+						headers['X-API-KEY'] = editorConfig.tests.apiKey;
+					}
+
 					const response = await fetch(url, {
 						method: 'POST',
-						headers: {
-							'Content-Type': 'text/plain',
-						},
+						headers,
 						body: yaml,
 					});
 
