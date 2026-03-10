@@ -5,7 +5,7 @@ import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import supportIcons from '../assets/support-icons/supportIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
-import { useCustomization, useIsPropertyHidden } from '../hooks/useCustomization.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
 
 // Support Item component with customization support
@@ -22,6 +22,28 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
   const isToolHidden = useIsPropertyHidden('support', 'tool');
   const isScopeHidden = useIsPropertyHidden('support', 'scope');
   const isInvitationUrlHidden = useIsPropertyHidden('support', 'invitationUrl');
+
+  // Get standard property overrides
+  const channelOverride = useStandardPropertyOverride('support', 'channel');
+  const urlOverride = useStandardPropertyOverride('support', 'url');
+  const toolOverride = useStandardPropertyOverride('support', 'tool');
+  const scopeOverride = useStandardPropertyOverride('support', 'scope');
+  const invitationUrlOverride = useStandardPropertyOverride('support', 'invitationUrl');
+
+  // Compute tool/scope options with override support
+  const effectiveToolOptions = useMemo(() => {
+    if (toolOverride?.enum) {
+      return convertEnumToOptions(toolOverride.enum);
+    }
+    return toolOptions;
+  }, [toolOverride, toolOptions]);
+
+  const effectiveScopeOptions = useMemo(() => {
+    if (scopeOverride?.enum) {
+      return convertEnumToOptions(scopeOverride.enum);
+    }
+    return scopeOptions;
+  }, [scopeOverride, scopeOptions]);
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -80,42 +102,53 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
         {!isChannelHidden && (
           <ValidatedInput
             name={`support-channel-${index}`}
-            label="Channel"
+            label={channelOverride?.title || "Channel"}
             value={item.channel || ''}
             onChange={(e) => onUpdate(index, 'channel', e.target.value)}
-            required={true}
+            required={channelOverride?.required ?? true}
             className="bg-white"
-            placeholder="support-slack"
+            placeholder={channelOverride?.placeholder || "support-slack"}
+            tooltip={channelOverride?.description}
+            pattern={channelOverride?.pattern}
+            patternMessage={channelOverride?.patternMessage}
+            minLength={channelOverride?.minLength}
+            maxLength={channelOverride?.maxLength}
             validationKey={`support.${index}.channel`}
             validationSection="Support"
           />
         )}
         <div>
           {!isUrlHidden && (
-            <>
-              <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <ValidatedInput
+                  name={`support-url-${index}`}
+                  label={urlOverride?.title || "URL"}
                   value={item.url || ''}
                   onChange={(e) => onUpdate(index, 'url', e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                  placeholder="https://slack.com/channels/support"
+                  required={urlOverride?.required}
+                  className="bg-white"
+                  placeholder={urlOverride?.placeholder || "https://slack.com/channels/support"}
+                  tooltip={urlOverride?.description}
+                  pattern={urlOverride?.pattern}
+                  patternMessage={urlOverride?.patternMessage}
+                  minLength={urlOverride?.minLength}
+                  maxLength={urlOverride?.maxLength}
+                  validationKey={`support.${index}.url`}
+                  validationSection="Support"
                 />
-                <button
-                  type="button"
-                  onClick={() => onRemove(index)}
-                  className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-                  title="Remove channel"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
               </div>
-            </>
+              <button
+                type="button"
+                onClick={() => onRemove(index)}
+                className="p-1.5 mb-0.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
+                title="Remove channel"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           )}
           {isUrlHidden && (
             <button
@@ -135,13 +168,13 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             <Combobox
               label={
                 <div className="flex items-center gap-1">
-                  <span>Tool</span>
+                  <span>{toolOverride?.title || 'Tool'}</span>
                   <Tooltip content="Platform type (email, slack, teams, discord, ticket, googlechat, other)">
                     <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
               }
-              options={toolOptions}
+              options={effectiveToolOptions}
               value={item.tool || ''}
               onChange={(selectedValue) => onUpdate(index, 'tool', selectedValue || '')}
               placeholder="Select a tool..."
@@ -167,13 +200,13 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             <Combobox
               label={
                 <div className="flex items-center gap-1">
-                  <span>Scope</span>
+                  <span>{scopeOverride?.title || 'Scope'}</span>
                   <Tooltip content="Usage context (interactive, announcements, issues, notifications)">
                     <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
               }
-              options={scopeOptions}
+              options={effectiveScopeOptions}
               value={item.scope || ''}
               onChange={(selectedValue) => onUpdate(index, 'scope', selectedValue || '')}
               placeholder="Select a scope..."
@@ -197,15 +230,21 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
         )}
         {!isInvitationUrlHidden && (
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-              Invitation URL
-            </label>
-            <input
-              type="text"
+            <ValidatedInput
+              name={`support-invitationUrl-${index}`}
+              label={invitationUrlOverride?.title || "Invitation URL"}
               value={item.invitationUrl || ''}
               onChange={(e) => onUpdate(index, 'invitationUrl', e.target.value)}
-              className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-              placeholder="https://invite-link.com"
+              required={invitationUrlOverride?.required}
+              className="bg-white"
+              placeholder={invitationUrlOverride?.placeholder || "https://invite-link.com"}
+              tooltip={invitationUrlOverride?.description}
+              pattern={invitationUrlOverride?.pattern}
+              patternMessage={invitationUrlOverride?.patternMessage}
+              minLength={invitationUrlOverride?.minLength}
+              maxLength={invitationUrlOverride?.maxLength}
+              validationKey={`support.${index}.invitationUrl`}
+              validationSection="Support"
             />
           </div>
         )}

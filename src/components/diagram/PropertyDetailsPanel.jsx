@@ -8,6 +8,7 @@ import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
+import ValidatedInput from '../ui/ValidatedInput.jsx';
 import TagsInput from '../ui/TagsInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
@@ -62,7 +63,19 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
   const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl;
 
   // Get overrides for standard properties
+  const nameOverride = useStandardPropertyOverride('schema.properties', 'name');
+  const businessNameOverride = useStandardPropertyOverride('schema.properties', 'businessName');
+  const physicalNameOverride = useStandardPropertyOverride('schema.properties', 'physicalName');
   const classificationOverride = useStandardPropertyOverride('schema.properties', 'classification');
+  const encryptedNameOverride = useStandardPropertyOverride('schema.properties', 'encryptedName');
+  const logicalTypeOverride = useStandardPropertyOverride('schema.properties', 'logicalType');
+  const physicalTypeOverride = useStandardPropertyOverride('schema.properties', 'physicalType');
+  const requiredOverride = useStandardPropertyOverride('schema.properties', 'required');
+  const uniqueOverride = useStandardPropertyOverride('schema.properties', 'unique');
+  const primaryKeyOverride = useStandardPropertyOverride('schema.properties', 'primaryKey');
+  const partitionedOverride = useStandardPropertyOverride('schema.properties', 'partitioned');
+  const criticalDataElementOverride = useStandardPropertyOverride('schema.properties', 'criticalDataElement');
+  const transformSourceObjectsOverride = useStandardPropertyOverride('schema.properties', 'transformSourceObjects');
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -224,46 +237,53 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               {/* Property Name */}
               {!isNameHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Property Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={property.name || ''}
-                    onChange={(e) => updateField('name', e.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="property_name"
-                  />
-                </div>
+                <ValidatedInput
+                  name="propertyName"
+                  label={nameOverride?.title || 'Property Name'}
+                  value={property.name || ''}
+                  onChange={(e) => updateField('name', e.target.value)}
+                  required={nameOverride?.required ?? true}
+                  tooltip={nameOverride?.description}
+                  placeholder={nameOverride?.placeholder || "property_name"}
+                  pattern={nameOverride?.pattern}
+                  patternMessage={nameOverride?.patternMessage}
+                  minLength={nameOverride?.minLength}
+                  maxLength={nameOverride?.maxLength}
+                />
               )}
 
               {/* Business Name */}
               {!isBusinessNameHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Business Name</label>
-                  <input
-                    type="text"
-                    value={property.businessName || ''}
-                    onChange={(e) => updateField('businessName', e.target.value)}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.businessName && !property.businessName ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.businessName || "Human-readable name"}
-                  />
-                </div>
+                <ValidatedInput
+                  name="businessName"
+                  label={businessNameOverride?.title || 'Business Name'}
+                  value={property.businessName || ''}
+                  onChange={(e) => updateField('businessName', e.target.value)}
+                  required={businessNameOverride?.required}
+                  tooltip={businessNameOverride?.description}
+                  placeholder={definitionData?.businessName || businessNameOverride?.placeholder || "Human-readable name"}
+                  pattern={businessNameOverride?.pattern}
+                  patternMessage={businessNameOverride?.patternMessage}
+                  minLength={businessNameOverride?.minLength}
+                  maxLength={businessNameOverride?.maxLength}
+                />
               )}
 
               {/* Physical Name */}
               {!isPhysicalNameHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Physical Name</label>
-                  <input
-                    type="text"
-                    value={property.physicalName || ''}
-                    onChange={(e) => updateField('physicalName', e.target.value)}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.physicalName && !property.physicalName ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.physicalName || "Actual database column name"}
-                  />
-                </div>
+                <ValidatedInput
+                  name="physicalName"
+                  label={physicalNameOverride?.title || 'Physical Name'}
+                  value={property.physicalName || ''}
+                  onChange={(e) => updateField('physicalName', e.target.value)}
+                  required={physicalNameOverride?.required}
+                  tooltip={physicalNameOverride?.description}
+                  placeholder={definitionData?.physicalName || physicalNameOverride?.placeholder || "Actual database column name"}
+                  pattern={physicalNameOverride?.pattern}
+                  patternMessage={physicalNameOverride?.patternMessage}
+                  minLength={physicalNameOverride?.minLength}
+                  maxLength={physicalNameOverride?.maxLength}
+                />
               )}
 
               {/* Logical Type */}
@@ -273,7 +293,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   context="property"
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
-                  label="Logical Type"
+                  label={logicalTypeOverride?.title || "Logical Type"}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   valueFromDefinition={definitionData?.logicalType}
                 />
@@ -302,8 +322,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                   onChange={(value) => updateField('physicalType', value || undefined)}
                   serverType={serverType}
                   logicalType={property.logicalType}
-                  label="Physical Type"
-                  placeholder={definitionData?.physicalType || "e.g., VARCHAR(255)"}
+                  label={physicalTypeOverride?.title || "Physical Type"}
+                  placeholder={definitionData?.physicalType || physicalTypeOverride?.placeholder || "e.g., VARCHAR(255)"}
                 />
               )}
 
@@ -752,7 +772,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 {/* Required */}
                 {!isRequiredHidden && (
                   <div>
-                    <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">Required</label>
+                    <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">{requiredOverride?.title || 'Required'}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="required"
@@ -778,7 +798,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 {/* Unique */}
                 {!isUniqueHidden && (
                   <div>
-                    <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">Unique</label>
+                    <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">{uniqueOverride?.title || 'Unique'}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="unique"
@@ -804,7 +824,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 {/* Primary Key */}
                 {!isPrimaryKeyHidden && (
                   <div>
-                    <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">Primary Key</label>
+                    <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">{primaryKeyOverride?.title || 'Primary Key'}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="primaryKey"
@@ -830,7 +850,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 {/* Partitioned */}
                 {!isPartitionedHidden && (
                   <div>
-                    <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">Partitioned</label>
+                    <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">{partitionedOverride?.title || 'Partitioned'}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="partitioned"
@@ -911,12 +931,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
             <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
               {/* Classification */}
               {!isClassificationHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    {classificationOverride?.title || 'Classification'}
-                    {classificationOverride?.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
-                  {classificationOverride?.enum ? (
+                classificationOverride?.enum ? (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      {classificationOverride?.title || 'Classification'}
+                      {classificationOverride?.required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
                     <div className="grid grid-cols-1">
                       <select
                         value={property.classification || ''}
@@ -935,22 +955,28 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                         className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
                       />
                     </div>
-                  ) : (
-                    <input
-                      type="text"
-                      value={property.classification || ''}
-                      onChange={(e) => updateField('classification', e.target.value || undefined)}
-                      className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.classification && !property.classification ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.classification || (classificationOverride?.placeholder || "e.g., confidential, public, internal")}
-                    />
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <ValidatedInput
+                    name="classification"
+                    label={classificationOverride?.title || 'Classification'}
+                    value={property.classification || ''}
+                    onChange={(e) => updateField('classification', e.target.value || undefined)}
+                    required={classificationOverride?.required}
+                    tooltip={classificationOverride?.description}
+                    placeholder={definitionData?.classification || classificationOverride?.placeholder || "e.g., confidential, public, internal"}
+                    pattern={classificationOverride?.pattern}
+                    patternMessage={classificationOverride?.patternMessage}
+                    minLength={classificationOverride?.minLength}
+                    maxLength={classificationOverride?.maxLength}
+                  />
+                )
               )}
 
               {/* Critical Data Element */}
               {!isCriticalDataElementHidden && (
                 <div>
-                  <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">Critical Data Element</label>
+                  <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">{criticalDataElementOverride?.title || 'Critical Data Element'}</label>
                   <div className="grid grid-cols-1">
                     <select
                       id="criticalDataElement"
@@ -975,16 +1001,19 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
 
               {/* Encrypted Name */}
               {!isEncryptedNameHidden && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Encrypted Name</label>
-                  <input
-                    type="text"
-                    value={property.encryptedName || ''}
-                    onChange={(e) => updateField('encryptedName', e.target.value || undefined)}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.encryptedName && !property.encryptedName ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.encryptedName || "Encrypted field reference"}
-                  />
-                </div>
+                <ValidatedInput
+                  name="encryptedName"
+                  label={encryptedNameOverride?.title || 'Encrypted Name'}
+                  value={property.encryptedName || ''}
+                  onChange={(e) => updateField('encryptedName', e.target.value || undefined)}
+                  required={encryptedNameOverride?.required}
+                  tooltip={encryptedNameOverride?.description}
+                  placeholder={definitionData?.encryptedName || encryptedNameOverride?.placeholder || "Encrypted field reference"}
+                  pattern={encryptedNameOverride?.pattern}
+                  patternMessage={encryptedNameOverride?.patternMessage}
+                  minLength={encryptedNameOverride?.minLength}
+                  maxLength={encryptedNameOverride?.maxLength}
+                />
               )}
 
               {/* Tags */}
@@ -1015,11 +1044,11 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
               {/* Transform Source Objects */}
               {!isTransformSourceObjectsHidden && (
                 <ArrayInput
-                  label="Transform Source Objects"
+                  label={transformSourceObjectsOverride?.title || "Transform Source Objects"}
                   value={property.transformSourceObjects}
                   onChange={(value) => updateField('transformSourceObjects', value)}
-                  placeholder="source_table_name"
-                  helpText="List of source tables/objects used in transformations"
+                  placeholder={transformSourceObjectsOverride?.placeholder || "source_table_name"}
+                  helpText={transformSourceObjectsOverride?.description || "List of source tables/objects used in transformations"}
                 />
               )}
 

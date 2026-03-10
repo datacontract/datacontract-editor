@@ -7,6 +7,7 @@ import TeamMember from '../components/features/TeamMember.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import { ValidatedCombobox } from '../components/ui/index.js';
 
 const Team = () => {
@@ -175,24 +176,28 @@ const Team = () => {
                       options={teamOptions}
                       value={team?.name || ''}
                       onChange={(selectedValue) => updateTeamField('name', selectedValue || undefined)}
-                      placeholder="Select a team..."
+                      placeholder={nameOverride?.placeholder || "Select a team..."}
                       tooltip={nameOverride?.description}
+                      required={nameOverride?.required}
+                      pattern={nameOverride?.pattern}
+                      patternMessage={nameOverride?.patternMessage}
                       acceptAnyInput={false}
                       allowCustomValue={false}
                     />
                   ) : (
-                    <div>
-                      <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        {nameOverride?.title || 'Team Name'}
-                      </label>
-                      <input
-                        type="text"
-                        value={team?.name || ''}
-                        onChange={(e) => updateTeamField('name', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="Data Engineering Team"
-                      />
-                    </div>
+                    <ValidatedInput
+                      name="teamName"
+                      label={nameOverride?.title || 'Team Name'}
+                      value={team?.name || ''}
+                      onChange={(e) => updateTeamField('name', e.target.value)}
+                      placeholder={nameOverride?.placeholder || "Data Engineering Team"}
+                      required={nameOverride?.required}
+                      tooltip={nameOverride?.description}
+                      pattern={nameOverride?.pattern}
+                      patternMessage={nameOverride?.patternMessage}
+                      minLength={nameOverride?.minLength}
+                      maxLength={nameOverride?.maxLength}
+                    />
                   );
                 })()
               )}

@@ -54,7 +54,30 @@
 								value: "operations",
 								label: "Operations",
 							}]
-	        }
+	        },
+          // Pattern on name
+          {
+            property: 'name',
+            title: 'Contract Name',
+            pattern: '^[A-Z][a-zA-Z0-9 ]*$',
+            patternMessage: 'Must start with uppercase letter, only letters/numbers/spaces allowed.',
+            minLength: 3,
+            maxLength: 80,
+            placeholder: 'My Data Contract'
+          },
+          // Pattern on id
+          {
+            property: 'id',
+            pattern: '^[a-z][a-z0-9-]*$',
+            patternMessage: 'Must be lowercase kebab-case (e.g., my-contract-id).',
+            required: true
+          },
+          // Version pattern
+          {
+            property: 'version',
+            pattern: '^\\d+\\.\\d+\\.\\d+$',
+            patternMessage: 'Must follow semver format: X.Y.Z'
+          }
         ],
         customProperties: [
           {
@@ -127,6 +150,24 @@
         standardProperties: [
           // Hide some advanced fields
           { property: 'encryptedName', hidden: true },
+          { property: 'name',
+            pattern: "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+            patternMessage: "Must be lowercase snake_case (e.g., user_id, created_at)."
+          },
+          {
+            property: 'physicalName',
+            title: 'DB Column Name',
+            pattern: '^[A-Z][A-Z0-9_]*$',
+            patternMessage: 'Must be uppercase SNAKE_CASE (e.g., CUSTOMER_ID).',
+            placeholder: 'COLUMN_NAME'
+          },
+          {
+            property: 'businessName',
+            title: 'Business Field Name',
+            minLength: 2,
+            maxLength: 60,
+            placeholder: 'Customer Identifier'
+          },
           { property: 'transformSourceObjects', hidden: true },
           // Customize classification with fixed options
           {
@@ -215,7 +256,31 @@
       // Schema level customizations
       schema: {
         standardProperties: [
-          { property: 'dataGranularityDescription', hidden: true }
+          { property: 'dataGranularityDescription', hidden: true },
+          {
+            property: 'name',
+            title: 'Schema Name',
+            pattern: '^[a-z][a-z0-9_]*$',
+            patternMessage: 'Must be lowercase snake_case.',
+            required: true,
+            placeholder: 'my_schema'
+          },
+          {
+            property: 'physicalName',
+            title: 'Physical Schema Name',
+            pattern: '^[A-Z][A-Z0-9_]*$',
+            patternMessage: 'Must be uppercase SNAKE_CASE (e.g., MY_TABLE).',
+            placeholder: 'MY_SCHEMA'
+          },
+          {
+            property: 'businessName',
+            maxLength: 100,
+            placeholder: 'Human-friendly schema name'
+          },
+          {
+            property: 'logicalType',
+            title: 'Schema Logical Type'
+          }
         ],
         customProperties: [
           {
@@ -229,6 +294,26 @@
 
       // Server level customizations
       servers: {
+        standardProperties: [
+          {
+            property: 'server',
+            title: 'Server Name',
+            pattern: '^[a-z][a-z0-9-]*$',
+            patternMessage: 'Must be lowercase with hyphens only (e.g., prod-db).',
+            required: true,
+            placeholder: 'my-server'
+          },
+          {
+            property: 'type',
+            title: 'Platform Type',
+            enum: ['snowflake', 'bigquery', 'postgres', 'databricks', 's3']
+          },
+          {
+            property: 'environment',
+            title: 'Deployment Environment',
+            enum: ['production', 'staging', 'development']
+          }
+        ],
         customProperties: [
           {
             property: 'slaLevel',
@@ -247,6 +332,17 @@
 
       // Team level customizations
       team: {
+        standardProperties: [
+          {
+            property: 'name',
+            title: 'Team Name',
+            pattern: '^[A-Z]',
+            patternMessage: 'Team name must start with an uppercase letter.',
+            required: true,
+            minLength: 3,
+            placeholder: 'Data Engineering'
+          }
+        ],
         customProperties: [
           {
             property: 'slackChannel',
@@ -260,7 +356,28 @@
         // Team members level customizations
         'team.members': {
           standardProperties: [
-            { property: 'dateOut', hidden: true }
+            { property: 'dateOut', hidden: true },
+            {
+              property: 'username',
+              title: 'Email',
+              pattern: '^[^@]+@[^@]+\\.[^@]+$',
+              patternMessage: 'Must be a valid email address.',
+              required: true,
+              placeholder: 'user@company.com'
+            },
+            {
+              property: 'name',
+              title: 'Display Name',
+              minLength: 2,
+              maxLength: 50
+            },
+            {
+              property: 'role',
+              title: 'Team Role',
+              pattern: '^[a-z][a-z_ ]*$',
+              patternMessage: 'Role must be lowercase.',
+              placeholder: 'data steward'
+            }
           ],
           customProperties: [
             {
@@ -268,6 +385,74 @@
               title: 'Department',
               type: 'select',
               enum: ['Engineering', 'Data Science', 'Analytics', 'Platform']
+            }
+          ]
+        },
+
+        // Roles level customizations
+        roles: {
+          standardProperties: [
+            {
+              property: 'role',
+              title: 'IAM Role ARN',
+              pattern: '^arn:',
+              patternMessage: 'Must start with "arn:" (e.g., arn:aws:iam::123456789:role/Reader).',
+              required: true
+            },
+            {
+              property: 'access',
+              title: 'Access Level',
+              placeholder: 'read / write / admin'
+            },
+            {
+              property: 'firstLevelApprovers',
+              title: 'Primary Approver',
+              pattern: '^[^@]+@[^@]+\\.[^@]+$',
+              patternMessage: 'Must be a valid email address.',
+              placeholder: 'approver@company.com'
+            },
+            {
+              property: 'secondLevelApprovers',
+              title: 'Secondary Approver',
+              pattern: '^[^@]+@[^@]+\\.[^@]+$',
+              patternMessage: 'Must be a valid email address.',
+              placeholder: 'director@company.com'
+            }
+          ]
+        },
+
+        // Support level customizations
+        support: {
+          standardProperties: [
+            {
+              property: 'channel',
+              title: 'Channel Name',
+              pattern: '^#?[a-z][a-z0-9-]*$',
+              patternMessage: 'Must be lowercase with hyphens (e.g., #data-support).',
+              required: true,
+              placeholder: '#data-support'
+            },
+            {
+              property: 'url',
+              title: 'Channel URL',
+              pattern: '^https?://',
+              patternMessage: 'Must start with http:// or https://.',
+              placeholder: 'https://slack.com/channels/data-support'
+            },
+            {
+              property: 'invitationUrl',
+              title: 'Invite Link',
+              pattern: '^https?://',
+              patternMessage: 'Must be a valid URL starting with http:// or https://.'
+            },
+            {
+              property: 'tool',
+              title: 'Platform',
+              enum: ['slack', 'teams', 'email', 'ticket']
+            },
+            {
+              property: 'scope',
+              title: 'Usage Scope'
             }
           ]
         }
@@ -312,6 +497,35 @@ schema:
       - name: amount
         logicalType: number
         description: Transaction amount
+servers:
+  - server: prod-db
+    type: snowflake
+    environment: production
+    account: xy12345
+    database: ANALYTICS
+    schema: PUBLIC
+team:
+  name: Data Engineering
+  description: Responsible for data pipelines
+  members:
+    - username: jane@company.com
+      name: Jane Doe
+      role: data steward
+      dateIn: "2024-01-15"
+    - username: bob@company.com
+      name: Bob Smith
+      role: owner
+roles:
+  - role: arn:aws:iam::123456789:role/DataReader
+    access: read
+    description: Read-only access to analytics tables
+    firstLevelApprovers: manager@company.com
+    secondLevelApprovers: director@company.com
+support:
+  - channel: "#data-support"
+    url: https://slack.com/channels/data-support
+    tool: slack
+    scope: interactive
 `;
 
     // Initialize the editor with customizations

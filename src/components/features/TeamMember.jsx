@@ -4,7 +4,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import { useEditorStore } from '../../store.js';
-import { useCustomization, useIsPropertyHidden } from '../../hooks/useCustomization.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 /**
@@ -27,6 +27,13 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
   const isDescriptionHidden = useIsPropertyHidden('team.members', 'description');
   const isDateInHidden = useIsPropertyHidden('team.members', 'dateIn');
   const isDateOutHidden = useIsPropertyHidden('team.members', 'dateOut');
+
+  // Get standard property overrides
+  const usernameOverride = useStandardPropertyOverride('team.members', 'username');
+  const nameOverride = useStandardPropertyOverride('team.members', 'name');
+  const roleOverride = useStandardPropertyOverride('team.members', 'role');
+  const dateInOverride = useStandardPropertyOverride('team.members', 'dateIn');
+  const dateOutOverride = useStandardPropertyOverride('team.members', 'dateOut');
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -95,11 +102,16 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           {!isUsernameHidden && (
             <ValidatedInput
               name={`member-${index}-username`}
-              label="Username"
+              label={usernameOverride?.title || "Username"}
               value={member.username || ''}
               onChange={(e) => onUpdate(index, 'username', e.target.value)}
-              placeholder="user@example.com"
-              required={true}
+              placeholder={usernameOverride?.placeholder || "user@example.com"}
+              required={usernameOverride?.required ?? true}
+              tooltip={usernameOverride?.description}
+              pattern={usernameOverride?.pattern}
+              patternMessage={usernameOverride?.patternMessage}
+              minLength={usernameOverride?.minLength}
+              maxLength={usernameOverride?.maxLength}
               className="bg-white"
               validationKey={`team.members.${index}.username`}
               validationSection="Team Members"
@@ -108,30 +120,35 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           )}
           <div>
             {!isNameHidden && (
-              <>
-                <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                  Full Name
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <ValidatedInput
+                    name={`member-${index}-name`}
+                    label={nameOverride?.title || "Full Name"}
                     value={member.name || ''}
                     onChange={(e) => onUpdate(index, 'name', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="John Doe"
+                    placeholder={nameOverride?.placeholder || "John Doe"}
+                    required={nameOverride?.required}
+                    tooltip={nameOverride?.description}
+                    pattern={nameOverride?.pattern}
+                    patternMessage={nameOverride?.patternMessage}
+                    minLength={nameOverride?.minLength}
+                    maxLength={nameOverride?.maxLength}
+                    className="bg-white"
+                    data-1p-ignore
                   />
-                  <button
-                    type="button"
-                    onClick={() => onRemove(index)}
-                    className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-                    title="Remove member"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
                 </div>
-              </>
+                <button
+                  type="button"
+                  onClick={() => onRemove(index)}
+                  className="p-1.5 mb-0.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
+                  title="Remove member"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             )}
             {isNameHidden && (
               <button
@@ -168,10 +185,16 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           {!isRoleHidden && (
             <ValidatedInput
               name={`member-${index}-role`}
-              label="Role"
+              label={roleOverride?.title || "Role"}
               value={member.role || ''}
               onChange={(e) => onUpdate(index, 'role', e.target.value)}
-              placeholder="e.g., owner, data steward"
+              placeholder={roleOverride?.placeholder || "e.g., owner, data steward"}
+              required={roleOverride?.required}
+              tooltip={roleOverride?.description}
+              pattern={roleOverride?.pattern}
+              patternMessage={roleOverride?.patternMessage}
+              minLength={roleOverride?.minLength}
+              maxLength={roleOverride?.maxLength}
               className="bg-white"
               data-1p-ignore
             />
@@ -184,12 +207,14 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           {!isDateInHidden && (
             <div>
               <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                Date In
+                {dateInOverride?.title || "Date In"}
               </label>
               <input
                 type="date"
                 value={member.dateIn || ''}
                 onChange={(e) => onUpdate(index, 'dateIn', e.target.value)}
+                required={dateInOverride?.required}
+                placeholder={dateInOverride?.placeholder}
                 className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
               />
             </div>
@@ -197,12 +222,14 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           {!isDateOutHidden && (
             <div>
               <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                Date Out
+                {dateOutOverride?.title || "Date Out"}
               </label>
               <input
                 type="date"
                 value={member.dateOut || ''}
                 onChange={(e) => onUpdate(index, 'dateOut', e.target.value)}
+                required={dateOutOverride?.required}
+                placeholder={dateOutOverride?.placeholder}
                 className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
               />
             </div>

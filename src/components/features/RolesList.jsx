@@ -1,11 +1,10 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Tooltip } from '../ui/index.js';
-import KeyValueEditor from '../ui/KeyValueEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import { useEditorStore } from '../../store.js';
-import { useCustomization, useIsPropertyHidden } from '../../hooks/useCustomization.js';
+import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) => {
@@ -113,6 +112,12 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
   const isFirstLevelApproversHidden = useIsPropertyHidden('roles', 'firstLevelApprovers');
   const isSecondLevelApproversHidden = useIsPropertyHidden('roles', 'secondLevelApprovers');
 
+  // Get standard property overrides
+  const roleOverride = useStandardPropertyOverride('roles', 'role');
+  const accessOverride = useStandardPropertyOverride('roles', 'access');
+  const firstLevelApproversOverride = useStandardPropertyOverride('roles', 'firstLevelApprovers');
+  const secondLevelApproversOverride = useStandardPropertyOverride('roles', 'secondLevelApprovers');
+
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
     const cp = roleItem.customProperties;
@@ -172,12 +177,16 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                         <ValidatedInput
                           ref={(el) => roleInputRefs.current[index] = el}
                           name={`role-${index}`}
-                          label="Role"
+                          label={roleOverride?.title || "Role"}
                           value={roleItem.role || ''}
                           onChange={(e) => updateRole(index, 'role', e.target.value)}
-                          required={true}
-                          tooltip="IAM role name"
-                          placeholder="arn:aws:iam::123456789:role/DataReader"
+                          required={roleOverride?.required ?? true}
+                          tooltip={roleOverride?.description || "IAM role name"}
+                          placeholder={roleOverride?.placeholder || "arn:aws:iam::123456789:role/DataReader"}
+                          pattern={roleOverride?.pattern}
+                          patternMessage={roleOverride?.patternMessage}
+                          minLength={roleOverride?.minLength}
+                          maxLength={roleOverride?.maxLength}
                           className="bg-white"
                           externalErrors={[]}
                           validationKey={`roles.${index}.role`}
@@ -198,23 +207,20 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     </button>
                   </div>
                 {!isAccessHidden && (
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <label className="block text-xs font-medium leading-4 text-gray-900">
-                        Access
-                      </label>
-                      <Tooltip content="The type of access provided by the IAM role (e.g. read or write)">
-                        <QuestionMarkCircleIcon />
-                      </Tooltip>
-                    </div>
-                    <input
-                      type="text"
-                      value={roleItem.access || ''}
-                      onChange={(e) => updateRole(index, 'access', e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                      placeholder="read"
-                    />
-                  </div>
+                  <ValidatedInput
+                    name={`role-${index}-access`}
+                    label={accessOverride?.title || "Access"}
+                    value={roleItem.access || ''}
+                    onChange={(e) => updateRole(index, 'access', e.target.value)}
+                    required={accessOverride?.required}
+                    tooltip={accessOverride?.description || "The type of access provided by the IAM role (e.g. read or write)"}
+                    placeholder={accessOverride?.placeholder || "read"}
+                    pattern={accessOverride?.pattern}
+                    patternMessage={accessOverride?.patternMessage}
+                    minLength={accessOverride?.minLength}
+                    maxLength={accessOverride?.maxLength}
+                    className="bg-white"
+                  />
                 )}
                 {!isDescriptionHidden && (
                   <div className="sm:col-span-2">
@@ -236,44 +242,38 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                   </div>
                 )}
                 {!isFirstLevelApproversHidden && (
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <label className="block text-xs font-medium leading-4 text-gray-900">
-                        First Level Approvers
-                      </label>
-                      <Tooltip content="Primary approval authority">
-                        <QuestionMarkCircleIcon />
-                      </Tooltip>
-                    </div>
-                    <input
-                      type="text"
-                      value={roleItem.firstLevelApprovers || ''}
-                      onChange={(e) => updateRole(index, 'firstLevelApprovers', e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                      placeholder="manager@example.com"
-                      data-1p-ignore
-                    />
-                  </div>
+                  <ValidatedInput
+                    name={`role-${index}-firstLevelApprovers`}
+                    label={firstLevelApproversOverride?.title || "First Level Approvers"}
+                    value={roleItem.firstLevelApprovers || ''}
+                    onChange={(e) => updateRole(index, 'firstLevelApprovers', e.target.value)}
+                    required={firstLevelApproversOverride?.required}
+                    tooltip={firstLevelApproversOverride?.description || "Primary approval authority"}
+                    placeholder={firstLevelApproversOverride?.placeholder || "manager@example.com"}
+                    pattern={firstLevelApproversOverride?.pattern}
+                    patternMessage={firstLevelApproversOverride?.patternMessage}
+                    minLength={firstLevelApproversOverride?.minLength}
+                    maxLength={firstLevelApproversOverride?.maxLength}
+                    className="bg-white"
+                    data-1p-ignore
+                  />
                 )}
                 {!isSecondLevelApproversHidden && (
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <label className="block text-xs font-medium leading-4 text-gray-900">
-                        Second Level Approvers
-                      </label>
-                      <Tooltip content="Secondary approval authority">
-                        <QuestionMarkCircleIcon />
-                      </Tooltip>
-                    </div>
-                    <input
-                      type="text"
-                      value={roleItem.secondLevelApprovers || ''}
-                      onChange={(e) => updateRole(index, 'secondLevelApprovers', e.target.value)}
-                      className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                      placeholder="director@example.com"
-                      data-1p-ignore
-                    />
-                  </div>
+                  <ValidatedInput
+                    name={`role-${index}-secondLevelApprovers`}
+                    label={secondLevelApproversOverride?.title || "Second Level Approvers"}
+                    value={roleItem.secondLevelApprovers || ''}
+                    onChange={(e) => updateRole(index, 'secondLevelApprovers', e.target.value)}
+                    required={secondLevelApproversOverride?.required}
+                    tooltip={secondLevelApproversOverride?.description || "Secondary approval authority"}
+                    placeholder={secondLevelApproversOverride?.placeholder || "director@example.com"}
+                    pattern={secondLevelApproversOverride?.pattern}
+                    patternMessage={secondLevelApproversOverride?.patternMessage}
+                    minLength={secondLevelApproversOverride?.minLength}
+                    maxLength={secondLevelApproversOverride?.maxLength}
+                    className="bg-white"
+                    data-1p-ignore
+                  />
                 )}
 
                 {/* Custom Sections from Customization */}

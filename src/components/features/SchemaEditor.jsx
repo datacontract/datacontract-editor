@@ -15,7 +15,7 @@ import {SparkleButton} from '../../ai/index.js';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
-import {useCustomization, useIsPropertyHidden} from '../../hooks/useCustomization.js';
+import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
 import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
 import {
@@ -89,6 +89,13 @@ const SchemaEditor = ({schemaIndex}) => {
 	const isDataGranularityDescriptionHidden = useIsPropertyHidden('schema', 'dataGranularityDescription');
 	const isTagsHidden = useIsPropertyHidden('schema', 'tags');
 	const isLogicalTypeHidden = useIsPropertyHidden('schema', 'logicalType');
+
+	// Standard property overrides
+	const nameOverride = useStandardPropertyOverride('schema', 'name');
+	const physicalTypeOverride = useStandardPropertyOverride('schema', 'physicalType');
+	const physicalNameOverride = useStandardPropertyOverride('schema', 'physicalName');
+	const businessNameOverride = useStandardPropertyOverride('schema', 'businessName');
+	const logicalTypeOverride = useStandardPropertyOverride('schema', 'logicalType');
 
 	// Convert array format to object lookup for UI components
 	const customPropertiesLookup = useMemo(() => {
@@ -415,12 +422,16 @@ const SchemaEditor = ({schemaIndex}) => {
 									{!isNameHidden && (
 										<ValidatedInput
 											name={`schema-name-${schemaIndex}`}
-											label="Name"
+											label={nameOverride?.title || 'Name'}
 											value={schema[schemaIndex].name || ''}
 											onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
-											required={true}
-											tooltip="Technical name for the schema (required)"
-											placeholder="schema_name"
+											required={nameOverride?.required ?? true}
+											tooltip={nameOverride?.description || 'Technical name for the schema (required)'}
+											placeholder={nameOverride?.placeholder || 'schema_name'}
+											pattern={nameOverride?.pattern}
+											patternMessage={nameOverride?.patternMessage}
+											minLength={nameOverride?.minLength}
+											maxLength={nameOverride?.maxLength}
 											validationKey={`schema.${schemaIndex}.name`}
 											validationSection="Schema"
 										/>
@@ -476,112 +487,87 @@ const SchemaEditor = ({schemaIndex}) => {
 													<div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
 														{/* Business Name Field */}
 														{!isBusinessNameHidden && (
-															<div>
-																<div className="flex items-center gap-1 mb-1">
-																	<label htmlFor={`schema-business-name-${schemaIndex}`}
-																				 className="block text-xs font-medium leading-4 text-gray-900">
-																		Business Name
-																	</label>
-																	<Tooltip content="Human-friendly name for the schema">
-																		<QuestionMarkCircleIcon/>
-																	</Tooltip>
-																</div>
-																<input
-																	type="text"
-																	name={`schema-business-name-${schemaIndex}`}
-																	id={`schema-business-name-${schemaIndex}`}
-																	value={schema[schemaIndex].businessName || ''}
-																	onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
-																	className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-																	placeholder="Human readable name"
-																/>
-															</div>
+															<ValidatedInput
+																name={`schema-business-name-${schemaIndex}`}
+																label={businessNameOverride?.title || 'Business Name'}
+																value={schema[schemaIndex].businessName || ''}
+																onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
+																required={businessNameOverride?.required ?? false}
+																tooltip={businessNameOverride?.description || 'Human-friendly name for the schema'}
+																placeholder={businessNameOverride?.placeholder || 'Human readable name'}
+																pattern={businessNameOverride?.pattern}
+																patternMessage={businessNameOverride?.patternMessage}
+																minLength={businessNameOverride?.minLength}
+																maxLength={businessNameOverride?.maxLength}
+															/>
 														)}
 
 														{/* Physical Type Field */}
 														{!isPhysicalTypeHidden && (
 															<div>
-																<div className="flex items-center gap-1 mb-1">
-																	<label className="block text-xs font-medium leading-4 text-gray-900">
-																		Physical Type
-																	</label>
-																	<Tooltip content="Physical type of the schema (table, view, etc.)">
-																		<QuestionMarkCircleIcon/>
-																	</Tooltip>
-																</div>
-																<div className="mt-1 grid grid-cols-1">
-																	<input
-																		type="text"
-																		value={(() => {
-																			const currentType = schema[schemaIndex].physicalType || 'table';
-																			const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
-																			return matchedOption ? matchedOption.name : currentType;
-																		})()}
-																		onChange={(e) => {
-																			const inputValue = e.target.value;
-																			const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
-																			const typeValue = matchedOption ? matchedOption.id : inputValue;
-																			setValue(`schema[${schemaIndex}].physicalType`, typeValue);
-																		}}
-																		className="col-start-1 row-start-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-																		placeholder="table"
-																		list={`schema-type-options-${schemaIndex}`}
-																	/>
-																	<datalist id={`schema-type-options-${schemaIndex}`}>
-																		{schemaTypeOptions.map((option) => (
-																			<option key={option.id} value={option.name}/>
-																		))}
-																	</datalist>
-																</div>
+																<ValidatedInput
+																	name={`schema-physical-type-${schemaIndex}`}
+																	label={physicalTypeOverride?.title || 'Physical Type'}
+																	value={(() => {
+																		const currentType = schema[schemaIndex].physicalType || 'table';
+																		const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
+																		return matchedOption ? matchedOption.name : currentType;
+																	})()}
+																	onChange={(e) => {
+																		const inputValue = e.target.value;
+																		const matchedOption = schemaTypeOptions.find(option => option.name === inputValue);
+																		const typeValue = matchedOption ? matchedOption.id : inputValue;
+																		setValue(`schema[${schemaIndex}].physicalType`, typeValue);
+																	}}
+																	required={physicalTypeOverride?.required ?? false}
+																	tooltip={physicalTypeOverride?.description || 'Physical type of the schema (table, view, etc.)'}
+																	placeholder={physicalTypeOverride?.placeholder || 'table'}
+																	pattern={physicalTypeOverride?.pattern}
+																	patternMessage={physicalTypeOverride?.patternMessage}
+																	minLength={physicalTypeOverride?.minLength}
+																	maxLength={physicalTypeOverride?.maxLength}
+																	list={`schema-type-options-${schemaIndex}`}
+																/>
+																<datalist id={`schema-type-options-${schemaIndex}`}>
+																	{schemaTypeOptions.map((option) => (
+																		<option key={option.id} value={option.name}/>
+																	))}
+																</datalist>
 															</div>
 														)}
 
 														{/* Physical Name Field */}
 														{!isPhysicalNameHidden && (
-															<div>
-																<div className="flex items-center gap-1 mb-1">
-																	<label htmlFor={`schema-physical-name-${schemaIndex}`}
-																				 className="block text-xs font-medium leading-4 text-gray-900">
-																		Physical Name
-																	</label>
-																	<Tooltip content="Physical name in the database/storage">
-																		<QuestionMarkCircleIcon/>
-																	</Tooltip>
-																</div>
-																<input
-																	type="text"
-																	name={`schema-physical-name-${schemaIndex}`}
-																	id={`schema-physical-name-${schemaIndex}`}
-																	value={schema[schemaIndex].physicalName || ''}
-																	onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
-																	className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-																	placeholder="shipments_v1"
-																/>
-															</div>
+															<ValidatedInput
+																name={`schema-physical-name-${schemaIndex}`}
+																label={physicalNameOverride?.title || 'Physical Name'}
+																value={schema[schemaIndex].physicalName || ''}
+																onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
+																required={physicalNameOverride?.required ?? false}
+																tooltip={physicalNameOverride?.description || 'Physical name in the database/storage'}
+																placeholder={physicalNameOverride?.placeholder || 'shipments_v1'}
+																pattern={physicalNameOverride?.pattern}
+																patternMessage={physicalNameOverride?.patternMessage}
+																minLength={physicalNameOverride?.minLength}
+																maxLength={physicalNameOverride?.maxLength}
+															/>
 														)}
 
 														{/* Logical Type Field */}
 														{!isLogicalTypeHidden && (
-															<div>
-																<div className="flex items-center gap-1 mb-1">
-																	<label htmlFor={`schema-logical-type-${schemaIndex}`}
-																				 className="block text-xs font-medium leading-4 text-gray-900">
-																		Logical Type
-																	</label>
-																	<Tooltip content="Logical type of the schema (object, array, etc.)">
-																		<QuestionMarkCircleIcon/>
-																	</Tooltip>
-																</div>
-																<input
-																	type="text"
-																	name={`schema-logical-type-${schemaIndex}`}
-																	id={`schema-logical-type-${schemaIndex}`}
-																	value={schema[schemaIndex].logicalType || ''}
-																	onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
-																	className="mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-																	placeholder="object"
-																/>
-															</div>
+															<ValidatedInput
+																name={`schema-logical-type-${schemaIndex}`}
+																label={logicalTypeOverride?.title || 'Logical Type'}
+																value={schema[schemaIndex].logicalType || ''}
+																onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
+																required={logicalTypeOverride?.required ?? false}
+																tooltip={logicalTypeOverride?.description || 'Logical type of the schema (object, array, etc.)'}
+																placeholder={logicalTypeOverride?.placeholder || 'object'}
+																pattern={logicalTypeOverride?.pattern}
+																patternMessage={logicalTypeOverride?.patternMessage}
+																minLength={logicalTypeOverride?.minLength}
+																maxLength={logicalTypeOverride?.maxLength}
+															/>
 														)}
 													</div>
 
@@ -624,7 +610,6 @@ const SchemaEditor = ({schemaIndex}) => {
 
 													{/* Data Quality Section */}
 													<div className="mt-6">
-														<h4 className="text-xs font-medium text-gray-900 mb-3">Data Quality</h4>
 														<QualityEditor
 															value={schema[schemaIndex].quality}
 															// TODO: Implement update
@@ -635,7 +620,6 @@ const SchemaEditor = ({schemaIndex}) => {
 
 													{/* Authoritative Definitions Section */}
 													<div className="mt-6">
-														<h4 className="text-xs font-medium text-gray-900 mb-3">Authoritative Definitions</h4>
 														<AuthoritativeDefinitionsEditor
 															value={schema[schemaIndex].authoritativeDefinitions}
 															onChange={(value) => setValue(`schema[${schemaIndex}].authoritativeDefinitions`, value)}
@@ -644,7 +628,6 @@ const SchemaEditor = ({schemaIndex}) => {
 
 													{/* Relationships Section */}
 													<div className="mt-6">
-														<h4 className="text-xs font-medium text-gray-900 mb-3">Relationships</h4>
 														<RelationshipEditor
 															value={schema[schemaIndex].relationships}
 															onChange={(value) => setValue(`schema[${schemaIndex}].relationships`, value)}
@@ -683,7 +666,6 @@ const SchemaEditor = ({schemaIndex}) => {
 
 													{/* Custom Properties Section (raw key-value editor) */}
 													<div className="mt-6">
-														<h4 className="text-xs font-medium text-gray-900 mb-3">Custom Properties</h4>
 														<CustomPropertiesEditor
 															value={schema[schemaIndex].customProperties}
 															onChange={(value) => setValue(`schema[${schemaIndex}].customProperties`, value)}

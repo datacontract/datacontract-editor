@@ -8,7 +8,7 @@ import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
 import {useShallow} from "zustand/react/shallow";
-import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
+import { convertEnumToOptions, useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const ServerEditor = ({ serverIndex }) => {
@@ -24,6 +24,11 @@ const ServerEditor = ({ serverIndex }) => {
   const isTypeHidden = useIsPropertyHidden('servers', 'type');
   const isEnvironmentHidden = useIsPropertyHidden('servers', 'environment');
   const isDescriptionHidden = useIsPropertyHidden('servers', 'description');
+
+  // Get overrides for standard properties
+  const serverOverride = useStandardPropertyOverride('servers', 'server');
+  const typeOverride = useStandardPropertyOverride('servers', 'type');
+  const environmentOverride = useStandardPropertyOverride('servers', 'environment');
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -124,12 +129,28 @@ const ServerEditor = ({ serverIndex }) => {
     { id: 'zen', name: 'zen' }
   ];
 
-  const environmentOptions = [
+  const defaultEnvironmentOptions = [
     { id: 'prod', name: 'prod' },
     { id: 'preprod', name: 'preprod' },
     { id: 'dev', name: 'dev' },
     { id: 'uat', name: 'uat' }
   ];
+
+  // Apply type override
+  const effectiveTypeOptions = useMemo(() => {
+    if (typeOverride?.enum) {
+      return convertEnumToOptions(typeOverride.enum);
+    }
+    return typeOptions;
+  }, [typeOverride]);
+
+  // Apply environment override
+  const environmentOptions = useMemo(() => {
+    if (environmentOverride?.enum) {
+      return convertEnumToOptions(environmentOverride.enum);
+    }
+    return defaultEnvironmentOptions;
+  }, [environmentOverride]);
 
   // Update a specific field of the server
   const updateServer = (field, value) => {
@@ -234,11 +255,16 @@ const ServerEditor = ({ serverIndex }) => {
                 {!isServerHidden && (
                   <ValidatedInput
                     name="server"
-                    label="Server"
+                    label={serverOverride?.title || "Server"}
                     value={servers[serverIndex].server || ''}
                     onChange={(e) => updateServer('server', e.target.value)}
-                    required={true}
-                    placeholder="production-server"
+                    required={serverOverride?.required ?? true}
+                    tooltip={serverOverride?.description || undefined}
+                    placeholder={serverOverride?.placeholder || "production-server"}
+                    pattern={serverOverride?.pattern}
+                    patternMessage={serverOverride?.patternMessage}
+                    minLength={serverOverride?.minLength}
+                    maxLength={serverOverride?.maxLength}
                     validationKey={`servers.${serverIndex}.server`}
                     validationSection="Servers"
                   />
@@ -248,7 +274,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <Combobox
                       label={
                         <div className="flex items-center gap-1">
-                          <span>Environment</span>
+                          <span>{environmentOverride?.title || "Environment"}</span>
                           <Tooltip content="Deployment stage (prod, preprod, dev, uat)">
                             <QuestionMarkCircleIcon />
                           </Tooltip>
@@ -257,7 +283,7 @@ const ServerEditor = ({ serverIndex }) => {
                       options={environmentOptions}
                       value={servers[serverIndex].environment || ''}
                       onChange={(selectedValue) => updateServer('environment', selectedValue || '')}
-                      placeholder="Select environment..."
+                      placeholder={environmentOverride?.placeholder || "Select environment..."}
                       acceptAnyInput={true}
                     />
                   </div>
@@ -284,14 +310,14 @@ const ServerEditor = ({ serverIndex }) => {
                 {!isTypeHidden && (
                   <div className="sm:col-span-2">
                     <ValidatedCombobox
-                      label="Type"
-                      tooltip="Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
-                      required={true}
-                      options={typeOptions}
+                      label={typeOverride?.title || "Type"}
+                      tooltip={typeOverride?.description || "Platform category (api, athena, bigquery, snowflake, postgres, etc.)"}
+                      required={typeOverride?.required ?? true}
+                      options={effectiveTypeOptions}
                       value={servers[serverIndex].type || ''}
                       onChange={(selectedValue) => updateServer('type', selectedValue || '')}
-                      placeholder="Select server type..."
-                      acceptAnyInput={true}
+                      placeholder={typeOverride?.placeholder || "Select server type..."}
+                      acceptAnyInput={!typeOverride?.enum}
                       validationKey={`servers.${serverIndex}.type`}
                       validationSection="Servers"
                       renderSelectedIcon={(value) => {
