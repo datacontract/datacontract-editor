@@ -12,6 +12,7 @@ Rules:
 - Be concise but informative
 - Use professional technical language
 - Keep suggestions to 1-3 sentences
+- You can use markdown for formatting
 
 IMPORTANT: Always respond with valid JSON in one of these formats:
 
