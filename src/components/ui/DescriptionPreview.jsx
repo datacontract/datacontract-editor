@@ -1,8 +1,59 @@
+import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Tooltip from './Tooltip.jsx';
 import { IconResolver } from './IconResolver.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
 import {useEditorStore} from "../../store.js";
 import {useShallow} from "zustand/react/shallow";
+
+const hasHeadline = (text) => /^#{1,6}\s/m.test(text || '');
+const LINE_HEIGHT_REM = 1.25;
+const MAX_COLLAPSED_LINES = 10;
+const MAX_HEIGHT = `${MAX_COLLAPSED_LINES * LINE_HEIGHT_REM}rem`;
+
+const MarkdownField = ({ id, label, text }) => {
+  const isDocument = hasHeadline(text);
+  const [expanded, setExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const maxPx = MAX_COLLAPSED_LINES * LINE_HEIGHT_REM * parseFloat(getComputedStyle(document.documentElement).fontSize);
+      setIsOverflowing(contentRef.current.scrollHeight > maxPx);
+    }
+  }, [text]);
+
+  return (
+    <div id={id}>
+      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</dt>
+      <dd className={"mt-1 text-sm text-gray-700 prose prose-sm max-w-full"}>
+        {isDocument ? (
+          <>
+            <div
+              ref={contentRef}
+              className="overflow-hidden transition-[max-height] duration-200"
+              style={{ maxHeight: expanded || !isOverflowing ? 'none' : MAX_HEIGHT }}
+            >
+              <ReactMarkdown>{text}</ReactMarkdown>
+            </div>
+            {isOverflowing && (
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="mt-0.5 mb-3 text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer"
+              >
+                {expanded ? 'Show less' : 'Show more...'}
+              </button>
+            )}
+          </>
+        ) : (
+          <ReactMarkdown>{text}</ReactMarkdown>
+        )}
+      </dd>
+    </div>
+  );
+};
 
 const DescriptionPreview = () => {
 	const description = useEditorStore(useShallow(state => state.getValue('description')));
@@ -53,30 +104,15 @@ const DescriptionPreview = () => {
 
           <div className="flex flex-col gap-3">
             {description.purpose && (
-              <div id="description-purpose">
-                <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Purpose</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  <span className="whitespace-pre-wrap">{description.purpose}</span>
-                </dd>
-              </div>
+              <MarkdownField id="description-purpose" label="Purpose" text={description.purpose} />
             )}
 
             {description.usage && (
-              <div id="description-usage">
-                <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Usage</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  <span className="whitespace-pre-wrap">{description.usage}</span>
-                </dd>
-              </div>
+              <MarkdownField id="description-usage" label="Usage" text={description.usage} />
             )}
 
             {description.limitations && (
-              <div id="description-limitations">
-                <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Limitations</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  <span className="whitespace-pre-wrap">{description.limitations}</span>
-                </dd>
-              </div>
+              <MarkdownField id="description-limitations" label="Limitations" text={description.limitations} />
             )}
 
             {hasCustomProperties && (() => {

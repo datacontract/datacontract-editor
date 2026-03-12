@@ -1,10 +1,8 @@
 import { useMemo, useCallback } from 'react';
 import { useEditorStore } from '../store.js';
-import { Tooltip } from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
-import ValidatedTextarea from '../components/ui/ValidatedTextarea.jsx';
-import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
+import MarkdownEditor from '../components/ui/MarkdownEditor.jsx';
 import { SparkleButton } from '../ai/index.js';
 import { useShallow } from "zustand/react/shallow";
 import { useCustomization, useStandardPropertyOverride, useIsPropertyHidden } from '../hooks/useCustomization.js';
@@ -88,17 +86,16 @@ const TermsOfUse = () => {
             <div className="space-y-3">
               {/* Purpose Field */}
               {!isPurposeHidden && (
-                <ValidatedTextarea
+                <MarkdownEditor
                   name="description-purpose"
                   label={purposeOverride?.title || 'Purpose'}
                   value={description?.purpose}
-                  onChange={(e) => setYamlValue('description.purpose', e.target.value)}
+                  onChange={(value) => setYamlValue('description.purpose', value)}
                   required={purposeOverride?.required}
                   minLength={purposeOverride?.minLength}
                   maxLength={purposeOverride?.maxLength}
                   tooltip={purposeOverride?.description || "Intended purpose for the provided data"}
                   placeholder={purposeOverride?.placeholder || "Describe the purpose of this data contract..."}
-                  rows={3}
                   actions={
                     <SparkleButton
                       fieldName={purposeOverride?.title || "Purpose"}
@@ -113,17 +110,16 @@ const TermsOfUse = () => {
 
               {/* Usage Field */}
               {!isUsageHidden && (
-                <ValidatedTextarea
+                <MarkdownEditor
                   name="description-usage"
                   label={usageOverride?.title || 'Usage'}
                   value={description?.usage}
-                  onChange={(e) => setYamlValue('description.usage', e.target.value)}
+                  onChange={(value) => setYamlValue('description.usage', value)}
                   required={usageOverride?.required}
                   minLength={usageOverride?.minLength}
                   maxLength={usageOverride?.maxLength}
                   tooltip={usageOverride?.description || "How this data should be used"}
                   placeholder={usageOverride?.placeholder || "Describe how to use this data..."}
-                  rows={3}
                   actions={
                     <SparkleButton
                       fieldName={usageOverride?.title || "Usage"}
@@ -138,17 +134,16 @@ const TermsOfUse = () => {
 
               {/* Limitations Field */}
               {!isLimitationsHidden && (
-                <ValidatedTextarea
+                <MarkdownEditor
                   name="description-limitations"
                   label={limitationsOverride?.title || 'Limitations'}
                   value={description?.limitations}
-                  onChange={(e) => setYamlValue('description.limitations', e.target.value)}
+                  onChange={(value) => setYamlValue('description.limitations', value)}
                   required={limitationsOverride?.required}
                   minLength={limitationsOverride?.minLength}
                   maxLength={limitationsOverride?.maxLength}
                   tooltip={limitationsOverride?.description || "Technical, compliance, and legal limitations for data use"}
                   placeholder={limitationsOverride?.placeholder || "Describe any limitations or constraints..."}
-                  rows={3}
                   actions={
                     <SparkleButton
                       fieldName={limitationsOverride?.title || "Limitations"}
