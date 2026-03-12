@@ -38,8 +38,11 @@ export function mergeCustomizationsIntoSchema(baseSchema, customizations) {
 
 /**
  * Each level maps to:
- *   propertiesPath  – where standard ODCS properties live in the schema
- *   customPropertiesPath – where the customProperties array lives
+ *   propertiesPath         – where standard ODCS properties live in the schema
+ *   customPropertiesPath   – where the customProperties array lives
+ *   allOfDef (optional)    – when set, custom property constraints are injected
+ *                            via allOf on this $defs entry instead of mutating
+ *                            the shared customPropertiesPath node directly.
  *
  * Paths are arrays of keys to walk from the schema root.
  * A special "$defs" segment is used to navigate into $defs.
@@ -106,10 +109,13 @@ function applyStandardOverrides(schema, mapping, overrides) {
 	const parent = parentPath.length ? resolvePath(schema, parentPath) : schema;
 
 	for (const override of overrides) {
-		const { property, hidden, title, description, placeholder, ...constraints } = override;
+		const { property, hidden, placeholder, title, description, ...constraints } = override;
 		if (!isSafeKey(property)) continue;
 		const propSchema = properties[property];
 		if (!propSchema) continue;
+
+		if (title) propSchema.title = title;
+		if (description) propSchema.description = description;
 
 		if (constraints.enum) {
 			const enumValues = constraints.enum.map((e) =>
@@ -213,25 +219,100 @@ function buildValueConstraints(config) {
 	return valueSchema;
 }
 
+function resolveCustomPropertiesBase(schema, cpNode) {
+	// If it's a $ref, resolve to get the actual definition
+	if (cpNode.$ref) {
+		const resolved = resolveRef(schema, cpNode.$ref);
+		if (!resolved) return null;
+		return structuredClone(resolved);
+	}
+	return structuredClone(cpNode);
+}
+
+function resolveItemsSchema(schema, cpSchema) {
+	if (cpSchema.type !== 'array') return null;
+	if (cpSchema.items?.$ref) {
+		const resolvedItems = resolveRef(schema, cpSchema.items.$ref);
+		if (resolvedItems) {
+			cpSchema.items = structuredClone(resolvedItems);
+		}
+	}
+	return cpSchema.items || null;
+}
+
 function applyCustomPropertyConstraints(schema, mapping, customProperties) {
-	// Resolve the customProperties schema node
 	const cpNode = resolvePath(schema, mapping.customPropertiesPath);
 	if (!cpNode) return;
 
-	// If it's a $ref, we need to inline it so we can add per-level if/then
-	let itemsSchema;
+	if (mapping.allOfDef) {
+		// For levels that share a customPropertiesPath (e.g. schema and schema.properties
+		// both point to SchemaElement), inject constraints into the level-specific $def
+		// (e.g. SchemaObject or SchemaBaseProperty) via allOf, leaving the shared node untouched.
+		applyCustomPropertyConstraintsViaAllOf(schema, mapping, customProperties, cpNode);
+	} else {
+		// For levels with their own customPropertiesPath, modify the node directly.
+		applyCustomPropertyConstraintsInline(schema, mapping, customProperties, cpNode);
+	}
+}
+
+function applyCustomPropertyConstraintsViaAllOf(schema, mapping, customProperties, cpNode) {
+	// Build a standalone customProperties schema with level-specific constraints
+	const cpSchema = resolveCustomPropertiesBase(schema, cpNode);
+	if (!cpSchema) return;
+
+	const itemsSchema = resolveItemsSchema(schema, cpSchema);
+	if (!itemsSchema) return;
+
+	// Add if/then clauses for value constraints
+	if (!itemsSchema.allOf) itemsSchema.allOf = [];
+	for (const cp of customProperties) {
+		const valueConstraints = buildValueConstraints(cp);
+		if (Object.keys(valueConstraints).length === 0) continue;
+		itemsSchema.allOf.push({
+			if: { properties: { property: { const: cp.property } } },
+			then: { properties: { value: valueConstraints } },
+		});
+	}
+
+	// Add contains constraints for required custom properties
+	const requiredCps = customProperties.filter((cp) => cp.required);
+	if (requiredCps.length > 0) {
+		if (!cpSchema.allOf) cpSchema.allOf = [];
+		for (const cp of requiredCps) {
+			cpSchema.allOf.push({
+				contains: {
+					properties: { property: { const: cp.property } },
+					required: ['property', 'value'],
+				},
+			});
+		}
+	}
+
+	// Inject into the level-specific $def via allOf
+	const defNode = schema.$defs?.[mapping.allOfDef];
+	if (!defNode) return;
+
+	if (!defNode.allOf) defNode.allOf = [];
+	const allOfEntry = { properties: { customProperties: cpSchema } };
+
+	// If there are required custom properties, also mark customProperties as required at this level
+	if (requiredCps.length > 0) {
+		allOfEntry.required = ['customProperties'];
+	}
+
+	defNode.allOf.push(allOfEntry);
+}
+
+function applyCustomPropertyConstraintsInline(schema, mapping, customProperties, cpNode) {
+	// Inline the $ref if needed
 	if (cpNode.$ref) {
-		// Resolve the $ref to get the base CustomProperties definition
 		const resolved = resolveRef(schema, cpNode.$ref);
 		if (!resolved) return;
-
-		// Replace $ref with inline copy
 		const inlined = structuredClone(resolved);
 		Object.keys(cpNode).forEach((k) => delete cpNode[k]);
 		Object.assign(cpNode, inlined);
 	}
 
-	// cpNode should now be { type: "array", items: ... }
 	if (cpNode.type !== 'array') return;
 
 	// Resolve items if it's a $ref
@@ -242,7 +323,7 @@ function applyCustomPropertyConstraints(schema, mapping, customProperties) {
 		}
 	}
 
-	itemsSchema = cpNode.items;
+	const itemsSchema = cpNode.items;
 	if (!itemsSchema) return;
 
 	// Add if/then clauses for each custom property via allOf on items
@@ -265,21 +346,16 @@ function applyCustomPropertyConstraints(schema, mapping, customProperties) {
 	// For required custom properties, add `contains` constraints on the array
 	const requiredCps = customProperties.filter((cp) => cp.required);
 	if (requiredCps.length > 0) {
-		// Find the schema object that contains the customProperties property
-		// e.g. for path ['properties', 'customProperties'], parent is at [] (root schema)
-		// for path ['$defs', 'Server', 'properties', 'customProperties'], parent is at ['$defs', 'Server']
 		const parentPath = mapping.customPropertiesPath.slice(0, -2);
 		const parent = parentPath.length ? resolvePath(schema, parentPath) : schema;
 
 		if (parent) {
-			// Ensure customProperties is required on the parent
 			if (!parent.required) parent.required = [];
 			if (!parent.required.includes('customProperties')) {
 				parent.required.push('customProperties');
 			}
 		}
 
-		// Use allOf with contains for each required property
 		if (!cpNode.allOf) cpNode.allOf = [];
 		for (const cp of requiredCps) {
 			cpNode.allOf.push({
