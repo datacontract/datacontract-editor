@@ -1,12 +1,15 @@
 import { parseYaml } from './yaml.js';
 import Ajv2019 from 'ajv/dist/2019.js';
 import addFormats from 'ajv-formats';
+import { mergeCustomizationsIntoSchema } from './mergeCustomizationsIntoSchema.js';
 
 const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
 let cachedSchema = null;
-let ajvInstance = null;
-let validateFn = null;
+
+// Cache for compiled validators keyed by customizations hash
+let cachedValidatorHash = null;
+let cachedValidateFn = null;
 
 /**
  * Fetch and cache the ODCS JSON schema
@@ -28,24 +31,43 @@ async function getSchema() {
 }
 
 /**
- * Get or create AJV validator
+ * Compute a simple hash of customizations for cache invalidation
  */
-async function getValidator() {
-	if (validateFn) return validateFn;
+function hashCustomizations(customizations) {
+	if (!customizations) return null;
+	try {
+		return JSON.stringify(customizations);
+	} catch {
+		return null;
+	}
+}
 
-	const schema = await getSchema();
-	if (!schema) return null;
+/**
+ * Get or create AJV validator, recompiling when customizations change
+ */
+async function getValidator(customizations) {
+	const hash = hashCustomizations(customizations);
 
-	ajvInstance = new Ajv2019({
+	if (cachedValidateFn && cachedValidatorHash === hash) {
+		return cachedValidateFn;
+	}
+
+	const baseSchema = await getSchema();
+	if (!baseSchema) return null;
+
+	const schema = mergeCustomizationsIntoSchema(baseSchema, customizations);
+
+	const ajvInstance = new Ajv2019({
 		allErrors: true,
 		strict: false,
-		validateFormats: false,
+		validateFormats: true,
 	});
 	addFormats(ajvInstance);
 
 	try {
-		validateFn = ajvInstance.compile(schema);
-		return validateFn;
+		cachedValidateFn = ajvInstance.compile(schema);
+		cachedValidatorHash = hash;
+		return cachedValidateFn;
 	} catch (e) {
 		console.warn('Failed to compile ODCS schema:', e.message);
 		return null;
@@ -56,9 +78,10 @@ async function getValidator() {
  * Validate a YAML string against ODCS v3.1.0 schema.
  *
  * @param {string} yamlString - The YAML content to validate
+ * @param {Object|null} customizations - Optional customizations to merge into schema
  * @returns {Promise<{isValid: boolean, errors: Array, parsed: any}>}
  */
-export async function validateYaml(yamlString) {
+export async function validateYaml(yamlString, customizations = null) {
 	const errors = [];
 
 	// Parse YAML to check syntax
@@ -80,8 +103,8 @@ export async function validateYaml(yamlString) {
 		};
 	}
 
-	// Validate against ODCS JSON schema
-	const validate = await getValidator();
+	// Validate against ODCS JSON schema (with customizations merged in)
+	const validate = await getValidator(customizations);
 	if (validate && parsed) {
 		const valid = validate(parsed);
 		if (!valid && validate.errors) {
@@ -123,6 +146,14 @@ function formatAjvError(err) {
 			return `${path}: unknown field '${err.params.additionalProperty}'`;
 		case 'if':
 			return null; // Skip 'if' errors, the 'then' errors are more informative
+		case 'contains': {
+			const propName = err.schema?.properties?.property?.const;
+			return propName
+				? `${path}: missing required custom property '${propName}'`
+				: `${path}: missing required custom property`;
+		}
+		case 'format':
+			return `${path}: must be a valid ${err.params.format}`;
 		default:
 			return `${path}: ${err.message}`;
 	}
