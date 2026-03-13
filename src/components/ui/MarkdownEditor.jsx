@@ -61,8 +61,8 @@ const MarkdownEditor = ({
         'guide',
       ],
       sideBySideFullscreen: false,
-      minHeight: '100px',
-      maxHeight: '300px',
+      minHeight: '80px',
+      maxHeight: '150px',
     });
 
     easyMDE.codemirror.on('change', () => {
