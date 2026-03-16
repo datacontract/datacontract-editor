@@ -257,9 +257,19 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 					<tr className="print:break-inside-avoid-page">
 						<th scope="colgroup" colSpan="3"
 								className="py-2 pl-4 pr-3 text-left font-semibold text-gray-900 sm:pl-6">
-							<span>{schema.title || schemaName}</span>
-							{' '}
-							<span className="font-mono font-medium">{schemaName}</span>
+							{schema.businessName && schema.businessName !== schemaName && (
+								<>
+									<span>{schema.businessName}</span>
+									{' '}
+								</>
+							)}
+							<span className="font-mono font-medium">{schemaName}
+								{(schema.physicalName && schema.physicalName !== schemaName) && (
+									<Tooltip content={`physicalName: ${schema.physicalName}`}>
+										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+									</Tooltip>
+								)}
+							</span>
 							{' '}
 							{schema.type && (
 								<span
