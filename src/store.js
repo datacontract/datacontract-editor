@@ -439,6 +439,10 @@ const defaultEditorStore = create()(
 				};
 			},
 			onRehydrateStorage: () => (state) => {
+				// Clean up orphaned localStorage data from pre-sessionStorage versions
+				if (persistence !== 'localStorage') {
+					try { localStorage.removeItem('editor-store'); } catch { /* ignore */ }
+				}
 				// Sync yamlParts from yaml when rehydrating from persisted storage
 				// setTimeout needed because defaultEditorStore isn't fully initialized yet
 				if (state?.yaml) {
