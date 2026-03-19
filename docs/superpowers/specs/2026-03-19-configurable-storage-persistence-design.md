@@ -12,8 +12,8 @@ The standalone editor persists the entire Zustand store (YAML content, editor co
 
 Introduce a configurable `persistence` option with three strategies: `localStorage`, `sessionStorage`, and `none`.
 
-- **Standalone mode** default changes from `localStorage` to `sessionStorage` (survives refresh, clears on tab close)
-- **Embedded mode** default remains `none` (no persistence, current behavior preserved)
+- **Standalone mode** is not user-configurable; it always uses `sessionStorage` (survives refresh, clears on tab close). This is an intentional hardcoded change from the previous `localStorage` default.
+- **Embedded mode** gains a `persistence` option (`'localStorage'`, `'sessionStorage'`, `'none'`), default remains `'none'` (current behavior preserved)
 - Backward compatibility for the existing `enablePersistence` boolean in embedded mode
 
 ## Design
@@ -86,9 +86,12 @@ persistence: 'none',
 In `createConfiguredStore`, add backward compatibility and use the factory:
 
 ```js
+// Backward compat: only apply enablePersistence when persistence is not explicitly set
 let persistence = config.persistence;
-if (config.enablePersistence === true) persistence = 'localStorage';
-if (config.enablePersistence === false) persistence = 'none';
+if (persistence === undefined) {
+  if (config.enablePersistence === true) persistence = 'localStorage';
+  else persistence = 'none';  // default for embedded
+}
 
 const storageConfig = getStorageConfig(persistence);
 
@@ -118,6 +121,16 @@ if (storageConfig) {
 | `src/store.js` | Use factory, default to `sessionStorage` |
 | `src/embed.jsx` | Replace `enablePersistence` with `persistence`, backward compat |
 | `CONFIGURATION.md` | Document new option, deprecate old one |
+| `public/index.html` | Update to use new `persistence` option (currently uses `enablePersistence: true`) |
+| `embed.html` | Review/update `enablePersistence` usage |
+| `embed-customizations.html` | Review/update `enablePersistence` usage |
+| `embed-customizations2.html` | Review/update `enablePersistence` usage |
+| `bin/datacontract-editor.js` | Review/update `enablePersistence` usage |
+
+## Out of Scope
+
+- **Field-level exclusion from persistence** (e.g., excluding `editorConfig.ai.apiKey` via Zustand's `partialize`). Changing from `localStorage` to `sessionStorage` reduces the exposure window but keys remain in storage for the tab lifetime. This could be addressed in a follow-up.
+- **Cleanup of orphaned `localStorage` data**. When the standalone default changes to `sessionStorage`, old data under the `editor-store` key in `localStorage` remains. A one-time cleanup could be added but is not part of this change.
 
 ## Risks
 
