@@ -162,7 +162,7 @@ function generateCliIndexHtml() {
             container: '#root',
             mode: 'CLI',
             yaml: yaml,
-            enablePersistence: false,
+            persistence: 'none',
             initialView: 'form',
             onSave: async (yamlContent) => {
               const saveResponse = await fetch('/api/files/${encodeURIComponent(targetFileName)}', {
