@@ -354,7 +354,57 @@ git commit -m "docs: document persistence option, deprecate enablePersistence"
 
 ---
 
-### Task 6: Manual verification with Playwright
+### Task 6: Add orphaned localStorage cleanup to standalone store
+
+**Files:**
+- Modify: `src/store.js:441-454` (onRehydrateStorage callback)
+
+**Context:** When standalone mode switches from `localStorage` to `sessionStorage`, old data under the `editor-store` key in `localStorage` is left behind. This task adds an idempotent cleanup that silently removes it on each rehydration. The cleanup is guarded: it only runs when the active strategy is not `localStorage`, to avoid deleting data that was just rehydrated.
+
+**Note:** When strategy is `'none'`, the `persist` middleware is skipped entirely, so `onRehydrateStorage` never fires. The cleanup only runs for the `'sessionStorage'` case — which is exactly when orphaned `localStorage` data would exist.
+
+- [ ] **Step 1: Update `onRehydrateStorage` in `src/store.js`**
+
+In the store creation block (line 441), add the cleanup before the existing yamlParts sync logic:
+
+Replace:
+```js
+		onRehydrateStorage: () => (state) => {
+			// Sync yamlParts from yaml when rehydrating from persisted storage
+			// setTimeout needed because defaultEditorStore isn't fully initialized yet
+			if (state?.yaml) {
+```
+
+With:
+```js
+		onRehydrateStorage: () => (state) => {
+			// Clean up orphaned localStorage data from pre-sessionStorage versions
+			if (persistence !== 'localStorage') {
+				try { localStorage.removeItem('editor-store'); } catch { /* ignore */ }
+			}
+			// Sync yamlParts from yaml when rehydrating from persisted storage
+			// setTimeout needed because defaultEditorStore isn't fully initialized yet
+			if (state?.yaml) {
+```
+
+- [ ] **Step 2: Verify the app builds**
+
+```bash
+npx vite build --mode production 2>&1 | tail -5
+```
+
+Expected: Build succeeds with no errors.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/store.js
+git commit -m "feat: clean up orphaned localStorage data on rehydration"
+```
+
+---
+
+### Task 7: Manual verification with Playwright
 
 - [ ] **Step 1: Build and start the app**
 
@@ -374,7 +424,15 @@ Use Playwright MCP tools:
 3. Run JS: `sessionStorage.getItem('editor-store')` — should return non-null
 4. Run JS: `localStorage.getItem('editor-store')` — should return null
 
-- [ ] **Step 3: Verify embedded mode with persistence: 'none'**
+- [ ] **Step 3: Verify orphaned localStorage cleanup**
+
+Simulate orphaned data by injecting a value into localStorage before navigating:
+1. Run JS: `localStorage.setItem('editor-store', '{"orphaned": true}')`
+2. Navigate to http://localhost:9090 (forces rehydration)
+3. Run JS: `localStorage.getItem('editor-store')` — should return null (cleaned up)
+4. Run JS: `sessionStorage.getItem('editor-store')` — should return non-null (active store)
+
+- [ ] **Step 4: Verify embedded mode with persistence: 'none'**
 
 Open http://localhost:9090/embed in the browser. Edit some YAML content. Check that:
 - Neither `sessionStorage` nor `localStorage` contain `editor-store`
@@ -385,7 +443,7 @@ Use Playwright MCP tools:
 3. Run JS: `sessionStorage.getItem('editor-store')` — should return null
 4. Run JS: `localStorage.getItem('editor-store')` — should return null
 
-- [ ] **Step 4: Stop the server**
+- [ ] **Step 5: Stop the server**
 
 ```bash
 kill %1
