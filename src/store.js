@@ -439,7 +439,7 @@ const defaultEditorStore = create()(
 				};
 			},
 			onRehydrateStorage: () => (state) => {
-				// Sync yamlParts from yaml when rehydrating from localStorage
+				// Sync yamlParts from yaml when rehydrating from persisted storage
 				// setTimeout needed because defaultEditorStore isn't fully initialized yet
 				if (state?.yaml) {
 					setTimeout(() => {
