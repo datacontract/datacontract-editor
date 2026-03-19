@@ -12,7 +12,7 @@ The standalone editor persists the entire Zustand store (YAML content, editor co
 
 Introduce a configurable `persistence` option with three strategies: `localStorage`, `sessionStorage`, and `none`.
 
-- **Standalone mode** is not user-configurable; it always uses `sessionStorage` (survives refresh, clears on tab close). This is an intentional hardcoded change from the previous `localStorage` default.
+- **Standalone mode** defaults to `sessionStorage`, configurable at build time via `VITE_PERSISTENCE` env var
 - **Embedded mode** gains a `persistence` option (`'localStorage'`, `'sessionStorage'`, `'none'`), default remains `'none'` (current behavior preserved)
 - Backward compatibility for the existing `enablePersistence` boolean in embedded mode
 
@@ -52,21 +52,26 @@ export function getStorageConfig(strategy = 'sessionStorage') {
 
 ### 2. Standalone Mode — `src/store.js`
 
-Replace hardcoded `createJSONStorage(() => localStorage)` with `getStorageConfig('sessionStorage')`.
+Read `VITE_PERSISTENCE` env var at build time, defaulting to `'sessionStorage'`. When the strategy resolves to `'none'`, skip the `persist` middleware entirely.
 
 Existing merge logic and `onRehydrateStorage` callback remain unchanged.
 
 ```js
 import { getStorageConfig } from './utils/persistence.js';
 
+const persistence = import.meta.env.VITE_PERSISTENCE || 'sessionStorage';
+const storageConfig = getStorageConfig(persistence);
+
 const defaultEditorStore = create()(
   devtools(
-    persist(defaultStoreConfig, {
-      name: 'editor-store',
-      storage: getStorageConfig('sessionStorage'),
-      merge: (persistedState, currentState) => { /* existing logic */ },
-      onRehydrateStorage: () => (state) => { /* existing logic */ },
-    })
+    storageConfig
+      ? persist(defaultStoreConfig, {
+          name: 'editor-store',
+          storage: storageConfig,
+          merge: (persistedState, currentState) => { /* existing logic */ },
+          onRehydrateStorage: () => (state) => { /* existing logic */ },
+        })
+      : defaultStoreConfig
   )
 );
 ```
@@ -118,7 +123,7 @@ if (storageConfig) {
 | File | Change |
 |------|--------|
 | `src/utils/persistence.js` | New — storage strategy factory |
-| `src/store.js` | Use factory, default to `sessionStorage` |
+| `src/store.js` | Use factory, read `VITE_PERSISTENCE` env var, default to `sessionStorage` |
 | `src/embed.jsx` | Replace `enablePersistence` with `persistence`, backward compat |
 | `CONFIGURATION.md` | Document new option, deprecate old one |
 | `public/index.html` | Update to use new `persistence` option (currently uses `enablePersistence: true`) |
