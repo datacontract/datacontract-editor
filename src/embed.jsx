@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
@@ -13,6 +13,7 @@ import './App.css'
 import './components/diagram/DiagramStyles.css'
 import * as Yaml from "yaml";
 import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
+import { getStorageConfig } from './utils/persistence.js';
 
 /**
  * Data Contract Editor - Embeddable Component
@@ -84,9 +85,6 @@ const DEFAULT_CONFIG = {
 
   // Custom backend
   backend: null,
-
-  // Enable/disable localStorage persistence
-  enablePersistence: false,
 
   // Show/hide the preview panel on the right side
   showPreview: true,
@@ -369,12 +367,22 @@ function createConfiguredStore(config) {
 		};
 	};
 
-  if (config.enablePersistence) {
+  // Backward compat: only apply enablePersistence when persistence is not explicitly set
+  let persistence = config.persistence;
+  if (persistence === undefined) {
+    if (config.enablePersistence === true) persistence = 'localStorage';
+    else persistence = 'none';
+  }
+
+  const storageConfig = getStorageConfig(persistence);
+
+  if (storageConfig) {
     return create()(
       persist(storeConfig, {
-				name: 'editor-store',
-				storage: createJSONStorage(() => localStorage),
-		}))
+        name: 'editor-store',
+        storage: storageConfig,
+      })
+    );
   } else {
     return create()(storeConfig);
   }
