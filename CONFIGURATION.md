@@ -137,11 +137,23 @@ init({
   allowUnmanagedTags: true,          // allow to use tags that are not specified as managed (default: true)
 
   // Advanced
-  enablePersistence: false,          // localStorage persistence
+  persistence: 'none',              // 'localStorage', 'sessionStorage', or 'none' (default: 'none')
   basePath: null,                    // Base path for assets
   customizations: null,              // UI customizations
 });
 ```
+
+### Persistence
+
+The `persistence` option controls how the editor stores state in the browser:
+
+| Value | Behavior |
+|-------|----------|
+| `'none'` | No browser storage (default for embedded mode) |
+| `'sessionStorage'` | Persists across page refresh, clears when tab closes (default for standalone mode, configurable via `VITE_PERSISTENCE` env var) |
+| `'localStorage'` | Persists indefinitely across sessions |
+
+**Deprecated:** `enablePersistence` (boolean) still works for backward compatibility: `true` maps to `'localStorage'`, `false` maps to `'none'`.
 
 ## Custom AI Tools (Embed Only)
 
