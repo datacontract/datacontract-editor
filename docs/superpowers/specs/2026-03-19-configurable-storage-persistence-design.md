@@ -54,7 +54,7 @@ export function getStorageConfig(strategy = 'sessionStorage') {
 
 Read `VITE_PERSISTENCE` env var at build time, defaulting to `'sessionStorage'`. When the strategy resolves to `'none'`, skip the `persist` middleware entirely.
 
-Existing merge logic and `onRehydrateStorage` callback remain unchanged.
+Existing merge logic remains unchanged. The `onRehydrateStorage` callback is extended with an idempotent silent cleanup of orphaned `localStorage` data left over from the previous `localStorage`-based persistence. The cleanup only runs when the active strategy is not `localStorage`, to avoid deleting data that was just rehydrated.
 
 ```js
 import { getStorageConfig } from './utils/persistence.js';
@@ -69,7 +69,13 @@ const defaultEditorStore = create()(
           name: 'editor-store',
           storage: storageConfig,
           merge: (persistedState, currentState) => { /* existing logic */ },
-          onRehydrateStorage: () => (state) => { /* existing logic */ },
+          onRehydrateStorage: () => (state) => {
+            // Clean up orphaned localStorage data from pre-sessionStorage versions
+            if (persistence !== 'localStorage') {
+              try { localStorage.removeItem('editor-store'); } catch { /* ignore */ }
+            }
+            // existing yamlParts sync logic...
+          },
         })
       : defaultStoreConfig
   )
@@ -129,9 +135,8 @@ if (storageConfig) {
 ## Out of Scope
 
 - **Field-level exclusion from persistence** (e.g., excluding `editorConfig.ai.apiKey` via Zustand's `partialize`). Changing from `localStorage` to `sessionStorage` reduces the exposure window but keys remain in storage for the tab lifetime. This could be addressed in a follow-up.
-- **Cleanup of orphaned `localStorage` data**. When the standalone default changes to `sessionStorage`, old data under the `editor-store` key in `localStorage` remains. A one-time cleanup could be added but is not part of this change.
 
 ## Risks
 
 - **Breaking change for standalone users**: existing `localStorage` data won't be read by `sessionStorage`. Users who relied on cross-session persistence will lose their stored state on upgrade. This is intentional — the security report specifically flags this behavior.
-- **No migration**: old `localStorage` data under `editor-store` key is left in place. It could be cleaned up manually or by a one-time migration script, but this is out of scope.
+- **Cleanup is best-effort**: the `localStorage.removeItem` call is wrapped in try/catch. In environments where `localStorage` access throws (e.g., some privacy modes), the orphaned data remains but causes no harm since the app no longer reads from it.
