@@ -1,9 +1,10 @@
 import {create} from 'zustand'
-import {devtools, persist, createJSONStorage} from 'zustand/middleware'
+import {devtools, persist} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
 import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
+import { getStorageConfig } from './utils/persistence.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -402,11 +403,15 @@ export function defaultStoreConfig(set, get) {
 
 
 // Create central zustand store for app state
+const persistence = import.meta.env.VITE_PERSISTENCE || 'sessionStorage';
+const storageConfig = getStorageConfig(persistence);
+
 const defaultEditorStore = create()(
 	devtools(
-		persist(defaultStoreConfig, {
+		storageConfig
+		? persist(defaultStoreConfig, {
 			name: 'editor-store',
-			storage: createJSONStorage(() => localStorage),
+			storage: storageConfig,
 			merge: (persistedState, currentState) => {
 				// Deep merge editorConfig, ensuring empty strings don't override build-time defaults
 				const persistedAi = persistedState?.editorConfig?.ai || {};
@@ -448,6 +453,7 @@ const defaultEditorStore = create()(
 				}
 			},
 		})
+		: defaultStoreConfig
 	)
 );
 
