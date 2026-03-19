@@ -80,13 +80,7 @@ const defaultEditorStore = create()(
 
 Replace `enablePersistence` (boolean) with `persistence` (string) in `DEFAULT_CONFIG`:
 
-```js
-// Before
-enablePersistence: false,
-
-// After
-persistence: 'none',
-```
+Remove `enablePersistence: false` from `DEFAULT_CONFIG`. Do NOT add `persistence` to defaults — it must remain `undefined` after the `{ ...DEFAULT_CONFIG, ...userConfig }` merge so the backward compat check can detect when the user only passed `enablePersistence`.
 
 In `createConfiguredStore`, add backward compatibility and use the factory:
 
