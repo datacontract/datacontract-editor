@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import { isSafeKey } from '../../utils/safeProperty.js';
 import TagsInput from '../ui/TagsInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
@@ -40,7 +41,7 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
     const cp = member.customProperties;
     if (!Array.isArray(cp)) return cp || {};
     return cp.reduce((acc, item) => {
-      if (item?.property !== undefined) {
+      if (item?.property !== undefined && isSafeKey(item.property)) {
         acc[item.property] = item.value;
       }
       return acc;

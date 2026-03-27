@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useEditorStore } from '../store.js';
+import { isSafeKey } from '../utils/safeProperty.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
@@ -50,7 +51,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
     const cp = item.customProperties;
     if (!Array.isArray(cp)) return cp || {};
     return cp.reduce((acc, item) => {
-      if (item?.property !== undefined) {
+      if (item?.property !== undefined && isSafeKey(item.property)) {
         acc[item.property] = item.value;
       }
       return acc;

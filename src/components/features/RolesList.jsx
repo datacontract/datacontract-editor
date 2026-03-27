@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Tooltip } from '../ui/index.js';
+import { isSafeKey } from '../../utils/safeProperty.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
@@ -123,7 +124,7 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
     const cp = roleItem.customProperties;
     if (!Array.isArray(cp)) return cp || {};
     return cp.reduce((acc, item) => {
-      if (item?.property !== undefined) {
+      if (item?.property !== undefined && isSafeKey(item.property)) {
         acc[item.property] = item.value;
       }
       return acc;

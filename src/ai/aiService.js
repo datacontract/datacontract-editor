@@ -10,6 +10,7 @@
  */
 
 import { DEFAULT_AI_CONFIG } from '../config/defaults.js';
+import { isSafeKey } from '../utils/safeProperty.js';
 
 /**
  * Tool registry - stores registered tools with their handlers
@@ -220,6 +221,7 @@ export async function streamChatCompletion({
     onToolCallDelta: (deltas) => {
       for (const delta of deltas) {
         const idx = delta.index;
+        if (!isSafeKey(idx)) continue;
         if (!currentToolCalls[idx]) {
           currentToolCalls[idx] = {
             id: delta.id || `call_${idx}`,

@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
+import {isSafeKey} from '../../utils/safeProperty.js';
 import {Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
@@ -82,7 +83,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
     const cp = property.customProperties;
     if (!Array.isArray(cp)) return cp || {};
     return cp.reduce((acc, item) => {
-      if (item?.property !== undefined) {
+      if (item?.property !== undefined && isSafeKey(item.property)) {
         acc[item.property] = item.value;
       }
       return acc;

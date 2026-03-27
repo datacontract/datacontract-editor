@@ -6,6 +6,8 @@
  * @param {Object|null} customizations - The editor customizations config
  * @returns {Object} A (deep-cloned) schema with customization rules merged in
  */
+import { isSafeKey } from './safeProperty.js';
+
 export function mergeCustomizationsIntoSchema(baseSchema, customizations) {
 	if (!customizations?.dataContract) return baseSchema;
 
@@ -105,6 +107,7 @@ function applyStandardOverrides(schema, mapping, overrides) {
 
 	for (const override of overrides) {
 		const { property, hidden, title, description, placeholder, ...constraints } = override;
+		if (!isSafeKey(property)) continue;
 		const propSchema = properties[property];
 		if (!propSchema) continue;
 
@@ -297,6 +300,7 @@ function resolvePath(obj, path) {
 	let current = obj;
 	for (const key of path) {
 		if (current == null || typeof current !== 'object') return null;
+		if (!isSafeKey(key)) return null;
 		current = current[key];
 	}
 	return current;

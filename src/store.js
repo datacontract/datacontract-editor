@@ -5,6 +5,7 @@ import * as Yaml from "yaml";
 import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 import { getStorageConfig } from './utils/persistence.js';
+import { isSafeKey } from './utils/safeProperty.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -48,6 +49,7 @@ export const getOverrideStore = () => {
 
 export function getValueWithPath(obj, path, defaultValue) {
 	const keys = path?.split(/\.|\[|\]/).filter(Boolean);
+	if (keys?.some((k) => !isSafeKey(k))) return defaultValue;
 	const result = keys?.reduce((acc, key) => acc?.[key], obj);
 	return result !== undefined ? result : defaultValue;
 }
@@ -56,6 +58,7 @@ export function setValueWithPath(obj, path, value) {
 	// Deep clone the object to avoid mutations
 	const newObj = JSON.parse(JSON.stringify(obj || {}));
 	const keys = path.match(/[^.[\]]+/g);
+	if (keys?.some((k) => !isSafeKey(k))) return newObj;
 	keys.slice(0, -1).reduce((acc, key, i) =>
 		acc[key] = acc[key] || (/^\d+$/.test(keys[i + 1]) ? [] : {}), newObj
 	)[keys[keys.length - 1]] = value;

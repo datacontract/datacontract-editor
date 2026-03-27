@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useEditorStore } from '../store.js';
+import { isSafeKey } from '../utils/safeProperty.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import MarkdownEditor from '../components/ui/MarkdownEditor.jsx';
@@ -32,7 +33,7 @@ const TermsOfUse = () => {
 		const props = description?.customProperties;
 		if (!Array.isArray(props)) return props || {};
 		return props.reduce((acc, item) => {
-			if (item?.property !== undefined) {
+			if (item?.property !== undefined && isSafeKey(item.property)) {
 				acc[item.property] = item.value;
 			}
 			return acc;

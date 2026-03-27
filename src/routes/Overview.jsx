@@ -1,5 +1,6 @@
 import {useCallback, useMemo} from 'react';
 import {useEditorStore} from '../store.js';
+import {isSafeKey} from '../utils/safeProperty.js';
 import {ValidatedCombobox} from '../components/ui/index.js';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
@@ -99,7 +100,7 @@ const Overview = () => {
 	const customPropertiesLookup = useMemo(() => {
 		if (!Array.isArray(customProperties)) return customProperties || {};
 		return customProperties.reduce((acc, item) => {
-			if (item?.property !== undefined) {
+			if (item?.property !== undefined && isSafeKey(item.property)) {
 				acc[item.property] = item.value;
 			}
 			return acc;

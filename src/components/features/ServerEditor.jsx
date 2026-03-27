@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useEditorStore } from '../../store.js';
+import { isSafeKey } from '../../utils/safeProperty.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedCombobox from '../ui/ValidatedCombobox.jsx';
@@ -35,7 +36,7 @@ const ServerEditor = ({ serverIndex }) => {
     const cp = servers?.[serverIndex]?.customProperties;
     if (!Array.isArray(cp)) return cp || {};
     return cp.reduce((acc, item) => {
-      if (item?.property !== undefined) {
+      if (item?.property !== undefined && isSafeKey(item.property)) {
         acc[item.property] = item.value;
       }
       return acc;

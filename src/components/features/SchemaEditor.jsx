@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useEditorStore} from '../../store.js';
+import {isSafeKey} from '../../utils/safeProperty.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import TagsInput from '../ui/TagsInput.jsx';
@@ -102,7 +103,7 @@ const SchemaEditor = ({schemaIndex}) => {
 		const cp = schema?.[schemaIndex]?.customProperties;
 		if (!Array.isArray(cp)) return cp || {};
 		return cp.reduce((acc, item) => {
-			if (item?.property !== undefined) {
+			if (item?.property !== undefined && isSafeKey(item.property)) {
 				acc[item.property] = item.value;
 			}
 			return acc;
