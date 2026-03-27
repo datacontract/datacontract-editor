@@ -77,7 +77,7 @@ const FormPageErrorBoundary = ({ children, pageName = 'form' }) => {
       fallback={fallback}
       resetKeys={[yaml]}
       onError={(error, errorInfo) => {
-        console.error(`Form page (${pageName}) error:`, {
+        console.error('Form page error:', pageName, {
           error,
           errorInfo,
           pageName,

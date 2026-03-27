@@ -18,7 +18,7 @@ const SERVER_API_URL = 'http://localhost:4001';
 export function createStorageBackend(storageBackendSlug = 'standalone') {
   switch (storageBackendSlug) {
     case 'server':
-      console.log(`Initializing ServerFileStorageBackend with URL: ${SERVER_API_URL}`);
+      console.log('Initializing ServerFileStorageBackend with URL:', SERVER_API_URL);
       return new ServerFileStorageBackend(SERVER_API_URL)
 
     case 'standalone':

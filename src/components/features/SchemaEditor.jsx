@@ -368,7 +368,7 @@ const SchemaEditor = ({schemaIndex}) => {
 	const addPropertyFromDefinition = useCallback((definition) => {
 		try {
 			if (!schema || !schema[schemaIndex]) {
-				console.warn(`Schema at index ${schemaIndex} not found`);
+				console.warn('Schema at index not found:', schemaIndex);
 				return;
 			}
 			console.log('Definition selected: ', definition);

@@ -12,7 +12,7 @@ function getStorage(strategy) {
 
 export function getStorageConfig(strategy = 'sessionStorage') {
   if (!VALID_STRATEGIES.includes(strategy)) {
-    console.warn(`Invalid persistence strategy "${strategy}", falling back to "sessionStorage"`);
+    console.warn('Invalid persistence strategy, falling back to "sessionStorage":', strategy);
     strategy = 'sessionStorage';
   }
   const storage = getStorage(strategy);

@@ -26,7 +26,7 @@ export function useSchemaOperations(schemaIndex) {
     const addProperty = useCallback(() => {
         try {
             if (!schema || !schema[schemaIndex]) {
-                console.warn(`Schema at index ${schemaIndex} not found`);
+                console.warn('Schema at index not found:', schemaIndex);
                 return;
             }
 
@@ -131,7 +131,7 @@ export function useSchemaOperations(schemaIndex) {
     const addSubProperty = useCallback((schemaIdx, propPath, isItems = false) => {
         try {
             if (!schema || !schema[schemaIndex]) {
-                console.warn(`Schema at index ${schemaIndex} not found`);
+                console.warn('Schema at index not found:', schemaIndex);
                 return;
             }
 

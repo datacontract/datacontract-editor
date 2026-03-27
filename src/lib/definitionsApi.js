@@ -24,14 +24,14 @@ export const fetchDefinition = async (url, definitionAcceptHeader = "application
 		});
 
 		if (!response.ok) {
-			console.error(`Failed to fetch definition ${url}:`, response.status, response.statusText);
+			console.error('Failed to fetch definition:', url, response.status, response.statusText);
 			return null;
 		}
 
 		const data = await response.json();
 		return data;
 	} catch (error) {
-		console.error(`Error fetching definition ${url}:`, error);
+		console.error('Error fetching definition:', url, error);
 		return null;
 	}
 };
@@ -59,7 +59,7 @@ export const searchDefinitions = async (baseUrl, searchTerm, maxResults, queryPa
 		// Fetch multiple pages if needed
 		for (let page = 0; page < numPages; page++) {
 			const url = `${baseUrl}?${queryParam}=${encodeURIComponent(searchTerm)}&${pageParam}=${page}`;
-			console.log(`Searching definitions (page ${page + 1}/${numPages}):`, url);
+			console.log('Searching definitions (page %d/%d):', page + 1, numPages, url);
 
 			const response = await fetch(url, {
 				method: 'GET',
@@ -70,7 +70,7 @@ export const searchDefinitions = async (baseUrl, searchTerm, maxResults, queryPa
 			});
 
 			if (!response.ok) {
-				console.error(`Failed to search definitions (page ${page}):`, response.status, response.statusText);
+				console.error('Failed to search definitions (page %d):', page, response.status, response.statusText);
 				break; // Stop fetching if a page fails
 			}
 

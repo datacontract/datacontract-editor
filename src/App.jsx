@@ -22,7 +22,7 @@ function App({ storageBackend = null, editorConfig = null }) {
         // Configure storage backend if provided
         if (storageBackend) {
             setFileStorageBackend(storageBackend);
-            console.log(`Using storage backend: ${storageBackend.getBackendName()}`);
+            console.log('Using storage backend:', storageBackend.getBackendName());
         } else {
             // Default to LocalFileStorageBackend if no backend provided
             setFileStorageBackend(new LocalFileStorageBackend());
