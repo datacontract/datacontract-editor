@@ -23,6 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# superpowers docs
+docs/superpowers
+
 # local templates
 /templates
 /.playwright-mcp
