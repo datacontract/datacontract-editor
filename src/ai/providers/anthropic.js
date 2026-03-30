@@ -20,7 +20,12 @@ export function buildHeaders(config) {
   };
 
   if (config.apiKey) {
-    headers['x-api-key-anthropic'] = config.apiKey;
+    const authHeader = config.authHeader || 'x-api-key-anthropic';
+    if (authHeader === 'bearer') {
+      headers['Authorization'] = `Bearer ${config.apiKey}`;
+    } else {
+      headers[authHeader] = config.apiKey;
+    }
   }
 
   // Add custom headers if provided (can override defaults)

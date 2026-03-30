@@ -83,7 +83,7 @@ ai: {
   endpoint: 'https://...',          // API endpoint (required)
   apiKey: 'sk-xxx',                 // API key (required)
   model: 'gpt-4o',                  // Model name (provider-specific)
-  authHeader: 'bearer',             // 'bearer' or 'api-key' (OpenAI only)
+  authHeader: 'bearer',             // Header name for API key (see below)
   headers: {},                      // Additional headers
   tools: [],                        // Custom AI tools (embed mode only)
 }
@@ -98,11 +98,16 @@ ai: {
 
 The `openai` provider works with any OpenAI-compatible API: OpenAI, Azure OpenAI, Ollama, OpenRouter, LiteLLM, vLLM, etc.
 
-**Auth Header (OpenAI provider only):**
-- `bearer` (default): Sends `Authorization: Bearer <key>`
-- `api-key`: Sends `api-key: <key>` header (used by Azure OpenAI)
+**Auth Header:**
 
-The Anthropic provider always uses `x-api-key-anthropic` for authentication (the `authHeader` setting is ignored).
+The `authHeader` field controls how the API key is sent. The special value `bearer` sends `Authorization: Bearer <key>`. Any other value is used directly as the header name.
+
+| Provider | Default `authHeader` | Resulting header |
+|----------|---------------------|------------------|
+| OpenAI | `bearer` | `Authorization: Bearer <key>` |
+| Azure OpenAI | `api-key` | `api-key: <key>` |
+| Anthropic | `x-api-key-anthropic` | `x-api-key-anthropic: <key>` |
+| Custom | any string | `<authHeader>: <key>` |
 
 ### Tests Configuration
 

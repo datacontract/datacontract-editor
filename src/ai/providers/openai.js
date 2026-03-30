@@ -20,10 +20,11 @@ export function buildHeaders(config) {
   };
 
   if (config.apiKey) {
-    if (config.authHeader === 'api-key') {
-      headers['api-key'] = config.apiKey;
-    } else {
+    const authHeader = config.authHeader || 'bearer';
+    if (authHeader === 'bearer') {
       headers['Authorization'] = `Bearer ${config.apiKey}`;
+    } else {
+      headers[authHeader] = config.apiKey;
     }
   }
 
