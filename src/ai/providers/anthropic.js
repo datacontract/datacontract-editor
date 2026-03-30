@@ -5,6 +5,8 @@
  * using SSE streaming and native Anthropic tool format.
  */
 
+const DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
+
 /**
  * Build HTTP headers for Anthropic API
  * @param {object} config - API configuration
@@ -58,10 +60,10 @@ export function buildRequestBody(messages, tools, config) {
     return msg;
   });
 
-  // Swap default OpenAI model to Anthropic equivalent
+  // Fall back to default Anthropic model if no model set or if model looks like an OpenAI model
   let model = config.model;
-  if (model === 'gpt-4o') {
-    model = 'claude-sonnet-4-20250514';
+  if (!model || model.startsWith('gpt-')) {
+    model = DEFAULT_ANTHROPIC_MODEL;
   }
 
   const body = {

@@ -266,7 +266,7 @@ export async function chatWithTools({
     const result = await streamChatCompletion({
       messages: currentMessages,
       tools,
-      config,
+      config: mergedConfig,
       signal,
       callbacks: {
         ...callbacks,
