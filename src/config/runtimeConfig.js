@@ -54,6 +54,7 @@ export function buildEditorConfig(runtimeConfig) {
     } else if (runtimeConfig.ai.endpoint && runtimeConfig.ai.apiKey) {
       config.ai = {
         enabled: true,
+        provider: runtimeConfig.ai.provider || 'openai',
         endpoint: runtimeConfig.ai.endpoint,
         apiKey: runtimeConfig.ai.apiKey,
         model: runtimeConfig.ai.model || 'gpt-4o',
