@@ -86,6 +86,10 @@ dataContract:
         maxLength: 255                # Maximum length (for text fields)
 ```
 
+### Risks of Regular Expressions
+
+The `pattern` field accepts regular expressions for input validation. Be aware that poorly crafted regular expressions can cause **Regular Expression Denial of Service (ReDoS)** — a condition where certain input strings cause the regex engine to take exponentially long to evaluate, freezing the browser tab. Avoid nested quantifiers (e.g., `(a+)+`), overlapping alternations, and other constructs that lead to catastrophic backtracking. Keep patterns simple and test them against adversarial input before deploying. If you only need to check for allowed characters or a fixed format, prefer straightforward character classes (e.g., `^[a-z0-9-]+$`) over complex expressions.
+
 ### Available Properties by Level
 
 #### root
