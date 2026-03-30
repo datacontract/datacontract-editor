@@ -496,16 +496,3 @@ AI_PROVIDER=anthropic
 AI_ENDPOINT=http://localhost:3001/v1/messages
 AI_API_KEY=not-used    # required to enable AI, but proxy handles real auth
 ```
-
-### Alternative: LiteLLM
-
-[LiteLLM](https://github.com/BerriAI/litellm) is an open-source proxy that provides an OpenAI-compatible interface in front of 100+ LLM providers, including Anthropic. With LiteLLM, you can use the `openai` provider and point the endpoint at LiteLLM:
-
-```bash
-# Start LiteLLM with Anthropic backend
-litellm --model anthropic/claude-sonnet-4-20250514
-
-# Configure the editor to use LiteLLM (uses OpenAI provider since LiteLLM speaks OpenAI format)
-AI_ENDPOINT=http://localhost:4000/v1/chat/completions
-AI_API_KEY=sk-xxx
-```
