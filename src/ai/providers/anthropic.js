@@ -115,6 +115,11 @@ export async function parseStream(stream, callbacks) {
         try {
           const json = JSON.parse(trimmed.slice(6));
 
+          // error — surface stream errors
+          if (json.type === 'error') {
+            throw new Error(json.error?.message || 'Anthropic API stream error');
+          }
+
           // content_block_start — new tool_use block
           if (json.type === 'content_block_start' && json.content_block?.type === 'tool_use') {
             toolCallIndex++;

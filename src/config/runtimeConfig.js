@@ -57,7 +57,7 @@ export function buildEditorConfig(runtimeConfig) {
         provider: runtimeConfig.ai.provider || 'openai',
         endpoint: runtimeConfig.ai.endpoint,
         apiKey: runtimeConfig.ai.apiKey,
-        model: runtimeConfig.ai.model || 'gpt-4o',
+        model: runtimeConfig.ai.model,
         authHeader: runtimeConfig.ai.authHeader || 'bearer',
         headers: runtimeConfig.ai.headers || {},
       };

@@ -324,7 +324,7 @@ export default function AiChat() {
 				config: {
 					endpoint: aiConfig.endpoint,
 					apiKey: aiConfig.apiKey,
-					model: aiConfig.model || 'gpt-4o',
+					model: aiConfig.model,
 					headers: aiConfig.headers || {},
 					authHeader: aiConfig.authHeader || 'bearer',
 					provider: aiConfig.provider || 'openai',
