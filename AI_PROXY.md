@@ -32,7 +32,7 @@ createServer(async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version, anthropic-dangerous-direct-browser-access');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key-anthropic, anthropic-version, anthropic-dangerous-direct-browser-access');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -52,7 +52,7 @@ createServer(async (req, res) => {
     headers: {
       ...Object.fromEntries(
         Object.entries(req.headers).filter(([k]) =>
-          ['content-type', 'authorization', 'x-api-key', 'anthropic-version'].includes(k)
+          ['content-type', 'authorization', 'x-api-key-anthropic', 'anthropic-version'].includes(k)
         )
       ),
     },
@@ -135,7 +135,7 @@ server {
 
         add_header Access-Control-Allow-Origin * always;
         add_header Access-Control-Allow-Methods 'POST, OPTIONS' always;
-        add_header Access-Control-Allow-Headers 'Content-Type, x-api-key, anthropic-version, anthropic-dangerous-direct-browser-access' always;
+        add_header Access-Control-Allow-Headers 'Content-Type, x-api-key-anthropic, anthropic-version, anthropic-dangerous-direct-browser-access' always;
 
         if ($request_method = OPTIONS) {
             return 204;
@@ -209,7 +209,7 @@ createServer(async (req, res) => {
   // Build auth headers server-side
   const headers = { 'Content-Type': 'application/json' };
   if (PROVIDER === 'anthropic') {
-    headers['x-api-key'] = API_KEY;
+    headers['x-api-key-anthropic'] = API_KEY;
     headers['anthropic-version'] = '2023-06-01';
   } else {
     headers['Authorization'] = `Bearer ${API_KEY}`;

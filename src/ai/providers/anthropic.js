@@ -20,7 +20,7 @@ export function buildHeaders(config) {
   };
 
   if (config.apiKey) {
-    headers['x-api-key'] = config.apiKey;
+    headers['x-api-key-anthropic'] = config.apiKey;
   }
 
   // Add custom headers if provided (can override defaults)

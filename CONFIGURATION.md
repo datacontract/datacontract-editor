@@ -102,7 +102,7 @@ The `openai` provider works with any OpenAI-compatible API: OpenAI, Azure OpenAI
 - `bearer` (default): Sends `Authorization: Bearer <key>`
 - `api-key`: Sends `api-key: <key>` header (used by Azure OpenAI)
 
-The Anthropic provider always uses `x-api-key` for authentication (the `authHeader` setting is ignored).
+The Anthropic provider always uses `x-api-key-anthropic` for authentication (the `authHeader` setting is ignored).
 
 ### Tests Configuration
 
