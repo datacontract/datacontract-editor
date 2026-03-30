@@ -327,6 +327,7 @@ export default function AiChat() {
 					model: aiConfig.model || 'gpt-4o',
 					headers: aiConfig.headers || {},
 					authHeader: aiConfig.authHeader || 'bearer',
+					provider: aiConfig.provider || 'openai',
 				},
 				context: { yaml, editorConfig, runTest },
 				signal: abortControllerRef.current.signal,
@@ -409,6 +410,7 @@ export default function AiChat() {
 
 	// Show configuration message if not configured
 	if (!isAiConfigured) {
+		const isAnthropic = aiConfig.provider === 'anthropic';
 		return (
 			<div className="flex flex-col h-full">
 				<div className="flex-1 flex items-center justify-center p-4">
@@ -416,12 +418,23 @@ export default function AiChat() {
 						<SparklesIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
 						<h3 className="text-sm font-medium text-gray-900 mb-2">AI Assistant Not Configured</h3>
 						<p className="text-xs text-gray-500 mb-4">
-							Configure an OpenAI-compatible endpoint.
+							{isAnthropic ? 'Configure an Anthropic API endpoint.' : 'Configure an OpenAI-compatible endpoint.'}
 						</p>
 						<div className="bg-gray-50 rounded-lg p-3 text-left text-xs font-mono text-gray-600">
-							<div><span className="text-gray-400">endpoint:</span> https://api.openai.com/v1/chat/completions</div>
-							<div><span className="text-gray-400">apiKey:</span> sk-...</div>
-							<div><span className="text-gray-400">model:</span> gpt-4o</div>
+							{isAnthropic ? (
+								<>
+									<div><span className="text-gray-400">provider:</span> anthropic</div>
+									<div><span className="text-gray-400">endpoint:</span> https://api.anthropic.com/v1/messages</div>
+									<div><span className="text-gray-400">apiKey:</span> sk-ant-...</div>
+									<div><span className="text-gray-400">model:</span> claude-sonnet-4-20250514</div>
+								</>
+							) : (
+								<>
+									<div><span className="text-gray-400">endpoint:</span> https://api.openai.com/v1/chat/completions</div>
+									<div><span className="text-gray-400">apiKey:</span> sk-...</div>
+									<div><span className="text-gray-400">model:</span> gpt-4o</div>
+								</>
+							)}
 						</div>
 					</div>
 				</div>
