@@ -246,6 +246,7 @@ export default function AiChat() {
 	const aiChatResetKey = useEditorStore((state) => state.aiChatResetKey);
 	const setAiChatHasMessages = useEditorStore((state) => state.setAiChatHasMessages);
 	const messagesEndRef = useRef(null);
+	const inputRef = useRef(null);
 	const [input, setInput] = useState('');
 	const [messages, setMessages] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -284,6 +285,13 @@ export default function AiChat() {
 			abortControllerRef.current?.abort();
 		}
 	}, [aiChatResetKey]);
+
+	// Refocus input when loading finishes
+	useEffect(() => {
+		if (!isLoading) {
+			inputRef.current?.focus();
+		}
+	}, [isLoading]);
 
 	// Send message to AI
 	const sendMessage = useCallback(async (userMessage) => {
@@ -556,6 +564,7 @@ export default function AiChat() {
 			<div className="border-t border-gray-200 p-4">
 				<form onSubmit={handleSubmit} className="flex gap-2">
 					<input
+						ref={inputRef}
 						type="text"
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
