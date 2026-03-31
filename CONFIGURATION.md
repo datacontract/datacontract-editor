@@ -13,6 +13,7 @@ Configuration via Vite build-time environment variables.
 cp .env.example .env.local
 
 # Edit with your values
+VITE_AI_PROVIDER=openai           # 'openai' or 'anthropic'
 VITE_AI_ENDPOINT=https://api.openai.com/v1/chat/completions
 VITE_AI_API_KEY=sk-xxx
 VITE_AI_MODEL=gpt-4o
@@ -42,10 +43,11 @@ docker run -p 4173:4173 \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AI_ENABLED` | `false` | Enable AI assistant |
-| `AI_ENDPOINT` | - | OpenAI-compatible API endpoint |
+| `AI_PROVIDER` | `openai` | `openai` or `anthropic` |
+| `AI_ENDPOINT` | - | API endpoint URL |
 | `AI_API_KEY` | - | API key for the endpoint |
-| `AI_MODEL` | `gpt-4o` | Model name |
-| `AI_AUTH_HEADER` | `bearer` | `bearer` or `api-key` |
+| `AI_MODEL` | `gpt-4o` | Model name (provider-specific) |
+| `AI_AUTH_HEADER` | `bearer` | `bearer` or `api-key` (OpenAI only) |
 | `TESTS_SERVER_URL` | - | Data contract test server URL |
 
 ### 2. Embed (JavaScript API)
@@ -62,6 +64,7 @@ Configuration via JavaScript when embedding in another application.
     yaml: '...',
     ai: {
       enabled: true,
+      provider: 'openai',  // or 'anthropic'
       endpoint: 'https://api.openai.com/v1/chat/completions',
       apiKey: 'sk-xxx',
     },
@@ -76,21 +79,35 @@ Configuration via JavaScript when embedding in another application.
 ```javascript
 ai: {
   enabled: true,                    // Enable/disable AI assistant
-  endpoint: 'https://...',          // OpenAI-compatible endpoint (required)
+  provider: 'openai',              // 'openai' or 'anthropic'
+  endpoint: 'https://...',          // API endpoint (required)
   apiKey: 'sk-xxx',                 // API key (required)
-  model: 'gpt-4o',                  // Model name
-  authHeader: 'bearer',             // 'bearer' or 'api-key' (see below)
+  model: 'gpt-4o',                  // Model name (provider-specific)
+  authHeader: 'bearer',             // Header name for API key (see below)
   headers: {},                      // Additional headers
   tools: [],                        // Custom AI tools (embed mode only)
 }
 ```
 
-**Auth Header:**
-- `bearer` (default): Sends `Authorization: Bearer <key>`
-- `api-key`: Sends `api-key: <key>` header (used by some providers like Azure)
+**Providers:**
 
-**Compatible Endpoints:**
-Any OpenAI-compatible chat completions API, e.g. OpenAI, Azure, Ollama, OpenRouter, LiteLLM, vLLM, etc.
+| Provider | `provider` | Default Model | Endpoint |
+|----------|------------|---------------|----------|
+| OpenAI (and compatible) | `openai` | `gpt-4o` | `https://api.openai.com/v1/chat/completions` |
+| Anthropic | `anthropic` | `claude-sonnet-4-20250514` | `https://api.anthropic.com/v1/messages` |
+
+The `openai` provider works with any OpenAI-compatible API: OpenAI, Azure OpenAI, Ollama, OpenRouter, LiteLLM, vLLM, etc.
+
+**Auth Header:**
+
+The `authHeader` field controls how the API key is sent. The special value `bearer` sends `Authorization: Bearer <key>`. Any other value is used directly as the header name.
+
+| Provider | Default `authHeader` | Resulting header |
+|----------|---------------------|------------------|
+| OpenAI | `bearer` | `Authorization: Bearer <key>` |
+| Azure OpenAI | `api-key` | `api-key: <key>` |
+| Anthropic | `x-api-key-anthropic` | `x-api-key-anthropic: <key>` |
+| Custom | any string | `<authHeader>: <key>` |
 
 ### Tests Configuration
 
@@ -195,6 +212,7 @@ For Docker deployments, the generated config.json follows this schema:
 {
   "ai": {
     "enabled": true,
+    "provider": "openai",
     "endpoint": "https://api.openai.com/v1/chat/completions",
     "apiKey": "sk-xxx",
     "model": "gpt-4o",
@@ -235,3 +253,7 @@ init({
   }
 });
 ```
+
+## AI Proxy Setup
+
+If the AI endpoint does not support CORS (e.g., Anthropic API), you need a proxy between the browser and the API. See [AI_PROXY.md](AI_PROXY.md) for setup guides including Node.js, nginx, Docker Compose, and secure proxy examples.

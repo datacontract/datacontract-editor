@@ -18,6 +18,6 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 4173
 
 CMD ["sh", "-c", "\
-  echo '{\"ai\":{\"enabled\":'${AI_ENABLED:-false}',\"endpoint\":\"'${AI_ENDPOINT}'\",\"apiKey\":\"'${AI_API_KEY}'\",\"model\":\"'${AI_MODEL:-gpt-4o}'\",\"authHeader\":\"'${AI_AUTH_HEADER:-bearer}'\"},\"tests\":{\"enabled\":true,\"dataContractCliApiServerUrl\":\"'${TESTS_SERVER_URL}'\"}}' > /app/dist/config.json && \
+  echo '{\"ai\":{\"enabled\":'${AI_ENABLED:-false}',\"provider\":\"'${AI_PROVIDER:-openai}'\",\"endpoint\":\"'${AI_ENDPOINT}'\",\"apiKey\":\"'${AI_API_KEY}'\",\"model\":\"'${AI_MODEL}'\",\"authHeader\":\"'${AI_AUTH_HEADER:-bearer}'\"},\"tests\":{\"enabled\":true,\"dataContractCliApiServerUrl\":\"'${TESTS_SERVER_URL}'\"}}' > /app/dist/config.json && \
   serve -s /app/dist -l 4173 \
 "]

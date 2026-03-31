@@ -9,6 +9,7 @@
 
 export const DEFAULT_AI_CONFIG = {
   enabled: !!import.meta.env.VITE_AI_API_KEY,
+  provider: import.meta.env.VITE_AI_PROVIDER || 'openai',
   endpoint: import.meta.env.VITE_AI_ENDPOINT || '',
   apiKey: import.meta.env.VITE_AI_API_KEY || '',
   model: import.meta.env.VITE_AI_MODEL || 'gpt-4o',

@@ -97,7 +97,7 @@ const DEFAULT_CONFIG = {
   customizations: null,
 
   // AI Assistant configuration
-  // Requires an OpenAI-compatible endpoint (OpenAI, Azure, Ollama, etc.)
+  // Requires an OpenAI-compatible or Anthropic endpoint
   // Uses build-time defaults from VITE_AI_* env vars, can be overridden
   ai: {
     ...DEFAULT_AI_CONFIG,

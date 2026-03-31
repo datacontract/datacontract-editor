@@ -1,16 +1,27 @@
 /**
- * AI Service - Pure browser-based OpenAI-compatible API client
+ * AI Service - Provider-agnostic chat completion orchestrator
  *
- * Supports any OpenAI-compatible endpoint:
- * - OpenAI API
- * - Azure OpenAI
- * - OpenRouter
- * - Local LLMs (Ollama, vLLM, llama.cpp, etc.)
- * - Any OpenAI-compatible API
+ * Delegates to provider adapters for API-specific logic:
+ * - OpenAI-compatible (OpenAI, Azure, OpenRouter, local LLMs)
+ * - Anthropic (Claude)
  */
 
 import { DEFAULT_AI_CONFIG } from '../config/defaults.js';
 import { isSafeKey } from '../utils/safeProperty.js';
+import * as openaiProvider from './providers/openai.js';
+import * as anthropicProvider from './providers/anthropic.js';
+
+/**
+ * Get the provider adapter based on config
+ * @param {object} config - Merged configuration
+ * @returns {object} Provider adapter
+ */
+function getProvider(config) {
+  if (config.provider === 'anthropic') {
+    return anthropicProvider;
+  }
+  return openaiProvider;
+}
 
 /**
  * Tool registry - stores registered tools with their handlers
@@ -79,57 +90,7 @@ export function hasTool(name) {
 }
 
 /**
- * Parse SSE stream from OpenAI-compatible API
- * @param {ReadableStream} stream - Response body stream
- * @param {object} callbacks - Callback functions
- */
-async function parseSSEStream(stream, callbacks) {
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed === 'data: [DONE]') continue;
-        if (!trimmed.startsWith('data: ')) continue;
-
-        try {
-          const json = JSON.parse(trimmed.slice(6));
-          const delta = json.choices?.[0]?.delta;
-          const finishReason = json.choices?.[0]?.finish_reason;
-
-          if (delta?.content) {
-            callbacks.onContent?.(delta.content);
-          }
-
-          if (delta?.tool_calls) {
-            callbacks.onToolCallDelta?.(delta.tool_calls);
-          }
-
-          if (finishReason) {
-            callbacks.onFinish?.(finishReason);
-          }
-        } catch {
-          // Ignore parse errors for incomplete chunks
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-}
-
-/**
- * Send a chat completion request to OpenAI-compatible API
+ * Send a chat completion request via the appropriate provider
  *
  * @param {object} options - Request options
  * @param {Array} options.messages - Chat messages
@@ -147,50 +108,28 @@ export async function streamChatCompletion({
   callbacks = {},
 }) {
   const mergedConfig = { ...DEFAULT_AI_CONFIG, ...config };
-  const { endpoint, model, apiKey, maxTokens, temperature, authHeader } = mergedConfig;
+  const provider = getProvider(mergedConfig);
 
-  // Build headers
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+  // Build headers via provider
+  const headers = provider.buildHeaders(mergedConfig);
 
-  // Set auth header based on authHeader config
-  if (apiKey) {
-    if (authHeader === 'api-key') {
-      headers['api-key'] = apiKey;
-    } else {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-  }
-
-  // Add custom headers if provided (can override auth)
-  if (config.headers) {
-    Object.assign(headers, config.headers);
-  }
-
-  // Build request body
-  const body = {
-    model,
-    messages,
-    stream: true,
-    max_completion_tokens: maxTokens,
-    temperature,
-  };
-
-  // Add tools if enabled (default: true)
+  // Collect all tools and translate to wire format
+  let wireTools = [];
   let toolCount = 0;
   if (config.useTools !== false) {
     const allTools = [...tools, ...getRegisteredTools()];
     if (allTools.length > 0) {
-      body.tools = allTools;
-      body.tool_choice = 'auto';
+      wireTools = provider.translateToolsToWireFormat(allTools);
       toolCount = allTools.length;
     }
   }
 
+  // Build request body via provider
+  const body = provider.buildRequestBody(messages, wireTools, mergedConfig);
+
   // Make request
-  console.log('[AI] Request:', { endpoint, model, tools: toolCount, messages });
-  const response = await fetch(endpoint, {
+  console.log('[AI] Request:', { endpoint: mergedConfig.endpoint, model: mergedConfig.model, tools: toolCount, messages });
+  const response = await fetch(mergedConfig.endpoint, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -213,7 +152,7 @@ export async function streamChatCompletion({
   const toolCalls = [];
   let currentToolCalls = {};
 
-  await parseSSEStream(response.body, {
+  await provider.parseStream(response.body, {
     onContent: (chunk) => {
       content += chunk;
       callbacks.onContent?.(chunk, content);
@@ -314,6 +253,8 @@ export async function chatWithTools({
   callbacks = {},
   maxToolRounds = 5,
 }) {
+  const mergedConfig = { ...DEFAULT_AI_CONFIG, ...config };
+  const provider = getProvider(mergedConfig);
   let currentMessages = [...messages];
   let round = 0;
   let finalContent = '';
@@ -325,7 +266,7 @@ export async function chatWithTools({
     const result = await streamChatCompletion({
       messages: currentMessages,
       tools,
-      config,
+      config: mergedConfig,
       signal,
       callbacks: {
         ...callbacks,
@@ -348,15 +289,13 @@ export async function chatWithTools({
     const toolResults = await executeToolCalls(result.toolCalls, context);
     callbacks.onToolCallsComplete?.(result.toolCalls, toolResults);
 
-    // Add assistant message with tool calls
-    currentMessages.push({
-      role: 'assistant',
-      content: result.content || null,
-      tool_calls: result.toolCalls,
-    });
-
-    // Add tool results
-    currentMessages.push(...toolResults);
+    // Format messages for next round using provider adapter
+    const nextMessages = provider.formatToolResultMessages(
+      result.toolCalls,
+      toolResults,
+      result.content,
+    );
+    currentMessages.push(...nextMessages);
   }
 
   return { content: finalContent, toolCalls: allToolCalls, messages: currentMessages };
