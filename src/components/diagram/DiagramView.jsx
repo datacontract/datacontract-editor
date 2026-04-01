@@ -8,6 +8,9 @@ import {
   useEdgesState,
   Panel,
   ReactFlowProvider,
+  BaseEdge,
+  getBezierPath,
+  EdgeLabelRenderer,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './DiagramStyles.css';
@@ -17,6 +20,39 @@ import SchemaNode from './SchemaNode.jsx';
 import { useLocation } from 'react-router-dom';
 import { getLayoutedElements, getGridPosition } from './layoutUtils.js';
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
+
+const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, style }) => {
+  const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  return (
+    <>
+      <BaseEdge id={id} path={edgePath} style={style} />
+      {data?.label && (
+        <EdgeLabelRenderer>
+          <div
+            className="schema-rel-label"
+            title="Schema-level relationship — only editable in the form editor"
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              pointerEvents: 'all',
+              cursor: 'default',
+              fontSize: 10,
+              fontWeight: 500,
+              color: '#6b7280',
+              background: 'rgba(255,255,255,0.9)',
+              padding: '1px 4px',
+              borderRadius: 2,
+            }}
+          >
+            {data.label}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+};
+
+const edgeTypes = { schemaRelationship: SchemaRelationshipEdge };
 
 const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: '#b1b1b7' },
@@ -694,16 +730,13 @@ const DiagramViewInner = () => {
               sourceHandle: `schema-${fromSchemaIndex}-prop-${fromPropIndex}-source`,
               target: `schema-${toSchemaIndex}`,
               targetHandle: `schema-${toSchemaIndex}-prop-${toPropIndex}-target`,
-              type: 'default',
+              type: 'schemaRelationship',
               selectable: false,
               deletable: false,
               focusable: false,
               interactionWidth: 20,
               className: 'schema-level-edge',
-              label: pairIdx === 0 ? (relationship.type || 'relationship') : undefined,
-              labelStyle: pairIdx === 0 ? { fontSize: 10, fill: '#6b7280', fontWeight: 500 } : undefined,
-              labelBgStyle: pairIdx === 0 ? { fill: '#ffffff', fillOpacity: 0.9 } : undefined,
-              labelBgPadding: pairIdx === 0 ? [4, 2] : undefined,
+              data: pairIdx === 0 ? { label: relationship.type || 'relationship' } : undefined,
               style: { stroke: '#b1b1b7', strokeWidth: 2, strokeDasharray: '5,5' },
             });
           }
@@ -834,6 +867,7 @@ const DiagramViewInner = () => {
         connectionMode="loose"
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneClick={(event) => {
           // Don't close drawer if click was inside a HeadlessUI portal (popover, listbox, combobox)

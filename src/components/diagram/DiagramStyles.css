@@ -24,35 +24,7 @@
   stroke-width: 2px !important;
 }
 
-/* Tooltip on hover for schema-level edges */
-.react-flow__edge.schema-level-edge {
-  position: relative;
-}
-
+/* Schema-level edge interaction — non-interactive cursor */
 .react-flow__edge.schema-level-edge .react-flow__edge-interaction {
   cursor: default;
-  pointer-events: all;
-}
-
-.react-flow__edge.schema-level-edge .react-flow__edge-interaction::after {
-  content: 'Schema-level relationship\AOonly editable in the form editor';
-  content: 'Schema-level relationship — only editable in the form editor';
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1f2937;
-  color: white;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease-in-out;
-  z-index: 1000;
-}
-
-.react-flow__edge.schema-level-edge:hover .react-flow__edge-interaction::after {
-  opacity: 1;
 }
