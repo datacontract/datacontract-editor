@@ -10,7 +10,6 @@ import {
   ReactFlowProvider,
   BaseEdge,
   getBezierPath,
-  EdgeLabelRenderer,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './DiagramStyles.css';
@@ -23,34 +22,12 @@ import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 
 const SCHEMA_EDGE_TOOLTIP = 'Schema-level relationship — only editable in the form editor';
 
-const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, style }) => {
-  const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }) => {
+  const [edgePath] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   return (
     <>
       <BaseEdge id={id} path={edgePath} style={style} />
       <title>{SCHEMA_EDGE_TOOLTIP}</title>
-      {data?.label && (
-        <EdgeLabelRenderer>
-          <div
-            className="schema-rel-label"
-            title={SCHEMA_EDGE_TOOLTIP}
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-              pointerEvents: 'all',
-              cursor: 'default',
-              fontSize: 10,
-              fontWeight: 500,
-              color: '#6b7280',
-              background: 'rgba(255,255,255,0.9)',
-              padding: '1px 4px',
-              borderRadius: 2,
-            }}
-          >
-            {data.label}
-          </div>
-        </EdgeLabelRenderer>
-      )}
     </>
   );
 };
@@ -738,7 +715,7 @@ const DiagramViewInner = () => {
               focusable: false,
               interactionWidth: 20,
               className: 'schema-level-edge',
-              data: { label: pairIdx === 0 ? (relationship.type || 'relationship') : null },
+              data: {},
               style: { stroke: '#b1b1b7', strokeWidth: 2, strokeDasharray: '5,5' },
             });
           }
