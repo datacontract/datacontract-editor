@@ -21,16 +21,19 @@ import { useLocation } from 'react-router-dom';
 import { getLayoutedElements, getGridPosition } from './layoutUtils.js';
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 
+const SCHEMA_EDGE_TOOLTIP = 'Schema-level relationship — only editable in the form editor';
+
 const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, style }) => {
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   return (
     <>
       <BaseEdge id={id} path={edgePath} style={style} />
+      <title>{SCHEMA_EDGE_TOOLTIP}</title>
       {data?.label && (
         <EdgeLabelRenderer>
           <div
             className="schema-rel-label"
-            title="Schema-level relationship — only editable in the form editor"
+            title={SCHEMA_EDGE_TOOLTIP}
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
@@ -670,9 +673,8 @@ const DiagramViewInner = () => {
       });
 
     // Build edges from schema-level relationships (dotted, non-interactive)
-    parsedData.schema
-      .filter(schema => schema != null)
-      .forEach((sourceSchema, sourceSchemaIndex) => {
+    parsedData.schema.forEach((sourceSchema, sourceSchemaIndex) => {
+        if (sourceSchema == null) return;
         const schemaRelationships = sourceSchema.relationships || [];
 
         schemaRelationships.forEach((relationship, relIndex) => {
@@ -736,7 +738,7 @@ const DiagramViewInner = () => {
               focusable: false,
               interactionWidth: 20,
               className: 'schema-level-edge',
-              data: pairIdx === 0 ? { label: relationship.type || 'relationship' } : undefined,
+              data: { label: pairIdx === 0 ? (relationship.type || 'relationship') : null },
               style: { stroke: '#b1b1b7', strokeWidth: 2, strokeDasharray: '5,5' },
             });
           }
