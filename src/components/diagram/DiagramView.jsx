@@ -633,6 +633,83 @@ const DiagramViewInner = () => {
         });
       });
 
+    // Build edges from schema-level relationships (dotted, non-interactive)
+    parsedData.schema
+      .filter(schema => schema != null)
+      .forEach((sourceSchema, sourceSchemaIndex) => {
+        const schemaRelationships = sourceSchema.relationships || [];
+
+        schemaRelationships.forEach((relationship, relIndex) => {
+          if (!relationship.from || !relationship.to) return;
+
+          // Normalize from/to to arrays (composite key support)
+          const fromArray = Array.isArray(relationship.from) ? relationship.from : [relationship.from];
+          const toArray = Array.isArray(relationship.to) ? relationship.to : [relationship.to];
+
+          // Process each from/to pair
+          const pairCount = Math.min(fromArray.length, toArray.length);
+          for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+            const fromRef = fromArray[pairIdx];
+            const toRef = toArray[pairIdx];
+            if (!fromRef || !toRef || typeof fromRef !== 'string' || typeof toRef !== 'string') continue;
+
+            // Parse "schemaName.propertyName" references
+            const [fromSchemaName, fromPropName] = fromRef.split('.');
+            const [toSchemaName, toPropName] = toRef.split('.');
+            if (!fromSchemaName || !fromPropName || !toSchemaName || !toPropName) continue;
+
+            // Resolve source (from) schema and property
+            const fromSchemaIndex = parsedData.schema.findIndex(
+              s => s != null && s.name === fromSchemaName
+            );
+            if (fromSchemaIndex === -1) continue;
+            const fromSchema = parsedData.schema[fromSchemaIndex];
+            const fromPropIndex = fromSchema.properties?.findIndex(
+              p => p != null && p.name === fromPropName
+            );
+            if (fromPropIndex == null || fromPropIndex === -1) continue;
+
+            // Resolve target (to) schema and property
+            const toSchemaIndex = parsedData.schema.findIndex(
+              s => s != null && s.name === toSchemaName
+            );
+            if (toSchemaIndex === -1) continue;
+            const toSchema = parsedData.schema[toSchemaIndex];
+            const toPropIndex = toSchema.properties?.findIndex(
+              p => p != null && p.name === toPropName
+            );
+            if (toPropIndex == null || toPropIndex === -1) continue;
+
+            // Check for duplicate with existing property-level edges
+            const dupId = `edge-${fromSchemaIndex}-${fromPropIndex}-${toSchemaIndex}-${toPropIndex}`;
+            if (propertyEdges.some(e => e.id === dupId)) continue;
+
+            const edgeId = `schema-rel-${sourceSchemaIndex}-${relIndex}-${pairIdx}`;
+            // Also skip if this schema-rel edge already exists
+            if (propertyEdges.some(e => e.id === edgeId)) continue;
+
+            propertyEdges.push({
+              id: edgeId,
+              source: `schema-${fromSchemaIndex}`,
+              sourceHandle: `schema-${fromSchemaIndex}-prop-${fromPropIndex}-source`,
+              target: `schema-${toSchemaIndex}`,
+              targetHandle: `schema-${toSchemaIndex}-prop-${toPropIndex}-target`,
+              type: 'default',
+              selectable: false,
+              deletable: false,
+              focusable: false,
+              interactionWidth: 20,
+              className: 'schema-level-edge',
+              label: pairIdx === 0 ? (relationship.type || 'relationship') : undefined,
+              labelStyle: pairIdx === 0 ? { fontSize: 10, fill: '#6b7280', fontWeight: 500 } : undefined,
+              labelBgStyle: pairIdx === 0 ? { fill: '#ffffff', fillOpacity: 0.9 } : undefined,
+              labelBgPadding: pairIdx === 0 ? [4, 2] : undefined,
+              style: { stroke: '#b1b1b7', strokeWidth: 2, strokeDasharray: '5,5' },
+            });
+          }
+        });
+      });
+
     // Preserve existing node positions — only new nodes get layout-computed positions
     setNodes(currentNodes => {
       // Build position map from current nodes keyed by schema name
