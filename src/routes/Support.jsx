@@ -306,10 +306,7 @@ const Support = () => {
   // Update YAML when form fields change
   const updateField = (value) => {
     try {
-
-      if (value) {
-				setValue('support', value);
-      }
+      setValue('support', value && value.length > 0 ? value : undefined);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }

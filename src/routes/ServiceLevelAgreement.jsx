@@ -46,9 +46,7 @@ const ServiceLevelAgreement = () => {
   // Update YAML when form fields change
   const updateField = (value) => {
     try {
-      if (value) {
-				setValue('slaProperties', value);
-      }
+      setValue('slaProperties', value && value.length > 0 ? value : undefined);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }

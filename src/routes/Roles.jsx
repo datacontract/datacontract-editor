@@ -9,9 +9,7 @@ const Roles = () => {
   // Update YAML when form fields change
   const updateRoles = (value) => {
     try {
-      if (value && value.length > 0) {
-				setValue('roles', value);
-      }
+      setValue('roles', value && value.length > 0 ? value : undefined);
     } catch (error) {
       console.error('Error updating YAML:', error);
     }
