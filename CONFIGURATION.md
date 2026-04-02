@@ -138,7 +138,7 @@ init({
   mode: 'SERVER',                    // 'SERVER', 'DESKTOP', or 'EMBEDDED'
 
   // Callbacks (EMBEDDED mode)
-  onSave: (yaml) => {},
+  onSave: (yaml, { markers, yamlParseError }) => {},  // return false to prevent clearing dirty state
   onCancel: () => {},
   onDelete: () => {},
   showDelete: true,

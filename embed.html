@@ -285,7 +285,12 @@ servers:
         initialView: 'form',
 
         // Callbacks
-        onSave: (yaml) => {
+        onSave: (yaml, { markers, yamlParseError }) => {
+            const errors = markers.filter(m => m.severity === 8);
+            if (errors.length > 0) {
+                alert(`Cannot save: ${errors.length} validation error(s)`);
+                return false;
+            }
             console.log('Save called with YAML:', yaml);
             alert('Contract saved!');
         },

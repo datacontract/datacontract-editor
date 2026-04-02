@@ -66,7 +66,7 @@ const DEFAULT_CONFIG = {
   mode: 'SERVER',
 
   // Callbacks
-  onSave: null,        // (yaml) => void
+  onSave: null,        // (yaml, { markers, yamlParseError }) => void | false
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
@@ -284,8 +284,11 @@ function createConfiguredStore(config) {
 
 				// Use custom onSave callback if provided
 				if (config.onSave) {
-					config.onSave(yaml);
-					set({ isDirty: false, baselineYaml: yaml });
+					const { markers, yamlParseError } = get();
+					const result = config.onSave(yaml, { markers, yamlParseError });
+					if (result !== false) {
+						set({ isDirty: false, baselineYaml: yaml });
+					}
 					return;
 				}
 
