@@ -1196,6 +1196,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
                 value={property.customProperties}
                 onChange={(value) => updateField('customProperties', value)}
                 showDescription={true}
+                managedProperties={customPropertyConfigs.map(c => c.property)}
               />
             </DisclosurePanel>
           </>

@@ -1,16 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Ajv2019 from 'ajv/dist/2019.js';
 import addFormats from 'ajv-formats';
 import { mergeCustomizationsIntoSchema } from './mergeCustomizationsIntoSchema.js';
-
-const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
-
-let baseSchema;
-
-beforeAll(async () => {
-	const response = await fetch(ODCS_SCHEMA_URL);
-	baseSchema = await response.json();
-}, 15000);
+import baseSchema from './fixtures/odcs-json-schema-v3.1.0.json';
 
 function compileSchema(schema) {
 	const ajv = new Ajv2019({ allErrors: true, strict: false, validateFormats: true });
@@ -250,5 +242,85 @@ describe('mergeCustomizationsIntoSchema', () => {
 
 		const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
 		expect(() => compileSchema(merged)).not.toThrow();
+	});
+
+	it('applies title and description as JSON Schema annotations', () => {
+		const customizations = {
+			dataContract: {
+				root: {
+					standardProperties: [
+						{ property: 'status', title: 'Contract Status', description: 'Current lifecycle status' },
+					],
+				},
+			},
+		};
+
+		const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+		expect(merged.properties.status.title).toBe('Contract Status');
+		expect(merged.properties.status.description).toBe('Current lifecycle status');
+	});
+
+	it('works with object-keyed standardProperties format', () => {
+		const customizations = {
+			dataContract: {
+				root: {
+					standardProperties: {
+						status: { enum: ['draft', 'active'] },
+						version: { pattern: '^\\d+\\.\\d+\\.\\d+$' },
+					},
+				},
+			},
+		};
+
+		const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+		const validate = compileSchema(merged);
+
+		expect(validate({ ...VALID_BASE, status: 'draft' })).toBe(true);
+		expect(validate({ ...VALID_BASE, status: 'unknown' })).toBe(false);
+		expect(validate({ ...VALID_BASE, version: 'bad' })).toBe(false);
+	});
+
+	it('keeps schema and schema.properties custom property constraints independent', () => {
+		const customizations = {
+			dataContract: {
+				schema: {
+					customProperties: [
+						{ property: 'retention', type: 'text', required: true },
+					],
+				},
+				'schema.properties': {
+					customProperties: [
+						{ property: 'pii', type: 'boolean', required: true },
+					],
+				},
+			},
+		};
+
+		const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+		expect(() => compileSchema(merged)).not.toThrow();
+
+		// SchemaObject (schema level) should have retention constraints, not pii
+		const schemaObjectAllOf = merged.$defs.SchemaObject.allOf;
+		const schemaOverride = schemaObjectAllOf.find(
+			(entry) => entry.properties?.customProperties
+		);
+		expect(schemaOverride).toBeDefined();
+		const schemaItems = schemaOverride.properties.customProperties.items;
+		expect(schemaItems.allOf.some((r) => r.if?.properties?.property?.const === 'retention')).toBe(true);
+		expect(schemaItems.allOf.some((r) => r.if?.properties?.property?.const === 'pii')).toBe(false);
+
+		// SchemaBaseProperty (schema.properties level) should have pii constraints, not retention
+		const basePropAllOf = merged.$defs.SchemaBaseProperty.allOf;
+		const propOverride = basePropAllOf.find(
+			(entry) => entry.properties?.customProperties
+		);
+		expect(propOverride).toBeDefined();
+		const propItems = propOverride.properties.customProperties.items;
+		expect(propItems.allOf.some((r) => r.if?.properties?.property?.const === 'pii')).toBe(true);
+		expect(propItems.allOf.some((r) => r.if?.properties?.property?.const === 'retention')).toBe(false);
+
+		// The shared SchemaElement node should be untouched
+		const sharedCp = merged.$defs.SchemaElement.properties.customProperties;
+		expect(sharedCp.$ref || sharedCp.type).toBeDefined(); // still original form
 	});
 });

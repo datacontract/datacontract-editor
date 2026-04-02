@@ -1740,6 +1740,7 @@ const ServerEditor = ({ serverIndex }) => {
                     value={servers[serverIndex].customProperties || []}
                     onChange={(customProperties) => updateServer('customProperties', customProperties)}
                     showDescription={true}
+                    managedProperties={customPropertyConfigs.map(c => c.property)}
                   />
                 </div>
               </div>

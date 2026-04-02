@@ -146,8 +146,12 @@ function formatAjvError(err) {
 			return `${path}: unknown field '${err.params.additionalProperty}'`;
 		case 'if':
 			return null; // Skip 'if' errors, the 'then' errors are more informative
-		case 'contains':
-			return `${path}: missing required custom property`;
+		case 'contains': {
+			const propName = err.schema?.properties?.property?.const;
+			return propName
+				? `${path}: missing required custom property '${propName}'`
+				: `${path}: missing required custom property`;
+		}
 		case 'format':
 			return `${path}: must be a valid ${err.params.format}`;
 		default:
