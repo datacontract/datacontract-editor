@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { configureMonacoYaml } from 'monaco-yaml';
 import { useEditorStore } from '../../../store.js';
+import { mergeCustomizationsIntoSchema } from '../../../utils/mergeCustomizationsIntoSchema.js';
 import { registerSchemaCompletionProvider } from '../../../services/schemaCompletionProvider.js';
 
 // Import Monaco workers setup
@@ -22,6 +23,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
     const setMarkers = useEditorStore((state) => state.setMarkers);
     const setSchemaInfo = useEditorStore((state) => state.setSchemaInfo);
     const baselineYaml = useEditorStore((state) => state.baselineYaml);
+    const customizations = useEditorStore((state) => state.editorConfig?.customizations);
     const location = useLocation();
 
     const hasChanges = yaml !== baselineYaml;
@@ -152,10 +154,11 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
         // monaco-yaml handles validation automatically
     };
 
-    // Update schema when it changes
+    // Update schema when it changes or customizations change
     useEffect(() => {
         if (monacoYamlRef.current && fetchedSchema) {
             try {
+                const schema = mergeCustomizationsIntoSchema(fetchedSchema, customizations);
                 // Update monaco-yaml schemas
                 monacoYamlRef.current.update({
                     enableSchemaRequest: true,
@@ -167,7 +170,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                         {
                             uri: schemaUrl || 'http://myserver/schema.json',
                             fileMatch: ['*'],
-                            schema: fetchedSchema
+                            schema
                         }
                     ]
                 });
@@ -175,7 +178,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                 console.warn('Failed to update schema:', error);
             }
         }
-    }, [fetchedSchema, schemaUrl]);
+    }, [fetchedSchema, schemaUrl, customizations]);
 
     // Trigger marker update when YAML changes (e.g., from form updates)
     useEffect(() => {

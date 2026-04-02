@@ -255,6 +255,7 @@ const Team = () => {
               <CustomPropertiesEditor
                 value={team?.customProperties}
                 onChange={(value) => updateTeamField('customProperties', value)}
+                managedProperties={customPropertyConfigs.map(c => c.property)}
               />
 
               {/* Team Authoritative Definitions */}

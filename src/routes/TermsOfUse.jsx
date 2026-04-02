@@ -194,15 +194,14 @@ const TermsOfUse = () => {
               />
 
               {/* Fallback Custom Properties Editor (only if no custom schema defined) */}
-              {customPropertyConfigs.length === 0 && (
               <div>
                 <CustomPropertiesEditor
                   value={description?.customProperties}
                   onChange={(value) => setYamlValue('description.customProperties', value)}
                   showDescription={true}
+                  managedProperties={customPropertyConfigs.map(c => c.property)}
                 />
               </div>
-              )}
             </div>
           </div>
 

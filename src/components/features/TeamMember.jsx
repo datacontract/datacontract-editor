@@ -283,6 +283,7 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
           value={member.customProperties || []}
           onChange={(value) => onUpdate(index, 'customProperties', value)}
           showDescription={true}
+          managedProperties={customPropertyConfigs.map(c => c.property)}
         />
 
         {/* Authoritative Definitions */}

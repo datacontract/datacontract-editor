@@ -215,6 +215,12 @@ function buildValueConstraints(config) {
 	if (config.maximum !== undefined && (valueSchema.type === 'number' || valueSchema.type === 'integer')) {
 		valueSchema.maximum = config.maximum;
 	}
+	if (config.minItems !== undefined && valueSchema.type === 'array') {
+		valueSchema.minItems = config.minItems;
+	}
+	if (config.maxItems !== undefined && valueSchema.type === 'array') {
+		valueSchema.maxItems = config.maxItems;
+	}
 
 	return valueSchema;
 }
@@ -268,17 +274,22 @@ function applyCustomPropertyConstraintsViaAllOf(schema, mapping, customPropertie
 	for (const cp of customProperties) {
 		const valueConstraints = buildValueConstraints(cp);
 		if (Object.keys(valueConstraints).length === 0) continue;
+		const thenClause = { properties: { value: valueConstraints } };
+		if (valueConstraints.minItems !== undefined) {
+			thenClause.required = ['value'];
+		}
 		itemsSchema.allOf.push({
 			if: { properties: { property: { const: cp.property } } },
-			then: { properties: { value: valueConstraints } },
+			then: thenClause,
 		});
 	}
 
-	// Add contains constraints for required custom properties
-	const requiredCps = customProperties.filter((cp) => cp.required);
-	if (requiredCps.length > 0) {
+	// Add contains constraints for custom properties that must be present
+	// (either explicitly required, or implicitly via minItems)
+	const mustExistCps = customProperties.filter((cp) => cp.required || (cp.minItems !== undefined && cp.minItems > 0));
+	if (mustExistCps.length > 0) {
 		if (!cpSchema.allOf) cpSchema.allOf = [];
-		for (const cp of requiredCps) {
+		for (const cp of mustExistCps) {
 			cpSchema.allOf.push({
 				contains: {
 					properties: { property: { const: cp.property } },
@@ -295,8 +306,8 @@ function applyCustomPropertyConstraintsViaAllOf(schema, mapping, customPropertie
 	if (!defNode.allOf) defNode.allOf = [];
 	const allOfEntry = { properties: { customProperties: cpSchema } };
 
-	// If there are required custom properties, also mark customProperties as required at this level
-	if (requiredCps.length > 0) {
+	// If there are custom properties that must exist, also mark customProperties as required at this level
+	if (mustExistCps.length > 0) {
 		allOfEntry.required = ['customProperties'];
 	}
 
@@ -333,19 +344,22 @@ function applyCustomPropertyConstraintsInline(schema, mapping, customProperties,
 		const valueConstraints = buildValueConstraints(cp);
 		if (Object.keys(valueConstraints).length === 0) continue;
 
+		const thenClause = { properties: { value: valueConstraints } };
+		if (valueConstraints.minItems !== undefined) {
+			thenClause.required = ['value'];
+		}
 		itemsSchema.allOf.push({
 			if: {
 				properties: { property: { const: cp.property } },
 			},
-			then: {
-				properties: { value: valueConstraints },
-			},
+			then: thenClause,
 		});
 	}
 
-	// For required custom properties, add `contains` constraints on the array
-	const requiredCps = customProperties.filter((cp) => cp.required);
-	if (requiredCps.length > 0) {
+	// Add contains constraints for custom properties that must be present
+	// (either explicitly required, or implicitly via minItems)
+	const mustExistCps = customProperties.filter((cp) => cp.required || (cp.minItems !== undefined && cp.minItems > 0));
+	if (mustExistCps.length > 0) {
 		const parentPath = mapping.customPropertiesPath.slice(0, -2);
 		const parent = parentPath.length ? resolvePath(schema, parentPath) : schema;
 
@@ -357,7 +371,7 @@ function applyCustomPropertyConstraintsInline(schema, mapping, customProperties,
 		}
 
 		if (!cpNode.allOf) cpNode.allOf = [];
-		for (const cp of requiredCps) {
+		for (const cp of mustExistCps) {
 			cpNode.allOf.push({
 				contains: {
 					properties: { property: { const: cp.property } },

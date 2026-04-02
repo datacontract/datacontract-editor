@@ -10,7 +10,7 @@ import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
  * @param {Function} onChange - Callback when array changes
  * @param {boolean} showDescription - Whether to show description field (default: false)
  */
-const CustomPropertiesEditor = ({ value, onChange, showDescription = false }) => {
+const CustomPropertiesEditor = ({ value, onChange, showDescription = false, managedProperties = [] }) => {
   // Normalize value to array format
   // Handle both array format [{property, value}] and object format {key: value}
   const normalizedValue = Array.isArray(value)
@@ -19,6 +19,20 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false }) =>
       ? Object.entries(value).map(([key, val]) => ({ property: key, value: val }))
       : [];
 
+  // Filter out properties that are managed by customization fields
+  const managedSet = managedProperties.length > 0 ? new Set(managedProperties) : null;
+  const displayedValue = managedSet
+    ? normalizedValue.filter((item) => !managedSet.has(item.property))
+    : normalizedValue;
+
+  // Map displayed index back to normalizedValue index
+  const displayedIndices = managedSet
+    ? normalizedValue.reduce((acc, item, i) => {
+        if (!managedSet.has(item.property)) acc.push(i);
+        return acc;
+      }, [])
+    : normalizedValue.map((_, i) => i);
+
   const handleAdd = () => {
     const newItem = { property: '', value: '' };
     if (showDescription) newItem.description = '';
@@ -26,14 +40,16 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false }) =>
     onChange(updatedArray);
   };
 
-  const handleRemove = (index) => {
-    const updatedArray = normalizedValue.filter((_, i) => i !== index);
+  const handleRemove = (displayIndex) => {
+    const realIndex = displayedIndices[displayIndex];
+    const updatedArray = normalizedValue.filter((_, i) => i !== realIndex);
     onChange(updatedArray.length > 0 ? updatedArray : undefined);
   };
 
-  const handleUpdate = (index, fieldName, fieldValue) => {
+  const handleUpdate = (displayIndex, fieldName, fieldValue) => {
+    const realIndex = displayedIndices[displayIndex];
     const updatedArray = [...normalizedValue];
-    updatedArray[index] = { ...updatedArray[index], [fieldName]: fieldValue };
+    updatedArray[realIndex] = { ...updatedArray[realIndex], [fieldName]: fieldValue };
     onChange(updatedArray);
   };
 
@@ -52,9 +68,9 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false }) =>
       </div>
 
       {/* Existing properties */}
-      {normalizedValue.map((item, index) => (
+      {displayedValue.map((item, index) => (
         <CustomPropertyCard
-          key={index}
+          key={displayedIndices[index]}
           item={item}
           index={index}
           showDescription={showDescription}

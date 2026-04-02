@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import { useCustomization } from '../hooks/useCustomization.js';
 
 const CustomProperties = () => {
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
+  const { customProperties: customPropertyConfigs } = useCustomization('root');
 
   // Parse current YAML to extract form values
   const formData = useMemo(() => {
@@ -62,6 +64,7 @@ const CustomProperties = () => {
               value={formData.customProperties}
               onChange={handleChange}
               showDescription={true}
+              managedProperties={customPropertyConfigs.map(c => c.property)}
             />
           </div>
         </div>

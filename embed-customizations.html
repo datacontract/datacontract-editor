@@ -100,7 +100,9 @@
             title: 'Compliance Frameworks',
             type: 'multiselect',
             description: 'Applicable compliance frameworks',
-            enum: ['GDPR', 'CCPA', 'HIPAA', 'SOX', 'PCI-DSS']
+            enum: ['GDPR', 'CCPA', 'HIPAA', 'SOX', 'PCI-DSS'],
+            minItems: 1,
+            maxItems: 3
           },
           {
             property: 'retentionDays',

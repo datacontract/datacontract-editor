@@ -671,6 +671,7 @@ const SchemaEditor = ({schemaIndex}) => {
 															value={schema[schemaIndex].customProperties}
 															onChange={(value) => setValue(`schema[${schemaIndex}].customProperties`, value)}
 															showDescription={true}
+															managedProperties={customPropertyConfigs.map(c => c.property)}
 														/>
 													</div>
 												</DisclosurePanel>
