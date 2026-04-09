@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {isSafeKey} from '../../utils/safeProperty.js';
 import {Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
@@ -24,7 +24,24 @@ import {useDefinition} from '../../hooks/useDefinition.js';
 import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
 import {useActiveServerType} from '../../hooks/useActiveServerType.js';
 
-const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
+const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce }) => {
+  const relationshipsSectionRef = useRef(null);
+  const [relationshipsHighlight, setRelationshipsHighlight] = useState(false);
+
+  // When a caller requests we focus the relationships section (e.g. clicking
+  // an edge in the diagram), scroll it into view and briefly highlight it.
+  // The focusNonce changes on every request so repeated clicks re-trigger.
+  useEffect(() => {
+    if (focusSection !== 'relationships' || !focusNonce) return;
+    // Defer to next frame so Disclosure has rendered the open panel.
+    const raf = requestAnimationFrame(() => {
+      relationshipsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setRelationshipsHighlight(true);
+      setTimeout(() => setRelationshipsHighlight(false), 1500);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [focusSection, focusNonce]);
+
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const yamlParts = useEditorStore((state) => state.yamlParts);
   const editorConfig = useEditorStore((state) => state.editorConfig);
@@ -1137,25 +1154,30 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete }) => {
       </Disclosure>
 
       {/* Relationships Section */}
-      <Disclosure>
-        {({ open }) => (
-          <>
-            <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Relationships</span>
-              <ChevronRightIcon
-                className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
-              />
-            </DisclosureButton>
-            <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
-              <RelationshipEditor
-                value={property.relationships}
-                onChange={(value) => updateField('relationships', value)}
-                relationshipTypeOptions={relationshipTypeOptions}
-              />
-            </DisclosurePanel>
-          </>
-        )}
-      </Disclosure>
+      <div
+        ref={relationshipsSectionRef}
+        className={`rounded transition-shadow ${relationshipsHighlight ? 'ring-2 ring-indigo-400 ring-offset-1' : ''}`}
+      >
+        <Disclosure key={`relationships-${focusNonce || 'initial'}`} defaultOpen={focusSection === 'relationships'}>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
+                <span>Relationships</span>
+                <ChevronRightIcon
+                  className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
+                <RelationshipEditor
+                  value={property.relationships}
+                  onChange={(value) => updateField('relationships', value)}
+                  relationshipTypeOptions={relationshipTypeOptions}
+                />
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
+      </div>
 
       {/* Custom Sections from Customization */}
       <CustomSections

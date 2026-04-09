@@ -355,7 +355,7 @@ const SchemaNode = ({ data, id }) => {
 
   return (
     <div
-      className="min-w-[250px]"
+      className="min-w-[250px] group/node"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -481,20 +481,25 @@ const SchemaNode = ({ data, id }) => {
                 data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
               }}
             >
-              {/* Property handles for connections */}
+              {/* Property handles for connections.
+                  Left (source) can start a drag, right (target) can only
+                  receive — users can't initiate a connection from the right. */}
               <Handle
                 type="source"
                 position={Position.Left}
                 id={`${id}-prop-${index}-source`}
-                className="w-6 h-6 !bg-indigo-500 !border-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="dce-prop-handle dce-prop-handle-source w-3 h-3 !bg-indigo-500 !border-indigo-700 opacity-0 group-hover/node:opacity-50 group-hover:!opacity-100 group-hover:scale-150 transition-all"
                 style={{ left: -1 }}
+                title="Drag from here to a property on another table to create a relationship"
               />
               <Handle
                 type="target"
                 position={Position.Right}
                 id={`${id}-prop-${index}-target`}
-                className="w-6 h-6 !bg-gray-400 !border-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                isConnectableStart={false}
+                className="dce-prop-handle dce-prop-handle-target w-3 h-3 !bg-gray-400 !border-gray-600 opacity-0 group-hover/node:opacity-50 transition-all"
                 style={{ right: -1 }}
+                title="Drop a relationship here"
               />
               <div className="flex justify-between items-center">
                 {/* Left side: Name and icons */}

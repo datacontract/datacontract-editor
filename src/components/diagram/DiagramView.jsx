@@ -82,6 +82,21 @@ const DiagramViewInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [showHelp, setShowHelp] = useState(false);
+  const [connectingFrom, setConnectingFrom] = useState(null); // 'source' | 'target' | null
+  const isConnecting = connectingFrom !== null;
+  const [coachDismissed, setCoachDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('diagram-coach-relationship-dismissed') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const dismissCoach = useCallback(() => {
+    setCoachDismissed(true);
+    try {
+      localStorage.setItem('diagram-coach-relationship-dismissed', '1');
+    } catch { /* ignore */ }
+  }, []);
   const location = useLocation();
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const lastFocusedIndexRef = useRef(null);
@@ -284,7 +299,7 @@ const DiagramViewInner = () => {
   }, [parsedData, updateSchemas]);
 
   // Handle showing property details in drawer
-  const handleShowPropertyDetails = useCallback((nodeId, propertyIndex, nodePosition, propertyOffset, openMethod = 'hover', nestedIndex = null) => {
+  const handleShowPropertyDetails = useCallback((nodeId, propertyIndex, nodePosition, propertyOffset, openMethod = 'hover', nestedIndex = null, focusSection = null) => {
     if (!parsedData?.schema) return;
 
     // Only open drawer on click, not on hover
@@ -315,7 +330,10 @@ const DiagramViewInner = () => {
 
     if (!property) return;
 
-    // Store the selected property info
+    // Store the selected property info.
+    // `focusSection` (e.g. 'relationships') causes the drawer to open that
+    // disclosure section and scroll it into view — used when the user clicks
+    // on a relationship edge so they land directly on the relevant editor.
     setSelectedProperty({
       nodeId,
       schemaIndex,
@@ -323,6 +341,8 @@ const DiagramViewInner = () => {
       nestedIndex,
       property,
       propertyPath,
+      focusSection,
+      focusNonce: Date.now(),
     });
   }, [parsedData]);
 
@@ -431,6 +451,27 @@ const DiagramViewInner = () => {
       updateSchemas(updatedSchemas);
     }
   }, [parsedData, updateSchemas]);
+
+  // Handle edge click: open the property drawer for the SOURCE property
+  // (the one that owns the relationship) and focus the Relationships section.
+  const onEdgeClick = useCallback((_event, edge) => {
+    // Only property-level relationships are editable from the drawer.
+    // Schema-level edges use the 'schemaRelationship' edge type.
+    if (edge?.type === 'schemaRelationship') return;
+    const match = edge?.id?.match(/^edge-(\d+)-(\d+)-(\d+)-(\d+)$/);
+    if (!match) return;
+    const sourceSchemaIndex = parseInt(match[1]);
+    const sourcePropIndex = parseInt(match[2]);
+    handleShowPropertyDetails(
+      `schema-${sourceSchemaIndex}`,
+      sourcePropIndex,
+      null,
+      0,
+      'click',
+      null,
+      'relationships'
+    );
+  }, [handleShowPropertyDetails]);
 
   // Handle edge deletion
   const onEdgesDelete = useCallback((edgesToDelete) => {
@@ -836,14 +877,18 @@ const DiagramViewInner = () => {
   return (
     <div className="w-full h-full">
       <ReactFlow
+        className={connectingFrom ? `dce-is-connecting dce-is-connecting-from-${connectingFrom}` : undefined}
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
+        onEdgeClick={onEdgeClick}
         onEdgesDelete={onEdgesDelete}
-        onConnect={onConnect}
+        onConnect={(c) => { setConnectingFrom(null); onConnect(c); dismissCoach(); }}
+        onConnectStart={(_e, { handleType }) => setConnectingFrom(handleType || null)}
+        onConnectEnd={() => setConnectingFrom(null)}
         isValidConnection={isValidConnection}
-        connectionMode="loose"
+        connectionMode="strict"
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -904,10 +949,42 @@ const DiagramViewInner = () => {
               <ul className="text-blue-800 space-y-1 list-disc list-inside">
                 <li>Click on schema or property names to edit</li>
                 <li>Click on properties to see details in drawer</li>
-                <li>Drag from right handle to left handle to link properties</li>
+                <li>Drag from a bubble on one property to a bubble on another to link them</li>
                 <li>Drag nodes to reposition</li>
                 <li>Use mouse wheel to zoom</li>
               </ul>
+            </div>
+          </Panel>
+        )}
+
+        {/* First-use coach mark: teach users how to draw relationships */}
+        {!coachDismissed &&
+         !isConnecting &&
+         parsedData?.schema &&
+         parsedData.schema.length >= 2 &&
+         edges.length === 0 && (
+          <Panel position="top-center" className="pointer-events-auto">
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg shadow-sm px-4 py-3 flex items-start gap-3 max-w-md">
+              <div className="flex-shrink-0 mt-0.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-indigo-200" />
+              </div>
+              <div className="text-sm text-indigo-900 flex-1">
+                <div className="font-semibold mb-0.5">Draw a relationship</div>
+                <div className="text-xs text-indigo-800">
+                  Hover a property row to reveal its connection dots, then drag from one property to another to link them (e.g. a foreign key to its referenced column).
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={dismissCoach}
+                className="flex-shrink-0 text-indigo-400 hover:text-indigo-700 transition-colors"
+                title="Dismiss"
+                aria-label="Dismiss hint"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </Panel>
         )}
@@ -943,6 +1020,8 @@ const DiagramViewInner = () => {
         open={selectedProperty !== null}
         onClose={handleCloseDrawer}
         propertyPath={selectedProperty?.propertyPath}
+        focusSection={selectedProperty?.focusSection}
+        focusNonce={selectedProperty?.focusNonce}
       />
     </div>
   );

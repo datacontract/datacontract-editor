@@ -28,3 +28,19 @@
 .react-flow__edge.schema-level-edge .react-flow__edge-interaction {
   cursor: default;
 }
+
+/*
+ * While a user is actively dragging a connection, reveal the valid drop
+ * targets. Connections can only start from a source handle (left bubble) and
+ * can only land on a target handle (right bubble), so highlight those.
+ */
+.dce-is-connecting-from-source .dce-prop-handle-target {
+  opacity: 1 !important;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+
+/* Crosshair cursor across the canvas while connecting */
+.dce-is-connecting .react-flow__pane {
+  cursor: crosshair;
+}
