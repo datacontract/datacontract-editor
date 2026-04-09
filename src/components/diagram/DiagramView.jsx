@@ -149,14 +149,21 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
 _SelfReferenceEdge = SelfReferenceEdge;
 
 // Cross-table bezier edge: same as React Flow's default bezier except
-// the source/target X are shifted inward by the dot radius so the path
-// terminates at the circle CENTER (which sits on the node border)
-// rather than at the handle's layout edge (the circle's outer edge,
-// 7 px outside the box).
-const DOT_RADIUS = 7;
-const PropertyBezierEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, markerEnd, markerStart, interactionWidth, label, labelStyle, labelBgStyle, labelShowBg, labelBgPadding, labelBgBorderRadius }) => {
-  const adjSourceX = sourceX + DOT_RADIUS; // source on LEFT → shift right (inward)
-  const adjTargetX = targetX - DOT_RADIUS; // target on RIGHT → shift left (inward)
+// the source/target X are anchored to the NODE's outer left/right edges
+// (where the visible dots are centered) rather than to the handle's
+// layout bounds — which can drift a few pixels depending on DOM
+// measurement timing. The anchoring uses useInternalNode so the edge
+// stays in sync with the node's actual position and width at render
+// time, not a snapshot cached by React Flow's handle bounds.
+const PropertyBezierEdge = ({ id, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, markerEnd, markerStart, interactionWidth, label, labelStyle, labelBgStyle, labelShowBg, labelBgPadding, labelBgBorderRadius }) => {
+  const sourceNode = useInternalNode(source);
+  const targetNode = useInternalNode(target);
+  // source handle is Position.Left → anchor at source node's LEFT edge
+  const adjSourceX = sourceNode ? sourceNode.internals.positionAbsolute.x : sourceX;
+  // target handle is Position.Right → anchor at target node's RIGHT edge
+  const adjTargetX = targetNode
+    ? targetNode.internals.positionAbsolute.x + (targetNode.measured?.width ?? 0)
+    : targetX;
   const [edgePath] = getBezierPath({
     sourceX: adjSourceX,
     sourceY,
