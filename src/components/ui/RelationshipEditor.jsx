@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useEditorStore } from '../../store.js';
 import Combobox from './Combobox.jsx';
 import LinkIcon from './icons/LinkIcon.jsx';
@@ -14,11 +14,21 @@ import { parseYaml } from '../../utils/yaml.js';
  * @param {Array} relationshipTypeOptions - Options for relationship type dropdown
  * @param {boolean} showFrom - Whether to show the 'from' field (required for schema-level, hidden for property-level)
  */
-const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['foreignKey'], showFrom = false }) => {
-  const yaml = useEditorStore((state) => state.yaml);
+// Returns true if `item.to` matches the given reference string (handles
+// composite keys where `to` is an array).
+const relationshipMatchesTo = (item, focusTo) => {
+  if (!focusTo || !item) return false;
+  if (Array.isArray(item.to)) return item.to.includes(focusTo);
+  return item.to === focusTo;
+};
 
-  // Generate schema.property suggestions from YAML
-  const schemaPropertySuggestions = useMemo(() => {
+/**
+ * Hook that returns schema.property suggestions parsed from the current
+ * YAML. Shared by RelationshipEditor and the dedicated RelationshipDrawer.
+ */
+export const useSchemaPropertySuggestions = () => {
+  const yaml = useEditorStore((state) => state.yaml);
+  return useMemo(() => {
     if (!yaml?.trim()) return [];
 
     try {
@@ -51,6 +61,10 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
       return [];
     }
   }, [yaml]);
+};
+
+const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['foreignKey'], showFrom = false, focusTo = null, focusNonce = null }) => {
+  const schemaPropertySuggestions = useSchemaPropertySuggestions();
 
   const handleAdd = () => {
     const newRelationship = { type: 'foreignKey', to: '', description: '' };
@@ -102,14 +116,31 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
           showFrom={showFrom}
           onUpdate={handleUpdate}
           onRemove={handleRemove}
+          isFocusMatch={relationshipMatchesTo(item, focusTo)}
+          focusNonce={focusNonce}
         />
       ))}
     </div>
   );
 };
 
-const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove }) => {
-  const [isExpanded, setIsExpanded] = useState(!item.to || (Array.isArray(item.to) && item.to.length === 0));
+export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove, isFocusMatch = false, focusNonce = null, defaultExpanded = null }) => {
+  const [isExpanded, setIsExpanded] = useState(
+    defaultExpanded !== null
+      ? defaultExpanded
+      : (!item.to || (Array.isArray(item.to) && item.to.length === 0))
+  );
+
+  // When this card is the focus match (e.g. user clicked its relationship
+  // edge in the diagram), flash a highlight ring. We do NOT auto-expand,
+  // scroll, or transfer keyboard focus — only a visual highlight.
+  const [focusHighlight, setFocusHighlight] = useState(false);
+  useEffect(() => {
+    if (!isFocusMatch || !focusNonce) return;
+    setFocusHighlight(true);
+    const timeoutId = setTimeout(() => setFocusHighlight(false), 1500);
+    return () => clearTimeout(timeoutId);
+  }, [isFocusMatch, focusNonce]);
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
 
@@ -203,7 +234,7 @@ const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaProperty
   const pairCount = Math.max(fromArray.length, toArray.length);
 
   return (
-    <div className="border border-gray-200 rounded-md bg-white">
+    <div className={`border rounded-md bg-white transition-shadow ${focusHighlight ? 'border-indigo-400 ring-2 ring-indigo-400 ring-offset-1' : 'border-gray-200'}`}>
       {/* Header - Always visible */}
       <div
         className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50"

@@ -1,6 +1,6 @@
-/* Make selected edges more visible */
+/* Make selected edges more visible — fuchsia stands out from node borders */
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: #888 !important;
+  stroke: #d946ef !important; /* fuchsia-500 */
   stroke-width: 3px !important;
 }
 
@@ -9,8 +9,10 @@
   cursor: pointer;
 }
 
-.react-flow__edge:hover .react-flow__edge-path {
-  stroke: #888 !important;
+/* Only tint on hover when the edge is not already selected — selection
+   must visually win over hover. */
+.react-flow__edge:hover:not(.selected) .react-flow__edge-path {
+  stroke: rgba(217, 70, 239, 0.55) !important; /* fuchsia-500 @ 55% */
   stroke-width: 2.5px !important;
 }
 
@@ -30,13 +32,143 @@
 }
 
 /*
+ * Connection-handle visibility rules.
+ *
+ * We intentionally manage opacity entirely in this stylesheet (rather than
+ * via Tailwind utility classes on the Handle JSX) because Tailwind's
+ * `group-hover:!opacity-100` lives in `@layer utilities` and fights the
+ * normal cascade in ways we can't reliably beat with specificity when we
+ * want to suppress the hover state during a connection drag.
+ *
+ * States:
+ *   default:               hidden
+ *   entity hover:          both source and target faint (0.5)
+ *   row hover:             source full (1) and enlarged; target unchanged
+ *   connecting-from-source: ALL source handles hidden; target handles
+ *                           highlighted and enlarged
+ */
+
+/* Base: invisible */
+.dce-prop-handle {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+/* Entity hover: both kinds visible faintly */
+.dce-schema-node:hover .dce-prop-handle {
+  opacity: 0.5;
+}
+/* Row hover: source handle goes fully opaque */
+.dce-prop-row:hover .dce-prop-handle-source {
+  opacity: 1;
+}
+
+/*
+ * Source (left) connection handle.
+ *
+ * The React Flow handle element itself is a large transparent square that
+ * serves as the pointer hit area — so even when the canvas is zoomed out,
+ * the grab target stays easy to click. The actual visible dot is rendered
+ * via a ::before pseudo-element that scales on row hover. The hover scale
+ * is driven by a CSS variable (`--dce-handle-hover-scale`) set on the
+ * schema node wrapper based on the current canvas zoom, so the visible
+ * dot remains roughly constant in SCREEN space regardless of zoom level.
+ */
+.react-flow__handle.dce-prop-handle-source {
+  background: transparent !important;
+  border: none !important;
+  width: 32px !important;
+  height: 32px !important;
+  /* React Flow v12 uses the handle's LAYOUT left edge (offsetLeft)
+     as the attachment point for Position.Left handles, NOT its center.
+     So we need the handle's layout LEFT edge to sit exactly on the
+     node's outer border. Since the row's positioning context starts 3px
+     inside the node's outer edge (border-[3px]), a `left: -3px` puts
+     the handle's left edge at the node's outer border. The hit area
+     then extends 32px INWARD into the row. */
+  left: -3px !important;
+  top: calc(50% - 16px) !important;
+  transform: none !important;
+}
+.react-flow__handle.dce-prop-handle-source::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; /* visible dot sits on the handle's left edge = node edge */
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #6366f1; /* indigo-500 */
+  border: 2px solid #4338ca; /* indigo-700 */
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  transition: transform 0.15s ease;
+  pointer-events: none;
+}
+/* Row hover → grow the visible dot (zoom-aware, capped) */
+.dce-prop-row:hover .react-flow__handle.dce-prop-handle-source::before {
+  transform: translate(-50%, -50%) scale(var(--dce-handle-hover-scale, 1.6));
+}
+
+/*
+ * While dragging a connection, the left (source) handles are not valid
+ * drop targets. Suppress them entirely — including on rows/entities the
+ * user is currently hovering while hunting for a drop target.
+ * !important beats the entity-hover and row-hover rules above without
+ * needing specificity gymnastics.
+ */
+.dce-is-connecting-from-source .dce-prop-handle-source {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+/* (pseudo is hidden via opacity on the parent; nothing else to do) */
+
+/*
+ * Target (right) connection handle.
+ *
+ * Same pattern as the source handle: a transparent oversized hit area with
+ * a small visible dot rendered via ::before. The right-anchored handle uses
+ * `translate(50%, -50%)` for its React Flow centering.
+ */
+.react-flow__handle.dce-prop-handle-target {
+  background: transparent !important;
+  border: none !important;
+  width: 32px !important;
+  height: 32px !important;
+  /* React Flow uses the handle's LAYOUT right edge for Position.Right
+     attachment, so put that edge at the node's outer border (-3 px
+     compensates for the 3 px border). Hit area extends 32 px inward. */
+  right: -3px !important;
+  top: calc(50% - 16px) !important;
+  transform: none !important;
+}
+.react-flow__handle.dce-prop-handle-target::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0; /* visible dot sits on the handle's right edge = node edge */
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #9ca3af; /* gray-400 */
+  border: 2px solid #4b5563; /* gray-600 */
+  transform: translate(50%, -50%) scale(1);
+  transform-origin: center;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  pointer-events: none;
+}
+
+/*
  * While a user is actively dragging a connection, reveal the valid drop
  * targets. Connections can only start from a source handle (left bubble) and
  * can only land on a target handle (right bubble), so highlight those.
  */
-.dce-is-connecting-from-source .dce-prop-handle-target {
+.dce-is-connecting-from-source .react-flow__handle.dce-prop-handle-target {
   opacity: 1 !important;
-  transform: scale(1.4);
+}
+.dce-is-connecting-from-source .react-flow__handle.dce-prop-handle-target::before {
+  background: #6366f1; /* indigo-500 — switch to indigo while connecting */
+  border-color: #4338ca;
+  transform: translate(50%, -50%) scale(var(--dce-handle-hover-scale, 1.6));
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
 }
 

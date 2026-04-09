@@ -24,22 +24,20 @@ import {useDefinition} from '../../hooks/useDefinition.js';
 import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
 import {useActiveServerType} from '../../hooks/useActiveServerType.js';
 
-const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce }) => {
+const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo }) => {
   const relationshipsSectionRef = useRef(null);
   const [relationshipsHighlight, setRelationshipsHighlight] = useState(false);
 
   // When a caller requests we focus the relationships section (e.g. clicking
-  // an edge in the diagram), scroll it into view and briefly highlight it.
+  // an edge in the diagram), briefly highlight it. We intentionally do not
+  // scroll or move keyboard focus — the specific matching relationship card
+  // is highlighted via RelationshipEditor's focusTo handling.
   // The focusNonce changes on every request so repeated clicks re-trigger.
   useEffect(() => {
     if (focusSection !== 'relationships' || !focusNonce) return;
-    // Defer to next frame so Disclosure has rendered the open panel.
-    const raf = requestAnimationFrame(() => {
-      relationshipsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setRelationshipsHighlight(true);
-      setTimeout(() => setRelationshipsHighlight(false), 1500);
-    });
-    return () => cancelAnimationFrame(raf);
+    setRelationshipsHighlight(true);
+    const timeoutId = setTimeout(() => setRelationshipsHighlight(false), 1500);
+    return () => clearTimeout(timeoutId);
   }, [focusSection, focusNonce]);
 
   const jsonSchema = useEditorStore((state) => state.schemaData);
@@ -1172,6 +1170,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   value={property.relationships}
                   onChange={(value) => updateField('relationships', value)}
                   relationshipTypeOptions={relationshipTypeOptions}
+                  focusTo={focusRelationshipTo}
+                  focusNonce={focusNonce}
                 />
               </DisclosurePanel>
             </>

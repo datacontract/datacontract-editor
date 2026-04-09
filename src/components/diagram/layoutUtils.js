@@ -84,11 +84,12 @@ export const getLayoutedElements = (schemas) => {
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({
     rankdir: 'LR',
-    nodesep: 40,
-    ranksep: 80,
+    nodesep: 60,
+    ranksep: 100,
     edgesep: 20,
     marginx: 40,
-    marginy: 40
+    marginy: 40,
+    ranker: 'network-simplex'
   });
 
   // Add nodes with content-aware size estimates

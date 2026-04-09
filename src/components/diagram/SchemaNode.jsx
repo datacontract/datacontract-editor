@@ -1,5 +1,5 @@
 import { memo, useState, useEffect, useRef, Fragment, useCallback } from 'react';
-import { Handle, Position, NodeToolbar, useReactFlow } from '@xyflow/react';
+import { Handle, Position, NodeToolbar, useReactFlow, useStore } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
 import { TypeSelector } from '../ui/TypeSelector';
 import { getLogicalTypeIcon } from '../features/schema/propertyIcons';
@@ -54,6 +54,10 @@ const SortablePropertyRow = ({ id: propId, children }) => {
 
 const SchemaNode = ({ data, id }) => {
   const { getNode } = useReactFlow();
+  // Current canvas zoom. Used to keep the connection-handle "grab target"
+  // large in screen space when the user zooms out (otherwise the handle
+  // visually shrinks and becomes hard to click).
+  const zoom = useStore((s) => s.transform[2]);
   const [isEditingSchemaName, setIsEditingSchemaName] = useState(false);
   const [editedSchemaName, setEditedSchemaName] = useState('');
   const [editingPropertyIndex, setEditingPropertyIndex] = useState(null);
@@ -355,7 +359,8 @@ const SchemaNode = ({ data, id }) => {
 
   return (
     <div
-      className="min-w-[250px] group/node"
+      className="min-w-[250px] group/node dce-schema-node"
+      style={{ '--dce-handle-hover-scale': Math.min(4, Math.max(1.6, 1.4 / Math.max(zoom || 1, 0.1))) }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -439,6 +444,26 @@ const SchemaNode = ({ data, id }) => {
               <span className="font-bold text-md truncate">{data.schema.name || 'Unnamed Schema'}</span>
             </div>
           )}
+          {/* Collapse toggle: full ↔ keys only */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onToggleCollapse?.(data.schema.name);
+            }}
+            className="ml-1 flex-shrink-0 p-1 rounded text-gray-600 hover:bg-white hover:text-gray-900 transition-colors"
+            title={data.collapseMode === 'keys' ? 'Show all properties' : 'Show keys only'}
+          >
+            {data.collapseMode === 'keys' ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 6h16M4 12h10M4 18h16" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
 
         {/* Properties List with Drag-and-Drop */}
@@ -455,6 +480,15 @@ const SchemaNode = ({ data, id }) => {
               strategy={verticalListSortingStrategy}
             >
               {data.schema.properties.map((prop, index) => {
+                // In "keys only" collapse mode, hide rows that are neither
+                // a primary key, a FK owner, nor the target of any edge —
+                // target rows must stay so their handles exist for edges.
+                if (data.collapseMode === 'keys') {
+                  const isPk = !!prop?.primaryKey;
+                  const isFk = Array.isArray(prop?.relationships) && prop.relationships.length > 0;
+                  const isReferenced = data.referencedPropertyNames?.has(prop?.name);
+                  if (!isPk && !isFk && !isReferenced) return null;
+                }
                 const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
                                               openPropertyDetails?.nestedIndex == null;
                 return (
@@ -462,7 +496,7 @@ const SchemaNode = ({ data, id }) => {
                     {({ dragHandleProps, isDragging }) => (
                       <Fragment>
                         <div
-                          className={`pl-2 pr-3 py-2 group relative cursor-pointer ${
+                          className={`pl-2 pr-3 py-2 group dce-prop-row relative cursor-pointer ${
                             isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                           } ${isDragging ? 'shadow-lg bg-white' : ''}`}
                           onContextMenu={(e) => handlePropertyContextMenu(e, index)}
@@ -488,7 +522,7 @@ const SchemaNode = ({ data, id }) => {
                 type="source"
                 position={Position.Left}
                 id={`${id}-prop-${index}-source`}
-                className="dce-prop-handle dce-prop-handle-source w-3 h-3 !bg-indigo-500 !border-indigo-700 opacity-0 group-hover/node:opacity-50 group-hover:!opacity-100 group-hover:scale-150 transition-all"
+                className="dce-prop-handle dce-prop-handle-source"
                 style={{ left: -1 }}
                 title="Drag from here to a property on another table to create a relationship"
               />
@@ -497,7 +531,7 @@ const SchemaNode = ({ data, id }) => {
                 position={Position.Right}
                 id={`${id}-prop-${index}-target`}
                 isConnectableStart={false}
-                className="dce-prop-handle dce-prop-handle-target w-3 h-3 !bg-gray-400 !border-gray-600 opacity-0 group-hover/node:opacity-50 transition-all"
+                className="dce-prop-handle dce-prop-handle-target"
                 style={{ right: -1 }}
                 title="Drop a relationship here"
               />
@@ -914,6 +948,32 @@ const SchemaNode = ({ data, id }) => {
             No properties defined
           </div>
         )}
+        {data.schema.properties?.length > 0 && data.collapseMode === 'keys' && (() => {
+          const total = data.schema.properties?.length || 0;
+          const visible = (data.schema.properties || []).filter((prop) => {
+            const isPk = !!prop?.primaryKey;
+            const isFk = Array.isArray(prop?.relationships) && prop.relationships.length > 0;
+            const isReferenced = data.referencedPropertyNames?.has(prop?.name);
+            return isPk || isFk || isReferenced;
+          }).length;
+          const hidden = total - visible;
+          if (hidden <= 0) return null;
+          return (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                data.onToggleCollapse?.(data.schema.name, 'full');
+              }}
+              className="w-full px-3 py-1.5 text-xs text-gray-500 hover:text-indigo-700 hover:bg-indigo-50 flex items-center justify-center gap-1 transition-colors"
+              title="Show all properties"
+            >
+              <span>+{hidden} hidden</span>
+              <span className="text-gray-400">·</span>
+              <span className="font-medium">Show all</span>
+            </button>
+          );
+        })()}
         </div>
       </div>
 

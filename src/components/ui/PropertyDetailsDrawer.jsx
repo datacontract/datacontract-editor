@@ -27,7 +27,7 @@ const MAX_WIDTH_PERCENT = 0.8;
  * @param {Function} props.onDelete - Callback when the property should be deleted
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
-const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, propertyPath, focusSection, focusNonce, ref }) {
+const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, propertyPath, focusSection, focusNonce, focusRelationshipTo, ref }) {
 	const property = useEditorStore(useShallow((state) => state.getValue(propertyPath)));
 	const getValue = useEditorStore(useShallow((state) => state.getValue));
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
@@ -153,6 +153,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
             onDelete={() => removeProperty(propertyPath)}
             focusSection={focusSection}
             focusNonce={focusNonce}
+            focusRelationshipTo={focusRelationshipTo}
           />
         </div>
       </div>
