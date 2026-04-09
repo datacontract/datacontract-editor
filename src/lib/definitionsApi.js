@@ -37,6 +37,38 @@ export const fetchDefinition = async (url, definitionAcceptHeader = "application
 };
 
 /**
+ * Fetch the semantic ontology tree (concepts with their properties as children)
+ * @param {string} baseUrl - API base URL for semantics (e.g., ".../datacontract-editor-api/semantics")
+ * @returns {Promise<Array>} Array of tree nodes (concepts with children)
+ */
+export const fetchSemanticTree = async (baseUrl) => {
+	if (!baseUrl) {
+		console.warn('Cannot fetch semantic tree: baseUrl not provided');
+		return [];
+	}
+
+	try {
+		const url = `${baseUrl}/tree`;
+		const response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			console.error('Failed to fetch semantic tree:', response.status, response.statusText);
+			return [];
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error('Error fetching semantic tree:', error);
+		return [];
+	}
+};
+
+/**
  * Search definitions using server-side search with pagination
  * @param {string} baseUrl - API base URL
  * @param {string} searchTerm - Search term

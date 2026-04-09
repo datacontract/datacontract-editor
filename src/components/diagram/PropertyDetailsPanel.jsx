@@ -75,8 +75,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   const isTransformLogicHidden = useIsPropertyHidden('schema.properties', 'transformLogic');
   const isTransformDescriptionHidden = useIsPropertyHidden('schema.properties', 'transformDescription');
 
-  // Semantics enabled via embed config (not customization)
-  const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl;
+  // Semantics/definitions enabled via embed config (not customization)
+  const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl || !!editorConfig?.definitions?.baseUrl;
 
   // Get overrides for standard properties
   const nameOverride = useStandardPropertyOverride('schema.properties', 'name');
