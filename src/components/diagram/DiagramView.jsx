@@ -96,20 +96,9 @@ const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, source
 const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, style, markerEnd, interactionWidth }) => {
   const node = useInternalNode(source);
 
-  // The source/target X coordinates passed in by React Flow correspond to
-  // the handle's layout LEFT (for Position.Left) or RIGHT (for Position.Right)
-  // edge. Our visible dots are 14 px wide and centered on the node border,
-  // so the layout edge sits 7 px outside the box — which means the edge
-  // path would otherwise terminate at the dot's OUTER edge instead of its
-  // center. Shift the endpoints 7 px inward so the path ends at the dot
-  // center, which sits exactly on the node's outer border.
-  const DOT_RADIUS = 7;
-  const adjSourceX = sourceX + DOT_RADIUS;
-  const adjTargetX = targetX - DOT_RADIUS;
-
   // Fallback to a bezier if measurements aren't ready yet.
   if (!node || !node.measured?.width || !node.measured?.height) {
-    const [edgePath] = getBezierPath({ sourceX: adjSourceX, sourceY, targetX: adjTargetX, targetY });
+    const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
     return <BaseEdge id={id} path={edgePath} style={style} markerEnd={markerEnd} interactionWidth={interactionWidth} />;
   }
 
@@ -117,6 +106,15 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
   const nodeY = node.internals.positionAbsolute.y;
   const width = node.measured.width;
   const height = node.measured.height;
+
+  // Since the visible dots are centered exactly on the node's left and
+  // right outer borders, we anchor the path endpoints to the node's
+  // left/right edges directly rather than to the handle coordinates
+  // React Flow passes us — which correspond to the handle's layout
+  // bounds and can drift by a few pixels from the visible dot center
+  // depending on DOM measurements.
+  const adjSourceX = nodeX;
+  const adjTargetX = nodeX + width;
 
   const offset = 28; // clearance from node edge
   const leftX = nodeX - offset;

@@ -107,6 +107,9 @@
   transform: none !important;
   transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
   transform-origin: center;
+  /* Ensure circles stack ABOVE the edge layer so edges terminate
+     visually "behind" the dots, hiding any sub-pixel endpoint noise. */
+  z-index: 10;
 }
 /* Invisible hit-area expansion (away from the box) */
 .react-flow__handle.dce-prop-handle-source::before {
@@ -163,6 +166,7 @@
   transform: none !important;
   transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
   transform-origin: center;
+  z-index: 10;
 }
 .react-flow__handle.dce-prop-handle-target::before {
   content: '';
