@@ -55,11 +55,19 @@ const ConnectionLinePreview = ({ fromX, fromY, toX, toY, fromPosition, toPositio
       />
     );
   }
+  // Match the committed `propertyBezier` edge: shift source X inward
+  // by the dot radius so the preview endpoint lands at the dot center.
+  // The target X is the mouse position (not a dot) so it isn't shifted
+  // unless the mouse is actually over a target handle — in which case
+  // React Flow already sets toX to the target handle's layout edge.
+  const dotRadius = 7;
+  const adjFromX = fromNode ? fromX + dotRadius : fromX;
+  const adjToX = toNode ? toX - dotRadius : toX;
   const [path] = getBezierPath({
-    sourceX: fromX,
+    sourceX: adjFromX,
     sourceY: fromY,
     sourcePosition: fromPosition,
-    targetX: toX,
+    targetX: adjToX,
     targetY: toY,
     targetPosition: toPosition,
   });
@@ -142,7 +150,46 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
 // the exact same rendering component.
 _SelfReferenceEdge = SelfReferenceEdge;
 
-const edgeTypes = { schemaRelationship: SchemaRelationshipEdge, selfReference: SelfReferenceEdge };
+// Cross-table bezier edge: same as React Flow's default bezier except
+// the source/target X are shifted inward by the dot radius so the path
+// terminates at the circle CENTER (which sits on the node border)
+// rather than at the handle's layout edge (the circle's outer edge,
+// 7 px outside the box).
+const DOT_RADIUS = 7;
+const PropertyBezierEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, markerEnd, markerStart, interactionWidth, label, labelStyle, labelBgStyle, labelShowBg, labelBgPadding, labelBgBorderRadius }) => {
+  const adjSourceX = sourceX + DOT_RADIUS; // source on LEFT → shift right (inward)
+  const adjTargetX = targetX - DOT_RADIUS; // target on RIGHT → shift left (inward)
+  const [edgePath] = getBezierPath({
+    sourceX: adjSourceX,
+    sourceY,
+    sourcePosition,
+    targetX: adjTargetX,
+    targetY,
+    targetPosition,
+  });
+  return (
+    <BaseEdge
+      id={id}
+      path={edgePath}
+      style={style}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
+      interactionWidth={interactionWidth}
+      label={label}
+      labelStyle={labelStyle}
+      labelBgStyle={labelBgStyle}
+      labelShowBg={labelShowBg}
+      labelBgPadding={labelBgPadding}
+      labelBgBorderRadius={labelBgBorderRadius}
+    />
+  );
+};
+
+const edgeTypes = {
+  schemaRelationship: SchemaRelationshipEdge,
+  selfReference: SelfReferenceEdge,
+  propertyBezier: PropertyBezierEdge,
+};
 
 const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: '#b1b1b7' },
@@ -1046,7 +1093,7 @@ const DiagramViewInner = () => {
                     sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
                     target: `schema-${targetSchemaIndex}`,
                     targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
-                    type: isSelfRef ? 'selfReference' : 'default',
+                    type: isSelfRef ? 'selfReference' : 'propertyBezier',
                     selectable: true,
                     deletable: true,
                     focusable: true,
@@ -1087,7 +1134,7 @@ const DiagramViewInner = () => {
                     sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
                     target: `schema-${targetSchemaIndex}`,
                     targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
-                    type: sourceSchemaIndex === targetSchemaIndex ? 'selfReference' : 'default',
+                    type: sourceSchemaIndex === targetSchemaIndex ? 'selfReference' : 'propertyBezier',
                     selectable: true,
                     deletable: true,
                     focusable: true,
