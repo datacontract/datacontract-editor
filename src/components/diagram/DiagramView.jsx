@@ -25,6 +25,51 @@ import Tooltip from '../ui/Tooltip.jsx';
 
 const SCHEMA_EDGE_TOOLTIP = 'Schema-level relationship — only editable in the form editor';
 
+const PREVIEW_EDGE_STYLE = { stroke: '#d946ef', strokeWidth: 2.5 };
+
+// Forward-declared: ConnectionLinePreview needs SelfReferenceEdge, which
+// is defined below. The component is only used at render time so a
+// function-valued const works once the file is fully evaluated.
+let _SelfReferenceEdge;
+
+/**
+ * Custom connection-line component used while the user is dragging a new
+ * relationship. When the drag target is the SAME node as the source
+ * (self-reference), reuse the committed self-reference edge component so
+ * the preview path is visually identical to the final edge. Otherwise
+ * render a plain bezier — both in fuchsia to match the hover accent.
+ */
+const ConnectionLinePreview = ({ fromX, fromY, toX, toY, fromPosition, toPosition, fromNode, toNode }) => {
+  const isSelfRef = !!(fromNode && toNode && fromNode.id === toNode.id);
+  if (isSelfRef && _SelfReferenceEdge && fromNode?.id) {
+    const SelfRef = _SelfReferenceEdge;
+    return (
+      <SelfRef
+        id="connection-preview"
+        source={fromNode.id}
+        sourceX={fromX}
+        sourceY={fromY}
+        targetX={toX}
+        targetY={toY}
+        style={PREVIEW_EDGE_STYLE}
+      />
+    );
+  }
+  const [path] = getBezierPath({
+    sourceX: fromX,
+    sourceY: fromY,
+    sourcePosition: fromPosition,
+    targetX: toX,
+    targetY: toY,
+    targetPosition: toPosition,
+  });
+  return (
+    <g>
+      <path d={path} stroke="#d946ef" strokeWidth={2.5} fill="none" />
+    </g>
+  );
+};
+
 const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }) => {
   const [edgePath] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   return (
@@ -43,9 +88,20 @@ const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, source
 const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, style, markerEnd, interactionWidth }) => {
   const node = useInternalNode(source);
 
+  // The source/target X coordinates passed in by React Flow correspond to
+  // the handle's layout LEFT (for Position.Left) or RIGHT (for Position.Right)
+  // edge. Our visible dots are 14 px wide and centered on the node border,
+  // so the layout edge sits 7 px outside the box — which means the edge
+  // path would otherwise terminate at the dot's OUTER edge instead of its
+  // center. Shift the endpoints 7 px inward so the path ends at the dot
+  // center, which sits exactly on the node's outer border.
+  const DOT_RADIUS = 7;
+  const adjSourceX = sourceX + DOT_RADIUS;
+  const adjTargetX = targetX - DOT_RADIUS;
+
   // Fallback to a bezier if measurements aren't ready yet.
   if (!node || !node.measured?.width || !node.measured?.height) {
-    const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY });
+    const [edgePath] = getBezierPath({ sourceX: adjSourceX, sourceY, targetX: adjTargetX, targetY });
     return <BaseEdge id={id} path={edgePath} style={style} markerEnd={markerEnd} interactionWidth={interactionWidth} />;
   }
 
@@ -68,7 +124,7 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
 
   // Orthogonal bracket path: source → left of node → over/under → right of node → target.
   // strokeLinejoin: 'round' is applied via style to soften the corners.
-  const path = `M ${sourceX} ${sourceY} L ${leftX} ${sourceY} L ${leftX} ${loopY} L ${rightX} ${loopY} L ${rightX} ${targetY} L ${targetX} ${targetY}`;
+  const path = `M ${adjSourceX} ${sourceY} L ${leftX} ${sourceY} L ${leftX} ${loopY} L ${rightX} ${loopY} L ${rightX} ${targetY} L ${adjTargetX} ${targetY}`;
 
   return (
     <BaseEdge
@@ -80,6 +136,11 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
     />
   );
 };
+
+// Register the self-reference edge with the forward reference used by
+// ConnectionLinePreview above so the preview and the committed edge use
+// the exact same rendering component.
+_SelfReferenceEdge = SelfReferenceEdge;
 
 const edgeTypes = { schemaRelationship: SchemaRelationshipEdge, selfReference: SelfReferenceEdge };
 
@@ -448,6 +509,49 @@ const DiagramViewInner = () => {
     }, 120);
   }, [parsedData, updateSchemas, reactFlowInstance, contractId]);
 
+  // If the given flow-space rect would be hidden under the right-hand
+  // drawer once it's open, pan the viewport horizontally so the rect is
+  // visible again. Only scrolls — never fits the view or auto-layouts,
+  // so the user's current zoom and overall framing are preserved.
+  const ensureRectVisibleForDrawer = useCallback((flowRect) => {
+    if (!reactFlowInstance || !flowRect) return;
+    // Defer to the next frame so the freshly-opened drawer is in the DOM.
+    requestAnimationFrame(() => {
+      // Collect all rendered drawer panels (ignore the hidden placeholder
+      // <div> that a closed drawer renders). Use offsetWidth so an
+      // in-progress CSS slide-in transform doesn't skew the measurement —
+      // we want the drawer's final on-screen left edge, not its animated
+      // position on this frame.
+      const drawerEls = Array.from(document.querySelectorAll('[data-drawer-panel]'))
+        .filter((el) => el.offsetWidth > 0);
+      if (drawerEls.length === 0) return;
+      const drawerLeft = Math.min(
+        ...drawerEls.map((el) => window.innerWidth - el.offsetWidth)
+      );
+
+      const br = reactFlowInstance.flowToScreenPosition({
+        x: flowRect.x + flowRect.width,
+        y: flowRect.y + flowRect.height,
+      });
+
+      const margin = 24;
+      const availableRight = drawerLeft - margin;
+      if (br.x <= availableRight) return;
+
+      // Pan left by exactly the overshoot — this keeps the rect's right
+      // edge just inside the available area. If the rect is wider than
+      // the available area, this still reveals as much of it as possible
+      // (right-aligned), which matters most for edges whose right endpoint
+      // is the part the drawer was covering.
+      const overshoot = br.x - availableRight;
+      const { x, y, zoom } = reactFlowInstance.getViewport();
+      reactFlowInstance.setViewport(
+        { x: x - overshoot, y, zoom },
+        { duration: 400 }
+      );
+    });
+  }, [reactFlowInstance]);
+
   // Handle showing property details in drawer
   const handleShowPropertyDetails = useCallback((nodeId, propertyIndex, nodePosition, propertyOffset, openMethod = 'hover', nestedIndex = null, focusSection = null, focusRelationshipTo = null) => {
     if (!parsedData?.schema) return;
@@ -495,7 +599,25 @@ const DiagramViewInner = () => {
       focusRelationshipTo,
       focusNonce: Date.now(),
     });
-  }, [parsedData]);
+
+    // Scroll the clicked property into view if the drawer would cover it.
+    // Only top-level property rows have a reliable flow-space rect here —
+    // nested rows live inside an expanded disclosure whose offset depends
+    // on runtime DOM measurements, so we skip them.
+    if (nestedIndex == null) {
+      const node = reactFlowInstance?.getNode?.(nodeId);
+      if (node) {
+        const nodeWidth = node.measured?.width ?? node.width ?? 250;
+        const propertyRowHeight = 42;
+        ensureRectVisibleForDrawer({
+          x: node.position.x,
+          y: node.position.y + propertyOffset,
+          width: nodeWidth,
+          height: propertyRowHeight,
+        });
+      }
+    }
+  }, [parsedData, reactFlowInstance, ensureRectVisibleForDrawer]);
 
   // Handle closing the drawer
   const handleCloseDrawer = useCallback(() => {
@@ -643,7 +765,31 @@ const DiagramViewInner = () => {
       sourcePropertyPath: `schema[${sourceSchemaIndex}].properties[${sourcePropIndex}]`,
       relationshipIndex,
     });
-  }, [parsedData]);
+
+    // Scroll the edge into view if the drawer would cover its endpoints.
+    // Build a flow-space rect spanning both connected property rows so
+    // the whole edge (or as much of it as can fit) stays visible.
+    const srcNode = reactFlowInstance?.getNode?.(`schema-${sourceSchemaIndex}`);
+    const tgtNode = reactFlowInstance?.getNode?.(`schema-${targetSchemaIndex}`);
+    if (srcNode && tgtNode) {
+      const headerHeight = 40;
+      const propertyRowHeight = 42;
+      const srcW = srcNode.measured?.width ?? srcNode.width ?? 250;
+      const tgtW = tgtNode.measured?.width ?? tgtNode.width ?? 250;
+      const srcY = srcNode.position.y + headerHeight + sourcePropIndex * propertyRowHeight;
+      const tgtY = tgtNode.position.y + headerHeight + targetPropIndex * propertyRowHeight;
+      const minX = Math.min(srcNode.position.x, tgtNode.position.x);
+      const maxX = Math.max(srcNode.position.x + srcW, tgtNode.position.x + tgtW);
+      const minY = Math.min(srcY, tgtY);
+      const maxY = Math.max(srcY + propertyRowHeight, tgtY + propertyRowHeight);
+      ensureRectVisibleForDrawer({
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      });
+    }
+  }, [parsedData, reactFlowInstance, ensureRectVisibleForDrawer]);
 
   // Close the relationship drawer automatically as soon as the corresponding
   // edge is no longer selected (user clicked the pane, another edge, or a
@@ -1080,6 +1226,36 @@ const DiagramViewInner = () => {
     }
   }, [reactFlowInstance, nodes.length]);
 
+  // Re-fit the view whenever the diagram container resizes (e.g. the user
+  // toggles preview/tests/validation panels, which change the available
+  // width or height of the canvas). Without this the graph can end up
+  // pushed off-screen or awkwardly small after a layout change.
+  const diagramContainerRef = useRef(null);
+  useEffect(() => {
+    if (!reactFlowInstance || typeof ResizeObserver === 'undefined') return;
+    const el = diagramContainerRef.current;
+    if (!el) return;
+
+    // Skip the very first observation (fires immediately when observe()
+    // is called) so we don't fight the initial auto-layout fit. We also
+    // debounce because panel open/close animations fire many resize
+    // events in quick succession.
+    let isFirst = true;
+    let timeoutId = null;
+    const observer = new ResizeObserver(() => {
+      if (isFirst) { isFirst = false; return; }
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.3, duration: 300 });
+      }, 150);
+    });
+    observer.observe(el);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [reactFlowInstance]);
+
   // Focus on selected schema when coming from sidebar
   useEffect(() => {
     const focusSchemaIndex = location.state?.focusSchemaIndex;
@@ -1140,7 +1316,7 @@ const DiagramViewInner = () => {
   }
 
   return (
-    <div className="w-full h-full">
+    <div ref={diagramContainerRef} className="w-full h-full">
       <ReactFlow
         className={connectingFrom ? `dce-is-connecting dce-is-connecting-from-${connectingFrom}` : undefined}
         nodes={nodes}
@@ -1158,6 +1334,8 @@ const DiagramViewInner = () => {
         onConnectEnd={() => setConnectingFrom(null)}
         isValidConnection={isValidConnection}
         connectionMode="strict"
+        connectionLineStyle={{ stroke: '#d946ef', strokeWidth: 2.5 }}
+        connectionLineComponent={ConnectionLinePreview}
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}

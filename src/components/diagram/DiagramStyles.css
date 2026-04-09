@@ -16,6 +16,17 @@
   stroke-width: 2.5px !important;
 }
 
+/* While the user is dragging a new connection, suppress edge hover
+   styling and pointer-events on existing edges so they don't flicker
+   in response to the mouse passing over them. */
+.dce-is-connecting .react-flow__edge {
+  pointer-events: none !important;
+}
+.dce-is-connecting .react-flow__edge:hover:not(.selected) .react-flow__edge-path {
+  stroke: #b1b1b7 !important;
+  stroke-width: 2px !important;
+}
+
 /* Schema-level relationship edges — dotted, non-interactive */
 .react-flow__edge.schema-level-edge .react-flow__edge-path {
   cursor: default;
@@ -73,54 +84,61 @@
  * schema node wrapper based on the current canvas zoom, so the visible
  * dot remains roughly constant in SCREEN space regardless of zoom level.
  */
+/*
+ * The source handle element IS the visible dot — half inside the box,
+ * half outside (centered on the node's left border). The handle IS
+ * clickable directly, and a transparent `::before` pseudo adds an
+ * invisible border that extends the hit zone OUTWARD (away from the
+ * box) so the user has a generous target without the hit zone
+ * bleeding into the property row's content.
+ *   - Row context starts 3 px inside the outer border → `left: -10px`
+ *     = -3 (border) + -7 (half the dot width) so the handle's CENTER
+ *     aligns with the node's outer border.
+ *   - Width 14 px (10 px fill + 2 px border).
+ */
 .react-flow__handle.dce-prop-handle-source {
-  background: transparent !important;
-  border: none !important;
-  width: 32px !important;
-  height: 32px !important;
-  /* React Flow v12 uses the handle's LAYOUT left edge (offsetLeft)
-     as the attachment point for Position.Left handles, NOT its center.
-     So we need the handle's layout LEFT edge to sit exactly on the
-     node's outer border. Since the row's positioning context starts 3px
-     inside the node's outer edge (border-[3px]), a `left: -3px` puts
-     the handle's left edge at the node's outer border. The hit area
-     then extends 32px INWARD into the row. */
-  left: -3px !important;
-  top: calc(50% - 16px) !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 9999px !important;
+  background: #d946ef !important; /* fuchsia-500 */
+  border: 2px solid #a21caf !important; /* fuchsia-700 */
+  left: -10px !important;
+  top: calc(50% - 7px) !important;
   transform: none !important;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transform-origin: center;
 }
+/* Invisible hit-area expansion (away from the box) */
 .react-flow__handle.dce-prop-handle-source::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 0; /* visible dot sits on the handle's left edge = node edge */
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: #6366f1; /* indigo-500 */
-  border: 2px solid #4338ca; /* indigo-700 */
-  transform: translate(-50%, -50%) scale(1);
-  transform-origin: center;
-  transition: transform 0.15s ease;
-  pointer-events: none;
+  top: -10px;
+  left: -10px;
+  right: 0; /* do NOT extend the hit zone INTO the box */
+  bottom: -10px;
+  pointer-events: auto;
 }
-/* Row hover → grow the visible dot (zoom-aware, capped) */
-.dce-prop-row:hover .react-flow__handle.dce-prop-handle-source::before {
-  transform: translate(-50%, -50%) scale(var(--dce-handle-hover-scale, 1.6));
+/* Row hover → grow the dot (zoom-aware, capped) */
+.dce-prop-row:hover .react-flow__handle.dce-prop-handle-source {
+  transform: scale(var(--dce-handle-hover-scale, 1.6)) !important;
 }
 
 /*
  * While dragging a connection, the left (source) handles are not valid
  * drop targets. Suppress them entirely — including on rows/entities the
  * user is currently hovering while hunting for a drop target.
- * !important beats the entity-hover and row-hover rules above without
- * needing specificity gymnastics.
+ *
+ * EXCEPTION: keep the origin handle (the one the user started dragging
+ * from) visible so they can see where the drag began. React Flow marks
+ * the origin handle with the `.connectingfrom` class.
  */
 .dce-is-connecting-from-source .dce-prop-handle-source {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-/* (pseudo is hidden via opacity on the parent; nothing else to do) */
+.dce-is-connecting-from-source .dce-prop-handle-source.connectingfrom {
+  opacity: 1 !important;
+}
 
 /*
  * Target (right) connection handle.
@@ -129,32 +147,31 @@
  * a small visible dot rendered via ::before. The right-anchored handle uses
  * `translate(50%, -50%)` for its React Flow centering.
  */
+/*
+ * Target (right) handle — mirror of the source: element IS the visible
+ * dot, half inside / half outside, centered on the node's right border.
+ * Invisible `::before` extends the hit zone outward (away from the box).
+ */
 .react-flow__handle.dce-prop-handle-target {
-  background: transparent !important;
-  border: none !important;
-  width: 32px !important;
-  height: 32px !important;
-  /* React Flow uses the handle's LAYOUT right edge for Position.Right
-     attachment, so put that edge at the node's outer border (-3 px
-     compensates for the 3 px border). Hit area extends 32 px inward. */
-  right: -3px !important;
-  top: calc(50% - 16px) !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 9999px !important;
+  background: #9ca3af !important; /* gray-400 */
+  border: 2px solid #4b5563 !important; /* gray-600 */
+  right: -10px !important;
+  top: calc(50% - 7px) !important;
   transform: none !important;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transform-origin: center;
 }
 .react-flow__handle.dce-prop-handle-target::before {
   content: '';
   position: absolute;
-  top: 50%;
-  right: 0; /* visible dot sits on the handle's right edge = node edge */
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: #9ca3af; /* gray-400 */
-  border: 2px solid #4b5563; /* gray-600 */
-  transform: translate(50%, -50%) scale(1);
-  transform-origin: center;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-  pointer-events: none;
+  top: -10px;
+  right: -10px;
+  left: 0; /* do NOT extend the hit zone INTO the box */
+  bottom: -10px;
+  pointer-events: auto;
 }
 
 /*
@@ -164,12 +181,10 @@
  */
 .dce-is-connecting-from-source .react-flow__handle.dce-prop-handle-target {
   opacity: 1 !important;
-}
-.dce-is-connecting-from-source .react-flow__handle.dce-prop-handle-target::before {
-  background: #6366f1; /* indigo-500 — switch to indigo while connecting */
-  border-color: #4338ca;
-  transform: translate(50%, -50%) scale(var(--dce-handle-hover-scale, 1.6));
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+  background: #d946ef !important; /* fuchsia-500 */
+  border-color: #a21caf !important; /* fuchsia-700 */
+  transform: scale(var(--dce-handle-hover-scale, 1.6)) !important;
+  box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.25);
 }
 
 /* Crosshair cursor across the canvas while connecting */

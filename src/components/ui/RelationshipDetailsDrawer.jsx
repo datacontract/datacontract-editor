@@ -111,6 +111,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
 
   return (
     <div
+      data-drawer-panel="relationship"
       style={width ? { width: `${width}px` } : undefined}
       className={`fixed inset-y-0 right-0 z-40 ${
         width ? '' : 'w-screen max-w-[calc(100vw-3rem)] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg'

@@ -500,7 +500,12 @@ const SchemaNode = ({ data, id }) => {
                             isPropertyDetailsOpen ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'
                           } ${isDragging ? 'shadow-lg bg-white' : ''}`}
                           onContextMenu={(e) => handlePropertyContextMenu(e, index)}
-                onClick={() => {
+                onClick={(e) => {
+                // Ignore clicks originating on a connection handle so a
+                // failed drag (mousedown+mouseup on the same spot) doesn't
+                // accidentally open the property details drawer.
+                if (e.target.closest('.dce-prop-handle')) return;
+
                 // Cancel any pending hover timeout when clicking
                 if (propertyHoverTimeoutRef.current) {
                   clearTimeout(propertyHoverTimeoutRef.current);
