@@ -159,9 +159,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     onUpdate(field, value);
   }, [onUpdate]);
 
-  // Get semantic definition from authoritative definitions (type === 'definition')
+  // Get semantic definition from authoritative definitions (type === 'semantic', with fallback to 'definition')
   const semanticDefinition = useMemo(() => {
-    const def = property.authoritativeDefinitions?.find(d => d.type === 'definition');
+    const def = property.authoritativeDefinitions?.find(d => d.type === 'semantic')
+      || property.authoritativeDefinitions?.find(d => d.type === 'definition');
     console.log('Semantic definition found:', def);
     return def;
   }, [property.authoritativeDefinitions]);
@@ -217,7 +218,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
 
   // Remove semantic definition
   const removeSemanticDefinition = useCallback(() => {
-    const filtered = property.authoritativeDefinitions?.filter(d => d.type !== 'definition');
+    const filtered = property.authoritativeDefinitions?.filter(d => d.type !== 'semantic' && d.type !== 'definition');
     updateField('authoritativeDefinitions', filtered?.length ? filtered : undefined);
   }, [property.authoritativeDefinitions, updateField]);
 
@@ -227,15 +228,15 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     // Use the full URL if available, otherwise use name (which might be a path)
     const definitionUrl = definition.url || definition.name;
 
-    const newDef = { type: 'definition', url: definitionUrl };
+    const newDef = { type: 'semantic', url: definitionUrl };
     const defs = property.authoritativeDefinitions || [];
-    updateField('authoritativeDefinitions', [...defs.filter(d => d.type !== 'definition'), newDef]);
+    updateField('authoritativeDefinitions', [...defs.filter(d => d.type !== 'semantic' && d.type !== 'definition'), newDef]);
   }, [property.authoritativeDefinitions, updateField]);
 
   // Get authoritative definitions excluding semantic definition (when semantics section visible)
   const filteredAuthoritativeDefinitions = useMemo(() => {
     if (!isSemanticsEnabled) return property.authoritativeDefinitions;
-    return property.authoritativeDefinitions; //?.filter(d => d.type !== 'definition');
+    return property.authoritativeDefinitions?.filter(d => d.type !== 'semantic' && d.type !== 'definition');
   }, [property.authoritativeDefinitions, isSemanticsEnabled]);
 
   return (
@@ -449,25 +450,40 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                                     </div>
                                   ) : (
                                     <>
-                                      {/* Row 1: name and logicalType */}
+                                      {/* Row 1: name, element type badge, and logicalType */}
                                       <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900 text-sm">{definitionData.name}</span>
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="font-medium text-gray-900 text-sm truncate">{definitionData.name}</span>
+                                          {(() => {
+                                            const et = definitionData.customProperties?.find(p => p.property === 'elementType')?.value;
+                                            if (!et) return null;
+                                            const colors = et === 'concept'
+                                              ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
+                                              : et === 'sharedProperty'
+                                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+                                                : 'bg-amber-50 text-amber-700 ring-amber-600/20';
+                                            return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${colors}`}>{et === 'sharedProperty' ? 'shared property' : et}</span>;
+                                          })()}
+                                        </div>
                                         {definitionData.logicalType && (
-                                          <span className="text-xs text-gray-500 font-mono">{definitionData.logicalType}</span>
+                                          <span className="text-xs text-gray-500 font-mono flex-shrink-0 ml-2">{definitionData.logicalType}</span>
                                         )}
                                       </div>
 
-                                      {/* Row 2: businessName and owner */}
+                                      {/* Row 2: businessName, parent concept, and owner */}
                                       <div className="flex items-center justify-between mt-0.5">
-                                        {definitionData.businessName && (
-                                          <span className="text-sm text-gray-700">{definitionData.businessName}</span>
-                                        )}
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          {definitionData.businessName && (
+                                            <span className="text-sm text-gray-700">{definitionData.businessName}</span>
+                                          )}
+                                          {(() => {
+                                            const pc = definitionData.customProperties?.find(p => p.property === 'parentConcept')?.value;
+                                            return pc ? <span className="text-xs text-gray-400"><span className="text-gray-300 mx-0.5">&middot;</span>{pc}</span> : null;
+                                          })()}
+                                        </div>
                                         {(() => {
-                                          const ownerProp = definitionData.customProperties?.find(p => p.property === 'owner');
-                                          const owner = ownerProp?.value;
-                                          return owner ? (
-                                            <span className="text-xs text-gray-500">Owner: {owner}</span>
-                                          ) : null;
+                                          const owner = definitionData.customProperties?.find(p => p.property === 'owner')?.value;
+                                          return owner ? <span className="text-xs text-gray-500 flex-shrink-0">Owner: {owner}</span> : null;
                                         })()}
                                       </div>
 

@@ -87,12 +87,14 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
     onClose();
   };
 
-  // Extract owner from customProperties array
-  const getOwner = (definition) => {
+  // Extract custom property value
+  const getCustomProperty = (definition, key) => {
     if (!definition.customProperties) return null;
-    const ownerProp = definition.customProperties.find(p => p.property === 'owner');
-    return ownerProp?.value;
+    return definition.customProperties.find(p => p.property === key)?.value;
   };
+
+  // Extract owner from customProperties array
+  const getOwner = (definition) => getCustomProperty(definition, 'owner');
 
   // Truncate description
   const truncateDescription = (text, maxLength = 80) => {
@@ -215,6 +217,8 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
               <div className="space-y-2 pr-2">
                   {definitions.map((definition, index) => {
                     const owner = getOwner(definition);
+                    const elementType = getCustomProperty(definition, 'elementType');
+                    const parentConcept = getCustomProperty(definition, 'parentConcept');
                     const isSelected = selectedDefinition?.url === definition.url;
                     return (
                       <button
@@ -227,21 +231,42 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                             : 'bg-gray-50 hover:bg-gray-100'
                         }`}
                       >
-                        {/* Row 1: name and logicalType */}
+                        {/* Row 1: name, element type badge, and logicalType */}
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-900 text-sm">{definition.name}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-medium text-gray-900 text-sm truncate">{definition.name}</span>
+                            {elementType && (
+                              <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${
+                                elementType === 'concept'
+                                  ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
+                                  : elementType === 'sharedProperty'
+                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+                                    : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                              }`}>
+                                {elementType === 'sharedProperty' ? 'shared property' : elementType}
+                              </span>
+                            )}
+                          </div>
                           {definition.logicalType && (
-                            <span className="text-xs text-gray-500 font-mono">{definition.logicalType}</span>
+                            <span className="text-xs text-gray-500 font-mono flex-shrink-0 ml-2">{definition.logicalType}</span>
                           )}
                         </div>
 
-                        {/* Row 2: businessName and owner */}
+                        {/* Row 2: businessName, parent concept, and owner */}
                         <div className="flex items-center justify-between mt-0.5">
-                          {definition.businessName && (
-                            <span className="text-sm text-gray-700">{definition.businessName}</span>
-                          )}
+                          <div className="flex items-center gap-2 min-w-0">
+                            {definition.businessName && (
+                              <span className="text-sm text-gray-700">{definition.businessName}</span>
+                            )}
+                            {parentConcept && (
+                              <span className="text-xs text-gray-400">
+                                <span className="text-gray-300 mx-0.5">&middot;</span>
+                                {parentConcept}
+                              </span>
+                            )}
+                          </div>
                           {owner && (
-                            <span className="text-xs text-gray-500">Owner: {owner}</span>
+                            <span className="text-xs text-gray-500 flex-shrink-0">Owner: {owner}</span>
                           )}
                         </div>
 

@@ -68,7 +68,7 @@ const PropertyRow = ({
 	// Get definition data using hook
 	const { getDefinition } = useDefinition();
 	const [definition, setDefinition] = useState(null);
-	const definitionUrl = property.authoritativeDefinitions?.find(d => d.type === 'definition')?.url;
+	const definitionUrl = (property.authoritativeDefinitions?.find(d => d.type === 'semantic') || property.authoritativeDefinitions?.find(d => d.type === 'definition'))?.url;
 	const absoluteDefinitionUrl = definitionUrl ? toAbsoluteUrl(definitionUrl) : null;
 
 	// Fetch definition data when URL changes
