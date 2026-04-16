@@ -457,12 +457,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                                           {(() => {
                                             const et = definitionData.customProperties?.find(p => p.property === 'elementType')?.value;
                                             if (!et) return null;
-                                            const colors = et === 'concept'
+                                            const colors = et === 'entity'
                                               ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
-                                              : et === 'sharedProperty'
+                                              : et === 'shared_property'
                                                 ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
                                                 : 'bg-amber-50 text-amber-700 ring-amber-600/20';
-                                            return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${colors}`}>{et === 'sharedProperty' ? 'shared property' : et}</span>;
+                                            return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${colors}`}>{et === 'shared_property' ? 'shared property' : et}</span>;
                                           })()}
                                         </div>
                                         {definitionData.logicalType && (

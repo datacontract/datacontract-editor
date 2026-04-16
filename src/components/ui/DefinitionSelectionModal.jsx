@@ -173,7 +173,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const countElements = (nodes) => {
     let concepts = 0, properties = 0;
     const walk = (n) => n.forEach(node => {
-      if (node.elementType === 'concept') concepts++;
+      if (node.elementType === 'entity') concepts++;
       else if (node.elementType !== 'namespace') properties++;
       if (node.children) walk(node.children);
     });
@@ -325,10 +325,10 @@ function ElementIcon({ elementType }) {
   switch (elementType) {
     case 'namespace':
       return (<svg className="size-5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z"/></svg>);
-    case 'concept':
+    case 'entity':
       return (<svg className="size-5 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 9.143l7.477-4.125-7.115-3.925ZM18 6.443l-7.25 4v8.25l6.888-3.8A.75.75 0 0 0 18 14.25V6.443ZM9.25 18.693v-8.25l-7.25-4v7.807a.75.75 0 0 0 .362.643l6.888 3.8Z"/></svg>);
     case 'property':
-    case 'sharedProperty':
+    case 'shared_property':
       return (<svg className="size-5 text-green-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v3.879a2.5 2.5 0 0 0 .732 1.767l7.5 7.5a2.5 2.5 0 0 0 3.536 0l3.878-3.878a2.5 2.5 0 0 0 0-3.536l-7.5-7.5A2.5 2.5 0 0 0 8.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd"/></svg>);
     case 'metric':
       return (<svg className="size-5 text-red-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z"/></svg>);
@@ -342,7 +342,7 @@ function TreeNode({ node, expandedNodes, toggleNode, selectedExternalId, onSelec
   const isExpanded = expandedNodes.has(node.externalId);
   const isSelectable = node.elementType !== 'namespace';
   const isSelected = isSelectable && selectedExternalId === node.externalId;
-  const isParent = node.elementType === 'concept' || node.elementType === 'namespace';
+  const isParent = node.elementType === 'entity' || node.elementType === 'namespace';
 
   return (
     <div>
@@ -394,10 +394,10 @@ function DefinitionCard({ definition, isSelected, onClick }) {
           <span className="font-medium text-gray-900 text-sm truncate">{definition.businessName || definition.name}</span>
           {elementType && (
             <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${
-              elementType === 'concept' ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
-                : elementType === 'sharedProperty' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+              elementType === 'entity' ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
+                : elementType === 'shared_property' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
                   : 'bg-amber-50 text-amber-700 ring-amber-600/20'
-            }`}>{elementType === 'sharedProperty' ? 'shared property' : elementType}</span>
+            }`}>{elementType === 'shared_property' ? 'shared property' : elementType}</span>
           )}
         </div>
         {definition.logicalType && <span className="text-xs text-gray-500 font-mono flex-shrink-0 ml-2">{definition.logicalType}</span>}
