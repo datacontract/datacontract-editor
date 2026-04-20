@@ -107,50 +107,92 @@ function applyStandardOverrides(schema, mapping, overrides) {
 	// Find the parent that holds the `required` array – one level up from propertiesPath
 	const parentPath = mapping.propertiesPath.slice(0, -1);
 	const parent = parentPath.length ? resolvePath(schema, parentPath) : schema;
+	const defNode = mapping.allOfDef ? schema.$defs?.[mapping.allOfDef] : null;
 
 	for (const override of overrides) {
 		const { property, hidden, placeholder, title, description, ...constraints } = override;
 		if (!isSafeKey(property)) continue;
-		const propSchema = properties[property];
-		if (!propSchema) continue;
 
-		if (title) propSchema.title = title;
-		if (description) propSchema.description = description;
+		let propSchema = properties[property];
+		let isComposed = false;
+
+		// Fall back to the allOf composition chain (e.g. SchemaObject → SchemaElement)
+		// so we can still apply overrides to inherited fields like `businessName` and `description`.
+		if (!propSchema && defNode) {
+			propSchema = findComposedProperty(schema, defNode, property);
+			if (propSchema) isComposed = true;
+		}
+
+		const propertyExists = Boolean(propSchema);
+		if (!propertyExists) continue;
+
+		const localOverrides = {};
+		if (title) localOverrides.title = title;
+		if (description) localOverrides.description = description;
 
 		if (constraints.enum) {
-			const enumValues = constraints.enum.map((e) =>
+			localOverrides.enum = constraints.enum.map((e) =>
 				typeof e === 'string' ? e : e.value
 			);
-			propSchema.enum = enumValues;
 		}
+		if (constraints.pattern) localOverrides.pattern = constraints.pattern;
+		if (constraints.minLength !== undefined) localOverrides.minLength = constraints.minLength;
+		if (constraints.maxLength !== undefined) localOverrides.maxLength = constraints.maxLength;
+		if (constraints.minimum !== undefined) localOverrides.minimum = constraints.minimum;
+		if (constraints.maximum !== undefined) localOverrides.maximum = constraints.maximum;
 
-		if (constraints.pattern) {
-			propSchema.pattern = constraints.pattern;
-		}
-
-		if (constraints.minLength !== undefined) {
-			propSchema.minLength = constraints.minLength;
-		}
-
-		if (constraints.maxLength !== undefined) {
-			propSchema.maxLength = constraints.maxLength;
-		}
-
-		if (constraints.minimum !== undefined) {
-			propSchema.minimum = constraints.minimum;
-		}
-
-		if (constraints.maximum !== undefined) {
-			propSchema.maximum = constraints.maximum;
-		}
-
-		if (constraints.required === true && parent) {
-			if (!parent.required) parent.required = [];
-			if (!parent.required.includes(property)) {
-				parent.required.push(property);
+		if (isComposed && defNode) {
+			// Don't mutate the shared composed def (e.g. SchemaElement is used by both
+			// SchemaObject and SchemaBaseProperty). Inject a level-specific override via allOf,
+			// including `required` so validators (incl. monaco-yaml) see the required array
+			// alongside the property definition.
+			const hasLocalOverrides = Object.keys(localOverrides).length > 0;
+			const isRequired = constraints.required === true;
+			if (hasLocalOverrides || isRequired) {
+				appendAllOfEntry(defNode, {
+					properties: hasLocalOverrides ? { [property]: localOverrides } : undefined,
+					required: isRequired ? [property] : undefined,
+				});
+			}
+		} else {
+			if (Object.keys(localOverrides).length > 0) {
+				Object.assign(propSchema, localOverrides);
+			}
+			if (constraints.required === true && parent) {
+				if (!parent.required) parent.required = [];
+				if (!parent.required.includes(property)) {
+					parent.required.push(property);
+				}
 			}
 		}
 	}
+}
+
+function findComposedProperty(schema, defNode, property, seen = new Set()) {
+	if (!defNode || !Array.isArray(defNode.allOf)) return null;
+	for (const entry of defNode.allOf) {
+		if (entry?.$ref) {
+			if (seen.has(entry.$ref)) continue;
+			seen.add(entry.$ref);
+			const resolved = resolveRef(schema, entry.$ref);
+			if (!resolved) continue;
+			if (resolved.properties?.[property]) return resolved.properties[property];
+			const nested = findComposedProperty(schema, resolved, property, seen);
+			if (nested) return nested;
+		} else if (entry?.properties?.[property]) {
+			return entry.properties[property];
+		}
+	}
+	return null;
+}
+
+function appendAllOfEntry(defNode, entry) {
+	if (!defNode.allOf) defNode.allOf = [];
+	const clean = {};
+	if (entry.properties) clean.properties = entry.properties;
+	if (entry.required) clean.required = entry.required;
+	if (Object.keys(clean).length === 0) return;
+	defNode.allOf.push(clean);
 }
 
 // ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
-import {getValueWithPath, setOverrideStore, setValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
+import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
@@ -130,6 +130,10 @@ function createConfiguredStore(config) {
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+			},
+			removeValue: (path) => {
+				const newYamlParts = removeValueWithPath(get().yamlParts, path);
 				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 			},
 			markClean: () => set({ isDirty: false }),

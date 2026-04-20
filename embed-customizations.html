@@ -258,30 +258,29 @@
       // Schema level customizations
       schema: {
         standardProperties: [
-          { property: 'dataGranularityDescription', hidden: true },
+          {
+            property: 'physicalName',
+            title: 'Physical Name',
+            description: 'Use an uppercase first letter for each word, with underscores for spaces. Well-known acronyms can remain fully uppercase. The PhysicalName must always be the same as the Name.',
+            pattern: '^(?:[A-Z]+|[A-Z][a-z]+)(?:_[A-Z][a-z]+)*$',
+            patternMessage: 'Must be snake_case with capitalized words. First word must be Title Case, well known acroynms can be ALL CAPS; subsequent words must be Title Case (e.g., Customer_Account_Name or AR_Customers).',
+            required: true
+          },
           {
             property: 'name',
             title: 'Schema Name',
-            pattern: '^[a-z][a-z0-9_]*$',
-            patternMessage: 'Must be lowercase snake_case.',
-            required: true,
-            placeholder: 'my_schema'
-          },
-          {
-            property: 'physicalName',
-            title: 'Physical Schema Name',
-            pattern: '^[A-Z][A-Z0-9_]*$',
-            patternMessage: 'Must be uppercase SNAKE_CASE (e.g., MY_TABLE).',
-            placeholder: 'MY_SCHEMA'
+            description: 'Use an uppercase first letter for each word, with underscores for spaces. Well-known acronyms can remain fully uppercase. The Name must always be the same as the PhysicalName.',
+            pattern: '^(?:[A-Z]+|[A-Z][a-z]+)(?:_[A-Z][a-z]+)*$',
+            patternMessage: 'Must be snake_case with capitalized words. First word must be Title Case, well known acroynms can be ALL CAPS; subsequent words must be Title Case (e.g., Customer_Account_Name or AR_Customers).',
+            required: true
           },
           {
             property: 'businessName',
-            maxLength: 100,
-            placeholder: 'Human-friendly schema name'
+            required: true
           },
           {
-            property: 'logicalType',
-            title: 'Schema Logical Type'
+            property: 'description',
+            required: true
           }
         ],
         customProperties: [

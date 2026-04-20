@@ -65,6 +65,22 @@ export function setValueWithPath(obj, path, value) {
 	return newObj;
 }
 
+export function removeValueWithPath(obj, path) {
+	const newObj = JSON.parse(JSON.stringify(obj || {}));
+	const keys = path.match(/[^.[\]]+/g);
+	if (!keys?.length || keys.some((k) => !isSafeKey(k))) return newObj;
+	const parent = keys.slice(0, -1).reduce((acc, key) => acc?.[key], newObj);
+	if (parent == null) return newObj;
+	const leaf = keys[keys.length - 1];
+	if (Array.isArray(parent)) {
+		const idx = Number(leaf);
+		if (Number.isInteger(idx) && idx >= 0 && idx < parent.length) parent.splice(idx, 1);
+	} else if (typeof parent === 'object') {
+		delete parent[leaf];
+	}
+	return newObj;
+}
+
 export function extractParseErrorMessage(e) {
 	try {
 		if (e?.message) return String(e.message);
@@ -108,6 +124,10 @@ export function defaultStoreConfig(set, get) {
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+		},
+		removeValue: (path) => {
+			const newYamlParts = removeValueWithPath(get().yamlParts, path);
 			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 		},
 		clearSaveInfo: () => set({lastSaveInfo: null}),

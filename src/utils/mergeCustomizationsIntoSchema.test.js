@@ -323,4 +323,118 @@ describe('mergeCustomizationsIntoSchema', () => {
 		const sharedCp = merged.$defs.SchemaElement.properties.customProperties;
 		expect(sharedCp.$ref || sharedCp.type).toBeDefined(); // still original form
 	});
+
+	describe('composed (allOf) standard property overrides', () => {
+		const CONTRACT_WITH_SCHEMA = (schemaObj) => ({
+			...VALID_BASE,
+			schema: [
+				{
+					name: 'orders',
+					properties: [{ name: 'id' }],
+					...schemaObj,
+				},
+			],
+		});
+
+		it('enforces required on schema-level properties that live in SchemaElement (businessName, description)', () => {
+			const customizations = {
+				dataContract: {
+					schema: {
+						standardProperties: [
+							{ property: 'businessName', required: true },
+							{ property: 'description', required: true },
+						],
+					},
+				},
+			};
+
+			const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+			const validate = compileSchema(merged);
+
+			// Required constraints are injected into SchemaObject.allOf so validators
+			// see them alongside the property declarations inherited via allOf → SchemaElement.
+			const required = merged.$defs.SchemaObject.allOf
+				.flatMap((e) => e.required || []);
+			expect(required).toContain('businessName');
+			expect(required).toContain('description');
+
+			// Shared SchemaElement must stay untouched
+			expect(merged.$defs.SchemaElement.required).toBeUndefined();
+
+			// Both missing → both errors present
+			expect(validate(CONTRACT_WITH_SCHEMA({}))).toBe(false);
+			const missing = validate.errors
+				.filter((e) => e.keyword === 'required')
+				.map((e) => e.params.missingProperty);
+			expect(missing).toContain('businessName');
+			expect(missing).toContain('description');
+
+			// Both present → valid
+			expect(
+				validate(CONTRACT_WITH_SCHEMA({ businessName: 'Orders', description: 'All orders' }))
+			).toBe(true);
+		});
+
+		it('applies pattern on composed properties without mutating shared SchemaElement', () => {
+			const customizations = {
+				dataContract: {
+					schema: {
+						standardProperties: [
+							{ property: 'businessName', pattern: '^[A-Z]' },
+						],
+					},
+				},
+			};
+
+			const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+			const validate = compileSchema(merged);
+
+			// Shared SchemaElement must not gain a pattern
+			expect(merged.$defs.SchemaElement.properties.businessName.pattern).toBeUndefined();
+
+			// SchemaObject.allOf should carry the level-specific override
+			const overrideEntry = merged.$defs.SchemaObject.allOf.find(
+				(e) => e.properties?.businessName?.pattern === '^[A-Z]'
+			);
+			expect(overrideEntry).toBeDefined();
+
+			expect(validate(CONTRACT_WITH_SCHEMA({ businessName: 'Orders' }))).toBe(true);
+			expect(validate(CONTRACT_WITH_SCHEMA({ businessName: 'orders' }))).toBe(false);
+		});
+
+		it('keeps schema and schema.properties level overrides on businessName independent', () => {
+			const customizations = {
+				dataContract: {
+					schema: {
+						standardProperties: [{ property: 'businessName', required: true }],
+					},
+					'schema.properties': {
+						standardProperties: [{ property: 'businessName', pattern: '^col_' }],
+					},
+				},
+			};
+
+			const merged = mergeCustomizationsIntoSchema(baseSchema, customizations);
+			const validate = compileSchema(merged);
+
+			// Schema-level: businessName required, pattern does NOT apply
+			expect(
+				validate(CONTRACT_WITH_SCHEMA({
+					businessName: 'orders',
+					properties: [{ name: 'id', businessName: 'col_id' }],
+				}))
+			).toBe(true);
+
+			// Schema property-level: pattern enforced
+			expect(
+				validate(CONTRACT_WITH_SCHEMA({
+					businessName: 'orders',
+					properties: [{ name: 'id', businessName: 'BAD' }],
+				}))
+			).toBe(false);
+
+			// Shared SchemaElement must remain untouched
+			expect(merged.$defs.SchemaElement.properties.businessName.pattern).toBeUndefined();
+		});
+	});
 });

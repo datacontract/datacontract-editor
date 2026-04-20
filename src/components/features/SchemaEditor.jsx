@@ -10,6 +10,7 @@ import RelationshipEditor from '../ui/RelationshipEditor.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {SparkleButton} from '../../ai/index.js';
@@ -38,6 +39,7 @@ const SchemaEditor = ({schemaIndex}) => {
 	const jsonSchema = useEditorStore((state) => state.schemaData);
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
+	const removeValue = useEditorStore((state) => state.removeValue);
 	const {
 		schema,
 		setValue,
@@ -95,6 +97,7 @@ const SchemaEditor = ({schemaIndex}) => {
 	const nameOverride = useStandardPropertyOverride('schema', 'name');
 	const physicalTypeOverride = useStandardPropertyOverride('schema', 'physicalType');
 	const physicalNameOverride = useStandardPropertyOverride('schema', 'physicalName');
+	const descriptionOverride = useStandardPropertyOverride('schema', 'description');
 	const businessNameOverride = useStandardPropertyOverride('schema', 'businessName');
 	const logicalTypeOverride = useStandardPropertyOverride('schema', 'logicalType');
 
@@ -440,17 +443,19 @@ const SchemaEditor = ({schemaIndex}) => {
 
 									{/* Description Field */}
 									{!isDescriptionHidden && (
-										<div>
-											<div className="flex items-center justify-between mb-1">
-												<div className="flex items-center gap-1">
-													<label htmlFor={`schema-description-${schemaIndex}`}
-																 className="block text-xs font-medium leading-4 text-gray-900">
-														Description
-													</label>
-													<Tooltip content="Description of what this schema contains">
-														<QuestionMarkCircleIcon/>
-													</Tooltip>
-												</div>
+										<ValidatedTextarea
+											name={`schema-description-${schemaIndex}`}
+											label={descriptionOverride?.title || 'Description'}
+											value={schema[schemaIndex].description || ''}
+											onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
+											onClear={() => removeValue(`schema[${schemaIndex}].description`)}
+											required={descriptionOverride?.required ?? false}
+											tooltip={descriptionOverride?.description || 'Description of what this schema contains'}
+											placeholder={descriptionOverride?.placeholder || 'Describe the schema...'}
+											minLength={descriptionOverride?.minLength}
+											maxLength={descriptionOverride?.maxLength}
+											rows={2}
+											actions={
 												<SparkleButton
 													fieldName={`Description for "${schema[schemaIndex].name || 'schema'}"`}
 													fieldPath={`schema[${schemaIndex}].description`}
@@ -458,17 +463,8 @@ const SchemaEditor = ({schemaIndex}) => {
 													onSuggestion={(value) => setValue(`schema[${schemaIndex}].description`, value)}
 													placeholder="Description of what this schema/table contains and its purpose"
 												/>
-											</div>
-											<textarea
-												id={`schema-description-${schemaIndex}`}
-												name={`schema-description-${schemaIndex}`}
-												rows={2}
-												value={schema[schemaIndex].description || ''}
-												onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
-												className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-												placeholder="Describe the schema..."
-											/>
-										</div>
+											}
+										/>
 									)}
 								</div>
 
