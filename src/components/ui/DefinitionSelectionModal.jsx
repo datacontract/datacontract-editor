@@ -136,7 +136,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const [selectedExternalId, setSelectedExternalId] = useState(null);
 
   const selectTreeNode = useCallback((node) => {
-    if (node.elementType === 'namespace') return;
+    if (node.elementType === 'namespace' || node.elementType === 'group') return;
     setSelectedDefinition(nodeToDefinition(node));
     setSelectedExternalId(node.externalId);
   }, [nodeToDefinition]);
@@ -325,6 +325,8 @@ function ElementIcon({ elementType }) {
   switch (elementType) {
     case 'namespace':
       return (<svg className="size-5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z"/></svg>);
+    case 'group':
+      return (<svg className="size-5 text-amber-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clipRule="evenodd"/></svg>);
     case 'entity':
       return (<svg className="size-5 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 9.143l7.477-4.125-7.115-3.925ZM18 6.443l-7.25 4v8.25l6.888-3.8A.75.75 0 0 0 18 14.25V6.443ZM9.25 18.693v-8.25l-7.25-4v7.807a.75.75 0 0 0 .362.643l6.888 3.8Z"/></svg>);
     case 'property':
@@ -340,9 +342,9 @@ function ElementIcon({ elementType }) {
 function TreeNode({ node, expandedNodes, toggleNode, selectedExternalId, onSelect, depth }) {
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.externalId);
-  const isSelectable = node.elementType !== 'namespace';
+  const isSelectable = node.elementType !== 'namespace' && node.elementType !== 'group';
   const isSelected = isSelectable && selectedExternalId === node.externalId;
-  const isParent = node.elementType === 'entity' || node.elementType === 'namespace';
+  const isParent = node.elementType === 'entity' || node.elementType === 'namespace' || node.elementType === 'group';
 
   return (
     <div>
