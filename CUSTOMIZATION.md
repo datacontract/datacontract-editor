@@ -149,7 +149,17 @@ dataContract:
         minLength: 1                    # Minimum length (for text)
         maxLength: 255                  # Maximum length (for text)
         condition: "expression"         # Conditional display expression
+        positionAfter: "description"    # Render inline after this property (standard or custom)
 ```
+
+### Positioning
+
+By default, custom properties that aren't assigned to a `customSection` render in a group below the standard sections. Use `positionAfter` to place a property inline, right after a named anchor. The anchor can be:
+
+- a standard property name at the same level (e.g., `description`, `classification`)
+- another custom property name
+
+Currently implemented in the property detail drawer (`schema.properties` level). If the referenced anchor doesn't exist or is hidden, the property won't render — check the browser console for a customization warning.
 
 ### Property Types
 
@@ -220,11 +230,15 @@ dataContract:
     customSections:
       - section: "section-id"        # Unique section identifier
         title: "Section Label"       # UI section heading
-        positionAfter: "overview"    # Position relative to existing sections
+        positionAfter: "description" # Render the section inline after this anchor (standard or custom property)
         expanded: true               # Optional: expand section by default (default: false)
         customProperties:
           - propertyName             # Reference to custom property defined above
 ```
+
+The `customProperties` list references custom property names defined under the same level. Names must match exactly — if a reference can't be resolved, the section is skipped and a warning is logged to the browser console (`[Customization] customSection "..." references unknown customProperties: ...`).
+
+`positionAfter` is currently supported in the property detail drawer (`schema.properties` level) and renders the section inline after the named anchor. Sections without `positionAfter` render below the standard sections in the order they're declared.
 
 
 ## Complete Example

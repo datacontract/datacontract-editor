@@ -13,7 +13,7 @@ Use Tailwind CSS with Tailwind Plus as a style guide.
 Use TailwindPlus react for TailwindCSS v4.
 Do never use Heroicons
 
-Use Playwright mcp tool to test if you are unsure.
+Use Playwright CLI tool to test if you are unsure.
 If you need to start a server, use port 9090 or greater.
 To test stuff that is only available in embedded mode, use /embed suburl
 

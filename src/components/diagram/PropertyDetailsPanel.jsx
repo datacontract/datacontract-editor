@@ -17,7 +17,7 @@ import {SparkleButton} from '../../ai/index.js';
 import {useEditorStore} from '../../store.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
-import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
+import {CustomContentAfter, CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
 import {isExternalUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
 import {useDefinition} from '../../hooks/useDefinition.js';
@@ -239,6 +239,40 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     return property.authoritativeDefinitions?.filter(d => d.type !== 'semantic' && d.type !== 'definition');
   }, [property.authoritativeDefinitions, isSemanticsEnabled]);
 
+  // Renders any custom properties anchored after the given standard field.
+  // Scoped to properties only; custom sections anchor to section IDs via
+  // renderCustomSectionsAfter instead.
+  const renderCustomAfter = (anchor) => (
+    <CustomContentAfter
+      anchor={anchor}
+      only="properties"
+      customSections={customSections}
+      customProperties={customPropertyConfigs}
+      values={customPropertiesLookup}
+      onPropertyChange={updateCustomProperty}
+      context={propertyContext}
+      yamlParts={yamlParts}
+      validationKeyPrefix={`schema.properties.${property.name}`}
+      validationSection="Schema Properties"
+    />
+  );
+
+  // Renders any custom sections anchored after the given top-level section ID.
+  const renderCustomSectionsAfter = (anchor) => (
+    <CustomContentAfter
+      anchor={anchor}
+      only="sections"
+      customSections={customSections}
+      customProperties={customPropertyConfigs}
+      values={customPropertiesLookup}
+      onPropertyChange={updateCustomProperty}
+      context={propertyContext}
+      yamlParts={yamlParts}
+      validationKeyPrefix={`schema.properties.${property.name}`}
+      validationSection="Schema Properties"
+    />
+  );
+
   return (
     <div className="space-y-1.5">
       {/* Metadata Section */}
@@ -268,6 +302,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   maxLength={nameOverride?.maxLength}
                 />
               )}
+              {renderCustomAfter('name')}
 
               {/* Business Name */}
               {!isBusinessNameHidden && (
@@ -285,6 +320,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   maxLength={businessNameOverride?.maxLength}
                 />
               )}
+              {renderCustomAfter('businessName')}
 
               {/* Physical Name */}
               {!isPhysicalNameHidden && (
@@ -302,6 +338,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   maxLength={physicalNameOverride?.maxLength}
                 />
               )}
+              {renderCustomAfter('physicalName')}
 
               {/* Logical Type */}
               {!isLogicalTypeHidden && (
@@ -315,6 +352,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   valueFromDefinition={definitionData?.logicalType}
                 />
               )}
+              {renderCustomAfter('logicalType')}
 
               {/* Array Item Type - only shown when logical type is array */}
               {!isLogicalTypeHidden && property.logicalType === 'array' && (
@@ -343,6 +381,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   placeholder={definitionData?.physicalType || physicalTypeOverride?.placeholder || "e.g., VARCHAR(255)"}
                 />
               )}
+              {renderCustomAfter('physicalType')}
 
               {/* Description */}
               {!isDescriptionHidden && (
@@ -366,6 +405,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   />
                 </div>
               )}
+              {renderCustomAfter('description')}
 
               {/* Examples */}
               {!isExamplesHidden && (
@@ -389,10 +429,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
                 </div>
               )}
+              {renderCustomAfter('examples')}
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('metadata')}
 
       {/* Semantics Section */}
       {isSemanticsEnabled && (
@@ -538,6 +580,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           )}
         </Disclosure>
       )}
+      {renderCustomSectionsAfter('semantics')}
 
       {/* Logical Type Options Section */}
       <Disclosure>
@@ -788,6 +831,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('logicalTypeOptions')}
 
       {/* Constraints Section */}
       <Disclosure>
@@ -945,10 +989,15 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   </p>
                 </div>
               )}
+              {renderCustomAfter('required')}
+              {renderCustomAfter('unique')}
+              {renderCustomAfter('primaryKey')}
+              {renderCustomAfter('partitioned')}
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('constraints')}
 
       {/* Classification & Security Section */}
       <Disclosure>
@@ -1005,6 +1054,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 )
               )}
 
+              {renderCustomAfter('classification')}
+
               {/* Critical Data Element */}
               {!isCriticalDataElementHidden && (
                 <div>
@@ -1030,6 +1081,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   </div>
                 </div>
               )}
+              {renderCustomAfter('criticalDataElement')}
 
               {/* Encrypted Name */}
               {!isEncryptedNameHidden && (
@@ -1047,6 +1099,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   maxLength={encryptedNameOverride?.maxLength}
                 />
               )}
+              {renderCustomAfter('encryptedName')}
 
               {/* Tags */}
               <div>
@@ -1057,10 +1110,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   placeholder="Add a tag..."
                 />
               </div>
+              {renderCustomAfter('tags')}
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('classificationAndSecurity')}
 
       {/* Transformations Section */}
       <Disclosure>
@@ -1083,6 +1138,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   helpText={transformSourceObjectsOverride?.description || "List of source tables/objects used in transformations"}
                 />
               )}
+              {renderCustomAfter('transformSourceObjects')}
 
               {/* Transform Logic */}
               {!isTransformLogicHidden && (
@@ -1098,6 +1154,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   <p className="mt-1 text-xs text-gray-500">Technical transformation implementation (SQL, etc.)</p>
                 </div>
               )}
+              {renderCustomAfter('transformLogic')}
 
               {/* Transform Description */}
               {!isTransformDescriptionHidden && (
@@ -1113,10 +1170,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   <p className="mt-1 text-xs text-gray-500">Non-technical description of how field is derived</p>
                 </div>
               )}
+              {renderCustomAfter('transformDescription')}
             </DisclosurePanel>
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('transformations')}
 
       {/* Data Quality Section */}
       <Disclosure>
@@ -1138,6 +1197,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('dataQuality')}
 
       {/* Authoritative Definitions Section */}
       <Disclosure>
@@ -1166,6 +1226,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           </>
         )}
       </Disclosure>
+      {renderCustomSectionsAfter('authoritativeDefinitions')}
 
       {/* Relationships Section */}
       <div
@@ -1194,6 +1255,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           )}
         </Disclosure>
       </div>
+      {renderCustomSectionsAfter('relationships')}
 
       {/* Custom Sections from Customization */}
       <CustomSections

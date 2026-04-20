@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from './icons/ChevronRightIcon';
 import CustomPropertyField from './CustomPropertyField';
@@ -31,6 +31,21 @@ const CustomSection = ({
 			.map((name) => customPropertyConfigs.find((p) => p.property === name))
 			.filter(Boolean);
 	}, [propertyNames, customPropertyConfigs]);
+
+	// Warn once per render when a section references custom property names that
+	// do not resolve — otherwise the section silently disappears and the bug is
+	// hard to diagnose.
+	useEffect(() => {
+		const unresolved = propertyNames.filter(
+			(name) => !customPropertyConfigs.find((p) => p.property === name)
+		);
+		if (unresolved.length > 0) {
+			const available = customPropertyConfigs.map((p) => p.property).join(', ') || '(none)';
+			console.warn(
+				`[Customization] customSection "${sectionConfig.section}" references unknown customProperties: ${unresolved.join(', ')}. Available: ${available}`
+			);
+		}
+	}, [propertyNames, customPropertyConfigs, sectionConfig.section]);
 
 	// Don't render if no properties in this section
 	if (sectionProperties.length === 0) {
@@ -103,13 +118,20 @@ export const CustomSections = ({
 	validationKeyPrefix,
 	validationSection,
 }) => {
-	if (!customSections || customSections.length === 0) {
+	// Sections with positionAfter are rendered inline via CustomContentAfter;
+	// the fallback wrapper only emits sections without an anchor.
+	const unanchored = useMemo(
+		() => (customSections || []).filter((s) => !s.positionAfter),
+		[customSections]
+	);
+
+	if (unanchored.length === 0) {
 		return null;
 	}
 
 	return (
 		<>
-			{customSections.map((sectionConfig) => (
+			{unanchored.map((sectionConfig) => (
 				<CustomSection
 					key={sectionConfig.section}
 					sectionConfig={sectionConfig}
@@ -119,6 +141,97 @@ export const CustomSections = ({
 					context={context}
 					yamlParts={yamlParts}
 					validationKeyPrefix={validationKeyPrefix}
+					validationSection={validationSection}
+				/>
+			))}
+		</>
+	);
+};
+
+/**
+ * Renders custom sections and/or ungrouped custom properties whose
+ * `positionAfter` matches the given anchor.
+ *
+ * The `only` prop disambiguates placement: `customProperties` anchor to
+ * field names (inline between standard fields inside a parent section), while
+ * `customSections` anchor to section identifiers (between top-level sections).
+ * Passing `only="properties"` at a field anchor and `only="sections"` at a
+ * section anchor keeps that contract explicit even if a user misconfigures.
+ *
+ * @param {string} anchor - The positionAfter value to match
+ * @param {"properties"|"sections"|"both"} [only="both"] - Which kind to render
+ * @param {Array} customSections - All section configs for the level
+ * @param {Array} customProperties - All custom property configs for the level
+ * @param {Object} values - Current custom property values
+ * @param {Function} onPropertyChange - Change handler
+ * @param {Object} context - Data context for conditions
+ * @param {Object} yamlParts - Full YAML data
+ */
+export const CustomContentAfter = ({
+	anchor,
+	only = 'both',
+	customSections = [],
+	customProperties = [],
+	values = {},
+	onPropertyChange,
+	context = {},
+	yamlParts = {},
+	validationKeyPrefix,
+	validationSection,
+}) => {
+	const extendedContext = useMemo(() => ({
+		...context,
+		...values,
+		customProperties: values,
+	}), [context, values]);
+
+	const sectionsAfter = useMemo(() => {
+		if (only === 'properties') return [];
+		return (customSections || []).filter((s) => s.positionAfter === anchor);
+	}, [customSections, anchor, only]);
+
+	// Standalone custom properties anchored here. Properties assigned to a
+	// section are rendered via that section instead, even if they also declare
+	// positionAfter — the section wins.
+	const propertiesAfter = useMemo(() => {
+		if (only === 'sections') return [];
+		const groupedNames = new Set();
+		(customSections || []).forEach((s) => {
+			(s.customProperties || []).forEach((n) => groupedNames.add(n));
+		});
+		return (customProperties || []).filter(
+			(p) => p.positionAfter === anchor && !groupedNames.has(p.property)
+		);
+	}, [customProperties, customSections, anchor, only]);
+
+	if (sectionsAfter.length === 0 && propertiesAfter.length === 0) {
+		return null;
+	}
+
+	return (
+		<>
+			{sectionsAfter.map((sectionConfig) => (
+				<CustomSection
+					key={sectionConfig.section}
+					sectionConfig={sectionConfig}
+					customPropertyConfigs={customProperties}
+					values={values}
+					onPropertyChange={onPropertyChange}
+					context={context}
+					yamlParts={yamlParts}
+					validationKeyPrefix={validationKeyPrefix}
+					validationSection={validationSection}
+				/>
+			))}
+			{propertiesAfter.map((propConfig) => (
+				<CustomPropertyField
+					key={propConfig.property}
+					config={propConfig}
+					value={values[propConfig.property]}
+					onChange={(val) => onPropertyChange(propConfig.property, val)}
+					context={extendedContext}
+					yamlParts={yamlParts}
+					validationKey={validationKeyPrefix ? `${validationKeyPrefix}.custom.${propConfig.property}` : undefined}
 					validationSection={validationSection}
 				/>
 			))}
@@ -155,9 +268,13 @@ export const UngroupedCustomProperties = ({
 		return names;
 	}, [customSections]);
 
-	// Filter to ungrouped properties
+	// Filter to ungrouped properties. Properties with positionAfter are
+	// rendered inline via CustomContentAfter and must be excluded here to
+	// avoid double-rendering.
 	const ungroupedProps = useMemo(() => {
-		return customProperties.filter((cp) => !groupedNames.has(cp.property));
+		return customProperties.filter(
+			(cp) => !groupedNames.has(cp.property) && !cp.positionAfter
+		);
 	}, [customProperties, groupedNames]);
 
 	if (ungroupedProps.length === 0) {
