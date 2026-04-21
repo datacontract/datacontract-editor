@@ -1,6 +1,66 @@
 import dagre from 'dagre';
 
 /**
+ * Splits a "schemaName.propertyPath" reference by matching the longest schema
+ * name that is a prefix of `reference` followed by '.'. ODCS schema names can
+ * themselves contain dots (fully-qualified physical names), so splitting on
+ * the first '.' mis-resolves the schema. Falls back to split-on-first-dot
+ * when no schema matches.
+ */
+const splitSchemaReference = (reference, schemaNames) => {
+  if (typeof reference !== 'string') return [undefined, undefined];
+  let longest = null;
+  for (const name of schemaNames) {
+    if (typeof name !== 'string') continue;
+    if ((reference === name || reference.startsWith(name + '.')) &&
+        (longest === null || name.length > longest.length)) {
+      longest = name;
+    }
+  }
+  if (longest !== null) {
+    const remainder = reference.length > longest.length ? reference.slice(longest.length + 1) : '';
+    return [longest, remainder];
+  }
+  const firstDot = reference.indexOf('.');
+  if (firstDot === -1) return [reference, ''];
+  return [reference.slice(0, firstDot), reference.slice(firstDot + 1)];
+};
+
+/**
+ * Build a map of { schemaName: Set<propertyName> } of properties that are
+ * the target of at least one inbound `relationships.to` reference. Used by
+ * the keys-only collapse mode so referenced rows stay visible (their
+ * handles are required for edges), and by the layout so collapsed nodes
+ * are sized based on the rows that will actually render.
+ */
+export const buildReferencedByName = (schemas) => {
+  const result = {};
+  if (!Array.isArray(schemas)) return result;
+
+  const schemaNames = schemas
+    .map((s) => s?.name)
+    .filter((n) => typeof n === 'string');
+
+  schemas.forEach((s) => {
+    if (s?.name) result[s.name] = new Set();
+  });
+
+  schemas.forEach((s) => {
+    s?.properties?.forEach((p) => {
+      (p?.relationships || []).forEach((rel) => {
+        if (typeof rel?.to !== 'string') return;
+        const [targetSchema, targetProp] = splitSchemaReference(rel.to, schemaNames);
+        if (targetSchema && targetProp && result[targetSchema]) {
+          result[targetSchema].add(targetProp);
+        }
+      });
+    });
+  });
+
+  return result;
+};
+
+/**
  * Estimate the rendered width of a text string at ~14px font size.
  * Uses approximate character widths for proportional fonts.
  */
@@ -102,6 +162,7 @@ export const getLayoutedElements = (schemas) => {
   });
 
   // Add edges based on property relationships
+  const schemaNames = schemas.map((s) => s?.name).filter((n) => typeof n === 'string');
   schemas.forEach((schema, sourceIndex) => {
     if (!schema.properties) return;
 
@@ -111,7 +172,7 @@ export const getLayoutedElements = (schemas) => {
       relationships.forEach(relationship => {
         const reference = relationship.to;
         if (reference && typeof reference === 'string') {
-          const [targetSchemaName] = reference.split('.');
+          const [targetSchemaName] = splitSchemaReference(reference, schemaNames);
           const targetIndex = schemas.findIndex(s => s?.name === targetSchemaName);
           if (targetIndex !== -1) {
             dagreGraph.setEdge(`schema-${targetIndex}`, `schema-${sourceIndex}`);
@@ -121,7 +182,7 @@ export const getLayoutedElements = (schemas) => {
 
       // Backward compatibility: customProperties.references
       if (prop?.customProperties?.references) {
-        const [targetSchemaName] = prop.customProperties.references.split('.');
+        const [targetSchemaName] = splitSchemaReference(prop.customProperties.references, schemaNames);
         const targetIndex = schemas.findIndex(s => s?.name === targetSchemaName);
         if (targetIndex !== -1) {
           dagreGraph.setEdge(`schema-${targetIndex}`, `schema-${sourceIndex}`);

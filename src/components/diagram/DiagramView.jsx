@@ -25,6 +25,31 @@ import Tooltip from '../ui/Tooltip.jsx';
 
 const SCHEMA_EDGE_TOOLTIP = 'Schema-level relationship — only editable in the form editor';
 
+// Splits a "schemaName.propertyPath" reference by matching the longest schema name
+// in `schemaNames` that is a prefix of `reference` followed by '.'. ODCS schema
+// names may themselves contain dots (e.g. fully-qualified physical names like
+// "catalog.schema.table"), so splitting naively on the first '.' mis-resolves the
+// schema. Falls back to split-on-first-dot when no schema matches, to keep the
+// previous behavior for unknown references.
+const splitSchemaReference = (reference, schemaNames) => {
+  if (typeof reference !== 'string') return [undefined, undefined];
+  let longest = null;
+  for (const name of schemaNames) {
+    if (typeof name !== 'string') continue;
+    if ((reference === name || reference.startsWith(name + '.')) &&
+        (longest === null || name.length > longest.length)) {
+      longest = name;
+    }
+  }
+  if (longest !== null) {
+    const remainder = reference.length > longest.length ? reference.slice(longest.length + 1) : '';
+    return [longest, remainder];
+  }
+  const firstDot = reference.indexOf('.');
+  if (firstDot === -1) return [reference, ''];
+  return [reference.slice(0, firstDot), reference.slice(firstDot + 1)];
+};
+
 const PREVIEW_EDGE_STYLE = { stroke: '#d946ef', strokeWidth: 2.5 };
 
 // Forward-declared: ConnectionLinePreview needs SelfReferenceEdge, which
@@ -1012,6 +1037,9 @@ const DiagramViewInner = () => {
     // Pre-compute which properties are referenced by any relationship so
     // the "keys only" collapse mode can keep them visible (otherwise edges
     // would attach to missing handles on the target side).
+    const schemaNames = parsedData.schema
+      .map((s) => s?.name)
+      .filter((n) => typeof n === 'string');
     const referencedByName = {};
     parsedData.schema.forEach((s) => {
       if (!s?.name) return;
@@ -1021,7 +1049,7 @@ const DiagramViewInner = () => {
       s?.properties?.forEach((p) => {
         (p?.relationships || []).forEach((rel) => {
           if (typeof rel?.to !== 'string') return;
-          const [targetSchema, targetProp] = rel.to.split('.');
+          const [targetSchema, targetProp] = splitSchemaReference(rel.to, schemaNames);
           if (targetSchema && targetProp && referencedByName[targetSchema]) {
             referencedByName[targetSchema].add(targetProp);
           }
@@ -1071,8 +1099,8 @@ const DiagramViewInner = () => {
           relationships.forEach(relationship => {
             const reference = relationship.to;
             if (reference && typeof reference === 'string') {
-              // Parse reference: schemaName.propertyName
-              const [targetSchemaName, targetPropertyName] = reference.split('.');
+              // Parse reference: schemaName.propertyName (schema names may contain dots)
+              const [targetSchemaName, targetPropertyName] = splitSchemaReference(reference, schemaNames);
 
               // Find target schema and property
               const targetSchemaIndex = parsedData.schema.findIndex(
@@ -1113,8 +1141,8 @@ const DiagramViewInner = () => {
           // Backward compatibility: also check customProperties.references
           const legacyReference = sourceProp.customProperties?.references;
           if (legacyReference && typeof legacyReference === 'string') {
-            // Parse reference: schemaName.propertyName
-            const [targetSchemaName, targetPropertyName] = legacyReference.split('.');
+            // Parse reference: schemaName.propertyName (schema names may contain dots)
+            const [targetSchemaName, targetPropertyName] = splitSchemaReference(legacyReference, schemaNames);
 
             // Find target schema and property
             const targetSchemaIndex = parsedData.schema.findIndex(
@@ -1172,9 +1200,9 @@ const DiagramViewInner = () => {
             const toRef = toArray[pairIdx];
             if (!fromRef || !toRef || typeof fromRef !== 'string' || typeof toRef !== 'string') continue;
 
-            // Parse "schemaName.propertyName" references
-            const [fromSchemaName, fromPropName] = fromRef.split('.');
-            const [toSchemaName, toPropName] = toRef.split('.');
+            // Parse "schemaName.propertyName" references (schema names may contain dots)
+            const [fromSchemaName, fromPropName] = splitSchemaReference(fromRef, schemaNames);
+            const [toSchemaName, toPropName] = splitSchemaReference(toRef, schemaNames);
             if (!fromSchemaName || !fromPropName || !toSchemaName || !toPropName) continue;
 
             // Resolve source (from) schema and property
