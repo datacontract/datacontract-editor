@@ -1031,9 +1031,7 @@ const DiagramViewInner = () => {
     // handles) and by the layout (to size collapsed nodes correctly).
     const referencedByName = buildReferencedByName(parsedData.schema);
     // Schema name list required by splitSchemaReference for edge-building below.
-    const schemaNames = parsedData.schema
-      .map((s) => s?.name)
-      .filter((n) => typeof n === 'string');
+    const schemaNames = Object.keys(referencedByName);
 
     // On first load, try localStorage positions, then fall back to Dagre.
     const savedPositions = !hasInitialLayout.current
