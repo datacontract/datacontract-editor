@@ -312,6 +312,9 @@ const DiagramViewInner = () => {
   const hasAutoLayouted = useRef(false);
   const hasInitialLayout = useRef(false);
   const saveTimerRef = useRef(null);
+  // Set by collapse-toggle handlers so the auto-layout effect below knows a
+  // user-initiated collapse change just occurred (vs. hydration from storage).
+  const userToggledCollapseRef = useRef(false);
 
   // Track selected property for drawer
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -364,6 +367,7 @@ const DiagramViewInner = () => {
   const handleToggleCollapseAll = useCallback(() => {
     if (!parsedData?.schema) return;
     const names = parsedData.schema.map((s) => s?.name).filter(Boolean);
+    userToggledCollapseRef.current = true;
     setCollapseState((prev) => {
       const anyFull = names.some((n) => (prev[n] || 'full') === 'full');
       const targetMode = anyFull ? 'keys' : 'full';
@@ -376,6 +380,7 @@ const DiagramViewInner = () => {
 
   const handleToggleCollapse = useCallback((schemaName, explicitMode) => {
     if (!schemaName) return;
+    userToggledCollapseRef.current = true;
     setCollapseState((prev) => {
       const nextMode = explicitMode && COLLAPSE_MODES.includes(explicitMode)
         ? explicitMode
@@ -996,6 +1001,15 @@ const DiagramViewInner = () => {
       }
     }, 0);
   }, [parsedData, contractId, nodes, setNodes, reactFlowInstance, collapseState]);
+
+  // After a user toggles collapse mode (per-schema or toolbar "all"), re-run
+  // auto-layout so node positions reflect the new rendered heights. The ref
+  // guard skips hydration and other system-initiated collapseState updates.
+  useEffect(() => {
+    if (!userToggledCollapseRef.current) return;
+    userToggledCollapseRef.current = false;
+    handleAutoLayout();
+  }, [collapseState, handleAutoLayout]);
 
   // Global diagram shortcuts: F = fit view, L = auto layout.
   // Only fire when the diagram view is active and user isn't typing.
