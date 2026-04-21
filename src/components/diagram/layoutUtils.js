@@ -58,6 +58,20 @@ export const buildReferencedByName = (schemas) => {
 };
 
 /**
+ * Determine whether a property row is rendered in keys-only collapse mode.
+ * Mirrors the filter in SchemaNode.jsx: the row is kept when the property
+ * is a primary key, owns at least one relationship (FK), or is referenced
+ * by an inbound relationship.
+ */
+const isVisibleInKeysMode = (prop, referenced) => {
+  if (!prop) return false;
+  if (prop.primaryKey) return true;
+  if (Array.isArray(prop.relationships) && prop.relationships.length > 0) return true;
+  if (referenced && referenced.has(prop.name)) return true;
+  return false;
+};
+
+/**
  * Estimate the rendered width of a text string at ~14px font size.
  * Uses approximate character widths for proportional fonts.
  */
@@ -71,8 +85,9 @@ const estimateTextWidth = (text) => {
 /**
  * Estimate the rendered width of a schema node based on its content.
  * Accounts for property names, type labels (physical or logical), and padding.
+ * In keys-only mode, only visible rows contribute to maxPropertyWidth.
  */
-const estimateNodeWidth = (schema) => {
+const estimateNodeWidth = (schema, mode = 'full', referenced = new Set()) => {
   const minWidth = 250;
   const padding = 70; // left pad + icon + gaps + right pad + handles
   const typeGap = 16; // gap between name and type
@@ -80,9 +95,14 @@ const estimateNodeWidth = (schema) => {
   // Header width: icon + schema name
   const headerWidth = 30 + estimateTextWidth(schema.name);
 
-  // Find widest property row
+  // Find widest property row (only visible rows count in keys mode)
+  const properties = schema.properties || [];
+  const rows = mode === 'keys'
+    ? properties.filter((p) => isVisibleInKeysMode(p, referenced))
+    : properties;
+
   let maxPropertyWidth = 0;
-  for (const prop of schema.properties || []) {
+  for (const prop of rows) {
     const displayType = prop.physicalType || prop.logicalType || '';
     const rowWidth = estimateTextWidth(prop.name) + typeGap + estimateTextWidth(displayType);
     if (rowWidth > maxPropertyWidth) maxPropertyWidth = rowWidth;
@@ -94,20 +114,33 @@ const estimateNodeWidth = (schema) => {
 /**
  * Estimate the rendered height of a schema node.
  * Accounts for top-level properties, nested object properties, and array items.
+ * In keys-only mode, only visible rows contribute and a footer button is added
+ * when any rows are hidden (matches the "+N hidden · Show all" button).
  */
-const estimateNodeHeight = (schema) => {
+const estimateNodeHeight = (schema, mode = 'full', referenced = new Set()) => {
   const headerHeight = 44; // schema name header + accent bar
   const propertyRowHeight = 40;
   const nestedRowHeight = 30;
   const emptyStateHeight = 40;
   const bottomPadding = 8;
+  const keysFooterHeight = 28; // "+N hidden · Show all" button in SchemaNode
 
   const properties = schema.properties || [];
   if (properties.length === 0) return headerHeight + emptyStateHeight + bottomPadding;
 
+  const rows = mode === 'keys'
+    ? properties.filter((p) => isVisibleInKeysMode(p, referenced))
+    : properties;
+  const hiddenCount = mode === 'keys' ? properties.length - rows.length : 0;
+
+  // Empty keys-only node (no PK/FK/referenced rows): header + footer only.
+  if (mode === 'keys' && rows.length === 0) {
+    return headerHeight + (hiddenCount > 0 ? keysFooterHeight : 0) + bottomPadding;
+  }
+
   let totalHeight = headerHeight;
 
-  for (const prop of properties) {
+  for (const prop of rows) {
     totalHeight += propertyRowHeight;
 
     // Nested object properties
@@ -127,6 +160,8 @@ const estimateNodeHeight = (schema) => {
       }
     }
   }
+
+  if (mode === 'keys' && hiddenCount > 0) totalHeight += keysFooterHeight;
 
   return totalHeight + bottomPadding;
 };
