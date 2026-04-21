@@ -167,11 +167,18 @@ const estimateNodeHeight = (schema, mode = 'full', referenced = new Set()) => {
 };
 
 /**
- * Layout nodes using the Dagre graph layout algorithm
+ * Layout nodes using the Dagre graph layout algorithm.
  * @param {Array} schemas - Array of schema objects to layout
+ * @param {Object} [options]
+ * @param {Object} [options.collapseState] - Map of `{ schemaName: 'full' | 'keys' }`.
+ *   Schemas in `'keys'` mode are sized based on only the rows that SchemaNode
+ *   will actually render (PK, FK, referenced), plus the footer button.
+ * @param {Object} [options.referencedByName] - Map of `{ schemaName: Set<propName> }`
+ *   of properties targeted by inbound relationships. Use `buildReferencedByName`
+ *   to construct it.
  * @returns {Array} - Schemas with calculated positions
  */
-export const getLayoutedElements = (schemas) => {
+export const getLayoutedElements = (schemas, { collapseState = {}, referencedByName = {} } = {}) => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({
@@ -187,8 +194,10 @@ export const getLayoutedElements = (schemas) => {
   // Add nodes with content-aware size estimates
   const nodeSizes = {};
   schemas.forEach((schema, index) => {
-    const nodeWidth = estimateNodeWidth(schema);
-    const nodeHeight = estimateNodeHeight(schema);
+    const mode = collapseState[schema?.name] === 'keys' ? 'keys' : 'full';
+    const referenced = referencedByName[schema?.name] || new Set();
+    const nodeWidth = estimateNodeWidth(schema, mode, referenced);
+    const nodeHeight = estimateNodeHeight(schema, mode, referenced);
     nodeSizes[index] = { width: nodeWidth, height: nodeHeight };
     dagreGraph.setNode(`schema-${index}`, { width: nodeWidth, height: nodeHeight });
   });
