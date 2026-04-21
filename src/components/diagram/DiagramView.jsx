@@ -965,7 +965,11 @@ const DiagramViewInner = () => {
     setIsLayouting(true);
     setTimeout(() => {
       clearDiagramPositions(contractId);
-      const layoutedSchemas = getLayoutedElements(parsedData.schema);
+      const referencedByName = buildReferencedByName(parsedData.schema);
+      const layoutedSchemas = getLayoutedElements(parsedData.schema, {
+        collapseState,
+        referencedByName,
+      });
 
       setNodes(currentNodes => {
         const updated = currentNodes.map((node, index) => ({
@@ -991,7 +995,7 @@ const DiagramViewInner = () => {
         });
       }
     }, 0);
-  }, [parsedData, contractId, nodes, setNodes, reactFlowInstance]);
+  }, [parsedData, contractId, nodes, setNodes, reactFlowInstance, collapseState]);
 
   // Global diagram shortcuts: F = fit view, L = auto layout.
   // Only fire when the diagram view is active and user isn't typing.
