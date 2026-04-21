@@ -18,7 +18,7 @@ import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import { useEditorStore } from '../../store.js';
 import SchemaNode from './SchemaNode.jsx';
 import { useLocation } from 'react-router-dom';
-import { getLayoutedElements, getGridPosition } from './layoutUtils.js';
+import { getLayoutedElements, getGridPosition, buildReferencedByName } from './layoutUtils.js';
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipDetailsDrawer from '../ui/RelationshipDetailsDrawer.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
@@ -1026,36 +1026,22 @@ const DiagramViewInner = () => {
       return;
     }
 
-    // On first load, try localStorage positions, then fall back to Dagre
+    // Pre-compute which properties are referenced by any relationship.
+    // Used by the keys-only collapse mode in SchemaNode (to keep target
+    // handles) and by the layout (to size collapsed nodes correctly).
+    const referencedByName = buildReferencedByName(parsedData.schema);
+    // Schema name list required by splitSchemaReference for edge-building below.
+    const schemaNames = parsedData.schema
+      .map((s) => s?.name)
+      .filter((n) => typeof n === 'string');
+
+    // On first load, try localStorage positions, then fall back to Dagre.
     const savedPositions = !hasInitialLayout.current
       ? getDiagramPositions(contractId)
       : null;
     const layoutedSchemas = !hasInitialLayout.current && !savedPositions
-      ? getLayoutedElements(parsedData.schema)
+      ? getLayoutedElements(parsedData.schema, { collapseState, referencedByName })
       : null;
-
-    // Pre-compute which properties are referenced by any relationship so
-    // the "keys only" collapse mode can keep them visible (otherwise edges
-    // would attach to missing handles on the target side).
-    const schemaNames = parsedData.schema
-      .map((s) => s?.name)
-      .filter((n) => typeof n === 'string');
-    const referencedByName = {};
-    parsedData.schema.forEach((s) => {
-      if (!s?.name) return;
-      referencedByName[s.name] = new Set();
-    });
-    parsedData.schema.forEach((s) => {
-      s?.properties?.forEach((p) => {
-        (p?.relationships || []).forEach((rel) => {
-          if (typeof rel?.to !== 'string') return;
-          const [targetSchema, targetProp] = splitSchemaReference(rel.to, schemaNames);
-          if (targetSchema && targetProp && referencedByName[targetSchema]) {
-            referencedByName[targetSchema].add(targetProp);
-          }
-        });
-      });
-    });
 
     const schemaNodes = parsedData.schema
       .filter(schema => schema != null)
