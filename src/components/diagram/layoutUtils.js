@@ -37,13 +37,10 @@ export const buildReferencedByName = (schemas) => {
   const result = {};
   if (!Array.isArray(schemas)) return result;
 
-  const schemaNames = schemas
-    .map((s) => s?.name)
-    .filter((n) => typeof n === 'string');
-
   schemas.forEach((s) => {
-    if (s?.name) result[s.name] = new Set();
+    if (s?.name && typeof s.name === 'string') result[s.name] = new Set();
   });
+  const schemaNames = Object.keys(result);
 
   schemas.forEach((s) => {
     s?.properties?.forEach((p) => {
