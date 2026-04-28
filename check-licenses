@@ -1,0 +1,2 @@
+# npm install -g license-checker
+license-checker --production --unknown --onlyAllow="MIT;Apache-2.0;BSD-3-Clause;ISC;0BSD" --excludePackages="datacontract-editor@0.1.5"
