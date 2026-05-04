@@ -7,6 +7,7 @@
 
 import { registerTool } from '../ai/aiService.js';
 import { validateYaml } from '../utils/validateYaml.js';
+import { useEditorStore } from '../store.js';
 
 // Cache for ODCS schema
 let odcsSchemaCache = null;
@@ -269,7 +270,8 @@ async function handleGetJsonSchema({ section = 'full' }) {
   // Fetch and cache schema
   if (!odcsSchemaCache) {
     try {
-      const response = await fetch(ODCS_SCHEMA_URL);
+      const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
+      const response = await fetch(url);
       if (!response.ok) {
         return { error: `Failed to fetch schema: ${response.status}` };
       }

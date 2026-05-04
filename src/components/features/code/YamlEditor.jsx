@@ -6,9 +6,6 @@ import { useEditorStore } from '../../../store.js';
 import { mergeCustomizationsIntoSchema } from '../../../utils/mergeCustomizationsIntoSchema.js';
 import { registerSchemaCompletionProvider } from '../../../services/schemaCompletionProvider.js';
 
-// Import Monaco workers setup
-import '../../../lib/monaco-workers.js';
-
 const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
 		const yaml = useEditorStore((state) => state.yaml);
 		const setYaml = useEditorStore((state) => state.setYaml);

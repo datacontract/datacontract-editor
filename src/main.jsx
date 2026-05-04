@@ -1,5 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// Configure Monaco's loader to use the locally bundled module before any
+// consumer (e.g. AiDiffPreviewModal) imports @monaco-editor/react.
+import './lib/monaco-workers.js'
 import App from './App.jsx'
 import { createStorageBackend } from './config/storage.js'
 import { loadRuntimeConfig, buildEditorConfig } from './config/runtimeConfig.js'

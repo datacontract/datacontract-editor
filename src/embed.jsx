@@ -2,6 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+// Configure Monaco's loader to use the locally bundled module before any
+// consumer (e.g. AiDiffPreviewModal) imports @monaco-editor/react.
+import './lib/monaco-workers.js'
 import App from './App.jsx'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
@@ -12,7 +15,7 @@ import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
 import * as Yaml from "yaml";
-import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
+import { parseYaml, stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { getStorageConfig } from './utils/persistence.js';
 
 /**
@@ -611,3 +614,5 @@ export function getEditorStore() {
 export function getFileStorageBackend() {
   return globalBackend;
 }
+
+export { parseYaml };

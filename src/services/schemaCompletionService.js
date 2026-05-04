@@ -1,4 +1,5 @@
 import { YAML } from '../utils/yaml.js';
+import { useEditorStore } from '../store.js';
 
 const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
@@ -11,7 +12,8 @@ export async function getOdcsSchema() {
   if (cachedSchema) return cachedSchema;
 
   try {
-    const response = await fetch(ODCS_SCHEMA_URL);
+    const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
+    const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     cachedSchema = await response.json();
     return cachedSchema;

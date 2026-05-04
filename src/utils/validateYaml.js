@@ -2,6 +2,7 @@ import { parseYaml } from './yaml.js';
 import Ajv2019 from 'ajv/dist/2019.js';
 import addFormats from 'ajv-formats';
 import { mergeCustomizationsIntoSchema } from './mergeCustomizationsIntoSchema.js';
+import { useEditorStore } from '../store.js';
 
 const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
@@ -18,7 +19,8 @@ async function getSchema() {
 	if (cachedSchema) return cachedSchema;
 
 	try {
-		const response = await fetch(ODCS_SCHEMA_URL);
+		const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
+		const response = await fetch(url);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch schema: ${response.status}`);
 		}
