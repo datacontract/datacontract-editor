@@ -79,15 +79,23 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						<div className="text-gray-400">No description</div>
 					)}
 
-					{property.examples && property.examples.length > 0 && (
-						<div className="mt-1 italic">
-							{property.examples.length === 1 ? (
-								<>Example: <span>{property.examples[0]}</span></>
-							) : (
-								<>Examples: <span>{property.examples.join(', ')}</span></>
-							)}
-						</div>
-					)}
+					{(() => {
+						const hasOwnExamples = property.examples && property.examples.length > 0;
+						const examples = hasOwnExamples ? property.examples : propDefinition?.examples;
+						const isExamplesInherited = !hasOwnExamples && examples && examples.length > 0;
+						if (!examples || examples.length === 0) return null;
+						return (
+							<div
+								className={`mt-1 italic${isExamplesInherited ? ' text-blue-400' : ''}`}
+								{...(isExamplesInherited ? { title: 'Inherited from semantic definition' } : {})}>
+								{examples.length === 1 ? (
+									<>Example: <span>{examples[0]}</span></>
+								) : (
+									<>Examples: <span>{examples.join(', ')}</span></>
+								)}
+							</div>
+						);
+					})()}
 
 					<div className="mt-1 flex gap-x-1 items-center flex-wrap">
 						{property.primaryKey && (

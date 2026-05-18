@@ -263,6 +263,24 @@ const PropertyRow = ({
                                 {definition.description}
                             </span>
 						) : null}
+
+						{/* Examples preview — own examples in gray, otherwise fall back to the
+						    inherited definition's examples in blue, mirroring description above. */}
+						{(() => {
+							const hasOwnExamples = property.examples && property.examples.length > 0;
+							const examples = hasOwnExamples ? property.examples : definition?.examples;
+							if (!examples || examples.length === 0) return null;
+							const text = `e.g. ${examples.join(', ')}`;
+							return hasOwnExamples ? (
+								<span className="text-xs text-gray-400 truncate shrink-0" title={text}>
+                                {text}
+                            </span>
+							) : (
+								<span className="text-xs text-blue-400 truncate shrink-0" title={`Inherited: ${text}`}>
+                                {text}
+                            </span>
+							);
+						})()}
 					</div>
 
 					{/* Action Icons */}
