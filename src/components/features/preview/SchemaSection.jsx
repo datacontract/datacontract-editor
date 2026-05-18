@@ -42,24 +42,33 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 					</div>
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
-					{property.logicalType && (
-						<div
-							className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
-							<span>{property.logicalType}</span>
-						</div>
-					)}
-					{property.physicalType && (
-						<div
-							className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mb-1">
-							<span>{property.physicalType}</span>
-						</div>
-					)}
-					{!property.logicalType && !property.physicalType && property.type && (
-						<div
-							className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-							<span>{property.type}</span>
-						</div>
-					)}
+					{(() => {
+						const effectiveLogicalType = property.logicalType || propDefinition?.logicalType;
+						const isLogicalTypeInherited = !property.logicalType && !!propDefinition?.logicalType;
+						return (
+							<>
+								{effectiveLogicalType && (
+									<div
+										className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1"
+										{...(isLogicalTypeInherited ? { title: 'Inherited from semantic definition' } : {})}>
+										<span>{effectiveLogicalType}</span>
+									</div>
+								)}
+								{property.physicalType && (
+									<div
+										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mb-1">
+										<span>{property.physicalType}</span>
+									</div>
+								)}
+								{!effectiveLogicalType && !property.physicalType && property.type && (
+									<div
+										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+										<span>{property.type}</span>
+									</div>
+								)}
+							</>
+						);
+					})()}
 				</td>
 				<td className="px-3 py-2 text-sm text-gray-500">
 					{property.description ? (
