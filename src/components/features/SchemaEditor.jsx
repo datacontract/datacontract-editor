@@ -448,8 +448,10 @@ const SchemaEditor = ({schemaIndex}) => {
 		setSelectedPropertyPath(null);
 	}, []);
 
-	// Add property from a selected definition
-	// Only sets name and definition link - other values are inherited from the definition
+	// Add property from a selected definition.
+	// Inherits the concept's logicalType and description when provided, so the
+	// property is complete enough for downstream tooling (e.g. a contract test
+	// emits a type check only when the property carries a type).
 	const addPropertyFromDefinition = useCallback((definition) => {
 		try {
 			if (!schema || !schema[schemaIndex]) {
@@ -461,6 +463,8 @@ const SchemaEditor = ({schemaIndex}) => {
 			const currentProperties = schema[schemaIndex].properties || [];
 			const newProperty = {
 				name: definition.businessName || definition.name?.split('/').pop() || '',
+				...(definition.logicalType ? { logicalType: definition.logicalType } : {}),
+				...(definition.description ? { description: definition.description } : {}),
 				authoritativeDefinitions: [{type: 'semantics', url: definition.url}],
 			};
 
