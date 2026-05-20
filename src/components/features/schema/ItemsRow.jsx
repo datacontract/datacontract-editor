@@ -45,7 +45,7 @@ const ItemsRow = ({
             >
                 {/* Main row for items node */}
                 <div className="flex items-center justify-between px-2 pr-2 py-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                         {/* Logical Type Icon */}
                         {(() => {
                             const IconComponent = getLogicalTypeIcon(items?.logicalType);
@@ -58,14 +58,14 @@ const ItemsRow = ({
 
                         {/* Items label - showing parent property name with [] */}
                         <span
-                            className="px-1 py-0.5 text-sm text-gray-700 font-medium min-w-32 max-w-xs truncate"
+                            className="px-1.5 py-0.5 text-sm text-gray-700 font-medium w-56 truncate flex-shrink-0"
                             title={`${parentPropertyName}[]`}
                         >
                             {parentPropertyName}[]
                         </span>
 
                         {/* Items Type - TypeSelector for logical and physical types */}
-                        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="w-28 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                             <TypeSelector
                                 logicalType={items?.logicalType}
                                 onLogicalTypeChange={(value) => updateItems('logicalType', value || undefined)}

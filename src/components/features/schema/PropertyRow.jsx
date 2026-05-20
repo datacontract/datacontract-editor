@@ -197,7 +197,7 @@ const PropertyRow = ({
 								}}
 								onClick={(e) => e.stopPropagation()}
 								ref={inputRef}
-								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-32"
+								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 flex-shrink-0"
 								placeholder="property name"
 								autoFocus
 							/>
@@ -214,7 +214,7 @@ const PropertyRow = ({
 									: 'text-gray-400 italic';
 							return (
 								<span
-									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 min-w-32 flex-shrink-0 ${colorClass}`}
+									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 truncate flex-shrink-0 ${colorClass}`}
 									onClick={(e) => {
 										e.stopPropagation();
 										onSelectProperty(currentPath, property);
@@ -228,8 +228,8 @@ const PropertyRow = ({
 							);
 						})()}
 
-						{/* Property Type - min width for alignment */}
-						<div className="min-w-20 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+						{/* Property Type - fixed width for alignment */}
+						<div className="w-28 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
 							<TypeSelector
 								logicalType={property.logicalType}
 								onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
@@ -240,11 +240,14 @@ const PropertyRow = ({
 							/>
 						</div>
 
-						{definitionUrl &&
-							<Tooltip key="def" content={`Definition: ${definitionUrl}`}>
-								<DefinitionIcon className="h-3.5 w-3.5 text-blue-400 cursor-pointer"/>
-							</Tooltip>
-						}
+						{/* Definition icon slot — always reserved so descriptions align across rows */}
+						<div className="w-3.5 flex-shrink-0">
+							{definitionUrl &&
+								<Tooltip key="def" content={`Definition: ${definitionUrl}`}>
+									<DefinitionIcon className="h-3.5 w-3.5 text-blue-400 cursor-pointer"/>
+								</Tooltip>
+							}
+						</div>
 
 						{/* Visual Indicators - fixed width for alignment */}
 						<div className="w-14 flex-shrink-0">
