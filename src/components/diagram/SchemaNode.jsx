@@ -1,8 +1,11 @@
 import { memo, useState, useEffect, useRef, Fragment, useCallback } from 'react';
 import { Handle, Position, NodeToolbar, useReactFlow, useStore } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
+import SemanticIcon from '../ui/icons/SemanticIcon.jsx';
 import { TypeSelector } from '../ui/TypeSelector';
 import { getLogicalTypeIcon } from '../features/schema/propertyIcons';
+import { useInheritedDefinition } from '../../hooks/useInheritedDefinition.js';
+import { isSemanticAuthDef } from '../../utils/authDefTypes.js';
 import {
   DndContext,
   closestCenter,
@@ -24,7 +27,7 @@ import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifi
 const animateLayoutChanges = () => false;
 
 // Sortable property row wrapper component
-const SortablePropertyRow = ({ id: propId, children }) => {
+const SortablePropertyRow = ({ id: propId, property, children }) => {
   const {
     attributes,
     listeners,
@@ -37,6 +40,12 @@ const SortablePropertyRow = ({ id: propId, children }) => {
     animateLayoutChanges,
   });
 
+  const { definitionData } = useInheritedDefinition(property?.authoritativeDefinitions);
+  const hasSemanticDefinition = !!property?.authoritativeDefinitions?.find((d) => isSemanticAuthDef(d));
+  const inheritedLogicalType = definitionData?.logicalType || null;
+  const isLogicalTypeFromDefinition = !property?.logicalType && !!inheritedLogicalType;
+  const effectiveLogicalType = property?.logicalType || inheritedLogicalType;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? transition : 'none', // Only animate while dragging
@@ -47,7 +56,14 @@ const SortablePropertyRow = ({ id: propId, children }) => {
 
   return (
     <div ref={setNodeRef} style={style}>
-      {children({ dragHandleProps: { ...attributes, ...listeners }, isDragging })}
+      {children({
+        dragHandleProps: { ...attributes, ...listeners },
+        isDragging,
+        hasSemanticDefinition,
+        inheritedLogicalType,
+        isLogicalTypeFromDefinition,
+        effectiveLogicalType,
+      })}
     </div>
   );
 };
@@ -437,11 +453,14 @@ const SchemaNode = ({ data, id }) => {
             />
           ) : (
             <div
-              className="cursor-pointer hover:opacity-80 flex-1 min-w-0"
+              className="cursor-pointer hover:opacity-80 flex-1 min-w-0 flex items-center gap-1.5"
               onClick={handleStartEditSchemaName}
               title="Click to edit"
             >
               <span className="font-bold text-md truncate">{data.schema.name || 'Unnamed Schema'}</span>
+              {data.schema.authoritativeDefinitions?.some((d) => isSemanticAuthDef(d)) && (
+                <SemanticIcon className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+              )}
             </div>
           )}
           {/* Collapse toggle: full ↔ keys only */}
@@ -492,8 +511,8 @@ const SchemaNode = ({ data, id }) => {
                 const isPropertyDetailsOpen = openPropertyDetails?.propertyIndex === index &&
                                               openPropertyDetails?.nestedIndex == null;
                 return (
-                  <SortablePropertyRow key={`prop-${index}`} id={`prop-${index}`}>
-                    {({ dragHandleProps, isDragging }) => (
+                  <SortablePropertyRow key={`prop-${index}`} id={`prop-${index}`} property={prop}>
+                    {({ dragHandleProps, isDragging, hasSemanticDefinition, inheritedLogicalType, isLogicalTypeFromDefinition, effectiveLogicalType }) => (
                       <Fragment>
                         <div
                           className={`pl-2 pr-3 py-2 group dce-prop-row relative cursor-pointer ${
@@ -577,8 +596,9 @@ const SchemaNode = ({ data, id }) => {
                         title="Drag to reorder"
                       >
                         {(() => {
-                          const TypeIcon = getLogicalTypeIcon(prop.logicalType);
-                          return TypeIcon ? <TypeIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" /> : null;
+                          const TypeIcon = getLogicalTypeIcon(effectiveLogicalType);
+                          const colorClass = isLogicalTypeFromDefinition ? 'text-blue-400' : 'text-gray-400';
+                          return TypeIcon ? <TypeIcon className={`h-3.5 w-3.5 flex-shrink-0 ${colorClass}`} /> : null;
                         })()}
                       </span>
                       <span
@@ -624,6 +644,10 @@ const SchemaNode = ({ data, id }) => {
                 <div className="flex items-center gap-1.5 ml-2" onClick={(e) => e.stopPropagation()}>
                   {editingPropertyIndex !== index && (
                     <div className="flex items-center gap-1">
+                      {/* Semantic Icon when a semantic definition is linked */}
+                      {hasSemanticDefinition && (
+                        <SemanticIcon className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                      )}
                       {/* Key Icon for Primary Key */}
                       {prop.primaryKey && (
                         <KeyIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
@@ -633,6 +657,8 @@ const SchemaNode = ({ data, id }) => {
                         onLogicalTypeChange={(value) => handleUpdateProperty(index, { logicalType: value || undefined })}
                         physicalType={prop.physicalType}
                         onPhysicalTypeChange={(value) => handleUpdateProperty(index, { physicalType: value || undefined })}
+                        fallbackLogicalType={inheritedLogicalType}
+                        isLogicalTypeFromDefinition={isLogicalTypeFromDefinition}
                       />
                     </div>
                   )}
