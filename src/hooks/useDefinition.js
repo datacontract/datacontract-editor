@@ -1,41 +1,25 @@
 import { useCallback } from 'react';
 import { useEditorStore } from '../store.js';
-import { fetchDefinition, fetchSemanticTree, searchDefinitions } from '../lib/definitionsApi.js';
-import {isExternalUrl} from "../lib/urlUtils.js";
+import { fetchDefinition, fetchSemanticTree } from '../lib/definitionsApi.js';
+import { isExternalUrl } from "../lib/urlUtils.js";
 
 /**
- * Hook for fetching definitions on-demand.
- * Supports both semantic ontology (tree browse) and business definitions (search).
+ * Hook for fetching definitions on-demand from the semantic ontology tree.
+ * The tree may also include business definitions merged in by the backend.
  */
 export function useDefinition() {
     const editorConfig = useEditorStore(state => state.editorConfig);
     const semantics = editorConfig?.semantics;
-    const definitions = editorConfig?.definitions;
 
     /**
-     * Fetch a single definition by ID or URL
+     * Fetch a single definition by URL
      */
     const getDefinition = useCallback(async (definitionUrl) => {
         if (!definitionUrl || isExternalUrl(definitionUrl)) {
             return null;
         }
-        return await fetchDefinition(definitionUrl, semantics?.definitionAcceptHeader || definitions?.definitionAcceptHeader);
-    }, []);
-
-    /**
-     * Search business definitions using server-side search with pagination
-     */
-    const findDefinitions = useCallback(async (searchTerm, maxResults = 50) => {
-        if (!definitions?.baseUrl) {
-            return [];
-        }
-        if (!searchTerm || searchTerm.trim() === '') {
-            return [];
-        }
-        const queryParam = definitions.queryParam || 'q';
-        const pageParam = definitions.pageParam || 'p';
-        return await searchDefinitions(definitions.baseUrl, searchTerm, maxResults, queryParam, pageParam, definitions.definitionAcceptHeader);
-    }, [definitions?.baseUrl, definitions?.queryParam, definitions?.pageParam, definitions?.definitionAcceptHeader]);
+        return await fetchDefinition(definitionUrl, semantics?.definitionAcceptHeader);
+    }, [semantics?.definitionAcceptHeader]);
 
     /**
      * Fetch the semantic ontology tree
@@ -49,9 +33,7 @@ export function useDefinition() {
 
     return {
         getDefinition,
-        findDefinitions,
         getSemanticTree,
         hasSemanticsConfig: !!semantics?.baseUrl,
-        hasDefinitionsConfig: !!definitions?.baseUrl,
     };
 }

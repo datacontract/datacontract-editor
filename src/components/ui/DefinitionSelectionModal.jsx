@@ -2,109 +2,57 @@ import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useDefinition } from '../../hooks/useDefinition';
 
-const MAX_SEARCH_RESULTS = 15;
-
 /**
- * Modal for selecting definitions — supports both:
- * - Semantic ontology tree browser (semantics config)
- * - Business definitions search (definitions config)
- * Shows a source selector when both are available.
+ * Modal for browsing and selecting a definition from the semantic tree.
+ *
+ * The tree (served by the configured `semantics` source) contains the semantic
+ * ontology and, when the backend merges them in, business definitions grouped
+ * by domain. Each node carries its own `authDefType`, so callers tag the
+ * selection correctly via resolveAuthDefType.
  */
 export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
-  const { getSemanticTree, findDefinitions, hasSemanticsConfig, hasDefinitionsConfig } = useDefinition();
+  const { getSemanticTree } = useDefinition();
 
-  const hasBoth = hasSemanticsConfig && hasDefinitionsConfig;
-  const defaultSource = hasSemanticsConfig ? 'semantics' : 'definitions';
-
-  const [source, setSource] = useState(defaultSource);
   const [selectedDefinition, setSelectedDefinition] = useState(null);
+  // Track selected externalId separately for tree highlighting (URLs may not be unique across elements)
+  const [selectedExternalId, setSelectedExternalId] = useState(null);
 
-  // Semantics state
   const [tree, setTree] = useState([]);
   const [isLoadingTree, setIsLoadingTree] = useState(false);
   const [treeLoaded, setTreeLoaded] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [treeFilter, setTreeFilter] = useState('');
 
-  // Definitions state
-  const [definitions, setDefinitions] = useState([]);
-  const [isLoadingDefs, setIsLoadingDefs] = useState(false);
-  const [defSearch, setDefSearch] = useState('');
-  const [debouncedDefSearch, setDebouncedDefSearch] = useState('');
-  const [defError, setDefError] = useState(null);
-
-  // Debounce definition search
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedDefSearch(defSearch), 300);
-    return () => clearTimeout(timer);
-  }, [defSearch]);
-
   // Reset on open
   useEffect(() => {
     if (!isOpen) return;
     setSelectedDefinition(null);
     setSelectedExternalId(null);
-    setSource(defaultSource);
     setExpandedNodes(new Set());
     setTreeFilter('');
     setTree([]);
     setTreeLoaded(false);
-    setDefinitions([]);
-    setDefSearch('');
-    setDebouncedDefSearch('');
-    setDefError(null);
-  }, [isOpen, defaultSource]);
+  }, [isOpen]);
 
   // Load semantic tree
   useEffect(() => {
-    if (!isOpen || source !== 'semantics' || treeLoaded) return;
+    if (!isOpen || treeLoaded) return;
 
     let cancelled = false;
     const load = async () => {
       setIsLoadingTree(true);
       try {
         const data = await getSemanticTree();
-        if (!cancelled) {
-          setTree(data);
-          // Auto-switch to definitions if semantics tree is empty and definitions are available
-          if (data.length === 0 && hasDefinitionsConfig) {
-            setSource('definitions');
-          }
-        }
+        if (!cancelled) setTree(data);
       } catch {
-        if (!cancelled) {
-          setTree([]);
-          if (hasDefinitionsConfig) setSource('definitions');
-        }
+        if (!cancelled) setTree([]);
       } finally {
         if (!cancelled) { setIsLoadingTree(false); setTreeLoaded(true); }
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [isOpen, source, treeLoaded, getSemanticTree, hasDefinitionsConfig]);
-
-  // Search definitions
-  useEffect(() => {
-    if (!isOpen || source !== 'definitions') return;
-    if (!debouncedDefSearch) { setDefinitions([]); return; }
-
-    let cancelled = false;
-    const search = async () => {
-      setIsLoadingDefs(true);
-      setDefError(null);
-      try {
-        const results = await findDefinitions(debouncedDefSearch, MAX_SEARCH_RESULTS);
-        if (!cancelled) setDefinitions(results);
-      } catch (err) {
-        if (!cancelled) { setDefError(err.message || 'Search failed'); setDefinitions([]); }
-      } finally {
-        if (!cancelled) setIsLoadingDefs(false);
-      }
-    };
-    search();
-    return () => { cancelled = true; };
-  }, [isOpen, source, debouncedDefSearch, findDefinitions]);
+  }, [isOpen, treeLoaded, getSemanticTree]);
 
   const handleSelect = () => {
     if (selectedDefinition) { onSelect(selectedDefinition); onClose(); }
@@ -122,6 +70,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const nodeToDefinition = useCallback((node) => ({
     name: node.externalId,
     url: node.url,
+    authDefType: node.authDefType,
     businessName: node.businessName || node.name,
     logicalType: node.logicalType,
     description: node.description,
@@ -131,9 +80,6 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
       ...(node.owner ? [{ property: 'owner', value: node.owner }] : []),
     ],
   }), []);
-
-  // Track selected externalId separately for tree highlighting (URLs may not be unique across elements)
-  const [selectedExternalId, setSelectedExternalId] = useState(null);
 
   const selectTreeNode = useCallback((node) => {
     if (node.elementType === 'namespace' || node.elementType === 'group') return;
@@ -192,9 +138,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
             {/* Header */}
             <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 relative">
               <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 pr-8">Find Definition</DialogTitle>
-              <p className="mt-1 text-sm text-gray-500 pr-8">
-                {source === 'semantics' ? 'Browse semantic definitions' : 'Search business definitions'}
-              </p>
+              <p className="mt-1 text-sm text-gray-500 pr-8">Browse definitions</p>
               <button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <span className="sr-only">Close</span>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -203,103 +147,39 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
               </button>
             </div>
 
-            {/* Source selector — only when both configs are available */}
-            {hasBoth && (
-              <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6">
-                <nav className="-mb-px flex gap-6" aria-label="Source">
-                  <button type="button" onClick={() => { setSource('semantics'); setSelectedDefinition(null); setSelectedExternalId(null); }}
-                    className={`whitespace-nowrap border-b-2 py-3 text-sm font-medium ${source === 'semantics' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                    Semantics
-                  </button>
-                  <button type="button" onClick={() => { setSource('definitions'); setSelectedDefinition(null); setSelectedExternalId(null); }}
-                    className={`whitespace-nowrap border-b-2 py-3 text-sm font-medium ${source === 'definitions' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                    Definitions
-                  </button>
-                </nav>
+            {/* Tree filter */}
+            <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-3">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <input type="text" placeholder="Search..." value={treeFilter} onChange={(e) => setTreeFilter(e.target.value)} autoFocus
+                  className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
               </div>
-            )}
+              {!isLoadingTree && tree.length > 0 && (
+                <div className="mt-2 text-xs text-gray-500">
+                  {stats.concepts} concept{stats.concepts !== 1 ? 's' : ''}, {stats.properties} propert{stats.properties !== 1 ? 'ies' : 'y'}
+                </div>
+              )}
+            </div>
 
-            {/* ── Semantics: tree browser ── */}
-            {source === 'semantics' && (
-              <>
-                <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-3">
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <input type="text" placeholder="Search..." value={treeFilter} onChange={(e) => setTreeFilter(e.target.value)} autoFocus
-                      className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                  </div>
-                  {!isLoadingTree && tree.length > 0 && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      {stats.concepts} concept{stats.concepts !== 1 ? 's' : ''}, {stats.properties} propert{stats.properties !== 1 ? 'ies' : 'y'}
-                    </div>
-                  )}
+            {/* Tree */}
+            <div className="flex-1 overflow-y-auto bg-white">
+              {isLoadingTree && <LoadingSpinner text="Loading definitions..." />}
+              {!isLoadingTree && filteredTree.length === 0 && (
+                <EmptyState text={treeFilter ? 'No matching elements' : 'No definitions yet'} />
+              )}
+              {!isLoadingTree && filteredTree.length > 0 && (
+                <div className="px-4 py-2">
+                  {filteredTree.map((node) => (
+                    <TreeNode key={node.externalId} node={node} expandedNodes={expandedNodes} toggleNode={toggleNode}
+                      selectedExternalId={selectedExternalId} onSelect={selectTreeNode} depth={0} />
+                  ))}
                 </div>
-                <div className="flex-1 overflow-y-auto bg-white">
-                  {isLoadingTree && <LoadingSpinner text="Loading ontology..." />}
-                  {!isLoadingTree && filteredTree.length === 0 && (
-                    <EmptyState text={treeFilter ? 'No matching elements' : 'No semantic elements yet'} />
-                  )}
-                  {!isLoadingTree && filteredTree.length > 0 && (
-                    <div className="px-4 py-2">
-                      {filteredTree.map((node) => (
-                        <TreeNode key={node.externalId} node={node} expandedNodes={expandedNodes} toggleNode={toggleNode}
-                          selectedExternalId={selectedExternalId} onSelect={selectTreeNode} depth={0} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ── Definitions: search ── */}
-            {source === 'definitions' && (
-              <>
-                <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-3">
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <input type="text" placeholder="Search definitions..." value={defSearch}
-                      onChange={(e) => setDefSearch(e.target.value)} autoFocus
-                      className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                  </div>
-                  {!isLoadingDefs && definitions.length > 0 && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      Found {definitions.length} definition{definitions.length !== 1 ? 's' : ''} matching &quot;{debouncedDefSearch}&quot;
-                      {definitions.length >= MAX_SEARCH_RESULTS && ` (limited to ${MAX_SEARCH_RESULTS} results)`}
-                    </div>
-                  )}
-                  {!isLoadingDefs && !defError && !debouncedDefSearch && (
-                    <div className="mt-2 text-xs text-gray-500">Enter a search term to find definitions</div>
-                  )}
-                </div>
-                <div className="flex-1 overflow-y-auto bg-white px-6 py-4">
-                  {isLoadingDefs && <LoadingSpinner text="Searching definitions..." />}
-                  {defError && <ErrorMessage message={defError} />}
-                  {!isLoadingDefs && !defError && !debouncedDefSearch && (
-                    <EmptyState text="Enter a search term to find definitions" />
-                  )}
-                  {!isLoadingDefs && !defError && debouncedDefSearch && definitions.length === 0 && (
-                    <EmptyState text={`No definitions found matching "${debouncedDefSearch}"`} />
-                  )}
-                  {!isLoadingDefs && !defError && definitions.length > 0 && (
-                    <div className="space-y-2 pr-2">
-                      {definitions.map((definition, index) => (
-                        <DefinitionCard key={definition.url || definition.name || index} definition={definition}
-                          isSelected={selectedDefinition?.url === definition.url}
-                          onClick={() => setSelectedDefinition(definition)} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
+              )}
+            </div>
 
             {/* Footer */}
             <div className="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
@@ -382,67 +262,11 @@ function TreeNode({ node, expandedNodes, toggleNode, selectedExternalId, onSelec
   );
 }
 
-function DefinitionCard({ definition, isSelected, onClick }) {
-  const getCP = (key) => definition.customProperties?.find(p => p.property === key)?.value;
-  const owner = getCP('owner');
-  const elementType = getCP('elementType');
-  const parentConcept = getCP('parentConcept');
-
-  return (
-    <button type="button" onClick={onClick}
-      className={`w-full rounded-md px-4 py-3 text-left transition-colors ${isSelected ? 'bg-indigo-50 ring-2 ring-indigo-600' : 'bg-gray-50 hover:bg-gray-100'}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-medium text-gray-900 text-sm truncate">{definition.businessName || definition.name}</span>
-          {elementType && (
-            <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${
-              elementType === 'entity' ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20'
-                : elementType === 'shared_property' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                  : 'bg-amber-50 text-amber-700 ring-amber-600/20'
-            }`}>{elementType === 'shared_property' ? 'shared property' : elementType}</span>
-          )}
-        </div>
-        {definition.logicalType && <span className="text-xs text-gray-500 font-mono flex-shrink-0 ml-2">{definition.logicalType}</span>}
-      </div>
-      {(definition.name || parentConcept || owner) && (
-        <div className="flex items-center justify-between mt-0.5">
-          <div className="flex items-center gap-2 min-w-0">
-            {definition.businessName && definition.name && <span className="text-xs text-gray-500 font-mono">{definition.name}</span>}
-            {parentConcept && <span className="text-xs text-gray-400"><span className="text-gray-300 mx-0.5">&middot;</span>{parentConcept}</span>}
-          </div>
-          {owner && <span className="text-xs text-gray-500 flex-shrink-0">Owner: {owner}</span>}
-        </div>
-      )}
-      {definition.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{definition.description}</p>}
-      {definition.tags?.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {definition.tags.map((tag, i) => (
-            <span key={i} className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{tag}</span>
-          ))}
-        </div>
-      )}
-    </button>
-  );
-}
-
 function LoadingSpinner({ text }) {
   return (
     <div className="flex items-center justify-center py-12">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600" />
       <span className="ml-3 text-sm text-gray-600">{text}</span>
-    </div>
-  );
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <div className="rounded-md bg-red-50 p-4">
-      <div className="flex">
-        <svg className="h-5 w-5 text-red-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-        </svg>
-        <p className="ml-3 text-sm text-red-700">{message}</p>
-      </div>
     </div>
   );
 }

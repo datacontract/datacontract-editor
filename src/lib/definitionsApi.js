@@ -1,21 +1,20 @@
 /**
- * API utilities for fetching and managing semantic definitions
+ * API utilities for fetching semantic definitions
  */
 
 /**
- * Fetch a single definition by ID from the API
- * @param {string} baseUrl - API base URL
- * @param {string} definitionId - Definition ID (e.g., "/testorga/definitions/fulfillment/sku")
+ * Fetch a single definition by its full URL/path.
+ * @param {string} url - Full URL/path to the definition
+ * @param {string} definitionAcceptHeader - Accept header for the request
  * @returns {Promise<Object|null>} The definition object or null if not found
  */
 export const fetchDefinition = async (url, definitionAcceptHeader = "application/json") => {
 	if (!url) {
-		console.warn('Cannot fetch definition: baseUrl or definitionId not provided');
+		console.warn('Cannot fetch definition: url not provided');
 		return null;
 	}
 
 	try {
-		// Remove leading slash from definitionId for URL construction
 		const response = await fetch(url, {
 			method: 'GET',
 			headers: {
@@ -37,9 +36,10 @@ export const fetchDefinition = async (url, definitionAcceptHeader = "application
 };
 
 /**
- * Fetch the semantic ontology tree (concepts with their properties as children)
+ * Fetch the semantic ontology tree (concepts with their properties as children).
+ * The tree may also include business definitions merged in by the backend.
  * @param {string} baseUrl - API base URL for semantics (e.g., ".../datacontract-editor-api/semantics")
- * @returns {Promise<Array>} Array of tree nodes (concepts with children)
+ * @returns {Promise<Array>} Array of tree nodes
  */
 export const fetchSemanticTree = async (baseUrl) => {
 	if (!baseUrl) {
@@ -65,67 +65,5 @@ export const fetchSemanticTree = async (baseUrl) => {
 	} catch (error) {
 		console.error('Error fetching semantic tree:', error);
 		return [];
-	}
-};
-
-/**
- * Search definitions using server-side search with pagination
- * @param {string} baseUrl - API base URL
- * @param {string} searchTerm - Search term
- * @param {number} maxResults - Maximum number of results to return
- * @param {string} queryParam - Query parameter name (e.g., 'q' or 'query')
- * @param {string} pageParam - Page parameter name (e.g., 'p' or 'page')
- * @returns {Promise<Array>} Array of matching definitions
- */
-export const searchDefinitions = async (baseUrl, searchTerm, maxResults, queryParam = 'q', pageParam = 'p', definitionAcceptHeader = "application/json") => {
-	if (!baseUrl) {
-		console.warn('Cannot search definitions: baseUrl not provided');
-		return [];
-	}
-
-	const PAGE_SIZE = 100; // Server returns max 100 results per page
-	const numPages = Math.floor(maxResults / PAGE_SIZE) + (maxResults % PAGE_SIZE > 0 ? 1 : 0);
-	const allResults = [];
-
-	try {
-		// Fetch multiple pages if needed
-		for (let page = 0; page < numPages; page++) {
-			const url = `${baseUrl}?${queryParam}=${encodeURIComponent(searchTerm)}&${pageParam}=${page}`;
-			console.log('Searching definitions (page %d/%d):', page + 1, numPages, url);
-
-			const response = await fetch(url, {
-				method: 'GET',
-				mode: 'cors',
-				headers: {
-					Accept: definitionAcceptHeader,
-				}
-			});
-
-			if (!response.ok) {
-				console.error('Failed to search definitions (page %d):', page, response.status, response.statusText);
-				break; // Stop fetching if a page fails
-			}
-
-			const data = await response.json();
-			const pageResults = Array.isArray(data) ? data : [];
-
-			allResults.push(...pageResults);
-
-			// Stop if we got fewer results than PAGE_SIZE (no more pages available)
-			if (pageResults.length < PAGE_SIZE) {
-				break;
-			}
-
-			// Stop if we've reached maxResults
-			if (allResults.length >= maxResults) {
-				break;
-			}
-		}
-
-		// Trim to maxResults
-		return allResults.slice(0, maxResults);
-	} catch (error) {
-		console.error('Error searching definitions:', error);
-		return allResults; // Return what we got so far
 	}
 };

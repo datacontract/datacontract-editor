@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useEditorStore} from '../../store.js';
 import {isSafeKey} from '../../utils/safeProperty.js';
+import {resolveAuthDefType} from '../../utils/authDefTypes.js';
 import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import TagsInput from '../ui/TagsInput.jsx';
@@ -461,7 +462,7 @@ const SchemaEditor = ({schemaIndex}) => {
 			const currentProperties = schema[schemaIndex].properties || [];
 			const newProperty = {
 				name: definition.businessName || definition.name?.split('/').pop() || '',
-				authoritativeDefinitions: [{type: 'semantics', url: definition.url}],
+				authoritativeDefinitions: [{type: resolveAuthDefType(definition), url: definition.url}],
 			};
 
 			setValue(`schema[${schemaIndex}].properties`, [...currentProperties, newProperty]);
@@ -770,7 +771,7 @@ const SchemaEditor = ({schemaIndex}) => {
 											className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 rounded-t-md">
 											<span className="text-sm font-medium text-gray-700">Properties</span>
 											<div className="flex items-center gap-2">
-												{(editorConfig?.semantics?.baseUrl || editorConfig?.definitions?.baseUrl) && (
+												{editorConfig?.semantics?.baseUrl && (
 													<button
 														onClick={() => setIsDefinitionModalOpen(true)}
 														className="rounded-sm bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"

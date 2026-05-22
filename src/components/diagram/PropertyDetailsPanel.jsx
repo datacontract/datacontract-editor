@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {isSafeKey} from '../../utils/safeProperty.js';
-import {isSemanticAuthDef} from '../../utils/authDefTypes.js';
+import {isSemanticAuthDef, resolveAuthDefType} from '../../utils/authDefTypes.js';
 import {Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import ChevronRightIcon from '../ui/icons/ChevronRightIcon.jsx';
 import ChevronDownIcon from '../ui/icons/ChevronDownIcon.jsx';
@@ -77,7 +77,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   const isTransformDescriptionHidden = useIsPropertyHidden('schema.properties', 'transformDescription');
 
   // Semantics/definitions enabled via embed config (not customization)
-  const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl || !!editorConfig?.definitions?.baseUrl;
+  const isSemanticsEnabled = !!editorConfig?.semantics?.baseUrl;
 
   // Get overrides for standard properties
   const nameOverride = useStandardPropertyOverride('schema.properties', 'name');
@@ -229,7 +229,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     // Use the full URL if available, otherwise use name (which might be a path)
     const definitionUrl = definition.url || definition.name;
 
-    const newDef = { type: 'semantics', url: definitionUrl };
+    const newDef = { type: resolveAuthDefType(definition), url: definitionUrl };
     const defs = property.authoritativeDefinitions || [];
     updateField('authoritativeDefinitions', [...defs.filter(d => !isSemanticAuthDef(d) && d.type !== 'definition'), newDef]);
   }, [property.authoritativeDefinitions, updateField]);

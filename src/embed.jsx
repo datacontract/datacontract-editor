@@ -76,8 +76,8 @@ const DEFAULT_CONFIG = {
   saveLabel: 'Save',   // string - custom label for Save button in EMBEDDED mode
 	titlePrefix: null,
 
-  // Semantics configuration (definition lookup feature)
-  semantics: null, // { baseUrl, pageParam, queryParam } for definitions API
+  // Semantic ontology tree browser (the tree may also include business definitions)
+  semantics: null, // { baseUrl, pageParam, queryParam }
 
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,
