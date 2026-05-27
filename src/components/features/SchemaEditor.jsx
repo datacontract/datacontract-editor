@@ -765,7 +765,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
 								{/* Properties Section - Schema Tree View */}
 								<div className="mt-6" ref={propertiesContainerRef}>
-									<div className="border border-gray-200 rounded-md">
+									<div className="border border-gray-200 rounded-md overflow-hidden">
 										{/* Header Row */}
 										<div
 											className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 rounded-t-md">

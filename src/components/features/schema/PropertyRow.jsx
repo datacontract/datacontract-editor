@@ -197,7 +197,7 @@ const PropertyRow = ({
 								}}
 								onClick={(e) => e.stopPropagation()}
 								ref={inputRef}
-								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 flex-shrink-0"
+								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 min-w-0"
 								placeholder="property name"
 								autoFocus
 							/>
@@ -214,7 +214,7 @@ const PropertyRow = ({
 									: 'text-gray-400 italic';
 							return (
 								<span
-									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 truncate flex-shrink-0 ${colorClass}`}
+									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 min-w-0 truncate ${colorClass}`}
 									onClick={(e) => {
 										e.stopPropagation();
 										onSelectProperty(currentPath, property);

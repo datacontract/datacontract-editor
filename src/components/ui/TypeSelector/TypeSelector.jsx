@@ -45,7 +45,7 @@ const TypeSelector = ({
           <PopoverButton
             disabled={disabled}
             className={`
-              group inline-flex items-center rounded-md px-2 py-1 text-xs
+              group flex max-w-full items-center rounded-md px-2 py-1 text-xs
               ${shouldHighlightAsDefinition ? 'text-blue-500' : 'text-gray-700'} bg-white
               ring-inset
               hover:bg-gray-50 hover:ring-1 hover:ring-gray-300
@@ -56,7 +56,7 @@ const TypeSelector = ({
             `}
           >
             {/* Display type value */}
-            <span>
+            <span className="min-w-0 truncate">
               {displayType}
             </span>
 
