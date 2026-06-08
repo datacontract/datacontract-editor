@@ -2,6 +2,7 @@ import {useCallback} from 'react';
 import {useEditorStore} from '../../../store.js';
 import {useShallow} from "zustand/react/shallow";
 import {buildPropertyPath, buildPropertiesArrayPath} from '../../../utils/schemaPathBuilder.js';
+import {useCustomization} from '../../../hooks/useCustomization.js';
 
 /**
  * Custom hook for schema CRUD operations
@@ -11,6 +12,35 @@ export function useSchemaOperations(schemaIndex) {
     const getValue = useEditorStore(useShallow((state) => state.getValue));
     const setValue = useEditorStore(useShallow((state) => state.setValue));
     const schema = useEditorStore(useShallow((state) => state.getValue('schema')));
+    const {standardProperties, customProperties} = useCustomization('schema.properties');
+
+    // Build a fresh new-property object pre-filled with configured defaults from
+    // the `schema.properties` customization (both standard and custom properties).
+    const buildDefaultProperty = useCallback(() => {
+        const property = {
+            name: '',
+            logicalType: '',
+            description: ''
+        };
+
+        for (const sp of standardProperties) {
+            if (sp?.property && sp.default !== undefined && sp.default !== null) {
+                property[sp.property] = sp.default;
+            }
+        }
+
+        const customProps = [];
+        for (const cp of customProperties) {
+            if (cp?.property && cp.default !== undefined && cp.default !== null) {
+                customProps.push({property: cp.property, value: cp.default});
+            }
+        }
+        if (customProps.length > 0) {
+            property.customProperties = customProps;
+        }
+
+        return property;
+    }, [standardProperties, customProperties]);
 
     // Remove entire schema
     const removeSchema = useCallback(() => {
@@ -31,17 +61,13 @@ export function useSchemaOperations(schemaIndex) {
             }
 
             const currentProperties = schema[schemaIndex].properties || [];
-            const newProperties = [...currentProperties, {
-                name: '',
-                logicalType: '',
-                description: ''
-            }];
+            const newProperties = [...currentProperties, buildDefaultProperty()];
 
             setValue(`schema[${schemaIndex}].properties`, newProperties);
         } catch (error) {
             console.error('Error adding property:', error);
         }
-    }, [schema, schemaIndex, setValue]);
+    }, [schema, schemaIndex, setValue, buildDefaultProperty]);
 
     // Save current property and add next one (for Enter key on last property)
     const handleSaveAndAddNext = useCallback((schemaIdx, propPath, newName) => {
@@ -59,11 +85,7 @@ export function useSchemaOperations(schemaIndex) {
             }
 
             // Add the new property
-            const newProperties = [...currentProperties, {
-                name: '',
-                logicalType: '',
-                description: ''
-            }];
+            const newProperties = [...currentProperties, buildDefaultProperty()];
             setValue(`schema[${schemaIndex}].properties`, newProperties);
 
             // Return the new property index for auto-edit
@@ -71,7 +93,7 @@ export function useSchemaOperations(schemaIndex) {
         } catch (error) {
             console.error('Error saving and adding next property:', error);
         }
-    }, [schema, schemaIndex, setValue]);
+    }, [schema, schemaIndex, setValue, buildDefaultProperty]);
 
     // Update property field (supports nested properties via propPath)
     const updateProperty = useCallback((schemaIdx, propPath, field, value) => {
@@ -139,17 +161,13 @@ export function useSchemaOperations(schemaIndex) {
 
             // Get current properties array or initialize empty
             const currentProperties = getValue(pathStr) || [];
-            const newProperties = [...currentProperties, {
-                name: '',
-                logicalType: '',
-                description: ''
-            }];
+            const newProperties = [...currentProperties, buildDefaultProperty()];
 
             setValue(pathStr, newProperties);
         } catch (error) {
             console.error('Error adding sub-property:', error);
         }
-    }, [schema, schemaIndex, getValue, setValue]);
+    }, [schema, schemaIndex, getValue, setValue, buildDefaultProperty]);
 
     // Reorder property within same parent (drag-and-drop)
     const reorderProperty = useCallback((propPath, fromIndex, toIndex) => {
