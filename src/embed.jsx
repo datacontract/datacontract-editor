@@ -62,11 +62,15 @@ const DEFAULT_CONFIG = {
     helpText: null, // Custom help text (HTML string) - replaces default CLI instructions
   },
 
-  // Editor mode: 'SERVER' (default), 'DESKTOP', or 'EMBEDDED'
+  // Editor mode: 'SERVER' (default), 'DESKTOP', 'CLI', or 'EMBEDDED'
   // - SERVER: Server mode with full menu
   // - DESKTOP: Desktop mode with file operations in menu
+  // - CLI: CLI mode (datacontract edit) editing a single local file: Save button only, no menu
   // - EMBEDDED: Embedded mode with Cancel/Delete/Save buttons, no menu
   mode: 'SERVER',
+
+  // Path of the file being edited, shown in the header (used by CLI mode)
+  filePath: null,
 
   // Callbacks
   onSave: null,        // (yaml, { markers, yamlParseError }) => void | false
@@ -358,6 +362,7 @@ function createConfiguredStore(config) {
 			// Store editor config for components to access
 			editorConfig: {
 				mode: config.mode,
+				filePath: config.filePath,
 				onCancel: config.onCancel,
 				onDelete: config.onDelete,
 				showDelete: config.showDelete,
