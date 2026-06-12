@@ -36,13 +36,15 @@ const Header = () => {
 	const yamlParseError = useEditorStore((state) => state.yamlParseError);
 	const contractName = useEditorStore((state) => state.getValue('name'));
 
-	// Check if we're in server mode
-	const backend = getFileStorageBackend();
-	const isServerMode = backend.getBackendName() === 'Server Storage';
-
 	// Get editor mode from config
 	const editorMode = editorConfig?.mode || 'SERVER';
 	const isEmbeddedMode = editorMode === 'EMBEDDED';
+
+	// Check if we're in server mode. CLI mode (datacontract edit) behaves the same:
+	// the editor is bound to a single managed file, so New / Load Example / Open
+	// make no sense and the menu is hidden.
+	const backend = getFileStorageBackend();
+	const isServerMode = backend.getBackendName() === 'Server Storage' || editorMode === 'CLI';
 	const [showParseErrorModal, setShowParseErrorModal] = useState(false);
 	// Calculate problem count
 	const totalCount = markers.length;
@@ -441,11 +443,18 @@ const Header = () => {
 									</linearGradient>
 								</defs>
 							</svg>
-							<span className="text-md leading-tight text-gray-900">
-												{editorConfig.titlePrefix
-													? `${editorConfig.titlePrefix} ${contractName}`
-													: 'Data Contract Editor'}
-                    </span>
+							<div className="flex flex-col min-w-0">
+								<span className="text-md leading-tight text-gray-900">
+													{editorConfig.titlePrefix
+														? `${editorConfig.titlePrefix} ${contractName}`
+														: 'Data Contract Editor'}
+									</span>
+								{editorConfig.filePath && (
+									<span className="text-xs leading-tight text-gray-500 truncate" title={editorConfig.filePath}>
+										{editorConfig.filePath}
+									</span>
+								)}
+							</div>
 						</div>
 						{/* View tabs - centered, responsive */}
 						<div className="flex flex-row flex-1 justify-center items-center">

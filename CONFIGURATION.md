@@ -135,7 +135,10 @@ init({
   showPreview: true,
 
   // Mode
-  mode: 'SERVER',                    // 'SERVER', 'DESKTOP', or 'EMBEDDED'
+  mode: 'SERVER',                    // 'SERVER', 'DESKTOP', 'CLI', or 'EMBEDDED'
+                                     // CLI: bound to a single local file (datacontract edit),
+                                     // Save button only, no New/Load Example/Open menu
+  filePath: null,                    // Path of the edited file, shown in the header (CLI mode)
 
   // Callbacks (EMBEDDED mode)
   onSave: (yaml, { markers, yamlParseError }) => {},  // return false to prevent clearing dirty state
