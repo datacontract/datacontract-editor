@@ -1451,7 +1451,9 @@ const DiagramViewInner = () => {
 						content={<span>Auto Layout <span className="opacity-60">(L)</span><br/><span className="opacity-70">Arrange tables automatically so they don't overlap.</span></span>}
 					>
 						<ControlButton onClick={handleAutoLayout}>
-							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+							{/* fill via inline style: React Flow's stylesheet sets fill: currentColor on
+							    control-button svgs, which would override the fill="none" attribute */}
+							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ fill: 'none' }} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<rect x="3" y="3" width="7" height="7" rx="1" />
 								<rect x="14" y="3" width="7" height="5" rx="1" />
 								<rect x="14" y="12" width="7" height="9" rx="1" />
@@ -1470,7 +1472,7 @@ const DiagramViewInner = () => {
 						}
 					>
 						<ControlButton onClick={handleToggleCollapseAll}>
-							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ fill: 'none' }} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<path d="M4 6h16M4 12h10M4 18h16" />
 							</svg>
 						</ControlButton>
@@ -1481,7 +1483,7 @@ const DiagramViewInner = () => {
 						content={<span>Add Schema<br/><span className="opacity-70">Create a new empty table in this contract.</span></span>}
 					>
 						<ControlButton onClick={handleAddSchema}>
-							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ fill: 'none' }} viewBox="0 0 24 24" stroke="currentColor">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
 							</svg>
 						</ControlButton>
