@@ -6,6 +6,8 @@ import { persist } from 'zustand/middleware'
 // consumer (e.g. AiDiffPreviewModal) imports @monaco-editor/react.
 import './lib/monaco-workers.js'
 import App from './App.jsx'
+import { I18nextProvider } from 'react-i18next'
+import i18n from './i18n/index.js'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
@@ -61,6 +63,10 @@ const DEFAULT_CONFIG = {
     showSettings: true, // Show settings button to configure API server URL
     helpText: null, // Custom help text (HTML string) - replaces default CLI instructions
   },
+
+  // UI language as a BCP-47 tag (e.g. 'en', 'de'). The host passes the resolved
+  // user locale; unknown/unsupported tags fall back to English. See src/i18n/index.js.
+  locale: 'en',
 
   // Editor mode: 'SERVER' (default), 'DESKTOP', 'CLI', or 'EMBEDDED'
   // - SERVER: Server mode with full menu
@@ -413,6 +419,10 @@ export function init(userConfig = {}) {
   // Merge user config with defaults
   const config = { ...DEFAULT_CONFIG, ...userConfig };
 
+  // Apply the host-supplied locale to the editor's scoped i18n instance. Unknown/
+  // unsupported tags degrade to English via fallbackLng/supportedLngs.
+  i18n.changeLanguage(config.locale);
+
   // Set up base path for workers if provided
   if (config.basePath && typeof window !== 'undefined') {
     window.__DATACONTRACT_EDITOR_BASE_PATH__ = config.basePath;
@@ -469,7 +479,9 @@ export function init(userConfig = {}) {
 
   root.render(
     <StrictMode>
-      <App />
+      <I18nextProvider i18n={i18n}>
+        <App />
+      </I18nextProvider>
     </StrictMode>
   );
 

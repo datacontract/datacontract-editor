@@ -1,0 +1,22 @@
+{
+  "header": {
+    "view": {
+      "diagram": "Diagramm",
+      "form": "Formular",
+      "yaml": "YAML"
+    },
+    "toolbar": {
+      "preview": "Vorschau",
+      "validation": "Validierung",
+      "tests": "Tests"
+    },
+    "action": {
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "confirm": {
+      "delete": "Möchtest du diesen Data Contract wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  }
+}
