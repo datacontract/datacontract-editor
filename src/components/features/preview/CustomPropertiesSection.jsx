@@ -4,8 +4,10 @@ import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
+import {useTranslation} from 'react-i18next';
 
 const CustomPropertiesSection = () => {
+	const { t } = useTranslation();
 	const customProperties = useEditorStore(useShallow(state => state.getValue('customProperties')));
 	const hiddenNames = useHiddenCustomPropertyNames('root');
 	const { customProperties: customPropertyConfigs } = useCustomization('root');
@@ -31,10 +33,8 @@ const CustomPropertiesSection = () => {
 	return (
 		<section className="print:break-before-page">
 			<div className="px-4 sm:px-0">
-				<h1 className="text-base font-semibold leading-6 text-gray-900" id="customProperties">Custom
-					Properties</h1>
-				<p className="text-sm text-gray-500">This section covers other properties you may find in a data
-					contract.</p>
+				<h1 className="text-base font-semibold leading-6 text-gray-900" id="customProperties">{t('preview.customProperties.heading')}</h1>
+				<p className="text-sm text-gray-500">{t('preview.customProperties.description')}</p>
 			</div>
 			<div className="mt-2 overflow-hidden print:overflow-auto bg-white shadow sm:rounded-lg">
 				<div className="border-t border-gray-100">

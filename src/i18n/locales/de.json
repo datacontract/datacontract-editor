@@ -9,7 +9,11 @@
     "roles": "Rollen",
     "pricing": "Preisgestaltung",
     "sla": "SLA",
-    "customProperties": "Benutzerdefinierte Eigenschaften"
+    "customProperties": "Benutzerdefinierte Eigenschaften",
+    "footer": {
+      "documentation": "Dokumentation",
+      "createdBy": "Erstellt von"
+    }
   },
   "overview": {
     "section": {
@@ -82,7 +86,10 @@
     "action": {
       "save": "Speichern",
       "cancel": "Abbrechen",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "new": "Neu",
+      "loadExample": "Beispiel laden",
+      "open": "Öffnen"
     },
     "confirm": {
       "delete": "Möchtest du diesen Data Contract wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
@@ -262,6 +269,19 @@
       "addProperty": "Füge eine Property business_timestamp hinzu",
       "generateQualityRules": "Generiere Quality-Regeln",
       "findAndFixIssues": "Finde und behebe Probleme"
+    },
+    "diff": {
+      "title": "KI-Änderungen prüfen",
+      "validYaml": "Gültiges YAML",
+      "errorCount_one": "{{count}} Fehler",
+      "errorCount_other": "{{count}} Fehler",
+      "warningCount_one": "{{count}} Warnung",
+      "warningCount_other": "{{count}} Warnungen",
+      "showDetails": "Details anzeigen",
+      "hideDetails": "Details ausblenden",
+      "editHint": "Bearbeite die rechte Seite direkt, um Änderungen anzupassen",
+      "cancel": "Abbrechen",
+      "applyChanges": "Änderungen übernehmen"
     }
   },
   "diagram": {
@@ -1194,6 +1214,13 @@
       "dateIn": "Eintritt: {{date}}",
       "dateOut": "Austritt: {{date}}",
       "replacedBy": "Ersetzt durch: {{username}}"
+    },
+    "customProperties": {
+      "heading": "Benutzerdefinierte Eigenschaften",
+      "description": "Dieser Abschnitt behandelt weitere Eigenschaften, die du in einem Data Contract finden kannst."
+    },
+    "contractHeader": {
+      "noData": "noch keine Daten"
     }
   },
   "app": {
@@ -1212,12 +1239,68 @@
     "noChanges": {
       "title": "Keine Änderungen",
       "description": "Dein Contract entspricht der zuletzt gespeicherten Version."
+    },
+    "diff": {
+      "edit": "Bearbeiten",
+      "split": "Geteilt",
+      "unified": "Vereinheitlicht"
     }
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",
     "unexpected": "Ein unerwarteter Fehler ist aufgetreten",
     "stackTrace": "Stack-Trace",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "form": {
+      "title": "Formularfehler",
+      "description": "Im {{pageName}}-Formular ist ein Fehler aufgetreten und es konnte nicht angezeigt werden.",
+      "errorLabel": "Fehler:",
+      "unknownError": "Unbekannter Formularfehler",
+      "whatYouCanDo": "Was du tun kannst:",
+      "suggestion1": "Wechsle zur YAML-Ansicht, um deinen Data Contract direkt zu bearbeiten",
+      "suggestion2": "Prüfe, ob deine YAML-Struktur gültig ist",
+      "suggestion3": "Versuche, zu einer anderen Formularseite zu wechseln",
+      "suggestion4": "Deine Daten sind sicher – das YAML wurde erhalten",
+      "retry": "Formular erneut laden",
+      "editYaml": "YAML direkt bearbeiten",
+      "developerDetails": "Entwicklerdetails"
+    },
+    "diagram": {
+      "title": "Diagramm-Renderingfehler",
+      "description": "In der Diagrammansicht ist ein Fehler aufgetreten und sie konnte nicht angezeigt werden.",
+      "errorLabel": "Fehler:",
+      "unknownError": "Unbekannter Renderingfehler",
+      "suggestions": "Vorschläge:",
+      "suggestion1": "Verwende stattdessen die Formularansicht oder den YAML-Editor",
+      "suggestion2": "Prüfe, ob deine Schemadefinitionen gültig sind",
+      "suggestion3": "Stelle sicher, dass die Beziehungen zwischen Properties korrekt formatiert sind",
+      "retry": "Diagramm erneut laden",
+      "switchToForm": "Zur Formularansicht wechseln",
+      "switchToYaml": "Zur YAML-Ansicht wechseln",
+      "developerDetails": "Entwicklerdetails"
+    },
+    "preview": {
+      "title": "Vorschaufehler",
+      "description": "Die Vorschau konnte nicht gerendert werden. Das passiert meist, wenn das YAML unerwartete Datenstrukturen enthält.",
+      "errorLabel": "Fehler:",
+      "unknownError": "Unbekannter Fehler",
+      "suggestions": "Vorschläge:",
+      "suggestion1": "Prüfe deine YAML-Syntax auf Fehler",
+      "suggestion2": "Stelle sicher, dass die Struktur des Data Contracts dem ODCS-Schema entspricht",
+      "suggestion3": "Versuche, das YAML direkt zu bearbeiten, um das Problem zu beheben",
+      "retry": "Vorschau erneut laden",
+      "developerDetails": "Entwicklerdetails"
+    }
+  },
+  "yaml": {
+    "parseError": {
+      "title": "YAML-Parsing-Fehler",
+      "description": "Das YAML enthält Syntaxfehler und kann nicht geparst werden. Das Formular ist nicht verfügbar, bis die Fehler behoben sind.",
+      "goToYaml": "Zur YAML-Ansicht"
+    }
+  },
+  "typeSelector": {
+    "use": "Verwenden:",
+    "customValueHint": "Tippen, um einen eigenen Wert einzugeben"
   }
 }

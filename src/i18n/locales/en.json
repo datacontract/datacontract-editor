@@ -9,7 +9,11 @@
     "roles": "Roles",
     "pricing": "Pricing",
     "sla": "SLA",
-    "customProperties": "Custom Properties"
+    "customProperties": "Custom Properties",
+    "footer": {
+      "documentation": "Documentation",
+      "createdBy": "Created by"
+    }
   },
   "overview": {
     "section": {
@@ -82,7 +86,10 @@
     "action": {
       "save": "Save",
       "cancel": "Cancel",
-      "delete": "Delete"
+      "delete": "Delete",
+      "new": "New",
+      "loadExample": "Load Example",
+      "open": "Open"
     },
     "confirm": {
       "delete": "Are you sure you want to delete this data contract? This action cannot be undone."
@@ -262,6 +269,19 @@
       "addProperty": "Add a property business_timestamp",
       "generateQualityRules": "Generate quality rules",
       "findAndFixIssues": "Find and fix issues"
+    },
+    "diff": {
+      "title": "Review AI Changes",
+      "validYaml": "Valid YAML",
+      "errorCount_one": "{{count}} error",
+      "errorCount_other": "{{count}} errors",
+      "warningCount_one": "{{count}} warning",
+      "warningCount_other": "{{count}} warnings",
+      "showDetails": "Show details",
+      "hideDetails": "Hide details",
+      "editHint": "Edit the right side directly to adjust changes",
+      "cancel": "Cancel",
+      "applyChanges": "Apply Changes"
     }
   },
   "diagram": {
@@ -1194,6 +1214,13 @@
       "dateIn": "In: {{date}}",
       "dateOut": "Out: {{date}}",
       "replacedBy": "Replaced by: {{username}}"
+    },
+    "customProperties": {
+      "heading": "Custom Properties",
+      "description": "This section covers other properties you may find in a data contract."
+    },
+    "contractHeader": {
+      "noData": "no data yet"
     }
   },
   "app": {
@@ -1212,12 +1239,68 @@
     "noChanges": {
       "title": "No changes",
       "description": "Your contract matches the last saved version."
+    },
+    "diff": {
+      "edit": "Edit",
+      "split": "Split",
+      "unified": "Unified"
     }
   },
   "errorBoundary": {
     "title": "Something went wrong",
     "unexpected": "An unexpected error occurred",
     "stackTrace": "Stack trace",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "form": {
+      "title": "Form Error",
+      "description": "The {{pageName}} form encountered an error and could not be displayed.",
+      "errorLabel": "Error:",
+      "unknownError": "Unknown form error",
+      "whatYouCanDo": "What you can do:",
+      "suggestion1": "Switch to YAML view to edit your data contract directly",
+      "suggestion2": "Check if your YAML structure is valid",
+      "suggestion3": "Try navigating to a different form page",
+      "suggestion4": "Your data is safe - the YAML has been preserved",
+      "retry": "Retry Form",
+      "editYaml": "Edit YAML Directly",
+      "developerDetails": "Developer Details"
+    },
+    "diagram": {
+      "title": "Diagram Rendering Error",
+      "description": "The diagram view encountered an error and could not be displayed.",
+      "errorLabel": "Error:",
+      "unknownError": "Unknown rendering error",
+      "suggestions": "Suggestions:",
+      "suggestion1": "Try using the Form view or YAML editor instead",
+      "suggestion2": "Check if your schema definitions are valid",
+      "suggestion3": "Verify property relationships are correctly formatted",
+      "retry": "Retry Diagram",
+      "switchToForm": "Switch to Form",
+      "switchToYaml": "Switch to YAML",
+      "developerDetails": "Developer Details"
+    },
+    "preview": {
+      "title": "Preview Error",
+      "description": "The preview could not be rendered. This usually happens when the YAML contains unexpected data structures.",
+      "errorLabel": "Error:",
+      "unknownError": "Unknown error",
+      "suggestions": "Suggestions:",
+      "suggestion1": "Check your YAML syntax for errors",
+      "suggestion2": "Verify data contract structure matches the ODCS schema",
+      "suggestion3": "Try editing the YAML directly to fix the issue",
+      "retry": "Retry Preview",
+      "developerDetails": "Developer Details"
+    }
+  },
+  "yaml": {
+    "parseError": {
+      "title": "YAML parse error",
+      "description": "The YAML contains syntax errors and cannot be parsed. The form is unavailable until the errors are fixed.",
+      "goToYaml": "Go to YAML view"
+    }
+  },
+  "typeSelector": {
+    "use": "Use:",
+    "customValueHint": "Type to enter a custom value"
   }
 }

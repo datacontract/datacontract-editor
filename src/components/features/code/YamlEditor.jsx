@@ -245,7 +245,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         }`}
                     >
-                        Edit
+                        {t('code.diff.edit')}
                     </button>
                     <button
                         onClick={() => setShowDiff(true)}
@@ -271,7 +271,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Split
+                            {t('code.diff.split')}
                         </button>
                         <button
                             onClick={() => setDiffRenderSideBySide(false)}
@@ -281,7 +281,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Unified
+                            {t('code.diff.unified')}
                         </button>
                     </div>
                 )}

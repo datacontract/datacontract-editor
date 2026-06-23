@@ -641,7 +641,7 @@ const Header = () => {
 										className="inline-flex items-center justify-center gap-1 md:gap-2 rounded-md bg-indigo-600 px-2 md:px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
 										onClick={handleSave}
 									>
-										Save
+										{t('header.action.save')}
 									</button>
 									{!isServerMode && (
 										<Menu as="div" className="relative inline-block">
@@ -667,7 +667,7 @@ const Header = () => {
 																	 viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
 															</svg>
-															New
+															{t('header.action.new')}
 														</button>
 													</MenuItem>
 													<MenuItem>
@@ -680,7 +680,7 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
 															</svg>
-															Load Example
+															{t('header.action.loadExample')}
 														</button>
 													</MenuItem>
 												</div>
@@ -695,7 +695,7 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"/>
 															</svg>
-															Open
+															{t('header.action.open')}
 														</button>
 													</MenuItem>
 													<MenuItem>
@@ -708,7 +708,7 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
 															</svg>
-															Save
+															{t('header.action.save')}
 														</button>
 													</MenuItem>
 												</div>

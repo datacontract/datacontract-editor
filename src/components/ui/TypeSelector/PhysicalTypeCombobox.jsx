@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 import { getGroupedPhysicalTypes } from './physicalTypeMappings';
 
@@ -28,6 +29,7 @@ const PhysicalTypeCombobox = ({
   placeholder = 'e.g., VARCHAR(255)',
   placeholderClassName = 'placeholder:text-gray-400',
 }) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   // Get grouped physical types for the server, filtered by logical type
@@ -103,7 +105,7 @@ const PhysicalTypeCombobox = ({
               className="group relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
             >
               <span className="flex items-center gap-2">
-                <span className="text-gray-400 group-data-[focus]:text-indigo-200">Use:</span>
+                <span className="text-gray-400 group-data-[focus]:text-indigo-200">{t('typeSelector.use')}</span>
                 <span className="block truncate font-medium">"{query}"</span>
               </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 text-indigo-600 group-data-[focus]:text-white [.group:not([data-selected])_&]:hidden">
@@ -140,7 +142,7 @@ const PhysicalTypeCombobox = ({
           {/* Show message when no options match */}
           {!hasMatchingTypes && query.length === 0 && (
             <div className="px-2 py-2 text-gray-500 text-xs">
-              Type to enter a custom value
+              {t('typeSelector.customValueHint')}
             </div>
           )}
         </ComboboxOptions>

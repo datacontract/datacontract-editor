@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import { DiffEditor } from '@monaco-editor/react';
 import { useEditorStore } from '../store.js';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Icons
 const XMarkIcon = ({ className }) => (
@@ -29,6 +30,7 @@ const CheckCircleIcon = ({ className }) => (
 );
 
 export default function AiDiffPreviewModal() {
+	const { t } = useTranslation();
 	const yaml = useEditorStore((state) => state.yaml);
 	const pendingAiChange = useEditorStore((state) => state.pendingAiChange);
 	const clearPendingAiChange = useEditorStore((state) => state.clearPendingAiChange);
@@ -123,7 +125,7 @@ export default function AiDiffPreviewModal() {
 				<div className="px-6 py-4 border-b border-gray-200 flex items-start justify-between bg-gray-50">
 					<div className="flex-1 min-w-0">
 						<h2 className="text-lg font-semibold text-gray-900">
-							Review AI Changes
+							{t('ai.diff.title')}
 						</h2>
 						{summary && (
 							<p className="text-sm text-gray-600 mt-1 truncate">{summary}</p>
@@ -144,18 +146,18 @@ export default function AiDiffPreviewModal() {
 							{criticalErrors.length > 0 ? (
 								<span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
 									<ExclamationCircleIcon className="h-4 w-4" />
-									{criticalErrors.length} error{criticalErrors.length !== 1 ? 's' : ''}
+									{t(criticalErrors.length === 1 ? 'ai.diff.errorCount_one' : 'ai.diff.errorCount_other', { count: criticalErrors.length })}
 								</span>
 							) : (
 								<span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
 									<CheckCircleIcon className="h-4 w-4" />
-									Valid YAML
+									{t('ai.diff.validYaml')}
 								</span>
 							)}
 							{warnings.length > 0 && (
 								<span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-600">
 									<ExclamationTriangleIcon className="h-4 w-4" />
-									{warnings.length} warning{warnings.length !== 1 ? 's' : ''}
+									{t(warnings.length === 1 ? 'ai.diff.warningCount_one' : 'ai.diff.warningCount_other', { count: warnings.length })}
 								</span>
 							)}
 						</div>
@@ -164,7 +166,7 @@ export default function AiDiffPreviewModal() {
 								onClick={() => setShowErrors(!showErrors)}
 								className="text-xs text-gray-500 hover:text-gray-700 underline"
 							>
-								{showErrors ? 'Hide details' : 'Show details'}
+								{showErrors ? t('ai.diff.hideDetails') : t('ai.diff.showDetails')}
 							</button>
 						)}
 					</div>
@@ -212,20 +214,20 @@ export default function AiDiffPreviewModal() {
 				{/* Footer */}
 				<div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
 					<p className="text-xs text-gray-500">
-						Edit the right side directly to adjust changes
+						{t('ai.diff.editHint')}
 					</p>
 					<div className="flex gap-3">
 						<button
 							onClick={handleCancel}
 							className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
 						>
-							Cancel
+							{t('ai.diff.cancel')}
 						</button>
 						<button
 							onClick={handleApply}
 							className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors bg-indigo-600 hover:bg-indigo-700"
 						>
-							Apply Changes
+							{t('ai.diff.applyChanges')}
 						</button>
 					</div>
 				</div>
