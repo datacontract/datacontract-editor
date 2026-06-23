@@ -1,12 +1,19 @@
 {
   "header": {
+    "view": {
+      "diagram": "Diagramm",
+      "form": "Formular",
+      "yaml": "YAML"
+    },
     "toolbar": {
       "preview": "Vorschau",
       "validation": "Validierung",
       "tests": "Tests"
     },
     "action": {
-      "save": "Speichern"
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
     },
     "confirm": {
       "delete": "Möchten Sie diesen Datenvertrag wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."

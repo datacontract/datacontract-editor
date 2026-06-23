@@ -1,12 +1,19 @@
 {
   "header": {
+    "view": {
+      "diagram": "Diagram",
+      "form": "Form",
+      "yaml": "YAML"
+    },
     "toolbar": {
       "preview": "Preview",
       "validation": "Validation",
       "tests": "Tests"
     },
     "action": {
-      "save": "Save"
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
     },
     "confirm": {
       "delete": "Are you sure you want to delete this data contract? This action cannot be undone."
