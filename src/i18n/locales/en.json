@@ -1,4 +1,16 @@
 {
+  "nav": {
+    "fundamentals": "Fundamentals",
+    "termsOfUse": "Terms of Use",
+    "schemas": "Schemas",
+    "servers": "Servers",
+    "team": "Team",
+    "support": "Support",
+    "roles": "Roles",
+    "pricing": "Pricing",
+    "sla": "SLA",
+    "customProperties": "Custom Properties"
+  },
   "header": {
     "view": {
       "diagram": "Diagram",
