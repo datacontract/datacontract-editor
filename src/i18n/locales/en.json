@@ -11,6 +11,26 @@
     "sla": "SLA",
     "customProperties": "Custom Properties"
   },
+  "overview": {
+    "section": {
+      "fundamentals": "Fundamentals",
+      "fundamentalsDescription": "Core metadata identifying the data contract, including name, version, status, and organizational context."
+    },
+    "name": { "label": "Name", "placeholder": "Enter document name", "tooltip": "The name of the data contract" },
+    "version": { "label": "Version", "tooltip": "Version number using semantic versioning" },
+    "id": { "label": "ID", "tooltip": "Unique identifier for this data contract" },
+    "status": { "label": "Status", "placeholder": "Select a status...", "tooltip": "Current status of the data contract" },
+    "tenant": { "label": "Tenant", "tooltip": "Tenant or organization this contract belongs to" },
+    "domain": { "label": "Domain", "placeholder": "Select a domain...", "tooltip": "Business domain or category of this data contract" },
+    "tags": { "label": "Tags", "placeholder": "Add a tag...", "tooltip": "Categorize your data contract with tags" }
+  },
+  "termsOfUse": {
+    "heading": "Terms of Use",
+    "description": "High level description of the dataset including purpose, usage guidelines, and limitations.",
+    "purpose": { "label": "Purpose", "tooltip": "Intended purpose for the provided data", "placeholder": "Describe the purpose of this data contract..." },
+    "usage": { "label": "Usage", "tooltip": "How this data should be used", "placeholder": "Describe how to use this data..." },
+    "limitations": { "label": "Limitations", "tooltip": "Technical, compliance, and legal limitations for data use", "placeholder": "Describe any limitations or constraints..." }
+  },
   "header": {
     "view": {
       "diagram": "Diagram",

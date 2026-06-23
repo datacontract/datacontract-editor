@@ -11,6 +11,26 @@
     "sla": "SLA",
     "customProperties": "Benutzerdefinierte Eigenschaften"
   },
+  "overview": {
+    "section": {
+      "fundamentals": "Grundlagen",
+      "fundamentalsDescription": "Kernmetadaten zur Identifikation des Data Contracts, darunter Name, Version, Status und organisatorischer Kontext."
+    },
+    "name": { "label": "Name", "placeholder": "Dokumentnamen eingeben", "tooltip": "Der Name des Data Contracts" },
+    "version": { "label": "Version", "tooltip": "Versionsnummer nach Semantic Versioning" },
+    "id": { "label": "ID", "tooltip": "Eindeutige Kennung für diesen Data Contract" },
+    "status": { "label": "Status", "placeholder": "Status auswählen...", "tooltip": "Aktueller Status des Data Contracts" },
+    "tenant": { "label": "Tenant", "tooltip": "Tenant oder Organisation, zu der dieser Data Contract gehört" },
+    "domain": { "label": "Domain", "placeholder": "Domain auswählen...", "tooltip": "Fachliche Domain oder Kategorie dieses Data Contracts" },
+    "tags": { "label": "Tags", "placeholder": "Tag hinzufügen...", "tooltip": "Kategorisiere deinen Data Contract mit Tags" }
+  },
+  "termsOfUse": {
+    "heading": "Nutzungsbedingungen",
+    "description": "Übergeordnete Beschreibung des Datensatzes einschließlich Zweck, Nutzungsrichtlinien und Einschränkungen.",
+    "purpose": { "label": "Zweck", "tooltip": "Vorgesehener Zweck der bereitgestellten Daten", "placeholder": "Beschreibe den Zweck dieses Data Contracts..." },
+    "usage": { "label": "Nutzung", "tooltip": "Wie diese Daten genutzt werden sollen", "placeholder": "Beschreibe, wie diese Daten zu nutzen sind..." },
+    "limitations": { "label": "Einschränkungen", "tooltip": "Technische, Compliance- und rechtliche Einschränkungen für die Datennutzung", "placeholder": "Beschreibe etwaige Einschränkungen oder Vorgaben..." }
+  },
   "header": {
     "view": {
       "diagram": "Diagramm",
