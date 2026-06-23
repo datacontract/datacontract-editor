@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {isSafeKey} from '../../utils/safeProperty.js';
 import {isSemanticAuthDef, resolveAuthDefType} from '../../utils/authDefTypes.js';
 import {Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
@@ -26,6 +27,7 @@ import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
 import {useActiveServerType} from '../../hooks/useActiveServerType.js';
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo }) => {
+  const { t } = useTranslation();
   const relationshipsSectionRef = useRef(null);
   const [relationshipsHighlight, setRelationshipsHighlight] = useState(false);
 
@@ -281,7 +283,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Metadata</span>
+              <span>{t('diagram.section.metadata')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -291,7 +293,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {!isNameHidden && (
                 <ValidatedInput
                   name="propertyName"
-                  label={nameOverride?.title || 'Property Name'}
+                  label={nameOverride?.title || t('diagram.field.propertyName.label')}
                   value={property.name || ''}
                   onChange={(e) => updateField('name', e.target.value)}
                   required={nameOverride?.required ?? true}
@@ -309,7 +311,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {!isBusinessNameHidden && (
                 <ValidatedInput
                   name="businessName"
-                  label={businessNameOverride?.title || 'Business Name'}
+                  label={businessNameOverride?.title || t('diagram.field.businessName.label')}
                   value={property.businessName || ''}
                   onChange={(e) => updateField('businessName', e.target.value)}
                   required={businessNameOverride?.required}
@@ -328,7 +330,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {!isPhysicalNameHidden && (
                 <ValidatedInput
                   name="physicalName"
-                  label={physicalNameOverride?.title || 'Physical Name'}
+                  label={physicalNameOverride?.title || t('diagram.field.physicalName.label')}
                   value={property.physicalName || ''}
                   onChange={(e) => updateField('physicalName', e.target.value)}
                   required={physicalNameOverride?.required}
@@ -350,7 +352,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   context="property"
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
-                  label={logicalTypeOverride?.title || "Logical Type"}
+                  label={logicalTypeOverride?.title || t('diagram.field.logicalType.label')}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   valueFromDefinition={definitionData?.logicalType}
                 />
@@ -367,8 +369,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     const items = property.items || {};
                     updateField('items', { ...items, logicalType: value || undefined });
                   }}
-                  label="Array Item Type"
-                  placeholder="Select item type..."
+                  label={t('diagram.field.arrayItemType.label')}
+                  placeholder={t('diagram.field.arrayItemType.placeholder')}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                 />
               )}
@@ -380,7 +382,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   onChange={(value) => updateField('physicalType', value || undefined)}
                   serverType={serverType}
                   logicalType={property.logicalType}
-                  label={physicalTypeOverride?.title || "Physical Type"}
+                  label={physicalTypeOverride?.title || t('diagram.field.physicalType.label')}
                   placeholder={definitionData?.physicalType || physicalTypeOverride?.placeholder || "e.g., VARCHAR(255)"}
                   placeholderClassName={definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
                 />
@@ -391,7 +393,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {!isDescriptionHidden && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-gray-700">Description</label>
+                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.description.label')}</label>
                     <SparkleButton
                       fieldName={`Description for "${property.name || 'property'}"`}
                       fieldPath="property.description"
@@ -405,7 +407,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     onChange={(e) => updateField('description', e.target.value)}
                     rows={3}
                     className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.description && !property.description ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.description || "Describe this property..."}
+                    placeholder={definitionData?.description || t('diagram.field.description.placeholder')}
                   />
                 </div>
               )}
@@ -414,7 +416,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Examples */}
               {!isExamplesHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Examples</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.examples.label')}</label>
                   <textarea
                     value={property.examples?.join('\n') || ''}
                     onChange={(e) => {
@@ -430,7 +432,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.examples && !property.examples ? 'placeholder:text-blue-400' : ''}`}
                     placeholder={definitionData?.examples ? definitionData.examples.join('\n') : "example1\nexample2\nexample3"}
                   />
-                  <p className="mt-1 text-xs text-gray-500">One example per line (all content preserved)</p>
+                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.examples.help')}</p>
                 </div>
               )}
               {renderCustomAfter('examples')}
@@ -446,14 +448,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>Semantics</span>
+                <span>{t('diagram.section.semantics')}</span>
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
               </DisclosureButton>
               <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Definition</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.semantics.definition')}</label>
                   {semanticDefinition ? (
                     <div className="space-y-2">
                       {/* Definition Link */}
@@ -478,7 +480,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                             {({ open }) => (
                               <>
                                 <PopoverButton className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none">
-                                  Show Details
+                                  {t('diagram.semantics.showDetails')}
                                 </PopoverButton>
                                 <PopoverPanel
                                   anchor="bottom end"
@@ -487,12 +489,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                                   {isFetchingDefinition ? (
                                     <div className="flex items-center gap-2 text-xs">
                                       <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></div>
-                                      <span className="text-gray-600">Loading definition...</span>
+                                      <span className="text-gray-600">{t('diagram.semantics.loading')}</span>
                                     </div>
                                   ) : !definitionData ? (
                                     <div className="text-xs text-gray-600">
-                                      <div>Unable to load definition data.</div>
-                                      <div className="mt-1 text-gray-400">Check console for details.</div>
+                                      <div>{t('diagram.semantics.loadError')}</div>
+                                      <div className="mt-1 text-gray-400">{t('diagram.semantics.loadErrorHint')}</div>
                                     </div>
                                   ) : (
                                     <>
@@ -508,7 +510,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                                               : et === 'shared_property'
                                                 ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
                                                 : 'bg-amber-50 text-amber-700 ring-amber-600/20';
-                                            return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${colors}`}>{et === 'shared_property' ? 'shared property' : et}</span>;
+                                            return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset flex-shrink-0 ${colors}`}>{et === 'shared_property' ? t('diagram.semantics.sharedProperty') : et}</span>;
                                           })()}
                                         </div>
                                         {definitionData.logicalType && (
@@ -529,7 +531,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                                         </div>
                                         {(() => {
                                           const owner = definitionData.customProperties?.find(p => p.property === 'owner')?.value;
-                                          return owner ? <span className="text-xs text-gray-500 flex-shrink-0">Owner: {owner}</span> : null;
+                                          return owner ? <span className="text-xs text-gray-500 flex-shrink-0">{t('diagram.semantics.owner')}: {owner}</span> : null;
                                         })()}
                                       </div>
 
@@ -566,7 +568,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                           onClick={removeSemanticDefinition}
                           className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                         >
-                          Remove
+                          {t('diagram.semantics.remove')}
                         </button>
                       </div>
                     </div>
@@ -575,7 +577,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       onClick={() => setIsDefinitionModalOpen(true)}
                       className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
-                      Find Definition
+                      {t('diagram.semantics.findDefinition')}
                     </button>
                   ) : null}
                 </div>
@@ -591,7 +593,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Logical Type Options</span>
+              <span>{t('diagram.section.logicalTypeOptions')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -601,18 +603,18 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {(property.logicalType === 'string') && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Format</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.format.label')}</label>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
                       className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.logicalTypeOptions?.format || "e.g., email, uri, uuid"}
+                      placeholder={definitionData?.logicalTypeOptions?.format || t('diagram.field.format.placeholderString')}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Min Length</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.minLength.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.minLength || ''}
@@ -622,7 +624,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Max Length</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.maxLength.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.maxLength || ''}
@@ -633,13 +635,13 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Pattern (Regex)</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.pattern.label')}</label>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.pattern || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, pattern: e.target.value || undefined })}
                       className={`w-full rounded-md border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono ${definitionData?.pattern && !property.logicalTypeOptions?.pattern ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.pattern || "Regular expression"}
+                      placeholder={definitionData?.pattern || t('diagram.field.pattern.placeholder')}
                     />
                   </div>
                 </>
@@ -653,8 +655,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     context="property"
                     value={property.logicalTypeOptions?.format || ''}
                     onChange={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: value || undefined })}
-                    label="Format"
-                    placeholder="Select integer format..."
+                    label={t('diagram.field.format.label')}
+                    placeholder={t('diagram.field.format.placeholderInteger')}
                     allowCustomValue={true}
                     fallbackOptions={['i8', 'i16', 'i32', 'i64', 'i128', 'u8', 'u16', 'u32', 'u64', 'u128']}
                   />
@@ -669,8 +671,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     context="property"
                     value={property.logicalTypeOptions?.format || ''}
                     onChange={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: value || undefined })}
-                    label="Format"
-                    placeholder="Select number format..."
+                    label={t('diagram.field.format.label')}
+                    placeholder={t('diagram.field.format.placeholderNumber')}
                     allowCustomValue={true}
                     fallbackOptions={['f32', 'f64']}
                   />
@@ -682,7 +684,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Minimum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.minimum.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.minimum ?? ''}
@@ -692,7 +694,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Maximum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.maximum.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.maximum ?? ''}
@@ -704,7 +706,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Exclusive Minimum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.exclusiveMinimum.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.exclusiveMinimum ?? ''}
@@ -714,7 +716,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Exclusive Maximum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.exclusiveMaximum.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.exclusiveMaximum ?? ''}
@@ -725,14 +727,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Multiple Of</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.multipleOf.label')}</label>
                     <input
                       type="number"
                       value={property.logicalTypeOptions?.multipleOf ?? ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, multipleOf: e.target.value ? parseFloat(e.target.value) : undefined })}
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                       step="any"
-                      placeholder="Value must be a multiple of this number"
+                      placeholder={t('diagram.field.multipleOf.placeholder')}
                     />
                   </div>
                 </>
@@ -742,35 +744,35 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {(property.logicalType === 'date' || property.logicalType === 'timestamp' || property.logicalType === 'time') && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Format</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.format.label')}</label>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
                       onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: e.target.value || undefined })}
                       className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.logicalTypeOptions?.format && !property.logicalTypeOptions?.format ? 'placeholder:text-blue-400' : ''}`}
-                      placeholder={definitionData?.logicalTypeOptions?.format || "e.g., yyyy-MM-dd, ISO 8601"}
+                      placeholder={definitionData?.logicalTypeOptions?.format || t('diagram.field.format.placeholderDate')}
                     />
-                    <p className="mt-1 text-xs text-gray-500">JDK DateTimeFormatter pattern</p>
+                    <p className="mt-1 text-xs text-gray-500">{t('diagram.field.format.dateHelp')}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Minimum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.minimum.label')}</label>
                       <input
                         type="text"
                         value={property.logicalTypeOptions?.minimum || ''}
                         onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, minimum: e.target.value || undefined })}
                         className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                        placeholder="Earliest allowed value"
+                        placeholder={t('diagram.field.minimum.datePlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Maximum</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.maximum.label')}</label>
                       <input
                         type="text"
                         value={property.logicalTypeOptions?.maximum || ''}
                         onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, maximum: e.target.value || undefined })}
                         className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                        placeholder="Latest allowed value"
+                        placeholder={t('diagram.field.maximum.datePlaceholder')}
                       />
                     </div>
                   </div>
@@ -782,7 +784,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Min Items</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.minItems.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.minItems || ''}
@@ -792,7 +794,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Max Items</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.maxItems.label')}</label>
                       <input
                         type="number"
                         value={property.logicalTypeOptions?.maxItems || ''}
@@ -803,7 +805,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="uniqueItems" className="block text-xs font-medium text-gray-700 mb-1">Unique Items</label>
+                    <label htmlFor="uniqueItems" className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.uniqueItems.label')}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="uniqueItems"
@@ -814,9 +816,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         }}
                         className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
                       >
-                        <option value="">Not set</option>
-                        <option value="false">False</option>
-                        <option value="true">True</option>
+                        <option value="">{t('diagram.option.notSet')}</option>
+                        <option value="false">{t('diagram.option.false')}</option>
+                        <option value="true">{t('diagram.option.true')}</option>
                       </select>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -829,7 +831,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
 
               {/* Message when no type-specific constraints available */}
               {!['string', 'number', 'integer', 'date', 'timestamp', 'time', 'array'].includes(property.logicalType || 'string') && (
-                <p className="text-sm text-gray-500 italic">No type-specific constraints available for {property.logicalType || 'this type'}.</p>
+                <p className="text-sm text-gray-500 italic">{t('diagram.noTypeConstraints', { type: property.logicalType || t('diagram.thisType') })}</p>
               )}
             </DisclosurePanel>
           </>
@@ -842,7 +844,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Constraints</span>
+              <span>{t('diagram.section.constraints')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -852,7 +854,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 {/* Required */}
                 {!isRequiredHidden && (
                   <div>
-                    <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">{requiredOverride?.title || 'Required'}</label>
+                    <label htmlFor="required" className="block text-xs font-medium text-gray-700 mb-1">{requiredOverride?.title || t('diagram.field.required.label')}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="required"
@@ -863,9 +865,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         }}
                         className={`col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs ${property.required === undefined && typeof definitionData?.required === 'boolean' ? 'text-blue-400' : 'text-gray-900'}`}
                       >
-                        <option value="">{typeof definitionData?.required === 'boolean' ? `Not set (semantic: ${definitionData.required ? 'True' : 'False'})` : 'Not set'}</option>
-                        <option value="false">False</option>
-                        <option value="true">True</option>
+                        <option value="">{typeof definitionData?.required === 'boolean' ? t('diagram.option.notSetSemantic', { value: definitionData.required ? t('diagram.option.true') : t('diagram.option.false') }) : t('diagram.option.notSet')}</option>
+                        <option value="false">{t('diagram.option.false')}</option>
+                        <option value="true">{t('diagram.option.true')}</option>
                       </select>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -878,7 +880,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 {/* Unique */}
                 {!isUniqueHidden && (
                   <div>
-                    <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">{uniqueOverride?.title || 'Unique'}</label>
+                    <label htmlFor="unique" className="block text-xs font-medium text-gray-700 mb-1">{uniqueOverride?.title || t('diagram.field.unique.label')}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="unique"
@@ -889,9 +891,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         }}
                         className={`col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs ${property.unique === undefined && typeof definitionData?.unique === 'boolean' ? 'text-blue-400' : 'text-gray-900'}`}
                       >
-                        <option value="">{typeof definitionData?.unique === 'boolean' ? `Not set (semantic: ${definitionData.unique ? 'True' : 'False'})` : 'Not set'}</option>
-                        <option value="false">False</option>
-                        <option value="true">True</option>
+                        <option value="">{typeof definitionData?.unique === 'boolean' ? t('diagram.option.notSetSemantic', { value: definitionData.unique ? t('diagram.option.true') : t('diagram.option.false') }) : t('diagram.option.notSet')}</option>
+                        <option value="false">{t('diagram.option.false')}</option>
+                        <option value="true">{t('diagram.option.true')}</option>
                       </select>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -904,7 +906,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 {/* Primary Key */}
                 {!isPrimaryKeyHidden && (
                   <div>
-                    <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">{primaryKeyOverride?.title || 'Primary Key'}</label>
+                    <label htmlFor="primaryKey" className="block text-xs font-medium text-gray-700 mb-1">{primaryKeyOverride?.title || t('diagram.field.primaryKey.label')}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="primaryKey"
@@ -915,9 +917,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         }}
                         className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
                       >
-                        <option value="">Not set</option>
-                        <option value="false">False</option>
-                        <option value="true">True</option>
+                        <option value="">{t('diagram.option.notSet')}</option>
+                        <option value="false">{t('diagram.option.false')}</option>
+                        <option value="true">{t('diagram.option.true')}</option>
                       </select>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -930,7 +932,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 {/* Partitioned */}
                 {!isPartitionedHidden && (
                   <div>
-                    <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">{partitionedOverride?.title || 'Partitioned'}</label>
+                    <label htmlFor="partitioned" className="block text-xs font-medium text-gray-700 mb-1">{partitionedOverride?.title || t('diagram.field.partitioned.label')}</label>
                     <div className="grid grid-cols-1">
                       <select
                         id="partitioned"
@@ -941,9 +943,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         }}
                         className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
                       >
-                        <option value="">Not set</option>
-                        <option value="false">False</option>
-                        <option value="true">True</option>
+                        <option value="">{t('diagram.option.notSet')}</option>
+                        <option value="false">{t('diagram.option.false')}</option>
+                        <option value="true">{t('diagram.option.true')}</option>
                       </select>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -958,7 +960,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {property.primaryKey && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Primary Key Position
+                    {t('diagram.field.primaryKeyPosition.label')}
                   </label>
                   <input
                     type="number"
@@ -969,7 +971,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     min="-1"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Ordinal position in composite primary key (starts at 1, or -1 for single key)
+                    {t('diagram.field.primaryKeyPosition.help')}
                   </p>
                 </div>
               )}
@@ -978,7 +980,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {property.partitioned && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Partition Key Position
+                    {t('diagram.field.partitionKeyPosition.label')}
                   </label>
                   <input
                     type="number"
@@ -989,7 +991,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     min="-1"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Ordinal position in partition hierarchy (starts at 1, or -1 for single partition)
+                    {t('diagram.field.partitionKeyPosition.help')}
                   </p>
                 </div>
               )}
@@ -1008,7 +1010,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Classification & Security</span>
+              <span>{t('diagram.section.classificationSecurity')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1019,7 +1021,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 classificationOverride?.enum ? (
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      {classificationOverride?.title || 'Classification'}
+                      {classificationOverride?.title || t('diagram.field.classification.label')}
                       {classificationOverride?.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
                     <div className="grid grid-cols-1">
@@ -1028,7 +1030,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                         onChange={(e) => updateField('classification', e.target.value || undefined)}
                         className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
                       >
-                        <option value="">{classificationOverride?.placeholder || 'Select...'}</option>
+                        <option value="">{classificationOverride?.placeholder || t('diagram.option.select')}</option>
                         {classificationOverride.enum.map((opt) => (
                           <option key={typeof opt === 'string' ? opt : opt.value} value={typeof opt === 'string' ? opt : opt.value}>
                             {typeof opt === 'string' ? opt : (opt.label || opt.title)}
@@ -1044,7 +1046,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 ) : (
                   <ValidatedInput
                     name="classification"
-                    label={classificationOverride?.title || 'Classification'}
+                    label={classificationOverride?.title || t('diagram.field.classification.label')}
                     value={property.classification || ''}
                     onChange={(e) => updateField('classification', e.target.value || undefined)}
                     required={classificationOverride?.required}
@@ -1064,7 +1066,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Critical Data Element */}
               {!isCriticalDataElementHidden && (
                 <div>
-                  <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">{criticalDataElementOverride?.title || 'Critical Data Element'}</label>
+                  <label htmlFor="criticalDataElement" className="block text-xs font-medium text-gray-700 mb-1">{criticalDataElementOverride?.title || t('diagram.field.criticalDataElement.label')}</label>
                   <div className="grid grid-cols-1">
                     <select
                       id="criticalDataElement"
@@ -1075,9 +1077,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                       }}
                       className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
                     >
-                      <option value="">Not set</option>
-                      <option value="false">False</option>
-                      <option value="true">True</option>
+                      <option value="">{t('diagram.option.notSet')}</option>
+                      <option value="false">{t('diagram.option.false')}</option>
+                      <option value="true">{t('diagram.option.true')}</option>
                     </select>
                     <ChevronDownIcon
                       aria-hidden="true"
@@ -1092,7 +1094,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {!isEncryptedNameHidden && (
                 <ValidatedInput
                   name="encryptedName"
-                  label={encryptedNameOverride?.title || 'Encrypted Name'}
+                  label={encryptedNameOverride?.title || t('diagram.field.encryptedName.label')}
                   value={property.encryptedName || ''}
                   onChange={(e) => updateField('encryptedName', e.target.value || undefined)}
                   required={encryptedNameOverride?.required}
@@ -1110,10 +1112,10 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Tags */}
               <div>
                 <TagsInput
-                  label="Tags"
+                  label={t('diagram.field.tags.label')}
                   value={property.tags || []}
                   onChange={(value) => updateField('tags', value)}
-                  placeholder="Add a tag..."
+                  placeholder={t('diagram.field.tags.placeholder')}
                 />
               </div>
               {renderCustomAfter('tags')}
@@ -1128,7 +1130,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Transformations</span>
+              <span>{t('diagram.section.transformations')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1137,11 +1139,11 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Source Objects */}
               {!isTransformSourceObjectsHidden && (
                 <ArrayInput
-                  label={transformSourceObjectsOverride?.title || "Transform Source Objects"}
+                  label={transformSourceObjectsOverride?.title || t('diagram.field.transformSourceObjects.label')}
                   value={property.transformSourceObjects}
                   onChange={(value) => updateField('transformSourceObjects', value)}
                   placeholder={transformSourceObjectsOverride?.placeholder || "source_table_name"}
-                  helpText={transformSourceObjectsOverride?.description || "List of source tables/objects used in transformations"}
+                  helpText={transformSourceObjectsOverride?.description || t('diagram.field.transformSourceObjects.help')}
                 />
               )}
               {renderCustomAfter('transformSourceObjects')}
@@ -1149,15 +1151,15 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Logic */}
               {!isTransformLogicHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Transform Logic</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.transformLogic.label')}</label>
                   <textarea
                     value={property.transformLogic || ''}
                     onChange={(e) => updateField('transformLogic', e.target.value || undefined)}
                     rows={4}
                     className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono ${definitionData?.transformLogic && !property.transformLogic ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.transformLogic || "SQL or transformation code..."}
+                    placeholder={definitionData?.transformLogic || t('diagram.field.transformLogic.placeholder')}
                   />
-                  <p className="mt-1 text-xs text-gray-500">Technical transformation implementation (SQL, etc.)</p>
+                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.transformLogic.help')}</p>
                 </div>
               )}
               {renderCustomAfter('transformLogic')}
@@ -1165,15 +1167,15 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Description */}
               {!isTransformDescriptionHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Transform Description</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.transformDescription.label')}</label>
                   <textarea
                     value={property.transformDescription || ''}
                     onChange={(e) => updateField('transformDescription', e.target.value || undefined)}
                     rows={3}
                     className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.transformDescription && !property.transformDescription ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.transformDescription || "Business-friendly explanation of transformation..."}
+                    placeholder={definitionData?.transformDescription || t('diagram.field.transformDescription.placeholder')}
                   />
-                  <p className="mt-1 text-xs text-gray-500">Non-technical description of how field is derived</p>
+                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.transformDescription.help')}</p>
                 </div>
               )}
               {renderCustomAfter('transformDescription')}
@@ -1188,7 +1190,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Data Quality</span>
+              <span>{t('diagram.section.dataQuality')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1210,7 +1212,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Authoritative Definitions</span>
+              <span>{t('diagram.section.authoritativeDefinitions')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1243,7 +1245,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>Relationships</span>
+                <span>{t('diagram.section.relationships')}</span>
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
@@ -1296,7 +1298,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>Custom Properties</span>
+              <span>{t('diagram.section.customProperties')}</span>
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1323,7 +1325,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Delete Property
+            {t('diagram.property.deleteProperty')}
           </button>
         </div>
       )}

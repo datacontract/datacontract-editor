@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 
 const SchemasEditor = () => {
+  const { t } = useTranslation();
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const navigate = useNavigate();
@@ -66,8 +68,8 @@ const SchemasEditor = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div className="relative">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Schemas</h3>
-            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Data models describing the structure, fields, and types of the datasets in this contract.</p>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('schemas.heading')}</h3>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">{t('schemas.description')}</p>
             <button
               onClick={addSchema}
               className="absolute top-0 right-0 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -75,7 +77,7 @@ const SchemasEditor = () => {
               <svg className="-ml-0.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
               </svg>
-              Add Schema
+              {t('schemas.add')}
             </button>
           </div>
 
@@ -84,8 +86,8 @@ const SchemasEditor = () => {
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No schemas</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating a new schema.</p>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('schemas.empty.title')}</h3>
+              <p className="mt-1 text-sm text-gray-500">{t('schemas.empty.description')}</p>
               <div className="mt-6">
                 <button
                   onClick={addSchema}
@@ -94,7 +96,7 @@ const SchemasEditor = () => {
                   <svg className="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                   </svg>
-                  New Schema
+                  {t('schemas.empty.add')}
                 </button>
               </div>
             </div>
@@ -109,7 +111,7 @@ const SchemasEditor = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h4 className="text-sm font-semibold text-gray-900">
-                        {schema.businessName || schema.name || `Schema ${index + 1}`}
+                        {schema.businessName || schema.name || t('schemas.item.fallbackName', { index: index + 1 })}
                       </h4>
                       {schema.description && (
                         <p className="mt-1 text-xs text-gray-500 line-clamp-2">{schema.description}</p>
@@ -117,17 +119,17 @@ const SchemasEditor = () => {
                       <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
                         {schema.name && (
                           <span>
-                            <span className="font-medium">Name:</span> {schema.name}
+                            <span className="font-medium">{t('schemas.item.name')}</span> {schema.name}
                           </span>
                         )}
                         {schema.type && (
                           <span>
-                            <span className="font-medium">Type:</span> {schema.type}
+                            <span className="font-medium">{t('schemas.item.type')}</span> {schema.type}
                           </span>
                         )}
                         {schema.properties && schema.properties.length > 0 && (
                           <span>
-                            <span className="font-medium">Properties:</span> {schema.properties.length}
+                            <span className="font-medium">{t('schemas.item.properties')}</span> {schema.properties.length}
                           </span>
                         )}
                       </div>

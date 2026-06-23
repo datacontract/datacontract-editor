@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import { useShallow } from 'zustand/react/shallow';
 import { RelationshipCard, useSchemaPropertySuggestions } from './RelationshipEditor.jsx';
@@ -28,6 +29,7 @@ const RELATIONSHIP_TYPE_OPTIONS = ['foreignKey'];
  * @param {number} props.relationshipIndex - index within source.relationships
  */
 const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relationshipIndex }) => {
+  const { t } = useTranslation();
   const getValue = useEditorStore(useShallow((state) => state.getValue));
   const setValue = useEditorStore(useShallow((state) => state.setValue));
 
@@ -107,7 +109,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
     return <div className="hidden" />;
   }
 
-  const sourceLabel = sourceProperty?.name || 'property';
+  const sourceLabel = sourceProperty?.name || t('relationship.drawer.propertyFallback');
 
   return (
     <div
@@ -123,7 +125,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
       <div
         onMouseDown={handleMouseDown}
         className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors z-10"
-        title="Drag to resize"
+        title={t('relationship.drawer.resize')}
       />
 
       <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
@@ -131,7 +133,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
         <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <h2 className="text-sm font-semibold text-gray-900 truncate">
-              Edit Relationship on <span className="font-mono">{sourceLabel}</span>
+              {t('relationship.drawer.editOn')} <span className="font-mono">{sourceLabel}</span>
             </h2>
             <div className="ml-2 flex h-6 items-center">
               <button
@@ -140,7 +142,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
                 className="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <span className="absolute -inset-2.5" />
-                <span className="sr-only">Close panel</span>
+                <span className="sr-only">{t('relationship.drawer.close')}</span>
                 <XIcon aria-hidden="true" className="size-5" />
               </button>
             </div>

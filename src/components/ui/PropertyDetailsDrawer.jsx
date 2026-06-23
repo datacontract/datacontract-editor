@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import PropertyDetailsPanel from '../diagram/PropertyDetailsPanel.jsx';
 import {useEditorStore} from "../../store.js";
 import {useShallow} from "zustand/react/shallow";
@@ -28,6 +29,7 @@ const MAX_WIDTH_PERCENT = 0.8;
  * @param {React.Ref} ref - Forwarded ref for click outside detection
  */
 const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, propertyPath, focusSection, focusNonce, focusRelationshipTo, ref }) {
+	const { t } = useTranslation();
 	const property = useEditorStore(useShallow((state) => state.getValue(propertyPath)));
 	const getValue = useEditorStore(useShallow((state) => state.getValue));
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
@@ -122,7 +124,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
       <div
         onMouseDown={handleMouseDown}
         className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors z-10"
-        title="Drag to resize"
+        title={t('customProperty.propertyDrawer.resize')}
       />
 
       <div className="flex h-full flex-col overflow-y-auto bg-white shadow-xl">
@@ -130,7 +132,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
         <div className="bg-gray-50 px-3 py-3 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <h2 className="text-sm font-semibold text-gray-900 truncate">
-              {property.name ? `Edit Property: ${property.name}` : 'Edit Property'}
+              {property.name ? t('customProperty.propertyDrawer.editNamed', { name: property.name }) : t('customProperty.propertyDrawer.edit')}
             </h2>
             <div className="ml-2 flex h-6 items-center">
               <button
@@ -139,7 +141,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
                 className="relative rounded-md bg-gray-50 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <span className="absolute -inset-2.5" />
-                <span className="sr-only">Close panel</span>
+                <span className="sr-only">{t('customProperty.propertyDrawer.close')}</span>
                 <XIcon aria-hidden="true" className="size-5" />
               </button>
             </div>

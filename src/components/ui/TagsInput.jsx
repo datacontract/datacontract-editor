@@ -1,18 +1,22 @@
 import {useMemo, useRef, useState} from 'react';
+import { useTranslation } from 'react-i18next';
 import {Combobox, ComboboxInput, ComboboxOption, ComboboxOptions} from '@headlessui/react';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
 
 const TagsInput = ({
-                     label = "Tags",
+                     label,
                      value = [],
                      onChange,
                      managedTags = [],
                      allowUnmanagedTags = true,
-                     placeholder = "Add a tag...",
+                     placeholder,
                      tooltip,
                      className = ''
                    }) => {
+  const { t } = useTranslation();
+  const resolvedLabel = label === undefined ? t('tags.label') : label;
+  const resolvedPlaceholder = placeholder === undefined ? t('tags.placeholder') : placeholder;
   const [newTag, setNewTag] = useState('');
   const inputRef = useRef(null);
 
@@ -57,10 +61,10 @@ const TagsInput = ({
 
   return (
     <div className={className}>
-      {label && (
+      {resolvedLabel && (
         <div className="flex items-center gap-1 mb-1">
           <label className="block text-xs font-medium leading-4 text-gray-900">
-            {label}
+            {resolvedLabel}
           </label>
           {tooltip && (
             <Tooltip content={tooltip}>
@@ -81,7 +85,7 @@ const TagsInput = ({
                 <span
                   key={index}
                   className={"tag-element m-0.5 badge--gray bg-yellow-50 text-yellow-700"}
-                  title="This tag is unmanaged."
+                  title={t('tags.unmanaged')}
                 >
                   <svg className="h-4 w-4 text-yellow-400 mr-1" viewBox="0 0 20 20" fill="currentColor"
                        aria-hidden="true">
@@ -94,9 +98,9 @@ const TagsInput = ({
                     type="button"
                     onClick={() => handleRemove(index)}
                     className="ml-0.5 hover:text-red-600 transition-colors"
-                    aria-label={`Remove ${existingTag}`}
+                    aria-label={t('tags.removeTag', { tag: existingTag })}
                   >
-                    <span className="sr-only">Remove</span>
+                    <span className="sr-only">{t('tags.remove')}</span>
                     <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                       <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
                     </svg>
@@ -117,9 +121,9 @@ const TagsInput = ({
                     type="button"
                     onClick={() => handleRemove(index)}
                     className="ml-0.5 hover:text-red-600 transition-colors"
-                    aria-label={`Remove ${existingTag}`}
+                    aria-label={t('tags.removeTag', { tag: existingTag })}
                   >
-                    <span className="sr-only">Remove</span>
+                    <span className="sr-only">{t('tags.remove')}</span>
                     <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
                       <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
                     </svg>
@@ -147,7 +151,7 @@ const TagsInput = ({
                     }
                   });
                 }}
-                placeholder={placeholder}
+                placeholder={resolvedPlaceholder}
                 className="w-full rounded-md bg-white border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
               />
               {managedTagsMap.size > 0 && <ComboboxOptions
@@ -165,7 +169,7 @@ const TagsInput = ({
                 ) : (
                   newTag ? (
                     doesTagExist(newTag) ? (
-                      <div className="px-3 py-2 text-gray-400">Tag '{newTag.trim()}' already exists</div>
+                      <div className="px-3 py-2 text-gray-400">{t('tags.alreadyExists', { tag: newTag.trim() })}</div>
                     ) : (
                       canTagBeAdded(newTag) ? (
                         <ComboboxOption
@@ -173,10 +177,10 @@ const TagsInput = ({
                           value={newTag.trim()}
                           className="cursor-default px-3 py-2 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white"
                         >
-                          Add tag '{newTag.trim()}'
+                          {t('tags.addTag', { tag: newTag.trim() })}
                         </ComboboxOption>
                       ) : (
-                        <div className="px-3 py-2 text-gray-400">According to the organization settings, only managed tags are permitted.</div>
+                        <div className="px-3 py-2 text-gray-400">{t('tags.managedOnly')}</div>
                       )
                     )
                   ) : null)}
@@ -189,7 +193,7 @@ const TagsInput = ({
             disabled={!canTagBeAdded(newTag)}
             className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 transition-colors"
           >
-            Add
+            {t('tags.add')}
           </button>
         </div>
       </div>

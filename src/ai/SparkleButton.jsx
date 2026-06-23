@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../store.js';
 import { useAiSuggestion } from './useAiSuggestion.js';
 import Tooltip from '../components/ui/Tooltip.jsx';
@@ -29,6 +30,7 @@ export default function SparkleButton({
 	placeholder,
 	className = '',
 }) {
+	const { t } = useTranslation();
 	const editorConfig = useEditorStore((state) => state.editorConfig);
 	const aiEnabled = editorConfig?.ai?.enabled;
 	const [showError, setShowError] = useState(false);
@@ -87,7 +89,7 @@ export default function SparkleButton({
 			{/* Status indicator */}
 			{isLoading && (
 				<span className="text-xs text-indigo-500 animate-pulse whitespace-nowrap">
-					Generating...
+					{t('ai.status.generating')}
 				</span>
 			)}
 			{showError && !isLoading && (
@@ -98,12 +100,12 @@ export default function SparkleButton({
 
 			{/* Undo button */}
 			{previousValue !== null && !isLoading && (
-				<Tooltip content="Undo AI suggestion">
+				<Tooltip content={t('ai.suggestion.undo')}>
 					<button
 						type="button"
 						onClick={handleUndo}
 						className="inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-						aria-label="Undo AI suggestion"
+						aria-label={t('ai.suggestion.undo')}
 					>
 						<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
 							<path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -113,7 +115,7 @@ export default function SparkleButton({
 			)}
 
 			{/* Generate button */}
-			<Tooltip content={error && !showError ? error : `Suggest ${fieldName} with AI`}>
+			<Tooltip content={error && !showError ? error : t('ai.suggestion.suggestField', { field: fieldName })}>
 				<button
 					type="button"
 					onClick={handleClick}
@@ -121,7 +123,7 @@ export default function SparkleButton({
 					className={`inline-flex items-center justify-center p-1 rounded-md transition-colors
             ${isLoading ? 'text-indigo-400 cursor-wait' : 'text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50'}
             ${error && !isLoading ? 'text-red-400 hover:text-red-600' : ''}`}
-					aria-label={`Suggest ${fieldName} with AI`}
+					aria-label={t('ai.suggestion.suggestField', { field: fieldName })}
 				>
 					<SparklesIcon className={`h-4 w-4 ${isLoading ? 'animate-pulse' : ''}`} />
 				</button>

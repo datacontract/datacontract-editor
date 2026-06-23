@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../store.js';
 import AiChat from './AiChat.jsx';
 
@@ -34,6 +35,7 @@ const SparklesIcon = ({ className }) => (
  * Includes the panel header and chat content (merged from AiPanel)
  */
 export default function AiSidebar() {
+	const { t } = useTranslation();
 	const isAiPanelOpen = useEditorStore((state) => state.isAiPanelOpen);
 	const closeAiPanel = useEditorStore((state) => state.closeAiPanel);
 	const resetAiChat = useEditorStore((state) => state.resetAiChat);
@@ -88,7 +90,7 @@ export default function AiSidebar() {
 			<div
 				onMouseDown={handleMouseDown}
 				className="relative flex-shrink-0 cursor-col-resize w-px h-full bg-gray-300 hover:bg-blue-400 transition-colors"
-				title="Drag to resize"
+				title={t('ai.sidebar.resize')}
 			>
 				{/* Invisible wider hit area */}
 				<div className="absolute inset-y-0 -left-1 -right-1" />
@@ -100,7 +102,7 @@ export default function AiSidebar() {
 						<div className="flex items-center gap-2">
 							<SparklesIcon className="h-5 w-5 text-white" />
 							<h2 className="text-sm font-semibold text-white">
-								Data Contract Assistant
+								{t('ai.assistant.title')}
 							</h2>
 						</div>
 						<div className="flex items-center gap-1">
@@ -109,9 +111,9 @@ export default function AiSidebar() {
 									type="button"
 									onClick={resetAiChat}
 									className="rounded-md text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white p-1"
-									title="New conversation"
+									title={t('ai.sidebar.newConversation')}
 								>
-									<span className="sr-only">New conversation</span>
+									<span className="sr-only">{t('ai.sidebar.newConversation')}</span>
 									<PlusIcon className="h-5 w-5" />
 								</button>
 							)}
@@ -119,9 +121,9 @@ export default function AiSidebar() {
 								type="button"
 								onClick={closeAiPanel}
 								className="rounded-md text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white p-1"
-								title="Close panel"
+								title={t('ai.sidebar.closePanel')}
 							>
-								<span className="sr-only">Close panel</span>
+								<span className="sr-only">{t('ai.sidebar.closePanel')}</span>
 								<XIcon className="h-5 w-5" />
 							</button>
 						</div>

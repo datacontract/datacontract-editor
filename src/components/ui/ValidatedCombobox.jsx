@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import Combobox from './Combobox.jsx';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon.jsx';
@@ -16,7 +17,7 @@ const ValidatedCombobox = forwardRef(({
   options = [],
   required = false,
   tooltip,
-  placeholder = "Select an option...",
+  placeholder,
   className = '',
   externalErrors = [],
   displayValue,
@@ -33,6 +34,7 @@ const ValidatedCombobox = forwardRef(({
   skipInternalValidation = false,
   ...props
 }, ref) => {
+  const { t } = useTranslation();
 
   // Internal validation - check if required field is empty
   const hasInternalError = !skipInternalValidation && required && (!value || value.trim === '' || (typeof value === 'string' && value.trim() === ''));
@@ -49,10 +51,10 @@ const ValidatedCombobox = forwardRef(({
   // Prepare error messages
   const errorMessages = [];
   if (hasInternalError) {
-    errorMessages.push('This field is required');
+    errorMessages.push(t('input.required'));
   }
   if (hasPatternError) {
-    errorMessages.push(patternMessage || `Value must match pattern: ${pattern}`);
+    errorMessages.push(patternMessage || t('input.patternMismatch', { pattern }));
   }
   errorMessages.push(...externalErrors);
 
@@ -70,7 +72,7 @@ const ValidatedCombobox = forwardRef(({
           </Tooltip>
         )}
         {required && (
-          <span className="ml-auto text-xs leading-4 text-gray-500">Required</span>
+          <span className="ml-auto text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
         )}
       </div>
       <Combobox
@@ -78,7 +80,7 @@ const ValidatedCombobox = forwardRef(({
         options={options}
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
+        placeholder={placeholder || t('input.selectOption')}
         displayValue={displayValue}
         renderOption={renderOption}
         renderSelectedIcon={renderSelectedIcon}

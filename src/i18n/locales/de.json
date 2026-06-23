@@ -201,5 +201,836 @@
       "placeholder": "Menschenlesbare Erläuterung..."
     },
     "add": "+ SLA hinzufügen"
+  },
+  "ai": {
+    "fab": {
+      "title": "KI-Assistent"
+    },
+    "sidebar": {
+      "resize": "Zum Anpassen ziehen",
+      "newConversation": "Neue Unterhaltung",
+      "closePanel": "Panel schließen"
+    },
+    "assistant": {
+      "title": "Data Contract Assistent"
+    },
+    "status": {
+      "generating": "Generiert...",
+      "thinking": "Denkt nach...",
+      "callingTool": "Ruft {{tool}} auf...",
+      "callingTools": "Ruft {{count}} Tools auf..."
+    },
+    "suggestion": {
+      "undo": "KI-Vorschlag rückgängig machen",
+      "suggestField": "{{field}} mit KI vorschlagen"
+    },
+    "error": {
+      "notConfiguredInline": "KI nicht konfiguriert. Bitte setze endpoint und apiKey in der KI-Konfiguration."
+    },
+    "toolCall": {
+      "defaultSummary": "Von der KI vorgeschlagene Änderungen",
+      "contractUpdate": "Contract-Aktualisierung",
+      "undo": "Rückgängig"
+    },
+    "notConfigured": {
+      "title": "KI-Assistent nicht konfiguriert",
+      "anthropicHint": "Konfiguriere einen Anthropic-API-Endpunkt.",
+      "openaiHint": "Konfiguriere einen OpenAI-kompatiblen Endpunkt."
+    },
+    "empty": {
+      "description": "Stelle Fragen zu deinem Data Contract oder bitte um Änderungen."
+    },
+    "input": {
+      "placeholder": "Frag zu deinem Data Contract...",
+      "loading": "Lädt..."
+    },
+    "prompts": {
+      "guideMe": "Führ mich",
+      "createFromExample": "Erstelle einen Data Contract für diese Beispieldaten: ",
+      "addProperty": "Füge eine Property business_timestamp hinzu",
+      "generateQualityRules": "Generiere Quality-Regeln",
+      "findAndFixIssues": "Finde und behebe Probleme"
+    }
+  },
+  "diagram": {
+    "clickToEdit": "Zum Bearbeiten klicken",
+    "confirmDeleteProperty": "Möchtest du diese Eigenschaft wirklich löschen?",
+    "layingOut": "Wird angeordnet…",
+    "noTypeConstraints": "Für {{type}} sind keine typspezifischen Einschränkungen verfügbar.",
+    "thisType": "diesen Typ",
+    "controls": {
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "fitView": "Ansicht anpassen",
+      "showHelp": "Hilfe anzeigen",
+      "hideHelp": "Hilfe ausblenden",
+      "autoLayout": "Automatisches Layout",
+      "autoLayoutHint": "Ordne Tabellen automatisch an, damit sie sich nicht überlappen.",
+      "addSchema": "Schema hinzufügen",
+      "addSchemaHint": "Erstelle eine neue leere Tabelle in diesem Data Contract.",
+      "close": "Schließen"
+    },
+    "collapse": {
+      "showAll": "Alle Eigenschaften anzeigen",
+      "showAllShort": "Alle anzeigen",
+      "showAllHint": "Klappe jede Tabelle auf, um alle Spalten anzuzeigen.",
+      "keysOnly": "Nur Schlüssel anzeigen",
+      "keysOnlyHint": "Klappe jede Tabelle auf ihre Primär- und Fremdschlüsselzeilen zusammen.",
+      "hiddenCount": "+{{count}} ausgeblendet"
+    },
+    "help": {
+      "title": "Schnelltipps:",
+      "editNames": "Klicke auf Schema- oder Eigenschaftsnamen, um sie zu bearbeiten",
+      "clickDetails": "Klicke auf Eigenschaften, um Details im Bereich anzuzeigen",
+      "dragLink": "Ziehe von einem Punkt an einer Eigenschaft zu einem Punkt an einer anderen, um sie zu verbinden",
+      "dragReposition": "Ziehe Knoten, um sie neu zu positionieren, oder nutze das automatische Layout",
+      "collapse": "Klappe eine Tabelle mit dem Listensymbol in der Kopfzeile auf nur Schlüssel zusammen oder alle Tabellen mit dem Symbolleisten-Button",
+      "zoom": "Nutze das Mausrad zum Zoomen",
+      "shortcutsPrefix": "Drücke",
+      "shortcutsFit": "um die Ansicht anzupassen,",
+      "shortcutsLayout": "für automatisches Layout"
+    },
+    "coach": {
+      "title": "Eine Beziehung zeichnen",
+      "body": "Fahre über eine Eigenschaftszeile, um ihre Verbindungspunkte einzublenden, und ziehe dann von einer Eigenschaft zu einer anderen, um sie zu verbinden (z. B. einen Fremdschlüssel zu seiner referenzierten Spalte).",
+      "dismiss": "Schließen",
+      "dismissAria": "Hinweis schließen"
+    },
+    "invalidYaml": {
+      "title": "Ungültiges YAML",
+      "description": "Behebe die YAML-Fehler, um das Diagramm zu sehen"
+    },
+    "empty": {
+      "title": "Keine Schemas",
+      "description": "Lege los, indem du dein erstes Schema erstellst."
+    },
+    "edge": {
+      "schemaLevel": "Beziehung auf Schemaebene — nur im Formular-Editor bearbeitbar"
+    },
+    "schema": {
+      "addProperty": "Eigenschaft hinzufügen",
+      "moreOptions": "Weitere Optionen",
+      "delete": "Schema löschen",
+      "unnamed": "Unbenanntes Schema",
+      "noProperties": "Keine Eigenschaften definiert"
+    },
+    "handle": {
+      "source": "Ziehe von hier zu einer Eigenschaft einer anderen Tabelle, um eine Beziehung zu erstellen",
+      "target": "Lege hier eine Beziehung ab"
+    },
+    "property": {
+      "namePlaceholder": "Eigenschaftsname",
+      "unnamed": "unbenannte Eigenschaft",
+      "unnamedShort": "unbenannt",
+      "dragToReorder": "Zum Umsortieren ziehen",
+      "addNested": "Verschachtelte Eigenschaft hinzufügen",
+      "delete": "Löschen",
+      "deleteProperty": "Eigenschaft löschen"
+    },
+    "propertyDetails": {
+      "title": "Eigenschaft bearbeiten",
+      "pin": "Klicken, um das Panel angeheftet zu lassen",
+      "unpin": "Klicken, um zu lösen"
+    },
+    "section": {
+      "metadata": "Metadaten",
+      "semantics": "Semantics",
+      "logicalTypeOptions": "Optionen für logischen Typ",
+      "constraints": "Einschränkungen",
+      "classificationSecurity": "Klassifizierung & Sicherheit",
+      "transformations": "Transformationen",
+      "dataQuality": "Datenqualität",
+      "authoritativeDefinitions": "Maßgebliche Definitionen",
+      "relationships": "Beziehungen",
+      "customProperties": "Benutzerdefinierte Eigenschaften"
+    },
+    "semantics": {
+      "definition": "Definition",
+      "showDetails": "Details anzeigen",
+      "loading": "Definition wird geladen...",
+      "loadError": "Definitionsdaten konnten nicht geladen werden.",
+      "loadErrorHint": "Details findest du in der Konsole.",
+      "sharedProperty": "geteilte Eigenschaft",
+      "owner": "Eigentümer",
+      "remove": "Entfernen",
+      "findDefinition": "Definition suchen"
+    },
+    "field": {
+      "propertyName": {
+        "label": "Eigenschaftsname"
+      },
+      "businessName": {
+        "label": "Fachlicher Name"
+      },
+      "physicalName": {
+        "label": "Physischer Name"
+      },
+      "logicalType": {
+        "label": "Logischer Typ"
+      },
+      "physicalType": {
+        "label": "Physischer Typ"
+      },
+      "arrayItemType": {
+        "label": "Typ der Array-Elemente",
+        "placeholder": "Elementtyp auswählen..."
+      },
+      "description": {
+        "label": "Beschreibung",
+        "placeholder": "Beschreibe diese Eigenschaft..."
+      },
+      "examples": {
+        "label": "Beispiele",
+        "help": "Ein Beispiel pro Zeile (gesamter Inhalt bleibt erhalten)"
+      },
+      "format": {
+        "label": "Format",
+        "placeholderString": "z. B. email, uri, uuid",
+        "placeholderInteger": "Integer-Format auswählen...",
+        "placeholderNumber": "Zahlenformat auswählen...",
+        "placeholderDate": "z. B. yyyy-MM-dd, ISO 8601",
+        "dateHelp": "JDK-DateTimeFormatter-Muster"
+      },
+      "minLength": {
+        "label": "Mindestlänge"
+      },
+      "maxLength": {
+        "label": "Maximallänge"
+      },
+      "pattern": {
+        "label": "Muster (Regex)",
+        "placeholder": "Regulärer Ausdruck"
+      },
+      "minimum": {
+        "label": "Minimum",
+        "datePlaceholder": "Frühester zulässiger Wert"
+      },
+      "maximum": {
+        "label": "Maximum",
+        "datePlaceholder": "Spätester zulässiger Wert"
+      },
+      "exclusiveMinimum": {
+        "label": "Exklusives Minimum"
+      },
+      "exclusiveMaximum": {
+        "label": "Exklusives Maximum"
+      },
+      "multipleOf": {
+        "label": "Vielfaches von",
+        "placeholder": "Der Wert muss ein Vielfaches dieser Zahl sein"
+      },
+      "minItems": {
+        "label": "Min. Elemente"
+      },
+      "maxItems": {
+        "label": "Max. Elemente"
+      },
+      "uniqueItems": {
+        "label": "Eindeutige Elemente"
+      },
+      "required": {
+        "label": "Erforderlich"
+      },
+      "unique": {
+        "label": "Eindeutig"
+      },
+      "primaryKey": {
+        "label": "Primary Key"
+      },
+      "partitioned": {
+        "label": "Partitioniert"
+      },
+      "primaryKeyPosition": {
+        "label": "Primary-Key-Position",
+        "help": "Ordnungsposition im zusammengesetzten Primary Key (beginnt bei 1, oder -1 für einen einzelnen Schlüssel)"
+      },
+      "partitionKeyPosition": {
+        "label": "Partitionsschlüssel-Position",
+        "help": "Ordnungsposition in der Partitionshierarchie (beginnt bei 1, oder -1 für eine einzelne Partition)"
+      },
+      "classification": {
+        "label": "Klassifizierung"
+      },
+      "criticalDataElement": {
+        "label": "Kritisches Datenelement"
+      },
+      "encryptedName": {
+        "label": "Verschlüsselter Name"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Tag hinzufügen..."
+      },
+      "transformSourceObjects": {
+        "label": "Transformations-Quellobjekte",
+        "help": "Liste der in Transformationen verwendeten Quelltabellen/-objekte"
+      },
+      "transformLogic": {
+        "label": "Transformationslogik",
+        "placeholder": "SQL- oder Transformationscode...",
+        "help": "Technische Umsetzung der Transformation (SQL usw.)"
+      },
+      "transformDescription": {
+        "label": "Transformationsbeschreibung",
+        "placeholder": "Fachlich verständliche Erklärung der Transformation...",
+        "help": "Nicht-technische Beschreibung, wie das Feld abgeleitet wird"
+      }
+    },
+    "option": {
+      "notSet": "Nicht gesetzt",
+      "notSetSemantic": "Nicht gesetzt (semantisch: {{value}})",
+      "false": "Falsch",
+      "true": "Wahr",
+      "select": "Auswählen..."
+    }
+  },
+  "testResults": {
+    "title": "Data Contract Tests",
+    "passed": "Bestanden",
+    "failed": "Fehlgeschlagen",
+    "failedTests": "Fehlgeschlagene Tests",
+    "allPassed": "Alle Tests bestanden",
+    "selectServer": "Server auswählen",
+    "server": "Server",
+    "serverLabel": "Server: {{server}}",
+    "running": "Test läuft gerade...",
+    "runTest": "Test ausführen",
+    "runVia": "Tests ausführen über:",
+    "clear": "Leeren",
+    "clearTitle": "Testergebnisse leeren",
+    "showHelp": "Hilfe anzeigen",
+    "hideHelp": "Hilfe ausblenden",
+    "errorLabel": "Fehler:",
+    "logs": "Logs",
+    "noData": "Keine Testdaten verfügbar",
+    "empty": {
+      "title": "Noch keine Testergebnisse",
+      "subtitle": "Klicke oben auf \"Test ausführen\", um deinen Data Contract zu testen."
+    },
+    "help": {
+      "title": "Hilfe",
+      "hide": "Hilfe ausblenden",
+      "cliTitle": "So startest du die Data Contract CLI",
+      "runIntro": "Um den API-Server",
+      "runIntroSuffix": "auszuführen, verwende den folgenden Befehl:",
+      "apiRunsAt": "Die API läuft unter",
+      "moreInfo": "Weitere Informationen findest du unter"
+    }
+  },
+  "warnings": {
+    "empty": {
+      "title": "Keine Probleme gefunden",
+      "subtitle": "Dein YAML ist gültig, ohne Fehler oder Warnungen."
+    },
+    "problems": "Probleme ({{count}})",
+    "lineColumn": "Zeile {{line}}, Spalte {{column}}"
+  },
+  "rolesList": {
+    "accessRoles": "Zugriffsrollen",
+    "addRole": "+ Rolle hinzufügen",
+    "remove": "Entfernen",
+    "role": {
+      "label": "Rolle",
+      "tooltip": "Name der IAM-Rolle"
+    },
+    "access": {
+      "label": "Zugriff",
+      "tooltip": "Die Art des Zugriffs, den die IAM-Rolle gewährt (z. B. read oder write)"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "tooltip": "Erläuterung des Berechtigungsumfangs",
+      "placeholder": "Erläuterung des Berechtigungsumfangs..."
+    },
+    "firstLevelApprovers": {
+      "label": "Genehmiger erster Ebene",
+      "tooltip": "Primäre Genehmigungsinstanz"
+    },
+    "secondLevelApprovers": {
+      "label": "Genehmiger zweiter Ebene",
+      "tooltip": "Sekundäre Genehmigungsinstanz"
+    }
+  },
+  "teamMember": {
+    "title": "Teammitglied",
+    "remove": "Mitglied entfernen",
+    "username": {
+      "label": "Benutzername"
+    },
+    "name": {
+      "label": "Vollständiger Name"
+    },
+    "role": {
+      "label": "Rolle",
+      "placeholder": "z. B. owner, data steward"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Beschreibung des Teammitglieds..."
+    },
+    "dateIn": {
+      "label": "Eintrittsdatum"
+    },
+    "dateOut": {
+      "label": "Austrittsdatum"
+    },
+    "replacedBy": {
+      "label": "Ersetzt durch"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Tag hinzufügen..."
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "current": "Aktuell:",
+    "apiServerUrl": {
+      "label": "Data Contract CLI API-Server-URL",
+      "help": "Die Basis-URL für den Data Contract CLI API-Server. Leer lassen, um den Standard zu verwenden."
+    },
+    "apiKey": {
+      "placeholder": "Gib deinen API Key ein",
+      "help": "Optionaler API Key für die Authentifizierung am Data Contract CLI API-Server."
+    }
+  },
+  "fileSelect": {
+    "title": "Datei auswählen",
+    "loading": "Dateien werden geladen...",
+    "empty": "Keine Dateien gefunden",
+    "cancel": "Abbrechen",
+    "open": "Öffnen"
+  },
+  "definitionSelect": {
+    "title": "Definition finden",
+    "subtitle": "Definitionen durchsuchen",
+    "close": "Schließen",
+    "search": "Suchen...",
+    "conceptCount_one": "{{count}} Konzept",
+    "conceptCount_other": "{{count}} Konzepte",
+    "propertyCount_one": "{{count}} Eigenschaft",
+    "propertyCount_other": "{{count}} Eigenschaften",
+    "loading": "Definitionen werden geladen...",
+    "noMatches": "Keine passenden Elemente",
+    "empty": "Noch keine Definitionen",
+    "cancel": "Abbrechen",
+    "select": "Auswählen"
+  },
+  "descriptionPreview": {
+    "termsOfUse": "Nutzungsbedingungen",
+    "subtitle": "Übergeordnete Beschreibung des Datensatzes inklusive Zweck, Nutzungsrichtlinien und Einschränkungen",
+    "purpose": "Zweck",
+    "usage": "Nutzung",
+    "limitations": "Einschränkungen",
+    "customProperties": "Benutzerdefinierte Eigenschaften",
+    "showMore": "Mehr anzeigen...",
+    "showLess": "Weniger anzeigen"
+  },
+  "toast": {
+    "close": "Benachrichtigung schließen"
+  },
+  "input": {
+    "required": "Dieses Feld ist erforderlich",
+    "requiredLabel": "Erforderlich",
+    "patternMismatch": "Der Wert muss dem Muster entsprechen: {{pattern}}",
+    "minLength": "Mindestlänge ist {{min}} (aktuell {{current}})",
+    "maxLength": "Maximallänge ist {{max}} (aktuell {{current}})",
+    "minValue": "Mindestwert ist {{min}}",
+    "maxValue": "Maximalwert ist {{max}}",
+    "selectOption": "Option auswählen...",
+    "typeToEnter": "Tippe, um einen Wert einzugeben, oder wähle aus den Optionen",
+    "noOptions": "Keine Optionen verfügbar"
+  },
+  "quality": {
+    "label": "Qualitätsregel",
+    "add": "Hinzufügen",
+    "empty": "Keine Qualitätsregeln definiert",
+    "remove": "Regel entfernen",
+    "select": "Auswählen…",
+    "summary": {
+      "metric": "Metrik",
+      "dimension": "Dimension",
+      "new": "Neue Regel"
+    },
+    "operator": {
+      "label": "Operator",
+      "placeholder": "Operator auswählen…",
+      "mustBe": "Muss sein (=)",
+      "mustNotBe": "Darf nicht sein (≠)",
+      "mustBeGreaterThan": "Muss größer sein als (>)",
+      "mustBeGreaterOrEqualTo": "Muss größer oder gleich sein (≥)",
+      "mustBeLessThan": "Muss kleiner sein als (<)",
+      "mustBeLessOrEqualTo": "Muss kleiner oder gleich sein (≤)"
+    },
+    "type": {
+      "label": "Typ",
+      "text": "Text",
+      "library": "Library (Metrik)",
+      "sql": "SQL",
+      "custom": "Benutzerdefiniert"
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "Regelbezeichner"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Verständliche Erklärung der Prüfung"
+    },
+    "metric": {
+      "label": "Metrik",
+      "placeholder": "Metrik auswählen…"
+    },
+    "missingValues": {
+      "label": "Fehlende Werte (einer pro Zeile)",
+      "help": "Werte, die zusätzlich zu null als fehlend gelten"
+    },
+    "validValues": {
+      "label": "Gültige Werte (einer pro Zeile)",
+      "orPattern": "ODER Muster",
+      "help": "Liste der zulässigen Werte"
+    },
+    "pattern": {
+      "validValuesOr": "Gültige Werte ODER",
+      "label": "Muster (Regex)",
+      "help": "Regulärer Ausdruck zur Validierung"
+    },
+    "properties": {
+      "label": "Eigenschaften (eine pro Zeile)",
+      "help": "Spaltennamen, die auf doppelte Kombinationen geprüft werden"
+    },
+    "sqlQuery": {
+      "label": "SQL-Abfrage",
+      "hint": "Hinweis: Verwende {{object}} und {{property}} als Platzhalter"
+    },
+    "engine": {
+      "label": "Engine",
+      "placeholder": "z. B. soda, greatExpectations, montecarlo"
+    },
+    "implementation": {
+      "label": "Implementierung",
+      "placeholder": "Anbieterspezifischer Konfigurationsblock"
+    },
+    "value": {
+      "label": "Wert",
+      "placeholder": "Numerischen Wert eingeben",
+      "placeholderDisabled": "Zuerst Operator auswählen"
+    },
+    "unit": {
+      "label": "Einheit",
+      "default": "Standard (Zeilen)"
+    },
+    "additionalDetails": "Weitere Details",
+    "dimension": {
+      "label": "Dimension"
+    },
+    "severity": {
+      "label": "Schweregrad",
+      "placeholder": "z. B. critical, warning"
+    },
+    "businessImpact": {
+      "label": "Geschäftliche Auswirkung",
+      "placeholder": "Folgen eines Regelverstoßes"
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "placeholder": "z. B. cron"
+    },
+    "schedule": {
+      "label": "Zeitplan"
+    }
+  },
+  "relationship": {
+    "heading": "Beziehungen",
+    "add": "Hinzufügen",
+    "title": "Beziehung",
+    "composite": "zusammengesetzt",
+    "new": "Neue Beziehung",
+    "type": {
+      "label": "Typ"
+    },
+    "select": "Auswählen…",
+    "remove": "Entfernen",
+    "from": "Von",
+    "to": "Nach",
+    "removePair": "Paar entfernen",
+    "addPair": "Spaltenpaar hinzufügen (zusammengesetzter Schlüssel)",
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Beschreibe die Beziehung…"
+    },
+    "drawer": {
+      "propertyFallback": "Eigenschaft",
+      "resize": "Zum Anpassen ziehen",
+      "editOn": "Beziehung bearbeiten für",
+      "close": "Panel schließen"
+    }
+  },
+  "customProperty": {
+    "heading": "Benutzerdefinierte Eigenschaften",
+    "add": "Hinzufügen",
+    "title": "Benutzerdefinierte Eigenschaft",
+    "new": "Neue Eigenschaft",
+    "remove": "Entfernen",
+    "property": {
+      "label": "Eigenschaft"
+    },
+    "value": {
+      "label": "Wert",
+      "placeholder": "Wert eingeben…"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Optionale Beschreibung…"
+    },
+    "required": "Erforderlich",
+    "select": "Auswählen…",
+    "noOptions": "Keine Optionen verfügbar",
+    "boolean": {
+      "notSet": "Nicht gesetzt",
+      "false": "Falsch",
+      "true": "Wahr"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "pattern": "Wert muss dem Muster entsprechen: {{pattern}}",
+      "minLength": "Mindestlänge beträgt {{count}}",
+      "maxLength": "Maximale Länge beträgt {{count}}",
+      "minimum": "Mindestwert beträgt {{value}}",
+      "maximum": "Maximalwert beträgt {{value}}",
+      "minItems": "Mindestens {{count}} Einträge erforderlich",
+      "maxItems": "Höchstens {{count}} Einträge erlaubt"
+    },
+    "propertyDrawer": {
+      "resize": "Zum Anpassen ziehen",
+      "edit": "Eigenschaft bearbeiten",
+      "editNamed": "Eigenschaft bearbeiten: {{name}}",
+      "close": "Panel schließen"
+    }
+  },
+  "authDef": {
+    "heading": "Maßgebliche Definitionen",
+    "add": "Hinzufügen",
+    "title": "Maßgebliche Definition",
+    "new": "Neue Definition",
+    "remove": "Entfernen",
+    "type": {
+      "label": "Typ",
+      "placeholder": "z. B. businessDefinition"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Beschreibe die maßgebliche Definition…"
+    }
+  },
+  "tags": {
+    "label": "Tags",
+    "placeholder": "Tag hinzufügen…",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "removeTag": "{{tag}} entfernen",
+    "unmanaged": "Dieser Tag ist nicht verwaltet.",
+    "alreadyExists": "Tag '{{tag}}' existiert bereits",
+    "addTag": "Tag '{{tag}}' hinzufügen",
+    "managedOnly": "Gemäß den Organisationseinstellungen sind nur verwaltete Tags erlaubt."
+  },
+  "enum": {
+    "selectOrType": "Auswählen oder eingeben…",
+    "select": "Auswählen…"
+  },
+  "keyValue": {
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "select": "Auswählen…"
+  },
+  "arrayInput": {
+    "placeholder": "Eintrag hinzufügen…",
+    "add": "Hinzufügen",
+    "remove": "Entfernen"
+  },
+  "schemas": {
+    "heading": "Schema",
+    "description": "Datenmodelle, die die Struktur, Felder und Typen der Datensätze in diesem Data Contract beschreiben.",
+    "add": "Schema hinzufügen",
+    "empty": {
+      "title": "Keine Schema",
+      "description": "Leg los, indem du ein neues Schema erstellst.",
+      "add": "Neues Schema"
+    },
+    "item": {
+      "fallbackName": "Schema {{index}}",
+      "name": "Name:",
+      "type": "Typ:",
+      "properties": "Eigenschaften:"
+    }
+  },
+  "schema": {
+    "untitled": "Unbenanntes Schema",
+    "description": "Definiere die Struktur und Eigenschaften dieses Schema, einschließlich Feldtypen, Einschränkungen und Metadaten.",
+    "confirm": {
+      "remove": "Möchtest du dieses Schema wirklich entfernen?",
+      "deleteProperty": "Möchtest du diese Eigenschaft wirklich löschen?"
+    },
+    "remove": "Schema entfernen",
+    "field": {
+      "name": {
+        "label": "Name",
+        "tooltip": "Technischer Name für das Schema (erforderlich)"
+      },
+      "description": {
+        "label": "Beschreibung",
+        "tooltip": "Beschreibung des Inhalts dieses Schema",
+        "placeholder": "Beschreibe das Schema...",
+        "aiPlaceholder": "Beschreibung des Inhalts und Zwecks dieses Schema bzw. dieser Tabelle"
+      },
+      "businessName": {
+        "label": "Business Name",
+        "tooltip": "Verständlicher Name für das Schema",
+        "placeholder": "Lesbarer Name"
+      },
+      "physicalType": {
+        "label": "Physischer Typ",
+        "tooltip": "Physischer Typ des Schema (table, view, usw.)"
+      },
+      "physicalName": {
+        "label": "Physischer Name",
+        "tooltip": "Physischer Name in der Datenbank/im Speicher"
+      },
+      "logicalType": {
+        "label": "Logischer Typ",
+        "tooltip": "Logischer Typ des Schema (object, array, usw.)"
+      },
+      "dataGranularity": {
+        "label": "Beschreibung der Datengranularität",
+        "tooltip": "Beschreibe den Detailgrad, den ein Datensatz darstellt"
+      },
+      "tags": {
+        "label": "Tags",
+        "tooltip": "Tags zum Kategorisieren und Organisieren von Schema",
+        "placeholder": "Tag hinzufügen..."
+      }
+    },
+    "advancedMetadata": "Erweiterte Metadaten",
+    "properties": {
+      "heading": "Eigenschaften",
+      "addFromDefinition": "Aus Business Definition hinzufügen",
+      "addProperty": "Eigenschaft hinzufügen",
+      "empty": "Keine Eigenschaften definiert"
+    },
+    "notFound": {
+      "title": "Kein Schema an Position {{index}} gefunden.",
+      "description": "Es wurde möglicherweise gelöscht."
+    }
+  },
+  "server": {
+    "heading": "Server",
+    "description": "Verbindungsdetails und Konfiguration für die Datenquelle oder Plattform, die diesen Data Contract bereitstellt.",
+    "fallbackName": "Server {{number}}",
+    "remove": "Server entfernen",
+    "confirm": {
+      "remove": "Möchtest du diesen Server wirklich entfernen?"
+    },
+    "notFound": {
+      "title": "Server am Index {{index}} nicht gefunden.",
+      "description": "Möglicherweise wurde er gelöscht."
+    },
+    "field": {
+      "required": "Erforderlich",
+      "server": {
+        "label": "Server"
+      },
+      "environment": {
+        "label": "Umgebung",
+        "placeholder": "Umgebung auswählen...",
+        "tooltip": "Deployment-Stufe (prod, preprod, dev, uat)"
+      },
+      "description": {
+        "label": "Beschreibung",
+        "placeholder": "Beschreibe diesen Server...",
+        "tooltip": "Server-Details"
+      },
+      "type": {
+        "label": "Typ",
+        "placeholder": "Server-Typ auswählen...",
+        "tooltip": "Plattform-Kategorie (api, athena, bigquery, snowflake, postgres, usw.)"
+      },
+      "account": {
+        "label": "Account"
+      },
+      "catalog": {
+        "label": "Catalog"
+      },
+      "database": {
+        "label": "Database"
+      },
+      "dataset": {
+        "label": "Dataset"
+      },
+      "delimiter": {
+        "label": "Trennzeichen"
+      },
+      "endpointUrl": {
+        "label": "Endpoint-URL"
+      },
+      "format": {
+        "label": "Format"
+      },
+      "host": {
+        "label": "Host"
+      },
+      "location": {
+        "label": "Speicherort"
+      },
+      "path": {
+        "label": "Pfad"
+      },
+      "port": {
+        "label": "Port"
+      },
+      "project": {
+        "label": "Projekt"
+      },
+      "region": {
+        "label": "Region"
+      },
+      "regionName": {
+        "label": "Regionsname"
+      },
+      "schema": {
+        "label": "Schema"
+      },
+      "serviceName": {
+        "label": "Service-Name"
+      },
+      "stagingDir": {
+        "label": "Staging-Verzeichnis"
+      },
+      "stream": {
+        "label": "Stream"
+      },
+      "warehouse": {
+        "label": "Warehouse"
+      }
+    }
+  },
+  "servers": {
+    "heading": "Server",
+    "description": "Verbindungs-Endpunkte und Plattform-Konfigurationen für den Zugriff auf die Data Products.",
+    "add": "Server hinzufügen",
+    "empty": {
+      "title": "Keine Server",
+      "description": "Lege los, indem du einen neuen Server erstellst.",
+      "add": "Neuer Server"
+    },
+    "card": {
+      "fallbackName": "Server {{number}}",
+      "type": "Typ:",
+      "environment": "Umgebung:"
+    }
   }
 }

@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 
 const ServersEditor = () => {
+  const { t } = useTranslation();
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const navigate = useNavigate();
@@ -64,8 +66,8 @@ const ServersEditor = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div className="relative">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Servers</h3>
-            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Connection endpoints and platform configurations for accessing the data products.</p>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('servers.heading')}</h3>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">{t('servers.description')}</p>
             <button
               onClick={addServer}
               className="absolute top-0 right-0 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -73,7 +75,7 @@ const ServersEditor = () => {
               <svg className="-ml-0.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
               </svg>
-              Add Server
+              {t('servers.add')}
             </button>
           </div>
 
@@ -82,8 +84,8 @@ const ServersEditor = () => {
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
               </svg>
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No servers</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating a new server.</p>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('servers.empty.title')}</h3>
+              <p className="mt-1 text-sm text-gray-500">{t('servers.empty.description')}</p>
               <div className="mt-6">
                 <button
                   onClick={addServer}
@@ -92,7 +94,7 @@ const ServersEditor = () => {
                   <svg className="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                   </svg>
-                  New Server
+                  {t('servers.empty.add')}
                 </button>
               </div>
             </div>
@@ -115,7 +117,7 @@ const ServersEditor = () => {
                         )}
                         <div className="flex-1">
                           <h4 className="text-sm font-semibold text-gray-900">
-                            {server.server || `Server ${index + 1}`}
+                            {server.server || t('servers.card.fallbackName', { number: index + 1 })}
                           </h4>
                           {server.description && (
                             <p className="mt-1 text-xs text-gray-500 line-clamp-2">{server.description}</p>
@@ -123,12 +125,12 @@ const ServersEditor = () => {
                           <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
                             {server.type && (
                               <span>
-                                <span className="font-medium">Type:</span> {server.type}
+                                <span className="font-medium">{t('servers.card.type')}</span> {server.type}
                               </span>
                             )}
                             {server.environment && (
                               <span>
-                                <span className="font-medium">Environment:</span> {server.environment}
+                                <span className="font-medium">{t('servers.card.environment')}</span> {server.environment}
                               </span>
                             )}
                           </div>

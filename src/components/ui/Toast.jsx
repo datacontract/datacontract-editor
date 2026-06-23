@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 
 /**
  * Individual toast notification component
  */
 const Toast = ({ notification, onClose }) => {
+  const { t } = useTranslation();
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ const Toast = ({ notification, onClose }) => {
       <button
         onClick={handleClose}
         className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="Close notification"
+        aria-label={t('toast.close')}
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path

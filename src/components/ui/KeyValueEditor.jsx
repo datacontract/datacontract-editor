@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * KeyValueEditor component for editing arrays of objects
@@ -9,7 +10,9 @@ import { useState } from 'react';
  * @param {Array} fields - Field configuration array: [{name, label, type, placeholder, options}]
  * @param {string} addButtonLabel - Label for the add button (e.g., "Add relationship")
  */
-const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'Add' }) => {
+const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel }) => {
+  const { t } = useTranslation();
+  const resolvedAddButtonLabel = addButtonLabel === undefined ? t('keyValue.add') : addButtonLabel;
   const [newItem, setNewItem] = useState({});
   const [isNewItemDirty, setIsNewItemDirty] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -76,7 +79,7 @@ const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'A
             onBlur={onBlur}
             className={commonClasses}
           >
-            <option value="">Select...</option>
+            <option value="">{t('keyValue.select')}</option>
             {field.options?.map(opt => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
@@ -122,7 +125,7 @@ const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'A
                 onClick={() => handleRemove(index)}
                 className="mt-1 text-red-600 hover:text-red-800 text-xs font-medium"
               >
-                Remove
+                {t('keyValue.remove')}
               </button>
             </div>
           ))}
@@ -147,7 +150,7 @@ const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'A
             onClick={handleCancelAdd}
             className="mt-1 text-red-600 hover:text-red-800 text-xs font-medium"
           >
-            Remove
+            {t('keyValue.remove')}
           </button>
         </div>
       )}
@@ -158,7 +161,7 @@ const KeyValueEditor = ({ value = [], onChange, fields = [], addButtonLabel = 'A
         onClick={() => setShowAddForm(true)}
         className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
       >
-        + {addButtonLabel}
+        + {resolvedAddButtonLabel}
       </button>
     </div>
   );

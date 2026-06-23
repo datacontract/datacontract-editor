@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store';
 
 const WarningsPanel = ({ onMarkerClick }) => {
+  const { t } = useTranslation();
   const markers = useEditorStore((state) => state.markers);
   const schemaUrl = useEditorStore((state) => state.schemaUrl);
   const schemaData = useEditorStore((state) => state.schemaData);
@@ -67,8 +69,8 @@ const WarningsPanel = ({ onMarkerClick }) => {
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium">No issues found</h3>
-            <p className="mt-1 text-sm">Your YAML is valid with no errors or warnings.</p>
+            <h3 className="mt-2 text-sm font-medium">{t('warnings.empty.title')}</h3>
+            <p className="mt-1 text-sm">{t('warnings.empty.subtitle')}</p>
           </div>
         </div>
 
@@ -101,7 +103,7 @@ const WarningsPanel = ({ onMarkerClick }) => {
       {/* Problems Section */}
       <div className="flex-1 overflow-y-auto p-4">
         <h2 className="text-lg font-bold mb-4 text-red-700 dark:text-red-400">
-          Problems ({markers.length})
+          {t('warnings.problems', { count: markers.length })}
         </h2>
 
         <div className="space-y-1">
@@ -120,7 +122,7 @@ const WarningsPanel = ({ onMarkerClick }) => {
                     {marker.message}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Line {marker.startLineNumber}, Column {marker.startColumn}
+                    {t('warnings.lineColumn', { line: marker.startLineNumber, column: marker.startColumn })}
                   </p>
                 </div>
               </div>

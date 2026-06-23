@@ -201,5 +201,836 @@
       "placeholder": "Human-readable explanation..."
     },
     "add": "+ Add SLA"
+  },
+  "ai": {
+    "fab": {
+      "title": "AI Assistant"
+    },
+    "sidebar": {
+      "resize": "Drag to resize",
+      "newConversation": "New conversation",
+      "closePanel": "Close panel"
+    },
+    "assistant": {
+      "title": "Data Contract Assistant"
+    },
+    "status": {
+      "generating": "Generating...",
+      "thinking": "Thinking...",
+      "callingTool": "Calling {{tool}}...",
+      "callingTools": "Calling {{count}} tools..."
+    },
+    "suggestion": {
+      "undo": "Undo AI suggestion",
+      "suggestField": "Suggest {{field}} with AI"
+    },
+    "error": {
+      "notConfiguredInline": "AI not configured. Please set endpoint and apiKey in the AI configuration."
+    },
+    "toolCall": {
+      "defaultSummary": "AI suggested changes",
+      "contractUpdate": "Contract Update",
+      "undo": "Undo"
+    },
+    "notConfigured": {
+      "title": "AI Assistant Not Configured",
+      "anthropicHint": "Configure an Anthropic API endpoint.",
+      "openaiHint": "Configure an OpenAI-compatible endpoint."
+    },
+    "empty": {
+      "description": "Ask questions about your data contract or request changes."
+    },
+    "input": {
+      "placeholder": "Ask about your data contract...",
+      "loading": "Loading..."
+    },
+    "prompts": {
+      "guideMe": "Guide me",
+      "createFromExample": "Create a data contract for this example data: ",
+      "addProperty": "Add a property business_timestamp",
+      "generateQualityRules": "Generate quality rules",
+      "findAndFixIssues": "Find and fix issues"
+    }
+  },
+  "diagram": {
+    "clickToEdit": "Click to edit",
+    "confirmDeleteProperty": "Are you sure you want to delete this property?",
+    "layingOut": "Laying out…",
+    "noTypeConstraints": "No type-specific constraints available for {{type}}.",
+    "thisType": "this type",
+    "controls": {
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitView": "Fit View",
+      "showHelp": "Show Help",
+      "hideHelp": "Hide Help",
+      "autoLayout": "Auto Layout",
+      "autoLayoutHint": "Arrange tables automatically so they don't overlap.",
+      "addSchema": "Add Schema",
+      "addSchemaHint": "Create a new empty table in this contract.",
+      "close": "Close"
+    },
+    "collapse": {
+      "showAll": "Show all properties",
+      "showAllShort": "Show all",
+      "showAllHint": "Expand every table to show all its columns.",
+      "keysOnly": "Show keys only",
+      "keysOnlyHint": "Collapse every table to just its primary and foreign key rows.",
+      "hiddenCount": "+{{count}} hidden"
+    },
+    "help": {
+      "title": "Quick Tips:",
+      "editNames": "Click on schema or property names to edit",
+      "clickDetails": "Click on properties to see details in drawer",
+      "dragLink": "Drag from a bubble on one property to a bubble on another to link them",
+      "dragReposition": "Drag nodes to reposition, or use Auto Layout to arrange them automatically",
+      "collapse": "Collapse a table to keys-only with the list icon in its header, or collapse all tables with the toolbar button",
+      "zoom": "Use mouse wheel to zoom",
+      "shortcutsPrefix": "Press",
+      "shortcutsFit": "to fit view,",
+      "shortcutsLayout": "to auto-layout"
+    },
+    "coach": {
+      "title": "Draw a relationship",
+      "body": "Hover a property row to reveal its connection dots, then drag from one property to another to link them (e.g. a foreign key to its referenced column).",
+      "dismiss": "Dismiss",
+      "dismissAria": "Dismiss hint"
+    },
+    "invalidYaml": {
+      "title": "Invalid YAML",
+      "description": "Fix YAML errors to see the diagram"
+    },
+    "empty": {
+      "title": "No schemas",
+      "description": "Get started by creating your first schema."
+    },
+    "edge": {
+      "schemaLevel": "Schema-level relationship — only editable in the form editor"
+    },
+    "schema": {
+      "addProperty": "Add property",
+      "moreOptions": "More options",
+      "delete": "Delete Schema",
+      "unnamed": "Unnamed Schema",
+      "noProperties": "No properties defined"
+    },
+    "handle": {
+      "source": "Drag from here to a property on another table to create a relationship",
+      "target": "Drop a relationship here"
+    },
+    "property": {
+      "namePlaceholder": "property name",
+      "unnamed": "unnamed property",
+      "unnamedShort": "unnamed",
+      "dragToReorder": "Drag to reorder",
+      "addNested": "Add nested property",
+      "delete": "Delete",
+      "deleteProperty": "Delete Property"
+    },
+    "propertyDetails": {
+      "title": "Edit Property",
+      "pin": "Click to pin panel open",
+      "unpin": "Click to unpin"
+    },
+    "section": {
+      "metadata": "Metadata",
+      "semantics": "Semantics",
+      "logicalTypeOptions": "Logical Type Options",
+      "constraints": "Constraints",
+      "classificationSecurity": "Classification & Security",
+      "transformations": "Transformations",
+      "dataQuality": "Data Quality",
+      "authoritativeDefinitions": "Authoritative Definitions",
+      "relationships": "Relationships",
+      "customProperties": "Custom Properties"
+    },
+    "semantics": {
+      "definition": "Definition",
+      "showDetails": "Show Details",
+      "loading": "Loading definition...",
+      "loadError": "Unable to load definition data.",
+      "loadErrorHint": "Check console for details.",
+      "sharedProperty": "shared property",
+      "owner": "Owner",
+      "remove": "Remove",
+      "findDefinition": "Find Definition"
+    },
+    "field": {
+      "propertyName": {
+        "label": "Property Name"
+      },
+      "businessName": {
+        "label": "Business Name"
+      },
+      "physicalName": {
+        "label": "Physical Name"
+      },
+      "logicalType": {
+        "label": "Logical Type"
+      },
+      "physicalType": {
+        "label": "Physical Type"
+      },
+      "arrayItemType": {
+        "label": "Array Item Type",
+        "placeholder": "Select item type..."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe this property..."
+      },
+      "examples": {
+        "label": "Examples",
+        "help": "One example per line (all content preserved)"
+      },
+      "format": {
+        "label": "Format",
+        "placeholderString": "e.g., email, uri, uuid",
+        "placeholderInteger": "Select integer format...",
+        "placeholderNumber": "Select number format...",
+        "placeholderDate": "e.g., yyyy-MM-dd, ISO 8601",
+        "dateHelp": "JDK DateTimeFormatter pattern"
+      },
+      "minLength": {
+        "label": "Min Length"
+      },
+      "maxLength": {
+        "label": "Max Length"
+      },
+      "pattern": {
+        "label": "Pattern (Regex)",
+        "placeholder": "Regular expression"
+      },
+      "minimum": {
+        "label": "Minimum",
+        "datePlaceholder": "Earliest allowed value"
+      },
+      "maximum": {
+        "label": "Maximum",
+        "datePlaceholder": "Latest allowed value"
+      },
+      "exclusiveMinimum": {
+        "label": "Exclusive Minimum"
+      },
+      "exclusiveMaximum": {
+        "label": "Exclusive Maximum"
+      },
+      "multipleOf": {
+        "label": "Multiple Of",
+        "placeholder": "Value must be a multiple of this number"
+      },
+      "minItems": {
+        "label": "Min Items"
+      },
+      "maxItems": {
+        "label": "Max Items"
+      },
+      "uniqueItems": {
+        "label": "Unique Items"
+      },
+      "required": {
+        "label": "Required"
+      },
+      "unique": {
+        "label": "Unique"
+      },
+      "primaryKey": {
+        "label": "Primary Key"
+      },
+      "partitioned": {
+        "label": "Partitioned"
+      },
+      "primaryKeyPosition": {
+        "label": "Primary Key Position",
+        "help": "Ordinal position in composite primary key (starts at 1, or -1 for single key)"
+      },
+      "partitionKeyPosition": {
+        "label": "Partition Key Position",
+        "help": "Ordinal position in partition hierarchy (starts at 1, or -1 for single partition)"
+      },
+      "classification": {
+        "label": "Classification"
+      },
+      "criticalDataElement": {
+        "label": "Critical Data Element"
+      },
+      "encryptedName": {
+        "label": "Encrypted Name"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Add a tag..."
+      },
+      "transformSourceObjects": {
+        "label": "Transform Source Objects",
+        "help": "List of source tables/objects used in transformations"
+      },
+      "transformLogic": {
+        "label": "Transform Logic",
+        "placeholder": "SQL or transformation code...",
+        "help": "Technical transformation implementation (SQL, etc.)"
+      },
+      "transformDescription": {
+        "label": "Transform Description",
+        "placeholder": "Business-friendly explanation of transformation...",
+        "help": "Non-technical description of how field is derived"
+      }
+    },
+    "option": {
+      "notSet": "Not set",
+      "notSetSemantic": "Not set (semantic: {{value}})",
+      "false": "False",
+      "true": "True",
+      "select": "Select..."
+    }
+  },
+  "testResults": {
+    "title": "Data Contract Tests",
+    "passed": "Passed",
+    "failed": "Failed",
+    "failedTests": "Failed tests",
+    "allPassed": "All tests passed",
+    "selectServer": "Select server",
+    "server": "Server",
+    "serverLabel": "Server: {{server}}",
+    "running": "Test is currently running...",
+    "runTest": "Run Test",
+    "runVia": "Run tests via:",
+    "clear": "Clear",
+    "clearTitle": "Clear test results",
+    "showHelp": "Show Help",
+    "hideHelp": "Hide Help",
+    "errorLabel": "Error:",
+    "logs": "Logs",
+    "noData": "No test data available",
+    "empty": {
+      "title": "No test results yet",
+      "subtitle": "Click the Run Test button above to test your data contract."
+    },
+    "help": {
+      "title": "Help",
+      "hide": "Hide help",
+      "cliTitle": "How to start the Data Contract CLI",
+      "runIntro": "To run the",
+      "runIntroSuffix": "API server, use the following command:",
+      "apiRunsAt": "The API runs at",
+      "moreInfo": "For more information, visit"
+    }
+  },
+  "warnings": {
+    "empty": {
+      "title": "No issues found",
+      "subtitle": "Your YAML is valid with no errors or warnings."
+    },
+    "problems": "Problems ({{count}})",
+    "lineColumn": "Line {{line}}, Column {{column}}"
+  },
+  "rolesList": {
+    "accessRoles": "Access Roles",
+    "addRole": "+ Add Role",
+    "remove": "Remove",
+    "role": {
+      "label": "Role",
+      "tooltip": "IAM role name"
+    },
+    "access": {
+      "label": "Access",
+      "tooltip": "The type of access provided by the IAM role (e.g. read or write)"
+    },
+    "description": {
+      "label": "Description",
+      "tooltip": "Permission scope explanation",
+      "placeholder": "Permission scope explanation..."
+    },
+    "firstLevelApprovers": {
+      "label": "First Level Approvers",
+      "tooltip": "Primary approval authority"
+    },
+    "secondLevelApprovers": {
+      "label": "Second Level Approvers",
+      "tooltip": "Secondary approval authority"
+    }
+  },
+  "teamMember": {
+    "title": "Team Member",
+    "remove": "Remove member",
+    "username": {
+      "label": "Username"
+    },
+    "name": {
+      "label": "Full Name"
+    },
+    "role": {
+      "label": "Role",
+      "placeholder": "e.g., owner, data steward"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description of the team member..."
+    },
+    "dateIn": {
+      "label": "Date In"
+    },
+    "dateOut": {
+      "label": "Date Out"
+    },
+    "replacedBy": {
+      "label": "Replaced By"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Add a tag..."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "current": "Current:",
+    "apiServerUrl": {
+      "label": "Data Contract CLI API Server URL",
+      "help": "The base URL for the Data Contract CLI API server. Leave empty to use the default."
+    },
+    "apiKey": {
+      "placeholder": "Enter your API key",
+      "help": "Optional API key for authentication with the Data Contract CLI API server."
+    }
+  },
+  "fileSelect": {
+    "title": "Select a File",
+    "loading": "Loading files...",
+    "empty": "No files found",
+    "cancel": "Cancel",
+    "open": "Open"
+  },
+  "definitionSelect": {
+    "title": "Find Definition",
+    "subtitle": "Browse definitions",
+    "close": "Close",
+    "search": "Search...",
+    "conceptCount_one": "{{count}} concept",
+    "conceptCount_other": "{{count}} concepts",
+    "propertyCount_one": "{{count}} property",
+    "propertyCount_other": "{{count}} properties",
+    "loading": "Loading definitions...",
+    "noMatches": "No matching elements",
+    "empty": "No definitions yet",
+    "cancel": "Cancel",
+    "select": "Select"
+  },
+  "descriptionPreview": {
+    "termsOfUse": "Terms of Use",
+    "subtitle": "High level description of the dataset including purpose, usage guidelines, and limitations",
+    "purpose": "Purpose",
+    "usage": "Usage",
+    "limitations": "Limitations",
+    "customProperties": "Custom Properties",
+    "showMore": "Show more...",
+    "showLess": "Show less"
+  },
+  "toast": {
+    "close": "Close notification"
+  },
+  "input": {
+    "required": "This field is required",
+    "requiredLabel": "Required",
+    "patternMismatch": "Value must match pattern: {{pattern}}",
+    "minLength": "Minimum length is {{min}} (currently {{current}})",
+    "maxLength": "Maximum length is {{max}} (currently {{current}})",
+    "minValue": "Minimum value is {{min}}",
+    "maxValue": "Maximum value is {{max}}",
+    "selectOption": "Select an option...",
+    "typeToEnter": "Type to enter a value or select from options",
+    "noOptions": "No options available"
+  },
+  "quality": {
+    "label": "Quality Rule",
+    "add": "Add",
+    "empty": "No quality rules defined",
+    "remove": "Remove Rule",
+    "select": "Select...",
+    "summary": {
+      "metric": "Metric",
+      "dimension": "Dimension",
+      "new": "New rule"
+    },
+    "operator": {
+      "label": "Operator",
+      "placeholder": "Select operator...",
+      "mustBe": "Must Be (=)",
+      "mustNotBe": "Must Not Be (≠)",
+      "mustBeGreaterThan": "Must Be Greater Than (>)",
+      "mustBeGreaterOrEqualTo": "Must Be Greater Or Equal (≥)",
+      "mustBeLessThan": "Must Be Less Than (<)",
+      "mustBeLessOrEqualTo": "Must Be Less Or Equal (≤)"
+    },
+    "type": {
+      "label": "Type",
+      "text": "Text",
+      "library": "Library (Metric)",
+      "sql": "SQL",
+      "custom": "Custom"
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "Rule identifier"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Human-readable explanation of the check"
+    },
+    "metric": {
+      "label": "Metric",
+      "placeholder": "Select metric..."
+    },
+    "missingValues": {
+      "label": "Missing Values (one per line)",
+      "help": "Values considered as missing beyond null"
+    },
+    "validValues": {
+      "label": "Valid Values (one per line)",
+      "orPattern": "OR Pattern",
+      "help": "List of acceptable values"
+    },
+    "pattern": {
+      "validValuesOr": "Valid Values OR",
+      "label": "Pattern (Regex)",
+      "help": "Regular expression for validation"
+    },
+    "properties": {
+      "label": "Properties (one per line)",
+      "help": "Column names to check for duplicate combinations"
+    },
+    "sqlQuery": {
+      "label": "SQL Query",
+      "hint": "Hint: Use {{object}} and {{property}} as placeholders"
+    },
+    "engine": {
+      "label": "Engine",
+      "placeholder": "e.g., soda, greatExpectations, montecarlo"
+    },
+    "implementation": {
+      "label": "Implementation",
+      "placeholder": "Vendor-specific configuration block"
+    },
+    "value": {
+      "label": "Value",
+      "placeholder": "Enter numeric value",
+      "placeholderDisabled": "Select operator first"
+    },
+    "unit": {
+      "label": "Unit",
+      "default": "Default (rows)"
+    },
+    "additionalDetails": "Additional Details",
+    "dimension": {
+      "label": "Dimension"
+    },
+    "severity": {
+      "label": "Severity",
+      "placeholder": "e.g., critical, warning"
+    },
+    "businessImpact": {
+      "label": "Business Impact",
+      "placeholder": "Consequences of rule failure"
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "placeholder": "e.g., cron"
+    },
+    "schedule": {
+      "label": "Schedule"
+    }
+  },
+  "relationship": {
+    "heading": "Relationships",
+    "add": "Add",
+    "title": "Relationship",
+    "composite": "composite",
+    "new": "New relationship",
+    "type": {
+      "label": "Type"
+    },
+    "select": "Select...",
+    "remove": "Remove",
+    "from": "From",
+    "to": "To",
+    "removePair": "Remove pair",
+    "addPair": "Add column pair (composite key)",
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe the relationship..."
+    },
+    "drawer": {
+      "propertyFallback": "property",
+      "resize": "Drag to resize",
+      "editOn": "Edit Relationship on",
+      "close": "Close panel"
+    }
+  },
+  "customProperty": {
+    "heading": "Custom Properties",
+    "add": "Add",
+    "title": "Custom Property",
+    "new": "New property",
+    "remove": "Remove",
+    "property": {
+      "label": "Property"
+    },
+    "value": {
+      "label": "Value",
+      "placeholder": "Enter value..."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Optional description..."
+    },
+    "required": "Required",
+    "select": "Select...",
+    "noOptions": "No options available",
+    "boolean": {
+      "notSet": "Not set",
+      "false": "False",
+      "true": "True"
+    },
+    "validation": {
+      "required": "This field is required",
+      "pattern": "Value must match pattern: {{pattern}}",
+      "minLength": "Minimum length is {{count}}",
+      "maxLength": "Maximum length is {{count}}",
+      "minimum": "Minimum value is {{value}}",
+      "maximum": "Maximum value is {{value}}",
+      "minItems": "Minimum {{count}} items required",
+      "maxItems": "Maximum {{count}} items allowed"
+    },
+    "propertyDrawer": {
+      "resize": "Drag to resize",
+      "edit": "Edit Property",
+      "editNamed": "Edit Property: {{name}}",
+      "close": "Close panel"
+    }
+  },
+  "authDef": {
+    "heading": "Authoritative Definitions",
+    "add": "Add",
+    "title": "Authoritative Definition",
+    "new": "New definition",
+    "remove": "Remove",
+    "type": {
+      "label": "Type",
+      "placeholder": "e.g., businessDefinition"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe the authoritative definition..."
+    }
+  },
+  "tags": {
+    "label": "Tags",
+    "placeholder": "Add a tag...",
+    "add": "Add",
+    "remove": "Remove",
+    "removeTag": "Remove {{tag}}",
+    "unmanaged": "This tag is unmanaged.",
+    "alreadyExists": "Tag '{{tag}}' already exists",
+    "addTag": "Add tag '{{tag}}'",
+    "managedOnly": "According to the organization settings, only managed tags are permitted."
+  },
+  "enum": {
+    "selectOrType": "Select or type...",
+    "select": "Select..."
+  },
+  "keyValue": {
+    "add": "Add",
+    "remove": "Remove",
+    "select": "Select..."
+  },
+  "arrayInput": {
+    "placeholder": "Add item...",
+    "add": "Add",
+    "remove": "Remove"
+  },
+  "schemas": {
+    "heading": "Schemas",
+    "description": "Data models describing the structure, fields, and types of the datasets in this contract.",
+    "add": "Add Schema",
+    "empty": {
+      "title": "No schemas",
+      "description": "Get started by creating a new schema.",
+      "add": "New Schema"
+    },
+    "item": {
+      "fallbackName": "Schema {{index}}",
+      "name": "Name:",
+      "type": "Type:",
+      "properties": "Properties:"
+    }
+  },
+  "schema": {
+    "untitled": "Untitled Schema",
+    "description": "Define the structure and properties of this schema, including field types, constraints, and metadata.",
+    "confirm": {
+      "remove": "Are you sure you want to remove this schema?",
+      "deleteProperty": "Are you sure you want to delete this property?"
+    },
+    "remove": "Remove Schema",
+    "field": {
+      "name": {
+        "label": "Name",
+        "tooltip": "Technical name for the schema (required)"
+      },
+      "description": {
+        "label": "Description",
+        "tooltip": "Description of what this schema contains",
+        "placeholder": "Describe the schema...",
+        "aiPlaceholder": "Description of what this schema/table contains and its purpose"
+      },
+      "businessName": {
+        "label": "Business Name",
+        "tooltip": "Human-friendly name for the schema",
+        "placeholder": "Human readable name"
+      },
+      "physicalType": {
+        "label": "Physical Type",
+        "tooltip": "Physical type of the schema (table, view, etc.)"
+      },
+      "physicalName": {
+        "label": "Physical Name",
+        "tooltip": "Physical name in the database/storage"
+      },
+      "logicalType": {
+        "label": "Logical Type",
+        "tooltip": "Logical type of the schema (object, array, etc.)"
+      },
+      "dataGranularity": {
+        "label": "Data Granularity Description",
+        "tooltip": "Describe the level of detail represented by one record"
+      },
+      "tags": {
+        "label": "Tags",
+        "tooltip": "Tags for categorizing and organizing schemas",
+        "placeholder": "Add a tag..."
+      }
+    },
+    "advancedMetadata": "Advanced Metadata",
+    "properties": {
+      "heading": "Properties",
+      "addFromDefinition": "Add from Definition",
+      "addProperty": "Add property",
+      "empty": "No properties defined"
+    },
+    "notFound": {
+      "title": "Schema not found at index {{index}}.",
+      "description": "It may have been deleted."
+    }
+  },
+  "server": {
+    "heading": "Server",
+    "description": "Connection details and configuration for the data source or platform serving this data contract.",
+    "fallbackName": "Server {{number}}",
+    "remove": "Remove Server",
+    "confirm": {
+      "remove": "Are you sure you want to remove this server?"
+    },
+    "notFound": {
+      "title": "Server not found at index {{index}}.",
+      "description": "It may have been deleted."
+    },
+    "field": {
+      "required": "Required",
+      "server": {
+        "label": "Server"
+      },
+      "environment": {
+        "label": "Environment",
+        "placeholder": "Select environment...",
+        "tooltip": "Deployment stage (prod, preprod, dev, uat)"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe this server...",
+        "tooltip": "Server details"
+      },
+      "type": {
+        "label": "Type",
+        "placeholder": "Select server type...",
+        "tooltip": "Platform category (api, athena, bigquery, snowflake, postgres, etc.)"
+      },
+      "account": {
+        "label": "Account"
+      },
+      "catalog": {
+        "label": "Catalog"
+      },
+      "database": {
+        "label": "Database"
+      },
+      "dataset": {
+        "label": "Dataset"
+      },
+      "delimiter": {
+        "label": "Delimiter"
+      },
+      "endpointUrl": {
+        "label": "Endpoint URL"
+      },
+      "format": {
+        "label": "Format"
+      },
+      "host": {
+        "label": "Host"
+      },
+      "location": {
+        "label": "Location"
+      },
+      "path": {
+        "label": "Path"
+      },
+      "port": {
+        "label": "Port"
+      },
+      "project": {
+        "label": "Project"
+      },
+      "region": {
+        "label": "Region"
+      },
+      "regionName": {
+        "label": "Region Name"
+      },
+      "schema": {
+        "label": "Schema"
+      },
+      "serviceName": {
+        "label": "Service Name"
+      },
+      "stagingDir": {
+        "label": "Staging Dir"
+      },
+      "stream": {
+        "label": "Stream"
+      },
+      "warehouse": {
+        "label": "Warehouse"
+      }
+    }
+  },
+  "servers": {
+    "heading": "Servers",
+    "description": "Connection endpoints and platform configurations for accessing the data products.",
+    "add": "Add Server",
+    "empty": {
+      "title": "No servers",
+      "description": "Get started by creating a new server.",
+      "add": "New Server"
+    },
+    "card": {
+      "fallbackName": "Server {{number}}",
+      "type": "Type:",
+      "environment": "Environment:"
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions, Label } from '@headlessui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // Placeholder ChevronDown icon component
 const ChevronDownIcon = ({ className }) => (
@@ -13,7 +14,7 @@ const ComboboxComponent = ({
   options = [],
   value,
   onChange,
-  placeholder = "Select an option...",
+  placeholder,
   displayValue = (item) => item?.name || item?.label || item || '',
   renderOption = null, // New prop for custom option rendering
   renderSelectedIcon = null, // New prop for rendering icon next to selected value
@@ -25,6 +26,7 @@ const ComboboxComponent = ({
   hasError = false, // New prop for error state
   ...props
 }) => {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
 
   const filteredOptions =
@@ -80,7 +82,7 @@ const ComboboxComponent = ({
           onChange={handleInputChange}
           onBlur={() => setQuery('')}
           displayValue={acceptAnyInput ? (item) => item || '' : displayValue}
-          placeholder={placeholder}
+          placeholder={placeholder || t('input.selectOption')}
         />
         <ComboboxButton className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden">
           <ChevronDownIcon className="size-4 text-gray-400" />
@@ -118,7 +120,7 @@ const ComboboxComponent = ({
           {/* Show message when no options available and no query */}
           {filteredOptions.length === 0 && !query && (
             <div className="px-3 py-2 text-gray-500 text-xs">
-              {acceptAnyInput ? 'Type to enter a value or select from options' : 'No options available'}
+              {acceptAnyInput ? t('input.typeToEnter') : t('input.noOptions')}
             </div>
           )}
         </ComboboxOptions>

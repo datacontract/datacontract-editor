@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../store.js';
 
 // Sparkles icon for AI button with individual animated sparkles
@@ -30,6 +31,7 @@ const SparklesIcon = ({ className, animate }) => (
  * The panel itself is rendered in MainContent as an integrated side panel.
  */
 export default function AiFloatingActionButton() {
+	const { t } = useTranslation();
 	const isOpen = useEditorStore((state) => state.isAiPanelOpen);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
 	const openAiPanel = useEditorStore((state) => state.openAiPanel);
@@ -59,7 +61,7 @@ export default function AiFloatingActionButton() {
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
-			title="AI Assistant"
+			title={t('ai.fab.title')}
 		>
 			<SparklesIcon className="h-6 w-6" animate={isHovered} />
 		</button>,

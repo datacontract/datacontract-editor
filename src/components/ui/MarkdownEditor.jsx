@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 import Tooltip from './Tooltip.jsx';
@@ -17,6 +18,7 @@ const MarkdownEditor = ({
   actions,
   className = '',
 }) => {
+  const { t } = useTranslation();
   const editorRef = useRef(null);
   const easyMDERef = useRef(null);
   const onChangeRef = useRef(onChange);
@@ -30,16 +32,16 @@ const MarkdownEditor = ({
   const errorMessages = useMemo(() => {
     const errors = [];
     if (required && trimmed === '') {
-      errors.push('This field is required');
+      errors.push(t('input.required'));
     }
     if (trimmed !== '' && minLength !== undefined && trimmed.length < minLength) {
-      errors.push(`Minimum length is ${minLength} (currently ${trimmed.length})`);
+      errors.push(t('input.minLength', { min: minLength, current: trimmed.length }));
     }
     if (trimmed !== '' && maxLength !== undefined && trimmed.length > maxLength) {
-      errors.push(`Maximum length is ${maxLength} (currently ${trimmed.length})`);
+      errors.push(t('input.maxLength', { max: maxLength, current: trimmed.length }));
     }
     return errors;
-  }, [trimmed, required, minLength, maxLength]);
+  }, [trimmed, required, minLength, maxLength, t]);
 
   const hasError = errorMessages.length > 0;
 
@@ -107,7 +109,7 @@ const MarkdownEditor = ({
         <div className="flex items-center gap-2">
           {actions}
           {required && (
-            <span className="text-xs leading-4 text-gray-500">Required</span>
+            <span className="text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
           )}
         </div>
       </div>

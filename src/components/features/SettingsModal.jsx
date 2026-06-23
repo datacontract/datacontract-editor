@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from '../ui/Modal';
 import { useEditorStore, setEditorConfig } from '../../store';
 
 const SettingsModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const editorConfig = useEditorStore((state) => state.editorConfig);
 
   // Local state for form values
@@ -40,16 +42,16 @@ const SettingsModal = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Settings"
+      title={t('settings.title')}
       onConfirm={handleSave}
       onCancel={handleCancel}
-      confirmText="Save"
-      cancelText="Cancel"
+      confirmText={t('settings.save')}
+      cancelText={t('settings.cancel')}
     >
       <div className="space-y-4">
         <div>
           <label htmlFor="api-server-url" className="block text-sm font-medium text-gray-700 mb-1">
-            Data Contract CLI API Server URL
+            {t('settings.apiServerUrl.label')}
           </label>
           <input
             type="url"
@@ -60,10 +62,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           <p className="mt-1 text-xs text-gray-500">
-            Current: <span className="font-mono text-gray-600">{apiServerUrl || 'https://api.datacontract.com'}</span>
+            {t('settings.current')} <span className="font-mono text-gray-600">{apiServerUrl || 'https://api.datacontract.com'}</span>
           </p>
           <p className="mt-1 text-xs text-gray-500">
-            The base URL for the Data Contract CLI API server. Leave empty to use the default.
+            {t('settings.apiServerUrl.help')}
           </p>
         </div>
         <div>
@@ -75,11 +77,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
             id="api-key"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your API key"
+            placeholder={t('settings.apiKey.placeholder')}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           <p className="mt-1 text-xs text-gray-500">
-            Optional API key for authentication with the Data Contract CLI API server.
+            {t('settings.apiKey.help')}
           </p>
         </div>
       </div>
