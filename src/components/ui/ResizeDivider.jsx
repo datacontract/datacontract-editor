@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ResizeDivider = ({ onResize, minLeftPercent = 20, maxLeftPercent = 80 }) => {
+  const { t } = useTranslation();
   const isDragging = useRef(false);
   const containerRef = useRef(null);
 
@@ -46,7 +48,7 @@ const ResizeDivider = ({ onResize, minLeftPercent = 20, maxLeftPercent = 80 }) =
       ref={containerRef}
       onMouseDown={handleMouseDown}
       className="relative flex-shrink-0 cursor-col-resize w-px h-full bg-gray-300 hover:bg-blue-400 transition-colors hidden md:block"
-      title="Drag to resize"
+      title={t("common.dragToResize")}
     >
       {/* Invisible wider hit area */}
       <div className="absolute inset-y-0 -left-1 -right-1" />

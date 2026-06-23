@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import {Tooltip} from '../../ui/index.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
 import {getLogicalTypeIcon} from './propertyIcons.js';
@@ -24,6 +25,7 @@ const ItemsRow = ({
                       setValue,
                       PropertyRow // Passed to avoid circular dependency
                   }) => {
+    const { t } = useTranslation();
     const pathKey = `${schemaIdx}-${propPath.join('-')}-items`;
     const isExpanded = expandedProperties.has(pathKey);
     const isObject = items?.logicalType === 'object';
@@ -85,7 +87,7 @@ const ItemsRow = ({
                     {/* Action Icons */}
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {isObject && (
-                            <Tooltip content="Add property to items">
+                            <Tooltip content={t("schema.properties.addToItems")}>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -94,7 +96,7 @@ const ItemsRow = ({
                                         addSubProperty(schemaIdx, propPath, true);
                                     }}
                                     className="p-1.5 rounded-full hover:bg-indigo-50"
-                                    title="Add property to items"
+                                    title={t("schema.properties.addToItems")}
                                 >
                                     <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
                                          viewBox="0 0 24 24">

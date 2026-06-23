@@ -920,7 +920,10 @@
       "heading": "Eigenschaften",
       "addFromDefinition": "Aus Business Definition hinzufügen",
       "addProperty": "Eigenschaft hinzufügen",
-      "empty": "Keine Eigenschaften definiert"
+      "empty": "Keine Eigenschaften definiert",
+      "addSubProperty": "Untereigenschaft hinzufügen",
+      "addToItems": "Eigenschaft zu Items hinzufügen",
+      "dragToReorder": "Zum Umsortieren ziehen"
     },
     "notFound": {
       "title": "Kein Schema an Position {{index}} gefunden.",
@@ -1032,5 +1035,8 @@
       "type": "Typ:",
       "environment": "Umgebung:"
     }
+  },
+  "common": {
+    "dragToResize": "Zum Anpassen ziehen"
   }
 }

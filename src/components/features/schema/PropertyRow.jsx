@@ -1,4 +1,5 @@
 import {memo, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Tooltip} from '../../ui/index.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
 import PropertyIndicators from './PropertyIndicators.jsx';
@@ -37,6 +38,7 @@ const PropertyRow = ({
 											 sortableId, // Unique ID for sortable (provided by parent)
 											 isDragEnabled = false // Only enable at top-level when wrapped in DndContext
 										 }) => {
+	const { t } = useTranslation();
 	// Disable layout animation to prevent visual glitch on drop
 	const animateLayoutChanges = () => false;
 
@@ -150,7 +152,7 @@ const PropertyRow = ({
 							{...(isDragEnabled ? {...attributes, ...listeners} : {})}
 							className={isDragEnabled ? "cursor-grab active:cursor-grabbing touch-none" : ""}
 							onClick={(e) => isDragEnabled && e.stopPropagation()}
-							title={isDragEnabled ? "Drag to reorder" : undefined}
+							title={isDragEnabled ? t("schema.properties.dragToReorder") : undefined}
 						>
                             {(() => {
 															const IconComponent = getLogicalTypeIcon(effectiveLogicalType);
@@ -289,14 +291,14 @@ const PropertyRow = ({
 					{/* Action Icons */}
 					<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 						{isObject && (
-							<Tooltip content="Add sub-property">
+							<Tooltip content={t("schema.properties.addSubProperty")}>
 								<button
 									onClick={(e) => {
 										e.stopPropagation();
 										addSubProperty(schemaIdx, currentPath);
 									}}
 									className="p-1.5 rounded-full hover:bg-indigo-50"
-									title="Add sub-property"
+									title={t("schema.properties.addSubProperty")}
 								>
 									<svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
 											 viewBox="0 0 24 24">

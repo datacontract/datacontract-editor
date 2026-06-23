@@ -920,7 +920,10 @@
       "heading": "Properties",
       "addFromDefinition": "Add from Definition",
       "addProperty": "Add property",
-      "empty": "No properties defined"
+      "empty": "No properties defined",
+      "addSubProperty": "Add sub-property",
+      "addToItems": "Add property to items",
+      "dragToReorder": "Drag to reorder"
     },
     "notFound": {
       "title": "Schema not found at index {{index}}.",
@@ -1032,5 +1035,8 @@
       "type": "Type:",
       "environment": "Environment:"
     }
+  },
+  "common": {
+    "dragToResize": "Drag to resize"
   }
 }
