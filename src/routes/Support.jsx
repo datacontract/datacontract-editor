@@ -8,9 +8,11 @@ import supportIcons from '../assets/support-icons/supportIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import { useTranslation } from 'react-i18next';
 
 // Support Item component with customization support
 const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOptions }) => {
+  const { t } = useTranslation();
   const yamlParts = useEditorStore((state) => state.yamlParts);
 
   // Get customization config for support level
@@ -103,7 +105,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
         {!isChannelHidden && (
           <ValidatedInput
             name={`support-channel-${index}`}
-            label={channelOverride?.title || "Channel"}
+            label={channelOverride?.title || t('support.channel.label')}
             value={item.channel || ''}
             onChange={(e) => onUpdate(index, 'channel', e.target.value)}
             required={channelOverride?.required ?? true}
@@ -124,7 +126,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
               <div className="flex-1">
                 <ValidatedInput
                   name={`support-url-${index}`}
-                  label={urlOverride?.title || "URL"}
+                  label={urlOverride?.title || t('support.url.label')}
                   value={item.url || ''}
                   onChange={(e) => onUpdate(index, 'url', e.target.value)}
                   required={urlOverride?.required}
@@ -143,7 +145,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
                 type="button"
                 onClick={() => onRemove(index)}
                 className="p-1.5 mb-0.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-                title="Remove channel"
+                title={t('support.removeChannel')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -156,7 +158,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
               type="button"
               onClick={() => onRemove(index)}
               className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-              title="Remove channel"
+              title={t('support.removeChannel')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -169,8 +171,8 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             <Combobox
               label={
                 <div className="flex items-center gap-1">
-                  <span>{toolOverride?.title || 'Tool'}</span>
-                  <Tooltip content="Platform type (email, slack, teams, discord, ticket, googlechat, other)">
+                  <span>{toolOverride?.title || t('support.tool.label')}</span>
+                  <Tooltip content={t('support.tool.tooltip')}>
                     <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
@@ -178,7 +180,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
               options={effectiveToolOptions}
               value={item.tool || ''}
               onChange={(selectedValue) => onUpdate(index, 'tool', selectedValue || '')}
-              placeholder="Select a tool..."
+              placeholder={t('support.tool.placeholder')}
               acceptAnyInput={true}
               renderSelectedIcon={(value) => {
                 const IconComponent = supportIcons[value];
@@ -201,8 +203,8 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             <Combobox
               label={
                 <div className="flex items-center gap-1">
-                  <span>{scopeOverride?.title || 'Scope'}</span>
-                  <Tooltip content="Usage context (interactive, announcements, issues, notifications)">
+                  <span>{scopeOverride?.title || t('support.scope.label')}</span>
+                  <Tooltip content={t('support.scope.tooltip')}>
                     <QuestionMarkCircleIcon />
                   </Tooltip>
                 </div>
@@ -210,7 +212,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
               options={effectiveScopeOptions}
               value={item.scope || ''}
               onChange={(selectedValue) => onUpdate(index, 'scope', selectedValue || '')}
-              placeholder="Select a scope..."
+              placeholder={t('support.scope.placeholder')}
               acceptAnyInput={true}
             />
           </div>
@@ -218,14 +220,14 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
         {!isDescriptionHidden && (
           <div className="sm:col-span-2">
             <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-              Description
+              {t('support.description.label')}
             </label>
             <textarea
               rows={2}
               value={item.description || ''}
               onChange={(e) => onUpdate(index, 'description', e.target.value)}
               className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-              placeholder="Channel details for users..."
+              placeholder={t('support.description.placeholder')}
             />
           </div>
         )}
@@ -233,7 +235,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
           <div className="sm:col-span-2">
             <ValidatedInput
               name={`support-invitationUrl-${index}`}
-              label={invitationUrlOverride?.title || "Invitation URL"}
+              label={invitationUrlOverride?.title || t('support.invitationUrl.label')}
               value={item.invitationUrl || ''}
               onChange={(e) => onUpdate(index, 'invitationUrl', e.target.value)}
               required={invitationUrlOverride?.required}
@@ -283,6 +285,7 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
 };
 
 const Support = () => {
+  const { t } = useTranslation();
 	const support = useEditorStore(useShallow((state) => state.getValue('support'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
@@ -343,9 +346,9 @@ const Support = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Support</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('support.heading')}</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
-              Communication channels for dataset assistance.
+              {t('support.section.description')}
             </p>
 
             <div>
@@ -372,7 +375,7 @@ const Support = () => {
                 onClick={addSupportItem}
                 className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
               >
-                + Add Support Channel
+                {t('support.addChannel')}
               </button>
             </div>
           </div>

@@ -3,8 +3,10 @@ import { useEditorStore } from '../store.js';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import { stringifyYaml, parseYaml } from '../utils/yaml.js';
 import { useCustomization } from '../hooks/useCustomization.js';
+import {useTranslation} from 'react-i18next';
 
 const CustomProperties = () => {
+  const { t } = useTranslation();
   const yaml = useEditorStore((state) => state.yaml);
   const setYaml = useEditorStore((state) => state.setYaml);
   const { customProperties: customPropertyConfigs } = useCustomization('root');
@@ -55,9 +57,9 @@ const CustomProperties = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Custom Properties</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('customProperties.heading')}</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
-              A list of key/value pairs for custom properties. Names should be in camel case.
+              {t('customProperties.description')}
             </p>
 
             <CustomPropertiesEditor

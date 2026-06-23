@@ -2,8 +2,10 @@ import { useEditorStore } from '../store.js';
 import { Tooltip } from '../components/ui/index.js';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import {useShallow} from "zustand/react/shallow";
+import {useTranslation} from 'react-i18next';
 
 const Pricing = () => {
+  const { t } = useTranslation();
 	const price = useEditorStore(useShallow((state) => state.getValue('price')));
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 
@@ -52,9 +54,9 @@ const Pricing = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Pricing</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('pricing.heading')}</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
-              Define subscription cost structure for data access.
+              {t('pricing.description')}
             </p>
 
             <div className="space-y-4">
@@ -63,9 +65,9 @@ const Pricing = () => {
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <label htmlFor="priceAmount" className="block text-xs font-medium leading-4 text-gray-900">
-                      Price Amount
+                      {t('pricing.priceAmount.label')}
                     </label>
-                    <Tooltip content="Subscription price per unit">
+                    <Tooltip content={t('pricing.priceAmount.tooltip')}>
                       <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
@@ -84,9 +86,9 @@ const Pricing = () => {
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <label htmlFor="priceCurrency" className="block text-xs font-medium leading-4 text-gray-900">
-                      Currency
+                      {t('pricing.currency.label')}
                     </label>
-                    <Tooltip content="Currency code (e.g., USD, EUR)">
+                    <Tooltip content={t('pricing.currency.tooltip')}>
                       <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>
@@ -105,9 +107,9 @@ const Pricing = () => {
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <label htmlFor="priceUnit" className="block text-xs font-medium leading-4 text-gray-900">
-                      Price Unit
+                      {t('pricing.priceUnit.label')}
                     </label>
-                    <Tooltip content="Unit of measurement (e.g., megabyte, gigabyte)">
+                    <Tooltip content={t('pricing.priceUnit.tooltip')}>
                       <QuestionMarkCircleIcon />
                     </Tooltip>
                   </div>

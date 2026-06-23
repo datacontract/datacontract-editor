@@ -16,20 +16,57 @@
       "fundamentals": "Fundamentals",
       "fundamentalsDescription": "Core metadata identifying the data contract, including name, version, status, and organizational context."
     },
-    "name": { "label": "Name", "placeholder": "Enter document name", "tooltip": "The name of the data contract" },
-    "version": { "label": "Version", "tooltip": "Version number using semantic versioning" },
-    "id": { "label": "ID", "tooltip": "Unique identifier for this data contract" },
-    "status": { "label": "Status", "placeholder": "Select a status...", "tooltip": "Current status of the data contract" },
-    "tenant": { "label": "Tenant", "tooltip": "Tenant or organization this contract belongs to" },
-    "domain": { "label": "Domain", "placeholder": "Select a domain...", "tooltip": "Business domain or category of this data contract" },
-    "tags": { "label": "Tags", "placeholder": "Add a tag...", "tooltip": "Categorize your data contract with tags" }
+    "name": {
+      "label": "Name",
+      "placeholder": "Enter document name",
+      "tooltip": "The name of the data contract"
+    },
+    "version": {
+      "label": "Version",
+      "tooltip": "Version number using semantic versioning"
+    },
+    "id": {
+      "label": "ID",
+      "tooltip": "Unique identifier for this data contract"
+    },
+    "status": {
+      "label": "Status",
+      "placeholder": "Select a status...",
+      "tooltip": "Current status of the data contract"
+    },
+    "tenant": {
+      "label": "Tenant",
+      "tooltip": "Tenant or organization this contract belongs to"
+    },
+    "domain": {
+      "label": "Domain",
+      "placeholder": "Select a domain...",
+      "tooltip": "Business domain or category of this data contract"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Add a tag...",
+      "tooltip": "Categorize your data contract with tags"
+    }
   },
   "termsOfUse": {
     "heading": "Terms of Use",
     "description": "High level description of the dataset including purpose, usage guidelines, and limitations.",
-    "purpose": { "label": "Purpose", "tooltip": "Intended purpose for the provided data", "placeholder": "Describe the purpose of this data contract..." },
-    "usage": { "label": "Usage", "tooltip": "How this data should be used", "placeholder": "Describe how to use this data..." },
-    "limitations": { "label": "Limitations", "tooltip": "Technical, compliance, and legal limitations for data use", "placeholder": "Describe any limitations or constraints..." }
+    "purpose": {
+      "label": "Purpose",
+      "tooltip": "Intended purpose for the provided data",
+      "placeholder": "Describe the purpose of this data contract..."
+    },
+    "usage": {
+      "label": "Usage",
+      "tooltip": "How this data should be used",
+      "placeholder": "Describe how to use this data..."
+    },
+    "limitations": {
+      "label": "Limitations",
+      "tooltip": "Technical, compliance, and legal limitations for data use",
+      "placeholder": "Describe any limitations or constraints..."
+    }
   },
   "header": {
     "view": {
@@ -50,5 +87,119 @@
     "confirm": {
       "delete": "Are you sure you want to delete this data contract? This action cannot be undone."
     }
+  },
+  "team": {
+    "heading": "Team",
+    "section": {
+      "description": "Team information and members."
+    },
+    "name": {
+      "label": "Team Name",
+      "placeholder": "Select a team..."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description of the team..."
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Add a tag..."
+    },
+    "addMember": "+ Add Team Member"
+  },
+  "support": {
+    "heading": "Support",
+    "section": {
+      "description": "Communication channels for dataset assistance."
+    },
+    "channel": {
+      "label": "Channel"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "removeChannel": "Remove channel",
+    "tool": {
+      "label": "Tool",
+      "tooltip": "Platform type (email, slack, teams, discord, ticket, googlechat, other)",
+      "placeholder": "Select a tool..."
+    },
+    "scope": {
+      "label": "Scope",
+      "tooltip": "Usage context (interactive, announcements, issues, notifications)",
+      "placeholder": "Select a scope..."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Channel details for users..."
+    },
+    "invitationUrl": {
+      "label": "Invitation URL"
+    },
+    "addChannel": "+ Add Support Channel"
+  },
+  "pricing": {
+    "heading": "Pricing",
+    "description": "Define subscription cost structure for data access.",
+    "priceAmount": {
+      "label": "Price Amount",
+      "tooltip": "Subscription price per unit"
+    },
+    "currency": {
+      "label": "Currency",
+      "tooltip": "Currency code (e.g., USD, EUR)"
+    },
+    "priceUnit": {
+      "label": "Price Unit",
+      "tooltip": "Unit of measurement (e.g., megabyte, gigabyte)"
+    }
+  },
+  "roles": {
+    "heading": "Roles",
+    "description": "A list of roles that will provide user access to the dataset."
+  },
+  "customProperties": {
+    "heading": "Custom Properties",
+    "description": "A list of key/value pairs for custom properties. Names should be in camel case."
+  },
+  "sla": {
+    "heading": "Service Level Agreement",
+    "description": "Performance and availability commitments with enforcement parameters.",
+    "property": {
+      "label": "Property",
+      "tooltip": "SLA metric identifier"
+    },
+    "value": {
+      "label": "Value",
+      "tooltip": "Target commitment value"
+    },
+    "remove": "Remove SLA",
+    "unit": {
+      "label": "Unit",
+      "tooltip": "Measurement standard (ISO format: d/day/days, y/yr/years)"
+    },
+    "element": {
+      "label": "Element",
+      "tooltip": "Target schema component(s)"
+    },
+    "driver": {
+      "label": "Driver",
+      "tooltip": "Priority classification",
+      "placeholder": "Select driver..."
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "tooltip": "Name of the scheduler (e.g., cron or any tool your organization supports)"
+    },
+    "schedule": {
+      "label": "Schedule",
+      "tooltip": "Configuration for the scheduling tool (e.g., 0 20 * * * for cron)"
+    },
+    "descriptionField": {
+      "label": "Description",
+      "tooltip": "Human-readable explanation",
+      "placeholder": "Human-readable explanation..."
+    },
+    "add": "+ Add SLA"
   }
 }

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../store.js';
 import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
@@ -6,6 +7,7 @@ import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIco
 import {useShallow} from "zustand/react/shallow";
 
 const ServiceLevelAgreement = () => {
+	const { t } = useTranslation();
 	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 	const schema = useEditorStore(useShallow((state) => state.getValue('schema'))) || [];
@@ -99,9 +101,9 @@ const ServiceLevelAgreement = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Service Level Agreement</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('sla.heading')}</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
-              Performance and availability commitments with enforcement parameters.
+              {t('sla.description')}
             </p>
 
             <div>
@@ -113,12 +115,12 @@ const ServiceLevelAgreement = () => {
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <ValidatedInput
                           name={`sla-property-${index}`}
-                          label="Property"
+                          label={t('sla.property.label')}
                           value={sla?.property || ''}
                           onChange={(e) => updateSLA(index, 'property', e.target.value)}
                           required={true}
                           className="bg-white"
-                          tooltip="SLA metric identifier"
+                          tooltip={t('sla.property.tooltip')}
                           placeholder="latency"
                           validationKey={`sla.${index}.property`}
                           validationSection="SLA"
@@ -126,9 +128,9 @@ const ServiceLevelAgreement = () => {
                         <div>
                           <div className="flex items-center gap-1 mb-1">
                             <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Value
+                              {t('sla.value.label')}
                             </label>
-                            <Tooltip content="Target commitment value">
+                            <Tooltip content={t('sla.value.tooltip')}>
                               <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
@@ -144,7 +146,7 @@ const ServiceLevelAgreement = () => {
                               type="button"
                               onClick={() => removeSLA(index)}
                               className="p-1.5 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors flex-shrink-0"
-                              title="Remove SLA"
+                              title={t('sla.remove')}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -155,9 +157,9 @@ const ServiceLevelAgreement = () => {
                         <div>
                           <div className="flex items-center gap-1 mb-1">
                             <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Unit
+                              {t('sla.unit.label')}
                             </label>
-                            <Tooltip content="Measurement standard (ISO format: d/day/days, y/yr/years)">
+                            <Tooltip content={t('sla.unit.tooltip')}>
                               <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
@@ -173,8 +175,8 @@ const ServiceLevelAgreement = () => {
                           <Combobox
                             label={
                               <div className="flex items-center gap-1">
-                                <span>Element</span>
-                                <Tooltip content="Target schema component(s)">
+                                <span>{t('sla.element.label')}</span>
+                                <Tooltip content={t('sla.element.tooltip')}>
                                   <QuestionMarkCircleIcon />
                                 </Tooltip>
                               </div>
@@ -192,8 +194,8 @@ const ServiceLevelAgreement = () => {
                           <Combobox
                             label={
                               <div className="flex items-center gap-1">
-                                <span>Driver</span>
-                                <Tooltip content="Priority classification">
+                                <span>{t('sla.driver.label')}</span>
+                                <Tooltip content={t('sla.driver.tooltip')}>
                                   <QuestionMarkCircleIcon />
                                 </Tooltip>
                               </div>
@@ -201,16 +203,16 @@ const ServiceLevelAgreement = () => {
                             options={driverOptions}
                             value={sla?.driver || ''}
                             onChange={(selectedValue) => updateSLA(index, 'driver', selectedValue || '')}
-                            placeholder="Select driver..."
+                            placeholder={t('sla.driver.placeholder')}
                             acceptAnyInput={true}
                           />
                         </div>
                         <div>
                           <div className="flex items-center gap-1 mb-1">
                             <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Scheduler
+                              {t('sla.scheduler.label')}
                             </label>
-                            <Tooltip content="Name of the scheduler (e.g., cron or any tool your organization supports)">
+                            <Tooltip content={t('sla.scheduler.tooltip')}>
                               <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
@@ -225,9 +227,9 @@ const ServiceLevelAgreement = () => {
                         <div>
                           <div className="flex items-center gap-1 mb-1">
                             <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Schedule
+                              {t('sla.schedule.label')}
                             </label>
-                            <Tooltip content="Configuration for the scheduling tool (e.g., 0 20 * * * for cron)">
+                            <Tooltip content={t('sla.schedule.tooltip')}>
                               <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
@@ -242,9 +244,9 @@ const ServiceLevelAgreement = () => {
                         <div className="sm:col-span-2">
                           <div className="flex items-center gap-1 mb-1">
                             <label className="block text-xs font-medium leading-4 text-gray-900">
-                              Description
+                              {t('sla.descriptionField.label')}
                             </label>
-                            <Tooltip content="Human-readable explanation">
+                            <Tooltip content={t('sla.descriptionField.tooltip')}>
                               <QuestionMarkCircleIcon />
                             </Tooltip>
                           </div>
@@ -253,7 +255,7 @@ const ServiceLevelAgreement = () => {
                             value={sla?.description || ''}
                             onChange={(e) => updateSLA(index, 'description', e.target.value)}
                             className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                            placeholder="Human-readable explanation..."
+                            placeholder={t('sla.descriptionField.placeholder')}
                           />
                         </div>
                       </div>
@@ -268,7 +270,7 @@ const ServiceLevelAgreement = () => {
                 onClick={addSLA}
                 className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
               >
-                + Add SLA
+                {t('sla.add')}
               </button>
             </div>
           </div>

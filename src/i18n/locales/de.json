@@ -16,20 +16,57 @@
       "fundamentals": "Grundlagen",
       "fundamentalsDescription": "Kernmetadaten zur Identifikation des Data Contracts, darunter Name, Version, Status und organisatorischer Kontext."
     },
-    "name": { "label": "Name", "placeholder": "Dokumentnamen eingeben", "tooltip": "Der Name des Data Contracts" },
-    "version": { "label": "Version", "tooltip": "Versionsnummer nach Semantic Versioning" },
-    "id": { "label": "ID", "tooltip": "Eindeutige Kennung für diesen Data Contract" },
-    "status": { "label": "Status", "placeholder": "Status auswählen...", "tooltip": "Aktueller Status des Data Contracts" },
-    "tenant": { "label": "Tenant", "tooltip": "Tenant oder Organisation, zu der dieser Data Contract gehört" },
-    "domain": { "label": "Domain", "placeholder": "Domain auswählen...", "tooltip": "Fachliche Domain oder Kategorie dieses Data Contracts" },
-    "tags": { "label": "Tags", "placeholder": "Tag hinzufügen...", "tooltip": "Kategorisiere deinen Data Contract mit Tags" }
+    "name": {
+      "label": "Name",
+      "placeholder": "Dokumentnamen eingeben",
+      "tooltip": "Der Name des Data Contracts"
+    },
+    "version": {
+      "label": "Version",
+      "tooltip": "Versionsnummer nach Semantic Versioning"
+    },
+    "id": {
+      "label": "ID",
+      "tooltip": "Eindeutige Kennung für diesen Data Contract"
+    },
+    "status": {
+      "label": "Status",
+      "placeholder": "Status auswählen...",
+      "tooltip": "Aktueller Status des Data Contracts"
+    },
+    "tenant": {
+      "label": "Tenant",
+      "tooltip": "Tenant oder Organisation, zu der dieser Data Contract gehört"
+    },
+    "domain": {
+      "label": "Domain",
+      "placeholder": "Domain auswählen...",
+      "tooltip": "Fachliche Domain oder Kategorie dieses Data Contracts"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Tag hinzufügen...",
+      "tooltip": "Kategorisiere deinen Data Contract mit Tags"
+    }
   },
   "termsOfUse": {
     "heading": "Nutzungsbedingungen",
     "description": "Übergeordnete Beschreibung des Datensatzes einschließlich Zweck, Nutzungsrichtlinien und Einschränkungen.",
-    "purpose": { "label": "Zweck", "tooltip": "Vorgesehener Zweck der bereitgestellten Daten", "placeholder": "Beschreibe den Zweck dieses Data Contracts..." },
-    "usage": { "label": "Nutzung", "tooltip": "Wie diese Daten genutzt werden sollen", "placeholder": "Beschreibe, wie diese Daten zu nutzen sind..." },
-    "limitations": { "label": "Einschränkungen", "tooltip": "Technische, Compliance- und rechtliche Einschränkungen für die Datennutzung", "placeholder": "Beschreibe etwaige Einschränkungen oder Vorgaben..." }
+    "purpose": {
+      "label": "Zweck",
+      "tooltip": "Vorgesehener Zweck der bereitgestellten Daten",
+      "placeholder": "Beschreibe den Zweck dieses Data Contracts..."
+    },
+    "usage": {
+      "label": "Nutzung",
+      "tooltip": "Wie diese Daten genutzt werden sollen",
+      "placeholder": "Beschreibe, wie diese Daten zu nutzen sind..."
+    },
+    "limitations": {
+      "label": "Einschränkungen",
+      "tooltip": "Technische, Compliance- und rechtliche Einschränkungen für die Datennutzung",
+      "placeholder": "Beschreibe etwaige Einschränkungen oder Vorgaben..."
+    }
   },
   "header": {
     "view": {
@@ -50,5 +87,119 @@
     "confirm": {
       "delete": "Möchtest du diesen Data Contract wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
     }
+  },
+  "team": {
+    "heading": "Team",
+    "section": {
+      "description": "Team-Informationen und Mitglieder."
+    },
+    "name": {
+      "label": "Team-Name",
+      "placeholder": "Team auswählen..."
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Beschreibung des Teams..."
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Tag hinzufügen..."
+    },
+    "addMember": "+ Team-Mitglied hinzufügen"
+  },
+  "support": {
+    "heading": "Support",
+    "section": {
+      "description": "Kommunikationskanäle für Unterstützung zum Datensatz."
+    },
+    "channel": {
+      "label": "Kanal"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "removeChannel": "Kanal entfernen",
+    "tool": {
+      "label": "Tool",
+      "tooltip": "Plattformtyp (email, slack, teams, discord, ticket, googlechat, other)",
+      "placeholder": "Tool auswählen..."
+    },
+    "scope": {
+      "label": "Scope",
+      "tooltip": "Verwendungskontext (interactive, announcements, issues, notifications)",
+      "placeholder": "Scope auswählen..."
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Kanaldetails für Nutzer..."
+    },
+    "invitationUrl": {
+      "label": "Einladungs-URL"
+    },
+    "addChannel": "+ Support-Kanal hinzufügen"
+  },
+  "pricing": {
+    "heading": "Preisgestaltung",
+    "description": "Definiere die Kostenstruktur des Abonnements für den Datenzugriff.",
+    "priceAmount": {
+      "label": "Preisbetrag",
+      "tooltip": "Abonnementpreis pro Einheit"
+    },
+    "currency": {
+      "label": "Währung",
+      "tooltip": "Währungscode (z. B. USD, EUR)"
+    },
+    "priceUnit": {
+      "label": "Preiseinheit",
+      "tooltip": "Maßeinheit (z. B. Megabyte, Gigabyte)"
+    }
+  },
+  "roles": {
+    "heading": "Rollen",
+    "description": "Eine Liste von Rollen, die Benutzern Zugriff auf den Datensatz gewähren."
+  },
+  "customProperties": {
+    "heading": "Benutzerdefinierte Eigenschaften",
+    "description": "Eine Liste von Schlüssel-Wert-Paaren für benutzerdefinierte Eigenschaften. Namen sollten in Camel Case geschrieben sein."
+  },
+  "sla": {
+    "heading": "Service Level Agreement",
+    "description": "Leistungs- und Verfügbarkeitszusagen mit Durchsetzungsparametern.",
+    "property": {
+      "label": "Eigenschaft",
+      "tooltip": "SLA-Metrik-Bezeichner"
+    },
+    "value": {
+      "label": "Wert",
+      "tooltip": "Zielwert der Zusage"
+    },
+    "remove": "SLA entfernen",
+    "unit": {
+      "label": "Einheit",
+      "tooltip": "Maßstandard (ISO-Format: d/day/days, y/yr/years)"
+    },
+    "element": {
+      "label": "Element",
+      "tooltip": "Ziel-Schema-Komponente(n)"
+    },
+    "driver": {
+      "label": "Treiber",
+      "tooltip": "Prioritätsklassifizierung",
+      "placeholder": "Treiber auswählen..."
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "tooltip": "Name des Schedulers (z. B. cron oder ein beliebiges von deiner Organisation unterstütztes Tool)"
+    },
+    "schedule": {
+      "label": "Zeitplan",
+      "tooltip": "Konfiguration für das Scheduling-Tool (z. B. 0 20 * * * für cron)"
+    },
+    "descriptionField": {
+      "label": "Beschreibung",
+      "tooltip": "Menschenlesbare Erläuterung",
+      "placeholder": "Menschenlesbare Erläuterung..."
+    },
+    "add": "+ SLA hinzufügen"
   }
 }
