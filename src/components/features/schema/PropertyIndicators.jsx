@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import {Tooltip} from '../../ui/index.js';
 import KeyIcon from "../../ui/icons/KeyIcon.jsx";
 import AsteriskIcon from "../../ui/icons/AsteriskIcon.jsx";
@@ -10,12 +11,13 @@ import LinkIcon from "../../ui/icons/LinkIcon.jsx";
  * Displays icons for primary key, required, classification, quality rules, relationships, and definitions
  */
 const PropertyIndicators = ({property}) => {
+    const {t} = useTranslation();
     const indicators = [];
 
 
     if (property.primaryKey) {
         indicators.push(
-            <Tooltip key="pk" content="Primary Key">
+            <Tooltip key="pk" content={t('schema.indicator.primaryKey')}>
                 <KeyIcon className="h-3.5 w-3.5 text-gray-400"/>
             </Tooltip>
         );
@@ -23,7 +25,7 @@ const PropertyIndicators = ({property}) => {
 
     if (property.required) {
         indicators.push(
-            <Tooltip key="req" content="Required">
+            <Tooltip key="req" content={t('schema.indicator.required')}>
                 <AsteriskIcon className="h-3.5 w-3.5 text-gray-400"/>
             </Tooltip>
         );
@@ -31,7 +33,7 @@ const PropertyIndicators = ({property}) => {
 
     if (property.classification) {
         indicators.push(
-            <Tooltip key="class" content={`Classification: ${property.classification}`}>
+            <Tooltip key="class" content={t('schema.indicator.classification', {classification: property.classification})}>
                 <LockClosedIcon className="h-3.5 w-3.5 text-gray-400"/>
             </Tooltip>
         );
@@ -39,7 +41,7 @@ const PropertyIndicators = ({property}) => {
 
     if (property.quality && property.quality.length > 0) {
         indicators.push(
-            <Tooltip key="qual" content={`${property.quality.length} quality rule(s)`}>
+            <Tooltip key="qual" content={t('schema.indicator.qualityRules', {count: property.quality.length})}>
                 <CheckCircleIcon className="h-3.5 w-3.5 text-gray-400"/>
             </Tooltip>
         );
@@ -47,7 +49,7 @@ const PropertyIndicators = ({property}) => {
 
     if (property.relationships && property.relationships.length > 0) {
         indicators.push(
-            <Tooltip key="rel" content={`${property.relationships.length} relationship(s)`}>
+            <Tooltip key="rel" content={t('schema.indicator.relationships', {count: property.relationships.length})}>
                 <LinkIcon className="h-3.5 w-3.5 text-gray-400"/>
             </Tooltip>
         );

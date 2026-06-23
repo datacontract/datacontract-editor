@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import {useTranslation} from 'react-i18next';
 import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import PropertyValueRenderer from '../../ui/PropertyValueRenderer.jsx';
@@ -12,6 +13,7 @@ import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/use
 
 // Memoized Team Member component
 const TeamMember = memo(({ teamMember }) => {
+	const { t } = useTranslation();
 	const hiddenNames = useHiddenCustomPropertyNames('team.members');
 	const { customProperties: customPropertyConfigs } = useCustomization('team.members');
 	const hasTeamMemberData = (member) => {
@@ -54,13 +56,13 @@ const TeamMember = memo(({ teamMember }) => {
 			)}
 			<div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500">
 				{teamMember.dateIn && (
-					<span>In: {teamMember.dateIn}</span>
+					<span>{t('preview.team.dateIn', { date: teamMember.dateIn })}</span>
 				)}
 				{teamMember.dateOut && (
-					<span>Out: {teamMember.dateOut}</span>
+					<span>{t('preview.team.dateOut', { date: teamMember.dateOut })}</span>
 				)}
 				{teamMember.replacedByUsername && (
-					<span>Replaced by: {teamMember.replacedByUsername}</span>
+					<span>{t('preview.team.replacedBy', { username: teamMember.replacedByUsername })}</span>
 				)}
 			</div>
 			{teamMember.tags && Array.isArray(teamMember.tags) && teamMember.tags.length > 0 && <Tags tags={teamMember.tags}/> }
@@ -97,6 +99,7 @@ TeamMember.displayName = 'TeamMember';
 
 // Main TeamSection component
 const TeamSection = () => {
+	const { t } = useTranslation();
 	const team = useEditorStore(useShallow(state => state.getValue('team')));
 	const teamMembers = team?.members || [];
 	const teamHiddenNames = useHiddenCustomPropertyNames('team');
@@ -109,8 +112,8 @@ const TeamSection = () => {
 	return (
 		<section>
 			<div className="px-4 sm:px-0">
-				<h1 className="text-base font-semibold leading-6 text-gray-900" id="team">Team</h1>
-				<p className="text-sm text-gray-500">This section lists team information and members</p>
+				<h1 className="text-base font-semibold leading-6 text-gray-900" id="team">{t('preview.team.heading')}</h1>
+				<p className="text-sm text-gray-500">{t('preview.team.description')}</p>
 			</div>
 
 			{/* Team Info */}
@@ -141,21 +144,21 @@ const TeamSection = () => {
 					<div className="flex flex-col gap-3">
 						{team.name && (
 							<div>
-								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Team Name</dt>
+								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('preview.team.teamName')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{team.name}</dd>
 							</div>
 						)}
 
 						{team.description && (
 							<div>
-								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</dt>
+								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('preview.team.descriptionLabel')}</dt>
 								<dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{team.description}</dd>
 							</div>
 						)}
 
 						{team.tags && Array.isArray(team.tags) && team.tags.length > 0 && (
 							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Tags</dt>
+								<dt className="text-sm font-medium text-gray-500 mb-2">{t('preview.team.tags')}</dt>
 								<dd><Tags tags={team.tags}/></dd>
 							</div>
 						)}
@@ -174,7 +177,7 @@ const TeamSection = () => {
 							if (normalizedProps.length === 0) return null;
 							return (
 								<div>
-									<dt className="text-sm font-medium text-gray-500 mb-2">Custom Properties</dt>
+									<dt className="text-sm font-medium text-gray-500 mb-2">{t('preview.team.customProperties')}</dt>
 									<dd className="flex flex-wrap gap-x-4 gap-y-2">
 										{normalizedProps.map((customProp, index) => {
 											const cfg = teamConfigsByName.get(customProp.property);
@@ -210,7 +213,7 @@ const TeamSection = () => {
 						{/* Team members */}
 						{teamMembers?.length > 0 && (
 							<div>
-								<dt className="text-sm font-medium text-gray-500 mb-2">Members</dt>
+								<dt className="text-sm font-medium text-gray-500 mb-2">{t('preview.team.members')}</dt>
 								<dd>
 									<div className="space-y-3">
 										{teamMembers?.map((teamMember, index) => (

@@ -406,7 +406,7 @@ const Header = () => {
 						<button
 							onClick={toggleMobileSidebar}
 							className="md:hidden p-2 -ml-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-							aria-label="Open menu"
+							aria-label={t('header.menu.open')}
 						>
 							<HamburgerIcon/>
 						</button>
@@ -540,7 +540,7 @@ const Header = () => {
                       </div>
                       <span className="hidden lg:inline">{t('header.toolbar.validation')}</span>
 											{totalCount === 0 ? (
-												<span className="lg:ml-1 inline-flex items-center text-green-600" title="Valid">
+												<span className="lg:ml-1 inline-flex items-center text-green-600" title={t('header.status.valid')}>
                           <div className="size-4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd"
@@ -575,7 +575,7 @@ const Header = () => {
                       <span className="hidden lg:inline">{t('header.toolbar.tests')}</span>
 											{testResults.length > 0 && (
 												hasTestPassed ? (
-													<span className="lg:ml-1.5 inline-flex items-center text-green-600" title="Tests passed">
+													<span className="lg:ml-1.5 inline-flex items-center text-green-600" title={t('header.status.testsPassed')}>
                             <div className="size-4">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd"
@@ -590,7 +590,7 @@ const Header = () => {
                             {testProblemCount}
                           </span>
 												) : (
-													<span className="lg:ml-1.5 inline-flex items-center text-red-600" title="Tests failed">
+													<span className="lg:ml-1.5 inline-flex items-center text-red-600" title={t('header.status.testsFailed')}>
                             <div className="size-4">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd"
@@ -745,9 +745,9 @@ const Header = () => {
 						</div>
 					</div>
 					<div className="min-w-0">
-						<h3 className="text-base font-semibold text-gray-900">Cannot save</h3>
+						<h3 className="text-base font-semibold text-gray-900">{t('header.cannotSave.title')}</h3>
 						<p className="mt-1 text-sm text-gray-500">
-							The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first.
+							{t('header.cannotSave.description')}
 						</p>
 						{yamlParseError && (
 							<p className="mt-3 rounded bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 font-mono whitespace-pre-wrap">

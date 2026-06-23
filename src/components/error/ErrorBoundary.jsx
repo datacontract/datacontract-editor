@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import i18n from '../../i18n';
 
 /**
  * Generic Error Boundary component that catches React errors in child components
@@ -83,14 +84,14 @@ class ErrorBoundary extends Component {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-red-800">
-                  Something went wrong
+                  {i18n.t('errorBoundary.title')}
                 </h3>
                 <p className="mt-1 text-xs text-red-700">
-                  {this.state.error?.message || 'An unexpected error occurred'}
+                  {this.state.error?.message || i18n.t('errorBoundary.unexpected')}
                 </p>
                 {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                   <details className="mt-2 text-xs text-red-600">
-                    <summary className="cursor-pointer font-medium">Stack trace</summary>
+                    <summary className="cursor-pointer font-medium">{i18n.t('errorBoundary.stackTrace')}</summary>
                     <pre className="mt-1 whitespace-pre-wrap overflow-auto max-h-32 text-xs">
                       {this.state.errorInfo.componentStack}
                     </pre>
@@ -100,7 +101,7 @@ class ErrorBoundary extends Component {
                   onClick={this.resetError}
                   className="mt-3 text-xs font-medium text-red-800 hover:text-red-900 underline"
                 >
-                  Try again
+                  {i18n.t('errorBoundary.tryAgain')}
                 </button>
               </div>
             </div>

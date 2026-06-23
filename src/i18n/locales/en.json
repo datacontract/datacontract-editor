@@ -86,6 +86,18 @@
     },
     "confirm": {
       "delete": "Are you sure you want to delete this data contract? This action cannot be undone."
+    },
+    "menu": {
+      "open": "Open menu"
+    },
+    "status": {
+      "valid": "Valid",
+      "testsPassed": "Tests passed",
+      "testsFailed": "Tests failed"
+    },
+    "cannotSave": {
+      "title": "Cannot save",
+      "description": "The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first."
     }
   },
   "team": {
@@ -928,6 +940,13 @@
     "notFound": {
       "title": "Schema not found at index {{index}}.",
       "description": "It may have been deleted."
+    },
+    "indicator": {
+      "primaryKey": "Primary Key",
+      "required": "Required",
+      "classification": "Classification: {{classification}}",
+      "qualityRules": "{{count}} quality rule(s)",
+      "relationships": "{{count}} relationship(s)"
     }
   },
   "server": {
@@ -1038,5 +1057,167 @@
   },
   "common": {
     "dragToResize": "Drag to resize"
+  },
+  "preview": {
+    "fundamentals": {
+      "heading": "Fundamentals",
+      "description": "Information about the data contract",
+      "name": "Name",
+      "version": "Version",
+      "id": "ID",
+      "status": "Status",
+      "tenant": "Tenant",
+      "domain": "Domain",
+      "dataProduct": "Data Product",
+      "contractCreated": "Contract Created",
+      "tags": "Tags"
+    },
+    "pricing": {
+      "heading": "Price",
+      "description": "This section covers pricing when you bill your customer for using this data product.",
+      "priceAmount": "Price Amount",
+      "priceCurrency": "Price Currency",
+      "priceUnit": "Price Unit"
+    },
+    "roles": {
+      "heading": "Roles",
+      "description": "Roles that a consumer may need to access the dataset, depending on the type of access they require",
+      "role": "Role",
+      "access": "Access",
+      "firstLevelApprovers": "First Level Approvers",
+      "secondLevelApprovers": "Second Level Approvers",
+      "customProperties": "Custom Properties"
+    },
+    "schema": {
+      "heading": "Schema",
+      "description": "Schema supports both a business representation and physical implementation",
+      "inheritedFromSemantic": "Inherited from semantic definition",
+      "noDescription": "No description",
+      "example": "Example:",
+      "examples": "Examples:",
+      "primaryKey": "primaryKey",
+      "required": "required",
+      "unique": "unique",
+      "partitioned": "partitioned",
+      "criticalDataElement": "critical data element",
+      "transformation": "transformation",
+      "transformLogic": "Transform Logic:",
+      "transformDescription": "Description:",
+      "format": "Format: {{value}}",
+      "minLength": "Min Length: {{value}}",
+      "maxLength": "Max Length: {{value}}",
+      "pattern": "Pattern: {{value}}",
+      "minimum": "Minimum: {{value}}",
+      "maximum": "Maximum: {{value}}",
+      "exclusiveMinimum": "Exclusive Minimum: {{value}}",
+      "exclusiveMaximum": "Exclusive Maximum: {{value}}",
+      "multipleOf": "Multiple Of: {{value}}",
+      "minItems": "Min Items: {{value}}",
+      "maxItems": "Max Items: {{value}}",
+      "uniqueItems": "Unique Items: {{value}}",
+      "minProperties": "Min Properties: {{value}}",
+      "maxProperties": "Max Properties: {{value}}",
+      "requiredList": "Required: {{value}}",
+      "timezone": "Timezone: {{value}}",
+      "defaultTimezone": "Default Timezone: {{value}}",
+      "yes": "Yes",
+      "no": "No",
+      "qualityType": "Type: {{value}}",
+      "qualityDimension": "Dimension: {{value}}",
+      "qualityMetric": "Metric: {{value}}",
+      "mustBeGreaterThan": "Must be > {{value}}",
+      "mustBeLessThan": "Must be < {{value}}",
+      "mustBe": "Must be {{value}}",
+      "qualityCheck": "Quality Check"
+    },
+    "servers": {
+      "heading": "Servers",
+      "description": "This section covers connection details to physical data sets and infrastructure",
+      "type": "Type",
+      "project": "Project",
+      "dataset": "Dataset",
+      "endpoint": "Endpoint",
+      "location": "Location",
+      "path": "Path",
+      "account": "Account",
+      "catalog": "Catalog",
+      "database": "Database",
+      "schema": "Schema",
+      "table": "Table",
+      "view": "View",
+      "host": "Host",
+      "port": "Port",
+      "topic": "Topic",
+      "format": "Format",
+      "delimiter": "Delimiter",
+      "stagingDir": "Staging Dir",
+      "stream": "Stream",
+      "serviceName": "Service Name",
+      "warehouse": "Warehouse",
+      "region": "Region",
+      "regionName": "Region Name",
+      "roles": "Roles",
+      "roleAccess": "Access: {{access}}",
+      "roleFirstLevelApprovers": "1st Approvers: {{approvers}}",
+      "roleSecondLevelApprovers": "2nd Approvers: {{approvers}}"
+    },
+    "sla": {
+      "heading": "Service-Level Agreement (SLA)",
+      "sectionDescription": "This section describes the service-level agreements (SLA).",
+      "property": "Property",
+      "value": "Value",
+      "unit": "Unit",
+      "element": "Element(s)",
+      "driver": "Driver",
+      "scheduler": "Scheduler",
+      "schedule": "Schedule",
+      "description": "Description"
+    },
+    "support": {
+      "heading": "Support & Communication Channels",
+      "sectionDescription": "Support and communication channels help consumers find help regarding their use of the data contract",
+      "tool": "Tool",
+      "channel": "Channel",
+      "scope": "Scope",
+      "description": "Description",
+      "invitationUrl": "Invitation URL",
+      "invitation": "Invitation"
+    },
+    "team": {
+      "heading": "Team",
+      "description": "This section lists team information and members",
+      "teamName": "Team Name",
+      "descriptionLabel": "Description",
+      "tags": "Tags",
+      "customProperties": "Custom Properties",
+      "members": "Members",
+      "dateIn": "In: {{date}}",
+      "dateOut": "Out: {{date}}",
+      "replacedBy": "Replaced by: {{username}}"
+    }
+  },
+  "app": {
+    "error": {
+      "title": "Application Error",
+      "description": "The Data Contract Editor encountered a critical error and cannot continue.",
+      "errorLabel": "Error: ",
+      "unknown": "Unknown error",
+      "tryAgain": "Try Again",
+      "reload": "Reload Application",
+      "loadShareFailed": "Failed to load shared data contract. The link may be invalid."
+    }
+  },
+  "code": {
+    "schemaError": "Schema Error:",
+    "noChanges": {
+      "title": "No changes",
+      "description": "Your contract matches the last saved version."
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "unexpected": "An unexpected error occurred",
+    "stackTrace": "Stack trace",
+    "tryAgain": "Try again"
   }
 }

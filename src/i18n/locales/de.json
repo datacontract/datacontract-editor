@@ -86,6 +86,18 @@
     },
     "confirm": {
       "delete": "Möchtest du diesen Data Contract wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "menu": {
+      "open": "Menü öffnen"
+    },
+    "status": {
+      "valid": "Gültig",
+      "testsPassed": "Tests bestanden",
+      "testsFailed": "Tests fehlgeschlagen"
+    },
+    "cannotSave": {
+      "title": "Speichern nicht möglich",
+      "description": "Das YAML enthält Syntaxfehler und kann nicht gespeichert werden. Bitte behebe die Fehler zuerst in der YAML-Ansicht."
     }
   },
   "team": {
@@ -928,6 +940,13 @@
     "notFound": {
       "title": "Kein Schema an Position {{index}} gefunden.",
       "description": "Es wurde möglicherweise gelöscht."
+    },
+    "indicator": {
+      "primaryKey": "Primary Key",
+      "required": "Erforderlich",
+      "classification": "Klassifizierung: {{classification}}",
+      "qualityRules": "{{count}} Qualitätsregel(n)",
+      "relationships": "{{count}} Beziehung(en)"
     }
   },
   "server": {
@@ -1038,5 +1057,167 @@
   },
   "common": {
     "dragToResize": "Zum Anpassen ziehen"
+  },
+  "preview": {
+    "fundamentals": {
+      "heading": "Grundlagen",
+      "description": "Informationen zum Data Contract",
+      "name": "Name",
+      "version": "Version",
+      "id": "ID",
+      "status": "Status",
+      "tenant": "Tenant",
+      "domain": "Domain",
+      "dataProduct": "Data Product",
+      "contractCreated": "Contract erstellt",
+      "tags": "Tags"
+    },
+    "pricing": {
+      "heading": "Preisgestaltung",
+      "description": "Dieser Abschnitt behandelt die Preisgestaltung, wenn du deinem Kunden die Nutzung dieses Data Products in Rechnung stellst.",
+      "priceAmount": "Preisbetrag",
+      "priceCurrency": "Preiswährung",
+      "priceUnit": "Preiseinheit"
+    },
+    "roles": {
+      "heading": "Rollen",
+      "description": "Rollen, die ein Konsument benötigt, um auf den Datensatz zuzugreifen, abhängig von der Art des erforderlichen Zugriffs",
+      "role": "Rolle",
+      "access": "Zugriff",
+      "firstLevelApprovers": "Genehmiger erste Ebene",
+      "secondLevelApprovers": "Genehmiger zweite Ebene",
+      "customProperties": "Benutzerdefinierte Eigenschaften"
+    },
+    "schema": {
+      "heading": "Schema",
+      "description": "Schema unterstützt sowohl eine fachliche Darstellung als auch eine physische Implementierung",
+      "inheritedFromSemantic": "Vom Semantic Concept geerbt",
+      "noDescription": "Keine Beschreibung",
+      "example": "Beispiel:",
+      "examples": "Beispiele:",
+      "primaryKey": "primaryKey",
+      "required": "erforderlich",
+      "unique": "eindeutig",
+      "partitioned": "partitioniert",
+      "criticalDataElement": "kritisches Datenelement",
+      "transformation": "Transformation",
+      "transformLogic": "Transformationslogik:",
+      "transformDescription": "Beschreibung:",
+      "format": "Format: {{value}}",
+      "minLength": "Min. Länge: {{value}}",
+      "maxLength": "Max. Länge: {{value}}",
+      "pattern": "Muster: {{value}}",
+      "minimum": "Minimum: {{value}}",
+      "maximum": "Maximum: {{value}}",
+      "exclusiveMinimum": "Exklusives Minimum: {{value}}",
+      "exclusiveMaximum": "Exklusives Maximum: {{value}}",
+      "multipleOf": "Vielfaches von: {{value}}",
+      "minItems": "Min. Einträge: {{value}}",
+      "maxItems": "Max. Einträge: {{value}}",
+      "uniqueItems": "Eindeutige Einträge: {{value}}",
+      "minProperties": "Min. Eigenschaften: {{value}}",
+      "maxProperties": "Max. Eigenschaften: {{value}}",
+      "requiredList": "Erforderlich: {{value}}",
+      "timezone": "Zeitzone: {{value}}",
+      "defaultTimezone": "Standard-Zeitzone: {{value}}",
+      "yes": "Ja",
+      "no": "Nein",
+      "qualityType": "Typ: {{value}}",
+      "qualityDimension": "Dimension: {{value}}",
+      "qualityMetric": "Metrik: {{value}}",
+      "mustBeGreaterThan": "Muss > {{value}} sein",
+      "mustBeLessThan": "Muss < {{value}} sein",
+      "mustBe": "Muss {{value}} sein",
+      "qualityCheck": "Qualitätsprüfung"
+    },
+    "servers": {
+      "heading": "Server",
+      "description": "Dieser Abschnitt behandelt Verbindungsdetails zu physischen Datensätzen und Infrastruktur",
+      "type": "Typ",
+      "project": "Projekt",
+      "dataset": "Dataset",
+      "endpoint": "Endpunkt",
+      "location": "Standort",
+      "path": "Pfad",
+      "account": "Account",
+      "catalog": "Katalog",
+      "database": "Datenbank",
+      "schema": "Schema",
+      "table": "Tabelle",
+      "view": "View",
+      "host": "Host",
+      "port": "Port",
+      "topic": "Topic",
+      "format": "Format",
+      "delimiter": "Trennzeichen",
+      "stagingDir": "Staging-Verzeichnis",
+      "stream": "Stream",
+      "serviceName": "Servicename",
+      "warehouse": "Warehouse",
+      "region": "Region",
+      "regionName": "Regionsname",
+      "roles": "Rollen",
+      "roleAccess": "Zugriff: {{access}}",
+      "roleFirstLevelApprovers": "Genehmiger 1. Ebene: {{approvers}}",
+      "roleSecondLevelApprovers": "Genehmiger 2. Ebene: {{approvers}}"
+    },
+    "sla": {
+      "heading": "Service Level Agreement (SLA)",
+      "sectionDescription": "Dieser Abschnitt beschreibt die Service Level Agreements (SLA).",
+      "property": "Eigenschaft",
+      "value": "Wert",
+      "unit": "Einheit",
+      "element": "Element(e)",
+      "driver": "Treiber",
+      "scheduler": "Scheduler",
+      "schedule": "Zeitplan",
+      "description": "Beschreibung"
+    },
+    "support": {
+      "heading": "Support- & Kommunikationskanäle",
+      "sectionDescription": "Support- und Kommunikationskanäle helfen Konsumenten, Unterstützung bei der Nutzung des Data Contracts zu finden",
+      "tool": "Tool",
+      "channel": "Kanal",
+      "scope": "Scope",
+      "description": "Beschreibung",
+      "invitationUrl": "Einladungs-URL",
+      "invitation": "Einladung"
+    },
+    "team": {
+      "heading": "Team",
+      "description": "Dieser Abschnitt listet Teaminformationen und Mitglieder auf",
+      "teamName": "Teamname",
+      "descriptionLabel": "Beschreibung",
+      "tags": "Tags",
+      "customProperties": "Benutzerdefinierte Eigenschaften",
+      "members": "Mitglieder",
+      "dateIn": "Eintritt: {{date}}",
+      "dateOut": "Austritt: {{date}}",
+      "replacedBy": "Ersetzt durch: {{username}}"
+    }
+  },
+  "app": {
+    "error": {
+      "title": "Anwendungsfehler",
+      "description": "Der Data Contract Editor ist auf einen kritischen Fehler gestoßen und kann nicht fortgesetzt werden.",
+      "errorLabel": "Fehler: ",
+      "unknown": "Unbekannter Fehler",
+      "tryAgain": "Erneut versuchen",
+      "reload": "Anwendung neu laden",
+      "loadShareFailed": "Der geteilte Data Contract konnte nicht geladen werden. Der Link ist möglicherweise ungültig."
+    }
+  },
+  "code": {
+    "schemaError": "Schema-Fehler:",
+    "noChanges": {
+      "title": "Keine Änderungen",
+      "description": "Dein Contract entspricht der zuletzt gespeicherten Version."
+    }
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "unexpected": "Ein unerwarteter Fehler ist aufgetreten",
+    "stackTrace": "Stack-Trace",
+    "tryAgain": "Erneut versuchen"
   }
 }

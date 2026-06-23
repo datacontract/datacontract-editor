@@ -415,7 +415,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Test is currently running...
+                  {t('testResults.running')}
                 </>
               ) : (
                 <>
@@ -423,7 +423,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Run Test
+                  {t('testResults.runTest')}
                 </>
               )}
             </button>
@@ -491,13 +491,13 @@ const TestResultsPanel = ({ onCheckClick }) => {
       {/* Run Test Button */}
       <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">Data Contract Tests</h2>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">{t('testResults.title')}</h2>
           {lastTestStatus && (
             <div className="flex items-center gap-1.5">
               {lastTestStatus.success ? (
                 <>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Passed</span>
-                  <span className="inline-flex items-center text-green-600" title="All tests passed">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('testResults.passed')}</span>
+                  <span className="inline-flex items-center text-green-600" title={t('testResults.allPassed')}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                     </svg>
@@ -505,7 +505,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
                 </>
               ) : (
                 <>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Failed tests</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('testResults.failedTests')}</span>
                   <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
                     {lastTestStatus.problemCount}
                   </span>
@@ -573,7 +573,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
         </div>
         <div className="mt-2 flex items-center justify-between gap-2 min-w-0">
           <div className="text-xs text-gray-500 dark:text-gray-400 min-w-0 truncate">
-            Run tests via: <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline" title={apiServerUrl}>{apiServerUrl}</a>
+            {t('testResults.runVia')} <a href={apiServerUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-600 dark:text-blue-400 hover:underline" title={apiServerUrl}>{apiServerUrl}</a>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {showSettingsButton && (
@@ -592,7 +592,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
               onClick={() => setShowHelp(!showHelp)}
               className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium whitespace-nowrap"
             >
-              {showHelp ? 'Hide Help' : 'Show Help'}
+              {showHelp ? t('testResults.hideHelp') : t('testResults.showHelp')}
             </button>
           </div>
         </div>
