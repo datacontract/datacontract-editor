@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {useNavigate, useLocation} from 'react-router-dom';
 import {useEditorStore, getFileStorageBackend, initialYaml} from "../store.js";
 import {stringifyYaml, parseYaml} from '../utils/yaml.js';
@@ -15,6 +16,7 @@ const HamburgerIcon = () => (
 );
 
 const Header = () => {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const saveToFile = useEditorStore((state) => state.saveToFile);
@@ -105,7 +107,7 @@ const Header = () => {
 	};
 
 	const handleDelete = () => {
-		if (window.confirm('Are you sure you want to delete this data contract? This action cannot be undone.')) {
+		if (window.confirm(t('header.confirm.delete'))) {
 			if (editorConfig?.onDelete) {
 				editorConfig.onDelete();
 			}
@@ -506,7 +508,7 @@ const Header = () => {
 							<span className="hidden md:inline-flex isolate rounded-md shadow-xs ml-2 xl:ml-4">
                 <button type="button"
 												onClick={togglePreview}
-												title="Preview"
+												title={t('header.toolbar.preview')}
 												className={`relative inline-flex items-center rounded-l-md px-2 xl:px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 transition-colors ${
 													isPreviewVisible
 														? 'bg-gray-100'
@@ -522,7 +524,7 @@ const Header = () => {
                 </button>
                 <button type="button"
 												onClick={toggleWarnings}
-												title="Validation"
+												title={t('header.toolbar.validation')}
 												className={`relative -ml-px inline-flex items-center px-2 xl:px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 transition-colors ${
 													editorConfig?.tests?.enabled === false ? 'rounded-r-md' : ''
 												} ${
@@ -558,7 +560,7 @@ const Header = () => {
 								{editorConfig?.tests?.enabled !== false && (
 									<button type="button"
 													onClick={toggleTestResults}
-													title="Tests"
+													title={t('header.toolbar.tests')}
 													className={`relative -ml-px inline-flex items-center rounded-r-md px-2 xl:px-3 py-1.5 text-xs font-semibold inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 hover:cursor-pointer focus:z-10 transition-colors ${
 														isTestResultsVisible
 															? 'bg-gray-100'
@@ -629,7 +631,7 @@ const Header = () => {
 										className="inline-flex items-center justify-center gap-1 md:gap-2 rounded-md bg-indigo-600 px-2 md:px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500 hover:cursor-pointer"
 										onClick={handleSave}
 									>
-										{editorConfig?.saveLabel || 'Save'}
+										{editorConfig?.saveLabel || t('header.action.save')}
 									</button>
 								</>
 							) : (
