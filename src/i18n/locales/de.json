@@ -11,8 +11,7 @@
     "sla": "SLA",
     "customProperties": "Benutzerdefinierte Eigenschaften",
     "footer": {
-      "documentation": "Dokumentation",
-      "createdBy": "Erstellt von"
+      "documentation": "Dokumentation"
     }
   },
   "overview": {

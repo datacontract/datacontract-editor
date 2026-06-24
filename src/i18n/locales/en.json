@@ -11,8 +11,7 @@
     "sla": "SLA",
     "customProperties": "Custom Properties",
     "footer": {
-      "documentation": "Documentation",
-      "createdBy": "Created by"
+      "documentation": "Documentation"
     }
   },
   "overview": {
