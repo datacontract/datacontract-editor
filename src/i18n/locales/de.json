@@ -104,6 +104,9 @@
     "cannotSave": {
       "title": "Speichern nicht möglich",
       "description": "Das YAML enthält Syntaxfehler und kann nicht gespeichert werden. Bitte behebe die Fehler zuerst in der YAML-Ansicht."
+    },
+    "language": {
+      "label": "Sprache"
     }
   },
   "team": {

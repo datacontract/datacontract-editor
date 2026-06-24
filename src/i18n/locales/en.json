@@ -104,6 +104,9 @@
     "cannotSave": {
       "title": "Cannot save",
       "description": "The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first."
+    },
+    "language": {
+      "label": "Language"
     }
   },
   "team": {

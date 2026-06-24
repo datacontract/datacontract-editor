@@ -18,8 +18,9 @@ async function init() {
   const runtimeConfig = await loadRuntimeConfig();
   const editorConfig = buildEditorConfig(runtimeConfig);
 
-  // Standalone dev/Docker may carry a locale in runtime config; default English.
-  if (editorConfig?.locale) i18n.changeLanguage(editorConfig.locale);
+  // Standalone locale is resolved by i18next-browser-languagedetector (querystring →
+  // localStorage → browser), configured in ./i18n. The in-app language switcher persists
+  // the user's choice; nothing to do here.
 
   createRoot(document.getElementById('root')).render(
     <StrictMode>
