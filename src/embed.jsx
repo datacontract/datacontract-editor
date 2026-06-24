@@ -64,9 +64,11 @@ const DEFAULT_CONFIG = {
     helpText: null, // Custom help text (HTML string) - replaces default CLI instructions
   },
 
-  // UI language as a BCP-47 tag (e.g. 'en', 'de'). The host passes the resolved
-  // user locale; unknown/unsupported tags fall back to English. See src/i18n/index.js.
-  locale: 'en',
+  // UI language as a BCP-47 tag (e.g. 'en', 'de'). When the host passes one (embedded
+  // use, e.g. entropy-data) it wins. When omitted (standalone, e.g. editor.datacontract.com)
+  // the i18n language detector resolves it (?lang / localStorage / navigator). See
+  // src/i18n/index.js. Unknown/unsupported tags fall back to English.
+  locale: null,
 
   // Editor mode: 'SERVER' (default), 'DESKTOP', 'CLI', or 'EMBEDDED'
   // - SERVER: Server mode with full menu
@@ -419,9 +421,17 @@ export function init(userConfig = {}) {
   // Merge user config with defaults
   const config = { ...DEFAULT_CONFIG, ...userConfig };
 
-  // Apply the host-supplied locale to the editor's scoped i18n instance. Unknown/
-  // unsupported tags degrade to English via fallbackLng/supportedLngs.
-  i18n.changeLanguage(config.locale);
+  // Locale: an explicit host-supplied locale wins (embedded). Otherwise leave the
+  // language to the detector configured in ./i18n (standalone: ?lang / localStorage /
+  // navigator), and keep <html lang> in sync since the editor owns the page in that case.
+  if (config.locale) {
+    i18n.changeLanguage(config.locale);
+  } else if (typeof document !== 'undefined') {
+    const syncHtmlLang = (lng) => { document.documentElement.lang = lng; };
+    syncHtmlLang(i18n.resolvedLanguage || 'en');
+    i18n.off('languageChanged', syncHtmlLang);
+    i18n.on('languageChanged', syncHtmlLang);
+  }
 
   // Set up base path for workers if provided
   if (config.basePath && typeof window !== 'undefined') {
