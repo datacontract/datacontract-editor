@@ -15,8 +15,15 @@ const HamburgerIcon = () => (
 	</svg>
 );
 
+// Supported UI languages for the standalone language switcher. Labels are autonyms
+// (each language shown in its own name) and intentionally not translated.
+const LANGUAGES = [
+	{ code: 'en', label: 'English' },
+	{ code: 'de', label: 'Deutsch' },
+];
+
 const Header = () => {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const saveToFile = useEditorStore((state) => state.saveToFile);
@@ -155,6 +162,10 @@ const Header = () => {
 			alert(`Failed to open file: ${error.message}`);
 		}
 	};
+
+	// Standalone language switch. The i18n language detector (caches: ['localStorage'])
+	// persists the choice automatically; embedded mode never reaches this menu.
+	const handleLanguageChange = (code) => i18n.changeLanguage(code);
 
 	// Determine which form to navigate to based on cursor position in YAML
 	const determineFormFromYamlLine = (lineNumber) => {
@@ -406,7 +417,7 @@ const Header = () => {
 						<button
 							onClick={toggleMobileSidebar}
 							className="md:hidden p-2 -ml-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-							aria-label="Open menu"
+							aria-label={t('header.menu.open')}
 						>
 							<HamburgerIcon/>
 						</button>
@@ -540,7 +551,7 @@ const Header = () => {
                       </div>
                       <span className="hidden lg:inline">{t('header.toolbar.validation')}</span>
 											{totalCount === 0 ? (
-												<span className="lg:ml-1 inline-flex items-center text-green-600" title="Valid">
+												<span className="lg:ml-1 inline-flex items-center text-green-600" title={t('header.status.valid')}>
                           <div className="size-4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd"
@@ -575,7 +586,7 @@ const Header = () => {
                       <span className="hidden lg:inline">{t('header.toolbar.tests')}</span>
 											{testResults.length > 0 && (
 												hasTestPassed ? (
-													<span className="lg:ml-1.5 inline-flex items-center text-green-600" title="Tests passed">
+													<span className="lg:ml-1.5 inline-flex items-center text-green-600" title={t('header.status.testsPassed')}>
                             <div className="size-4">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd"
@@ -590,7 +601,7 @@ const Header = () => {
                             {testProblemCount}
                           </span>
 												) : (
-													<span className="lg:ml-1.5 inline-flex items-center text-red-600" title="Tests failed">
+													<span className="lg:ml-1.5 inline-flex items-center text-red-600" title={t('header.status.testsFailed')}>
                             <div className="size-4">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd"
@@ -641,7 +652,7 @@ const Header = () => {
 										className="inline-flex items-center justify-center gap-1 md:gap-2 rounded-md bg-indigo-600 px-2 md:px-3 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500"
 										onClick={handleSave}
 									>
-										Save
+										{t('header.action.save')}
 									</button>
 									{!isServerMode && (
 										<Menu as="div" className="relative inline-block">
@@ -667,7 +678,7 @@ const Header = () => {
 																	 viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
 															</svg>
-															New
+															{t('header.action.new')}
 														</button>
 													</MenuItem>
 													<MenuItem>
@@ -680,7 +691,7 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
 															</svg>
-															Load Example
+															{t('header.action.loadExample')}
 														</button>
 													</MenuItem>
 												</div>
@@ -695,7 +706,7 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"/>
 															</svg>
-															Open
+															{t('header.action.open')}
 														</button>
 													</MenuItem>
 													<MenuItem>
@@ -708,9 +719,35 @@ const Header = () => {
 																<path strokeLinecap="round" strokeLinejoin="round"
 																			d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
 															</svg>
-															Save
+															{t('header.action.save')}
 														</button>
 													</MenuItem>
+												</div>
+												<div className="py-1">
+													<div className="px-4 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+														{t('header.language.label')}
+													</div>
+													{LANGUAGES.map((lng) => (
+														<MenuItem key={lng.code}>
+															<button
+																onClick={() => handleLanguageChange(lng.code)}
+																className="group flex w-full items-center px-4 py-2 text-xs text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
+															>
+																<svg className="mr-3 h-5 w-5 text-gray-400 group-data-[focus]:text-gray-500" fill="none"
+																		 viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+																	<path strokeLinecap="round" strokeLinejoin="round"
+																				d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/>
+																</svg>
+																<span className="flex-1 text-left">{lng.label}</span>
+																{i18n.resolvedLanguage === lng.code && (
+																	<svg className="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24"
+																			 strokeWidth={2} stroke="currentColor">
+																		<path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+																	</svg>
+																)}
+															</button>
+														</MenuItem>
+													))}
 												</div>
 											</MenuItems>
 										</Menu>
@@ -745,9 +782,9 @@ const Header = () => {
 						</div>
 					</div>
 					<div className="min-w-0">
-						<h3 className="text-base font-semibold text-gray-900">Cannot save</h3>
+						<h3 className="text-base font-semibold text-gray-900">{t('header.cannotSave.title')}</h3>
 						<p className="mt-1 text-sm text-gray-500">
-							The YAML contains syntax errors and cannot be saved. Please fix the errors in the YAML view first.
+							{t('header.cannotSave.description')}
 						</p>
 						{yamlParseError && (
 							<p className="mt-3 rounded bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 font-mono whitespace-pre-wrap">

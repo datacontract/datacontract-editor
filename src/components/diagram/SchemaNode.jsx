@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useRef, Fragment, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Handle, Position, NodeToolbar, useReactFlow, useStore } from '@xyflow/react';
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
 import SemanticIcon from '../ui/icons/SemanticIcon.jsx';
@@ -69,6 +70,7 @@ const SortablePropertyRow = ({ id: propId, property, children }) => {
 };
 
 const SchemaNode = ({ data, id }) => {
+  const { t } = useTranslation();
   const { getNode } = useReactFlow();
   // Current canvas zoom. Used to keep the connection-handle "grab target"
   // large in screen space when the user zooms out (otherwise the handle
@@ -386,7 +388,7 @@ const SchemaNode = ({ data, id }) => {
           <button
             onClick={handleAddProperty}
             className="p-1.5 text-gray-700 hover:bg-gray-100 rounded transition-colors"
-            title="Add property"
+            title={t('diagram.schema.addProperty')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -396,7 +398,7 @@ const SchemaNode = ({ data, id }) => {
             <button
               onClick={() => setShowMenu(!showMenu)}
               className="p-1.5 text-gray-700 hover:bg-gray-100 rounded transition-colors"
-              title="More options"
+              title={t('diagram.schema.moreOptions')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -414,7 +416,7 @@ const SchemaNode = ({ data, id }) => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  Delete Schema
+                  {t('diagram.schema.delete')}
                 </button>
               </div>
             )}
@@ -455,9 +457,9 @@ const SchemaNode = ({ data, id }) => {
             <div
               className="cursor-pointer hover:opacity-80 flex-1 min-w-0 flex items-center gap-1.5"
               onClick={handleStartEditSchemaName}
-              title="Click to edit"
+              title={t('diagram.clickToEdit')}
             >
-              <span className="font-bold text-md truncate">{data.schema.name || 'Unnamed Schema'}</span>
+              <span className="font-bold text-md truncate">{data.schema.name || t('diagram.schema.unnamed')}</span>
               {data.schema.authoritativeDefinitions?.some((d) => isSemanticAuthDef(d)) && (
                 <SemanticIcon className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
               )}
@@ -471,7 +473,7 @@ const SchemaNode = ({ data, id }) => {
               data.onToggleCollapse?.(data.schema.name);
             }}
             className="ml-1 flex-shrink-0 p-1 rounded text-gray-600 hover:bg-white hover:text-gray-900 transition-colors"
-            title={data.collapseMode === 'keys' ? 'Show all properties' : 'Show keys only'}
+            title={data.collapseMode === 'keys' ? t('diagram.collapse.showAll') : t('diagram.collapse.keysOnly')}
           >
             {data.collapseMode === 'keys' ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -548,7 +550,7 @@ const SchemaNode = ({ data, id }) => {
                 id={`${id}-prop-${index}-source`}
                 className="dce-prop-handle dce-prop-handle-source"
                 style={{ left: -1 }}
-                title="Drag from here to a property on another table to create a relationship"
+                title={t('diagram.handle.source')}
               />
               <Handle
                 type="target"
@@ -557,7 +559,7 @@ const SchemaNode = ({ data, id }) => {
                 isConnectableStart={false}
                 className="dce-prop-handle dce-prop-handle-target"
                 style={{ right: -1 }}
-                title="Drop a relationship here"
+                title={t('diagram.handle.target')}
               />
               <div className="flex justify-between items-center">
                 {/* Left side: Name and icons */}
@@ -581,7 +583,7 @@ const SchemaNode = ({ data, id }) => {
                         }
                       }}
                       className="flex-1 px-2 py-1 text-sm bg-white text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500"
-                      placeholder="property name"
+                      placeholder={t('diagram.property.namePlaceholder')}
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
@@ -593,7 +595,7 @@ const SchemaNode = ({ data, id }) => {
                         {...dragHandleProps}
                         className="nodrag cursor-grab active:cursor-grabbing touch-none"
                         onClick={(e) => e.stopPropagation()}
-                        title="Drag to reorder"
+                        title={t('diagram.property.dragToReorder')}
                       >
                         {(() => {
                           const TypeIcon = getLogicalTypeIcon(effectiveLogicalType);
@@ -617,9 +619,9 @@ const SchemaNode = ({ data, id }) => {
                             data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
                           }
                         }}
-                        title="Click to edit"
+                        title={t('diagram.clickToEdit')}
                       >
-                        {!prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'unnamed property' : prop.name}
+                        {!prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? t('diagram.property.unnamed') : prop.name}
                       </span>
                       {/* Add nested property button - only shown for object types */}
                       {prop.logicalType === 'object' && (
@@ -629,7 +631,7 @@ const SchemaNode = ({ data, id }) => {
                             handleAddNestedProperty(index);
                           }}
                           className="p-0.5 text-indigo-600 rounded transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 hover:opacity-100 hover:bg-indigo-50"
-                          title="Add nested property"
+                          title={t('diagram.property.addNested')}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -778,7 +780,7 @@ const SchemaNode = ({ data, id }) => {
                                 }
                               }}
                               className="flex-1 px-1 py-0.5 text-xs bg-white text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500"
-                              placeholder="property name"
+                              placeholder={t('diagram.property.namePlaceholder')}
                               autoFocus
                               onClick={(e) => e.stopPropagation()}
                             />
@@ -792,9 +794,9 @@ const SchemaNode = ({ data, id }) => {
                                 setEditingNestedProperty({ parentIndex: index, nestedIndex: `items-${itemPropIndex}`, field: 'name' });
                                 setEditedNestedValue(itemProp.name || '');
                               }}
-                              title="Click to edit"
+                              title={t('diagram.clickToEdit')}
                             >
-                              {itemProp.name || 'unnamed'}
+                              {itemProp.name || t('diagram.property.unnamedShort')}
                             </span>
                           )}
                         </div>
@@ -930,7 +932,7 @@ const SchemaNode = ({ data, id }) => {
                             }
                           }}
                           className="flex-1 px-1 py-0.5 text-xs bg-white text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500"
-                          placeholder="property name"
+                          placeholder={t('diagram.property.namePlaceholder')}
                           autoFocus
                           onClick={(e) => e.stopPropagation()}
                         />
@@ -943,9 +945,9 @@ const SchemaNode = ({ data, id }) => {
                             e.stopPropagation();
                             handleStartEditNestedProperty(index, nestedIndex, 'name', nestedProp.name);
                           }}
-                          title="Click to edit"
+                          title={t('diagram.clickToEdit')}
                         >
-                          {nestedProp.name || 'unnamed'}
+                          {nestedProp.name || t('diagram.property.unnamedShort')}
                         </span>
                       )}
                     </div>
@@ -976,7 +978,7 @@ const SchemaNode = ({ data, id }) => {
             className="px-4 py-3 text-xs text-gray-400 italic cursor-pointer hover:bg-gray-50"
             onClick={handleAddProperty}
           >
-            No properties defined
+            {t('diagram.schema.noProperties')}
           </div>
         )}
         {data.schema.properties?.length > 0 && data.collapseMode === 'keys' && (() => {
@@ -997,11 +999,11 @@ const SchemaNode = ({ data, id }) => {
                 data.onToggleCollapse?.(data.schema.name, 'full');
               }}
               className="w-full px-3 py-1.5 text-xs text-gray-500 hover:text-indigo-700 hover:bg-indigo-50 flex items-center justify-center gap-1 transition-colors"
-              title="Show all properties"
+              title={t('diagram.collapse.showAll')}
             >
-              <span>+{hidden} hidden</span>
+              <span>{t('diagram.collapse.hiddenCount', { count: hidden })}</span>
               <span className="text-gray-400">·</span>
-              <span className="font-medium">Show all</span>
+              <span className="font-medium">{t('diagram.collapse.showAllShort')}</span>
             </button>
           );
         })()}
@@ -1028,7 +1030,7 @@ const SchemaNode = ({ data, id }) => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Delete
+            {t('diagram.property.delete')}
           </button>
         </div>
       )}

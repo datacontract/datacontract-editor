@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import ValidatedCombobox from './ValidatedCombobox.jsx';
@@ -9,8 +10,10 @@ import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
  * QualityEditor - Custom component for editing ODCS 3.1.0 quality rules
  * Provides a smart interface that shows relevant fields based on quality type
  */
-const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality Rule', helpText }) => {
+const QualityEditor = ({ value, onChange, context = 'property', label, helpText }) => {
+  const { t } = useTranslation();
   const jsonSchema = useEditorStore((state) => state.schemaData);
+  const resolvedLabel = label || t('quality.label');
 
   // Get dynamic enum values from schema
   const qualityDimensionOptions = useMemo(() => {
@@ -43,13 +46,13 @@ const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-gray-700">{label}</label>
+        <label className="text-xs font-medium text-gray-700">{resolvedLabel}</label>
         <button
           type="button"
           onClick={addRule}
           className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          + Add
+          + {t('quality.add')}
         </button>
       </div>
 
@@ -66,7 +69,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality
       ))}
 
       {rules.length === 0 && (
-        <div className="text-xs text-gray-500 italic">No quality rules defined</div>
+        <div className="text-xs text-gray-500 italic">{t('quality.empty')}</div>
       )}
 
       {helpText && (
@@ -77,6 +80,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label = 'Quality
 };
 
 const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState(null);
@@ -90,12 +94,12 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
 
   // Operator definitions
   const operatorOptions = [
-    { value: 'mustBe', label: 'Must Be (=)', symbol: '=' },
-    { value: 'mustNotBe', label: 'Must Not Be (≠)', symbol: '≠' },
-    { value: 'mustBeGreaterThan', label: 'Must Be Greater Than (>)', symbol: '>' },
-    { value: 'mustBeGreaterOrEqualTo', label: 'Must Be Greater Or Equal (≥)', symbol: '≥' },
-    { value: 'mustBeLessThan', label: 'Must Be Less Than (<)', symbol: '<' },
-    { value: 'mustBeLessOrEqualTo', label: 'Must Be Less Or Equal (≤)', symbol: '≤' }
+    { value: 'mustBe', label: t('quality.operator.mustBe'), symbol: '=' },
+    { value: 'mustNotBe', label: t('quality.operator.mustNotBe'), symbol: '≠' },
+    { value: 'mustBeGreaterThan', label: t('quality.operator.mustBeGreaterThan'), symbol: '>' },
+    { value: 'mustBeGreaterOrEqualTo', label: t('quality.operator.mustBeGreaterOrEqualTo'), symbol: '≥' },
+    { value: 'mustBeLessThan', label: t('quality.operator.mustBeLessThan'), symbol: '<' },
+    { value: 'mustBeLessOrEqualTo', label: t('quality.operator.mustBeLessOrEqualTo'), symbol: '≤' }
   ];
 
   // Initialize selected operator from rule data on mount and when rule changes
@@ -140,8 +144,8 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
   const getSummary = () => {
     const parts = [];
     if (rule.name) parts.push(rule.name);
-    if (rule.metric) parts.push(`Metric: ${rule.metric}`);
-    if (rule.dimension) parts.push(`Dimension: ${rule.dimension}`);
+    if (rule.metric) parts.push(`${t('quality.summary.metric')}: ${rule.metric}`);
+    if (rule.dimension) parts.push(`${t('quality.summary.dimension')}: ${rule.dimension}`);
 
     // Show operator summary with actual symbol and value
     const activeOps = operatorOptions.filter(op => rule[op.value] !== undefined);
@@ -149,7 +153,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
       parts.push(`${op.value} ${rule[op.value]}${rule.unit === 'percent' ? '%' : ''}`);
     });
 
-    return parts.length > 0 ? parts.join(' • ') : 'New rule';
+    return parts.length > 0 ? parts.join(' • ') : t('quality.summary.new');
   };
 
   return (
@@ -190,28 +194,28 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
           {/* Core Fields - Always shown */}
           <div className="grid grid-cols-12 gap-3 items-end">
             <div className="col-span-4">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.type.label')}</label>
               <select
                 value={rule.type || ''}
                 onChange={(e) => onUpdate(index, 'type', e.target.value)}
                 className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
               >
-                <option value="">Select...</option>
-                <option value="text">Text</option>
-                <option value="library">Library (Metric)</option>
-                <option value="sql">SQL</option>
-                <option value="custom">Custom</option>
+                <option value="">{t('quality.select')}</option>
+                <option value="text">{t('quality.type.text')}</option>
+                <option value="library">{t('quality.type.library')}</option>
+                <option value="sql">{t('quality.type.sql')}</option>
+                <option value="custom">{t('quality.type.custom')}</option>
               </select>
             </div>
 
             <div className="col-span-7">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.name.label')}</label>
               <input
                 type="text"
                 value={rule.name || ''}
                 onChange={(e) => onUpdate(index, 'name', e.target.value)}
                 className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                placeholder="Rule identifier"
+                placeholder={t('quality.name.placeholder')}
               />
             </div>
 
@@ -219,7 +223,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
               type="button"
               onClick={() => onRemove(index)}
               className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
-              title="Remove Rule"
+              title={t('quality.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -228,13 +232,13 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.description.label')}</label>
             <textarea
               value={rule.description || ''}
               onChange={(e) => onUpdate(index, 'description', e.target.value)}
               rows={2}
               className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-              placeholder="Human-readable explanation of the check"
+              placeholder={t('quality.description.placeholder')}
             />
           </div>
 
@@ -242,13 +246,13 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
           {showLibraryFields && (
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Metric</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.metric.label')}</label>
                 <select
                   value={rule.metric || ''}
                   onChange={(e) => onUpdate(index, 'metric', e.target.value)}
                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                 >
-                  <option value="">Select metric...</option>
+                  <option value="">{t('quality.metric.placeholder')}</option>
                   <option value="nullValues">nullValues</option>
                   <option value="missingValues">missingValues</option>
                   <option value="invalidValues">invalidValues</option>
@@ -260,7 +264,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
               {/* Metric-specific arguments */}
               {rule.metric === 'missingValues' && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Missing Values (one per line)</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.missingValues.label')}</label>
                   <textarea
                     value={rule.arguments?.missingValues?.join('\n') || ''}
                     onChange={(e) => {
@@ -272,7 +276,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                     placeholder="null&#10;&#10;N/A&#10;n/a"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Values considered as missing beyond null</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('quality.missingValues.help')}</p>
                 </div>
               )}
 
@@ -280,7 +284,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Valid Values (one per line) <span className="text-gray-500">OR Pattern</span>
+                      {t('quality.validValues.label')} <span className="text-gray-500">{t('quality.validValues.orPattern')}</span>
                     </label>
                     <textarea
                       value={rule.arguments?.validValues?.join('\n') || ''}
@@ -299,11 +303,11 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                       placeholder="pounds&#10;kg"
                     />
-                    <p className="text-xs text-gray-500 mt-1">List of acceptable values</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('quality.validValues.help')}</p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      <span className="text-gray-500">Valid Values OR</span> Pattern (Regex)
+                      <span className="text-gray-500">{t('quality.pattern.validValuesOr')}</span> {t('quality.pattern.label')}
                     </label>
                     <input
                       type="text"
@@ -321,14 +325,14 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                       placeholder="^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Regular expression for validation</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('quality.pattern.help')}</p>
                   </div>
                 </div>
               )}
 
               {rule.metric === 'duplicateValues' && context === 'schema' && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Properties (one per line)</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.properties.label')}</label>
                   <textarea
                     value={rule.arguments?.properties?.join('\n') || ''}
                     onChange={(e) => {
@@ -340,7 +344,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                     placeholder="tenant_id&#10;order_id"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Column names to check for duplicate combinations</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('quality.properties.help')}</p>
                 </div>
               )}
             </div>
@@ -349,7 +353,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
           {/* SQL-specific fields */}
           {showSqlFields && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">SQL Query</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.sqlQuery.label')}</label>
               <textarea
                 value={rule.query || ''}
                 onChange={(e) => onUpdate(index, 'query', e.target.value)}
@@ -357,7 +361,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                 className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
                 placeholder="SELECT COUNT(*) FROM {object} WHERE..."
               />
-              <p className="text-xs text-gray-500 mt-1">Hint: Use {`{object}`} and {`{property}`} as placeholders</p>
+              <p className="text-xs text-gray-500 mt-1">{t('quality.sqlQuery.hint', { object: '{object}', property: '{property}' })}</p>
             </div>
           )}
 
@@ -365,24 +369,24 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
           {showCustomFields && (
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Engine</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.engine.label')}</label>
                 <input
                   type="text"
                   value={rule.engine || ''}
                   onChange={(e) => onUpdate(index, 'engine', e.target.value)}
                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                  placeholder="e.g., soda, greatExpectations, montecarlo"
+                  placeholder={t('quality.engine.placeholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Implementation</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('quality.implementation.label')}</label>
                 <textarea
                   value={rule.implementation || ''}
                   onChange={(e) => onUpdate(index, 'implementation', e.target.value)}
                   rows={4}
                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono"
-                  placeholder="Vendor-specific configuration block"
+                  placeholder={t('quality.implementation.placeholder')}
                 />
               </div>
             </div>
@@ -395,11 +399,11 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                 <div>
                   <ValidatedCombobox
                     name="operator"
-                    label="Operator"
+                    label={t('quality.operator.label')}
                     options={operatorOptions.map(op => ({ id: op.value, name: op.label }))}
                     value={selectedOperator || ''}
                     onChange={handleOperatorChange}
-                    placeholder="Select operator..."
+                    placeholder={t('quality.operator.placeholder')}
                     required={true}
                     acceptAnyInput={false}
                     displayValue={(val) => {
@@ -413,25 +417,25 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Value</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.value.label')}</label>
                   <input
                     type="number"
                     value={selectedOperator ? (rule[selectedOperator] ?? '') : ''}
                     onChange={(e) => handleOperatorValueChange(e.target.value ? Number(e.target.value) : undefined)}
                     disabled={!selectedOperator}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed text-xs"
-                    placeholder={selectedOperator ? "Enter numeric value" : "Select operator first"}
+                    placeholder={selectedOperator ? t('quality.value.placeholder') : t('quality.value.placeholderDisabled')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Unit</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.unit.label')}</label>
                   <select
                     value={rule.unit || ''}
                     onChange={(e) => onUpdate(index, 'unit', e.target.value)}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                   >
-                    <option value="">Default (rows)</option>
+                    <option value="">{t('quality.unit.default')}</option>
                     <option value="rows">rows</option>
                     <option value="percent">percent</option>
                   </select>
@@ -447,7 +451,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
               onClick={() => setIsAdditionalDetailsExpanded(!isAdditionalDetailsExpanded)}
               className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded bg-gray-50"
             >
-              <h4 className="text-xs font-medium text-gray-700">Additional Details</h4>
+              <h4 className="text-xs font-medium text-gray-700">{t('quality.additionalDetails')}</h4>
               <ChevronDownIcon
                 className={`h-4 w-4 text-gray-500 transition-transform ${isAdditionalDetailsExpanded ? 'rotate-180' : ''}`}
               />
@@ -457,13 +461,13 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
               <div className="space-y-3 mt-2">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Dimension</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.dimension.label')}</label>
                     <select
                       value={rule.dimension || ''}
                       onChange={(e) => onUpdate(index, 'dimension', e.target.value)}
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                     >
-                      <option value="">Select...</option>
+                      <option value="">{t('quality.select')}</option>
                       {dimensionOptions.map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
                       ))}
@@ -471,42 +475,42 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Severity</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.severity.label')}</label>
                     <input
                       type="text"
                       value={rule.severity || ''}
                       onChange={(e) => onUpdate(index, 'severity', e.target.value)}
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                      placeholder="e.g., critical, warning"
+                      placeholder={t('quality.severity.placeholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Business Impact</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.businessImpact.label')}</label>
                   <textarea
                     value={rule.businessImpact || ''}
                     onChange={(e) => onUpdate(index, 'businessImpact', e.target.value)}
                     rows={2}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                    placeholder="Consequences of rule failure"
+                    placeholder={t('quality.businessImpact.placeholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Scheduler</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.scheduler.label')}</label>
                     <input
                       type="text"
                       value={rule.scheduler || ''}
                       onChange={(e) => onUpdate(index, 'scheduler', e.target.value)}
                       className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-                      placeholder="e.g., cron"
+                      placeholder={t('quality.scheduler.placeholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Schedule</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t('quality.schedule.label')}</label>
                     <input
                       type="text"
                       value={rule.schedule || ''}

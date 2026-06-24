@@ -1,9 +1,11 @@
 import Tags from '../../ui/Tags.jsx';
 import { IconResolver } from '../../ui/IconResolver.jsx';
+import {useTranslation} from 'react-i18next';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 
 const FundamentalsSection = () => {
+	const { t } = useTranslation();
 	const id = useEditorStore(useShallow(state => state.getValue('id')));
 	const name = useEditorStore(useShallow(state => state.getValue('name')));
 	const version = useEditorStore(useShallow(state => state.getValue('version')));
@@ -35,8 +37,8 @@ const FundamentalsSection = () => {
 	return (
 		<section>
 			<div className="px-4 sm:px-0">
-				<h1 className="text-base font-semibold leading-6 text-gray-900" id="fundamentals">Fundamentals</h1>
-				<p className="text-sm text-gray-500">Information about the data contract</p>
+				<h1 className="text-base font-semibold leading-6 text-gray-900" id="fundamentals">{t('preview.fundamentals.heading')}</h1>
+				<p className="text-sm text-gray-500">{t('preview.fundamentals.description')}</p>
 			</div>
 			<div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">
 				<div className="px-4 py-4 sm:px-6">
@@ -66,63 +68,63 @@ const FundamentalsSection = () => {
 					<dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
 						{name && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Name</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.name')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{name}</dd>
 							</div>
 						)}
 
 						{version && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Version</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.version')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{version}</dd>
 							</div>
 						)}
 
 						{id && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">ID</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.id')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{id}</dd>
 							</div>
 						)}
 
 						{status && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Status</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.status')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{status}</dd>
 							</div>
 						)}
 
 						{tenant && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Tenant</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.tenant')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{tenant}</dd>
 							</div>
 						)}
 
 						{domain && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Domain</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.domain')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{domain}</dd>
 							</div>
 						)}
 
 						{dataProduct && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Data Product</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.dataProduct')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{dataProduct}</dd>
 							</div>
 						)}
 
 						{contractCreatedTs && (
 							<div className="sm:col-span-1">
-								<dt className="text-sm font-medium text-gray-500">Contract Created</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.contractCreated')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">{new Date(contractCreatedTs).toLocaleString()}</dd>
 							</div>
 						)}
 
 						{tags && Array.isArray(tags) && tags.length > 0 && (
 							<div className="sm:col-span-2">
-								<dt className="text-sm font-medium text-gray-500">Tags</dt>
+								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.tags')}</dt>
 								<dd className="mt-1 text-sm text-gray-900">
                   <Tags tags={tags} managedTags={editorConfig.managedTags} />
 								</dd>

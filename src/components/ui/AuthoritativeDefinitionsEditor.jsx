@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import ExternalLinkIcon from './icons/ExternalLinkIcon.jsx';
@@ -13,6 +14,7 @@ import { toAbsoluteUrl, isExternalUrl } from '../../lib/urlUtils.js';
  * @param {Function} onChange - Callback when array changes
  */
 const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
+  const { t } = useTranslation();
   const handleAdd = () => {
     const updatedArray = [...value, { type: '', url: '', description: '' }];
     onChange(updatedArray);
@@ -33,13 +35,13 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
     <div className="space-y-2">
       {/* Header with label and add button */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-gray-700">Authoritative Definitions</label>
+        <label className="text-xs font-medium text-gray-700">{t('authDef.heading')}</label>
         <button
           type="button"
           onClick={handleAdd}
           className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          + Add
+          + {t('authDef.add')}
         </button>
       </div>
 
@@ -58,13 +60,14 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
 };
 
 const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!item.type && !item.url);
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
 
   // Generate a summary of the definition
   const getSummary = () => {
-    if (!item.type && !item.url) return 'New definition';
+    if (!item.type && !item.url) return t('authDef.new');
     return item.type || '';
   };
 
@@ -88,8 +91,8 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <LinkIcon className="size-3 text-indigo-600 shrink-0" />
-            <span className="text-xs font-medium text-gray-900">Authoritative Definition</span>
-            {getSummary() && getSummary() !== 'New definition' && (
+            <span className="text-xs font-medium text-gray-900">{t('authDef.title')}</span>
+            {getSummary() && getSummary() !== t('authDef.new') && (
               <span className="text-xs text-gray-500">• {getSummary()}</span>
             )}
           </div>
@@ -108,7 +111,7 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
                 </a>
               </Tooltip>
             ) : (
-              <span className="italic text-gray-400">New definition</span>
+              <span className="italic text-gray-400">{t('authDef.new')}</span>
             )}
           </div>
         </div>
@@ -132,17 +135,17 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
           {/* Type and URL row */}
           <div className="grid grid-cols-12 gap-2 items-end">
             <div className="col-span-4">
-              <label className="block text-xs font-medium text-gray-700 mb-0.5">Type</label>
+              <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('authDef.type.label')}</label>
               <input
                 type="text"
                 value={item.type || ''}
                 onChange={(e) => onUpdate(index, 'type', e.target.value)}
                 className={inputClasses}
-                placeholder="e.g., businessDefinition"
+                placeholder={t('authDef.type.placeholder')}
               />
             </div>
             <div className="col-span-7">
-              <label className="block text-xs font-medium text-gray-700 mb-0.5">URL</label>
+              <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('authDef.url.label')}</label>
               <input
                 type="text"
                 value={item.url || ''}
@@ -155,7 +158,7 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
               type="button"
               onClick={() => onRemove(index)}
               className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
-              title="Remove"
+              title={t('authDef.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -165,12 +168,12 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
 
           {/* Description field */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-0.5">Description</label>
+            <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('authDef.description.label')}</label>
             <textarea
               value={item.description || ''}
               onChange={(e) => onUpdate(index, 'description', e.target.value)}
               className={inputClasses}
-              placeholder="Describe the authoritative definition..."
+              placeholder={t('authDef.description.placeholder')}
               rows={2}
             />
           </div>

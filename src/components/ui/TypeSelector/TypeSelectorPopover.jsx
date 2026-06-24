@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import LogicalTypeCombobox from './LogicalTypeCombobox';
 import PhysicalTypeCombobox from './PhysicalTypeCombobox';
 
@@ -14,13 +15,14 @@ const TypeSelectorPopover = ({
   disabled = false,
   fallbackLogicalType = null,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="p-4 space-y-4 min-w-[280px]">
       <LogicalTypeCombobox
         value={logicalType}
         onChange={onLogicalTypeChange}
         disabled={disabled}
-        label="Logical Type"
+        label={t("schema.field.logicalType.label")}
         fallbackValue={fallbackLogicalType}
       />
       <PhysicalTypeCombobox
@@ -29,7 +31,7 @@ const TypeSelectorPopover = ({
         serverType={serverType}
         logicalType={logicalType || fallbackLogicalType}
         disabled={disabled}
-        label="Physical Type"
+        label={t("schema.field.physicalType.label")}
         placeholder="e.g., VARCHAR(255)"
       />
     </div>

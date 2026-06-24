@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {useEditorStore} from '../../store.js';
 import {isSafeKey} from '../../utils/safeProperty.js';
 import {resolveAuthDefType} from '../../utils/authDefTypes.js';
@@ -38,6 +39,7 @@ import {
 import {restrictToVerticalAxis, restrictToParentElement} from '@dnd-kit/modifiers';
 
 const SchemaEditor = ({schemaIndex}) => {
+	const {t} = useTranslation();
 	const jsonSchema = useEditorStore((state) => state.schemaData);
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
@@ -375,7 +377,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
 				// Only support deleting top-level properties for now
 				if (propPath.length === 1 && typeof propIdx === 'number') {
-					if (window.confirm('Are you sure you want to delete this property?')) {
+					if (window.confirm(t('schema.confirm.deleteProperty'))) {
 						removeProperty(schemaIndex, propIdx);
 						setSelectedProperty(null);
 						setSelectedPropertyPath(null);
@@ -388,7 +390,7 @@ const SchemaEditor = ({schemaIndex}) => {
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [selectedProperty, schemaIndex, removeProperty]);
+	}, [selectedProperty, schemaIndex, removeProperty, t]);
 
 	// Helper to toggle property expansion (for nested structures)
 	const togglePropertyExpansion = useCallback((pathKey) => {
@@ -482,18 +484,18 @@ const SchemaEditor = ({schemaIndex}) => {
 						{schema[schemaIndex] ? (
 							<div className="relative">
 								<h3 className="text-base font-semibold leading-6 text-gray-900">
-									{schema[schemaIndex].name || schema[schemaIndex].businessName || 'Untitled Schema'}
+									{schema[schemaIndex].name || schema[schemaIndex].businessName || t('schema.untitled')}
 								</h3>
-								<p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Define the structure and properties of this schema, including field types, constraints, and metadata.</p>
+								<p className="mt-1 text-xs leading-4 text-gray-500 mb-4">{t('schema.description')}</p>
 								<button
 									type="button"
 									onClick={() => {
-										if (window.confirm('Are you sure you want to remove this schema?')) {
+										if (window.confirm(t('schema.confirm.remove'))) {
 											removeSchema();
 										}
 									}}
 									className="absolute top-0 right-0 p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors"
-									title="Remove Schema"
+									title={t('schema.remove')}
 								>
 									<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24"
 											 stroke="currentColor">
@@ -508,11 +510,11 @@ const SchemaEditor = ({schemaIndex}) => {
 									{!isNameHidden && (
 										<ValidatedInput
 											name={`schema-name-${schemaIndex}`}
-											label={nameOverride?.title || 'Name'}
+											label={nameOverride?.title || t('schema.field.name.label')}
 											value={schema[schemaIndex].name || ''}
 											onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
 											required={nameOverride?.required ?? true}
-											tooltip={nameOverride?.description || 'Technical name for the schema (required)'}
+											tooltip={nameOverride?.description || t('schema.field.name.tooltip')}
 											placeholder={nameOverride?.placeholder || 'schema_name'}
 											pattern={nameOverride?.pattern}
 											patternMessage={nameOverride?.patternMessage}
@@ -527,13 +529,13 @@ const SchemaEditor = ({schemaIndex}) => {
 									{!isDescriptionHidden && (
 										<ValidatedTextarea
 											name={`schema-description-${schemaIndex}`}
-											label={descriptionOverride?.title || 'Description'}
+											label={descriptionOverride?.title || t('schema.field.description.label')}
 											value={schema[schemaIndex].description || ''}
 											onChange={(e) => setValue(`schema[${schemaIndex}].description`, e.target.value)}
 											onClear={() => removeValue(`schema[${schemaIndex}].description`)}
 											required={descriptionOverride?.required ?? false}
-											tooltip={descriptionOverride?.description || 'Description of what this schema contains'}
-											placeholder={schemaDefinitionData?.description || descriptionOverride?.placeholder || 'Describe the schema...'}
+											tooltip={descriptionOverride?.description || t('schema.field.description.tooltip')}
+											placeholder={schemaDefinitionData?.description || descriptionOverride?.placeholder || t('schema.field.description.placeholder')}
 											placeholderClassName={schemaDefinitionData?.description && !schema[schemaIndex].description ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
 											minLength={descriptionOverride?.minLength}
 											maxLength={descriptionOverride?.maxLength}
@@ -544,7 +546,7 @@ const SchemaEditor = ({schemaIndex}) => {
 													fieldPath={`schema[${schemaIndex}].description`}
 													currentValue={schema[schemaIndex].description || ''}
 													onSuggestion={(value) => setValue(`schema[${schemaIndex}].description`, value)}
-													placeholder="Description of what this schema/table contains and its purpose"
+													placeholder={t('schema.field.description.aiPlaceholder')}
 												/>
 											}
 										/>
@@ -558,7 +560,7 @@ const SchemaEditor = ({schemaIndex}) => {
 											<>
 												<DisclosureButton
 													className="flex w-full items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-													<span>Advanced Metadata</span>
+													<span>{t('schema.advancedMetadata')}</span>
 													<ChevronRightIcon
 														className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
 													/>
@@ -569,12 +571,12 @@ const SchemaEditor = ({schemaIndex}) => {
 														{!isBusinessNameHidden && (
 															<ValidatedInput
 																name={`schema-business-name-${schemaIndex}`}
-																label={businessNameOverride?.title || 'Business Name'}
+																label={businessNameOverride?.title || t('schema.field.businessName.label')}
 																value={schema[schemaIndex].businessName || ''}
 																onChange={(e) => setValue(`schema[${schemaIndex}].businessName`, e.target.value)}
 																required={businessNameOverride?.required ?? false}
-																tooltip={businessNameOverride?.description || 'Human-friendly name for the schema'}
-																placeholder={schemaDefinitionData?.businessName || businessNameOverride?.placeholder || 'Human readable name'}
+																tooltip={businessNameOverride?.description || t('schema.field.businessName.tooltip')}
+																placeholder={schemaDefinitionData?.businessName || businessNameOverride?.placeholder || t('schema.field.businessName.placeholder')}
 																placeholderClassName={schemaDefinitionData?.businessName && !schema[schemaIndex].businessName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
 																pattern={businessNameOverride?.pattern}
 																patternMessage={businessNameOverride?.patternMessage}
@@ -588,7 +590,7 @@ const SchemaEditor = ({schemaIndex}) => {
 															<div>
 																<ValidatedInput
 																	name={`schema-physical-type-${schemaIndex}`}
-																	label={physicalTypeOverride?.title || 'Physical Type'}
+																	label={physicalTypeOverride?.title || t('schema.field.physicalType.label')}
 																	value={(() => {
 																		const currentType = schema[schemaIndex].physicalType || 'table';
 																		const matchedOption = schemaTypeOptions.find(option => option.id === currentType);
@@ -601,7 +603,7 @@ const SchemaEditor = ({schemaIndex}) => {
 																		setValue(`schema[${schemaIndex}].physicalType`, typeValue);
 																	}}
 																	required={physicalTypeOverride?.required ?? false}
-																	tooltip={physicalTypeOverride?.description || 'Physical type of the schema (table, view, etc.)'}
+																	tooltip={physicalTypeOverride?.description || t('schema.field.physicalType.tooltip')}
 																	placeholder={schemaDefinitionData?.physicalType || physicalTypeOverride?.placeholder || 'table'}
 																	placeholderClassName={schemaDefinitionData?.physicalType && !schema[schemaIndex].physicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
 																	pattern={physicalTypeOverride?.pattern}
@@ -622,11 +624,11 @@ const SchemaEditor = ({schemaIndex}) => {
 														{!isPhysicalNameHidden && (
 															<ValidatedInput
 																name={`schema-physical-name-${schemaIndex}`}
-																label={physicalNameOverride?.title || 'Physical Name'}
+																label={physicalNameOverride?.title || t('schema.field.physicalName.label')}
 																value={schema[schemaIndex].physicalName || ''}
 																onChange={(e) => setValue(`schema[${schemaIndex}].physicalName`, e.target.value)}
 																required={physicalNameOverride?.required ?? false}
-																tooltip={physicalNameOverride?.description || 'Physical name in the database/storage'}
+																tooltip={physicalNameOverride?.description || t('schema.field.physicalName.tooltip')}
 																placeholder={schemaDefinitionData?.physicalName || physicalNameOverride?.placeholder || 'shipments_v1'}
 																placeholderClassName={schemaDefinitionData?.physicalName && !schema[schemaIndex].physicalName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
 																pattern={physicalNameOverride?.pattern}
@@ -640,11 +642,11 @@ const SchemaEditor = ({schemaIndex}) => {
 														{!isLogicalTypeHidden && (
 															<ValidatedInput
 																name={`schema-logical-type-${schemaIndex}`}
-																label={logicalTypeOverride?.title || 'Logical Type'}
+																label={logicalTypeOverride?.title || t('schema.field.logicalType.label')}
 																value={schema[schemaIndex].logicalType || ''}
 																onChange={(e) => setValue(`schema[${schemaIndex}].logicalType`, e.target.value)}
 																required={logicalTypeOverride?.required ?? false}
-																tooltip={logicalTypeOverride?.description || 'Logical type of the schema (object, array, etc.)'}
+																tooltip={logicalTypeOverride?.description || t('schema.field.logicalType.tooltip')}
 																placeholder={schemaDefinitionData?.logicalType || logicalTypeOverride?.placeholder || 'object'}
 																placeholderClassName={schemaDefinitionData?.logicalType && !schema[schemaIndex].logicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
 																pattern={logicalTypeOverride?.pattern}
@@ -661,9 +663,9 @@ const SchemaEditor = ({schemaIndex}) => {
 															<div className="flex items-center gap-1 mb-1">
 																<label htmlFor={`schema-data-granularity-${schemaIndex}`}
 																			 className="block text-xs font-medium leading-4 text-gray-900">
-																	Data Granularity Description
+																	{t('schema.field.dataGranularity.label')}
 																</label>
-																<Tooltip content="Describe the level of detail represented by one record">
+																<Tooltip content={t('schema.field.dataGranularity.tooltip')}>
 																	<QuestionMarkCircleIcon/>
 																</Tooltip>
 															</div>
@@ -683,11 +685,11 @@ const SchemaEditor = ({schemaIndex}) => {
 													{!isTagsHidden && (
 														<div className="mt-4">
 															<TagsInput
-																label="Tags"
+																label={t('schema.field.tags.label')}
 																value={schema[schemaIndex].tags || []}
 																onChange={(value) => setValue(`schema[${schemaIndex}].tags`, value)}
-																tooltip="Tags for categorizing and organizing schemas"
-																placeholder="Add a tag..."
+																tooltip={t('schema.field.tags.tooltip')}
+																placeholder={t('schema.field.tags.placeholder')}
 															/>
 														</div>
 													)}
@@ -769,21 +771,21 @@ const SchemaEditor = ({schemaIndex}) => {
 										{/* Header Row */}
 										<div
 											className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200 rounded-t-md">
-											<span className="text-sm font-medium text-gray-700">Properties</span>
+											<span className="text-sm font-medium text-gray-700">{t('schema.properties.heading')}</span>
 											<div className="flex items-center gap-2">
 												{editorConfig?.semantics?.baseUrl && (
 													<button
 														onClick={() => setIsDefinitionModalOpen(true)}
 														className="rounded-sm bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"
-														title="Add from Definition"
+														title={t('schema.properties.addFromDefinition')}
 													>
-														Add from Definition
+														{t('schema.properties.addFromDefinition')}
 													</button>
 												)}
 												<button
 													onClick={() => addProperty()}
 													className="text-gray-400 hover:text-indigo-600 cursor-pointer"
-													title="Add property"
+													title={t('schema.properties.addProperty')}
 												>
 													<svg className="w-4 h-4" fill="none" stroke="currentColor"
 															 viewBox="0 0 24 24">
@@ -839,7 +841,7 @@ const SchemaEditor = ({schemaIndex}) => {
 												className="px-4 py-8 text-center rounded-b-md cursor-pointer hover:bg-gray-50"
 												onClick={() => addProperty()}
 											>
-												<p className="text-sm text-gray-400 mb-2">No properties defined</p>
+												<p className="text-sm text-gray-400 mb-2">{t('schema.properties.empty')}</p>
 												<button
 													onClick={(e) => {
 														e.stopPropagation();
@@ -852,7 +854,7 @@ const SchemaEditor = ({schemaIndex}) => {
 														<path strokeLinecap="round" strokeLinejoin="round"
 																	strokeWidth={2} d="M12 4v16m8-8H4"/>
 													</svg>
-													Add property
+													{t('schema.properties.addProperty')}
 												</button>
 											</div>
 										)}
@@ -861,8 +863,8 @@ const SchemaEditor = ({schemaIndex}) => {
 							</div>
 						) : (
 							<div className="text-center py-6 text-gray-500">
-								<p className="text-xs">Schema not found at index {schemaIndex}.</p>
-								<p className="text-xs mt-1">It may have been deleted.</p>
+								<p className="text-xs">{t('schema.notFound.title', { index: schemaIndex })}</p>
+								<p className="text-xs mt-1">{t('schema.notFound.description')}</p>
 							</div>
 						)}
 					</div>

@@ -13,13 +13,21 @@ import { loadRuntimeConfig, buildEditorConfig } from './config/runtimeConfig.js'
 const storageBackendSlug = "standalone"
 const storageBackend = createStorageBackend(storageBackendSlug);
 
+// Reflect the active locale on <html lang> for a11y/SEO. Standalone-only: the embedded
+// build mounts via embed.jsx (not this entry), so the host page keeps control of its own
+// lang attribute.
+const syncHtmlLang = (lng) => { document.documentElement.lang = lng; };
+syncHtmlLang(i18n.resolvedLanguage || 'en');
+i18n.on('languageChanged', syncHtmlLang);
+
 async function init() {
   // Load runtime config (from /config.json in Docker, or empty for hosted)
   const runtimeConfig = await loadRuntimeConfig();
   const editorConfig = buildEditorConfig(runtimeConfig);
 
-  // Standalone dev/Docker may carry a locale in runtime config; default English.
-  if (editorConfig?.locale) i18n.changeLanguage(editorConfig.locale);
+  // Standalone locale is resolved by i18next-browser-languagedetector (querystring →
+  // localStorage → browser), configured in ./i18n. The in-app language switcher persists
+  // the user's choice; nothing to do here.
 
   createRoot(document.getElementById('root')).render(
     <StrictMode>

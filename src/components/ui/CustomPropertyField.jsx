@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import ValidatedInput from './ValidatedInput';
 import { ValidatedCombobox } from './index';
 import TagsInput from './TagsInput.jsx';
@@ -13,7 +14,7 @@ import { evaluateCondition } from '../../lib/conditionEvaluator';
  * @param {Object} config - Property config
  * @returns {string[]} Array of error messages
  */
-function validateValue(value, config) {
+function validateValue(value, config, t) {
   const errors = [];
   const {
     required,
@@ -29,14 +30,14 @@ function validateValue(value, config) {
 
   // Required check
   if (required && (value === undefined || value === null || value === '')) {
-    errors.push('This field is required');
+    errors.push(t('customProperty.validation.required'));
     return errors; // Return early if required and empty
   }
 
   // Skip other validations if value is empty
   if (value === undefined || value === null || value === '') {
     if (minItems !== undefined && !Array.isArray(value)) {
-      errors.push(`Minimum ${minItems} items required`);
+      errors.push(t('customProperty.validation.minItems', { count: minItems }));
     }
     return errors;
   }
@@ -45,7 +46,7 @@ function validateValue(value, config) {
   if (pattern && typeof value === 'string') {
     try {
       if (!new RegExp(pattern).test(value)) {
-        errors.push(patternMessage || `Value must match pattern: ${pattern}`);
+        errors.push(patternMessage || t('customProperty.validation.pattern', { pattern }));
       }
     } catch (e) {
       // Invalid regex, skip validation
@@ -55,30 +56,30 @@ function validateValue(value, config) {
   // Length validation (for strings)
   if (typeof value === 'string') {
     if (minLength !== undefined && value.length < minLength) {
-      errors.push(`Minimum length is ${minLength}`);
+      errors.push(t('customProperty.validation.minLength', { count: minLength }));
     }
     if (maxLength !== undefined && value.length > maxLength) {
-      errors.push(`Maximum length is ${maxLength}`);
+      errors.push(t('customProperty.validation.maxLength', { count: maxLength }));
     }
   }
 
   // Range validation (for numbers)
   if (typeof value === 'number') {
     if (minimum !== undefined && value < minimum) {
-      errors.push(`Minimum value is ${minimum}`);
+      errors.push(t('customProperty.validation.minimum', { value: minimum }));
     }
     if (maximum !== undefined && value > maximum) {
-      errors.push(`Maximum value is ${maximum}`);
+      errors.push(t('customProperty.validation.maximum', { value: maximum }));
     }
   }
 
   // Array items validation
   if (Array.isArray(value)) {
     if (minItems !== undefined && value.length < minItems) {
-      errors.push(`Minimum ${minItems} items required`);
+      errors.push(t('customProperty.validation.minItems', { count: minItems }));
     }
     if (maxItems !== undefined && value.length > maxItems) {
-      errors.push(`Maximum ${maxItems} items allowed`);
+      errors.push(t('customProperty.validation.maxItems', { count: maxItems }));
     }
   }
 
@@ -129,6 +130,7 @@ const TextField = ({ config, value, onChange, errors }) => {
  * Textarea field sub-component
  */
 const TextareaField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
   const {
     property,
     title,
@@ -155,7 +157,7 @@ const TextareaField = ({ config, value, onChange, errors }) => {
         )}
         {required && (
           <span className="ml-auto text-xs leading-4 text-gray-500">
-            Required
+            {t('customProperty.required')}
           </span>
         )}
       </div>
@@ -183,6 +185,7 @@ const TextareaField = ({ config, value, onChange, errors }) => {
  * Number/Integer field sub-component
  */
 const NumberField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
   const {
     property,
     title,
@@ -222,7 +225,7 @@ const NumberField = ({ config, value, onChange, errors }) => {
         )}
         {required && (
           <span className="ml-auto text-xs leading-4 text-gray-500">
-            Required
+            {t('customProperty.required')}
           </span>
         )}
       </div>
@@ -253,6 +256,7 @@ const NumberField = ({ config, value, onChange, errors }) => {
  * Select field sub-component
  */
 const SelectField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
   const {
     property,
     title,
@@ -279,7 +283,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
       options={options}
       value={value}
       onChange={(val) => onChange(val || undefined)}
-      placeholder={placeholder || 'Select...'}
+      placeholder={placeholder || t('customProperty.select')}
       required={required}
       tooltip={description}
       externalErrors={errors}
@@ -292,6 +296,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
  * Multi-select field sub-component
  */
 const MultiselectField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
   const {
     property,
     title,
@@ -339,7 +344,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
         )}
         {required && (
           <span className="ml-auto text-xs leading-4 text-gray-500">
-            Required
+            {t('customProperty.required')}
           </span>
         )}
       </div>
@@ -362,7 +367,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
         ))}
         {options.length === 0 && (
           <span className="text-xs text-gray-400">
-            {placeholder || 'No options available'}
+            {placeholder || t('customProperty.noOptions')}
           </span>
         )}
       </div>
@@ -379,6 +384,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
  * Boolean field sub-component
  */
 const BooleanField = ({ config, value, onChange }) => {
+  const { t } = useTranslation();
   const { property, title, description } = config;
 
   return (
@@ -411,9 +417,9 @@ const BooleanField = ({ config, value, onChange }) => {
           }}
           className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
         >
-          <option value="">Not set</option>
-          <option value="false">False</option>
-          <option value="true">True</option>
+          <option value="">{t('customProperty.boolean.notSet')}</option>
+          <option value="false">{t('customProperty.boolean.false')}</option>
+          <option value="true">{t('customProperty.boolean.true')}</option>
         </select>
         <ChevronDownIcon
           aria-hidden="true"
@@ -428,6 +434,7 @@ const BooleanField = ({ config, value, onChange }) => {
  * Date field sub-component
  */
 const DateField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
   const { property, title, placeholder, description, required, type } = config;
   const hasError = errors && errors.length > 0;
   const inputType = type === 'datetime' ? 'datetime-local' : 'date';
@@ -448,7 +455,7 @@ const DateField = ({ config, value, onChange, errors }) => {
         )}
         {required && (
           <span className="ml-auto text-xs leading-4 text-gray-500">
-            Required
+            {t('customProperty.required')}
           </span>
         )}
       </div>
@@ -561,6 +568,7 @@ const CustomPropertyField = ({
   validationKey,
   validationSection,
 }) => {
+  const { t } = useTranslation();
   const { type = 'text', condition, hidden } = config;
 
   // hidden:true hides the property from form-style UIs (managed externally via API/YAML).
@@ -574,8 +582,8 @@ const CustomPropertyField = ({
 
   // Validate current value
   const validationErrors = useMemo(
-    () => validateValue(value, config),
-    [value, config],
+    () => validateValue(value, config, t),
+    [value, config, t],
   );
 
   if (!shouldShow) {

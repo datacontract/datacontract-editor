@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Modal component for selecting files from a list
@@ -9,7 +10,8 @@ import { useState, useEffect } from 'react';
  * @param {Function} props.fetchFiles - Function to fetch the list of files
  * @param {string} props.title - Modal title
  */
-export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, title = 'Select a File' }) {
+export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, title }) {
+  const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -61,7 +63,7 @@ export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, titl
         <div className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
           {/* Header */}
           <div className="border-b border-gray-200 bg-white px-6 py-4">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{title || t('fileSelect.title')}</h3>
           </div>
 
           {/* Content */}
@@ -69,7 +71,7 @@ export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, titl
             {loading && (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600"></div>
-                <span className="ml-3 text-sm text-gray-600">Loading files...</span>
+                <span className="ml-3 text-sm text-gray-600">{t('fileSelect.loading')}</span>
               </div>
             )}
 
@@ -90,7 +92,7 @@ export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, titl
 
             {!loading && !error && files.length === 0 && (
               <div className="py-8 text-center">
-                <p className="text-sm text-gray-500">No files found</p>
+                <p className="text-sm text-gray-500">{t('fileSelect.empty')}</p>
               </div>
             )}
 
@@ -137,7 +139,7 @@ export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, titl
               onClick={handleCancel}
               className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              Cancel
+              {t('fileSelect.cancel')}
             </button>
             <button
               type="button"
@@ -145,7 +147,7 @@ export function FileSelectionModal({ isOpen, onClose, onSelect, fetchFiles, titl
               disabled={!selectedFile}
               className="rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Open
+              {t('fileSelect.open')}
             </button>
           </div>
         </div>

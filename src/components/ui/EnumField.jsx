@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store';
 import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor';
 import Combobox from './Combobox';
@@ -37,6 +38,7 @@ const EnumField = ({
   ...props
 }) => {
   const schemaData = useEditorStore((state) => state.schemaData);
+  const { t } = useTranslation();
 
   // Special handling for logicalType - use LogicalTypeCombobox
   if (propertyPath === 'logicalType') {
@@ -91,7 +93,7 @@ const EnumField = ({
         options={enumValues}
         value={value}
         onChange={onChange}
-        placeholder={placeholder || "Select or type..."}
+        placeholder={placeholder || t('enum.selectOrType')}
         disabled={disabled}
         className={className}
         acceptAnyInput={true}
@@ -119,7 +121,7 @@ const EnumField = ({
           className={`col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4 ${isValueFromDefinition ? 'text-blue-400' : 'text-gray-900'}`}
           {...props}
         >
-          <option value="">{placeholder || 'Select...'}</option>
+          <option value="">{placeholder || t('enum.select')}</option>
           {enumValues.map((enumValue) => (
             <option key={enumValue} value={enumValue}>
               {enumValue}

@@ -1,7 +1,9 @@
 import { memo, useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import PropertyDetailsPanel from './PropertyDetailsPanel.jsx';
 
 const PropertyDetailsNode = ({ data }) => {
+  const { t } = useTranslation();
   const { property, onUpdate, onDelete, onClose, openMethod, onPinnedChange, initialPinned } = data;
   const closeTimeoutRef = useRef(null);
   const panelRef = useRef(null);
@@ -100,10 +102,10 @@ const PropertyDetailsNode = ({ data }) => {
       <div
         className="px-4 py-3 border-b border-gray-200 flex justify-between items-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
         onClick={handleHeaderClick}
-        title={isPinned ? "Click to unpin" : "Click to pin panel open"}
+        title={isPinned ? t('diagram.propertyDetails.unpin') : t('diagram.propertyDetails.pin')}
       >
         <h3 id="property-details-title" className="text-sm font-semibold text-gray-900">
-          Edit Property: {property.name || 'unnamed'}
+          {t('diagram.propertyDetails.title')}: {property.name || t('diagram.property.unnamed')}
         </h3>
         <button
           onClick={(e) => {
@@ -111,7 +113,7 @@ const PropertyDetailsNode = ({ data }) => {
             onClose();
           }}
           className="text-gray-400 hover:text-gray-600 transition-colors"
-          title="Close"
+          title={t('diagram.controls.close')}
           type="button"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

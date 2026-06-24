@@ -10,8 +10,10 @@ import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, con
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import { ValidatedCombobox } from '../components/ui/index.js';
+import { useTranslation } from 'react-i18next';
 
 const Team = () => {
+  const { t } = useTranslation();
 	const team = useEditorStore(useShallow((state) => state.getValue('team')))
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
   const editorConfig = useEditorStore((state) => state.editorConfig);
@@ -155,9 +157,9 @@ const Team = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Team</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">{t('team.heading')}</h3>
             <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">
-              Team information and members.
+              {t('team.section.description')}
             </p>
 
             <div className="space-y-4">
@@ -173,11 +175,11 @@ const Team = () => {
                   return teamOptions ? (
                     <ValidatedCombobox
                       name="teamName"
-                      label={nameOverride?.title || 'Team Name'}
+                      label={nameOverride?.title || t('team.name.label')}
                       options={teamOptions}
                       value={team?.name || ''}
                       onChange={(selectedValue) => updateTeamField('name', selectedValue || undefined)}
-                      placeholder={nameOverride?.placeholder || "Select a team..."}
+                      placeholder={nameOverride?.placeholder || t('team.name.placeholder')}
                       tooltip={nameOverride?.description}
                       required={nameOverride?.required}
                       pattern={nameOverride?.pattern}
@@ -188,7 +190,7 @@ const Team = () => {
                   ) : (
                     <ValidatedInput
                       name="teamName"
-                      label={nameOverride?.title || 'Team Name'}
+                      label={nameOverride?.title || t('team.name.label')}
                       value={team?.name || ''}
                       onChange={(e) => updateTeamField('name', e.target.value)}
                       placeholder={nameOverride?.placeholder || "Data Engineering Team"}
@@ -207,13 +209,13 @@ const Team = () => {
               {!isDescriptionHidden && (
                 <div>
                   <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                    Description
+                    {t('team.description.label')}
                   </label>
                   <textarea
                     value={team?.description}
                     onChange={(e) => updateTeamField('description', e.target.value)}
                     className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder="Description of the team..."
+                    placeholder={t('team.description.placeholder')}
                     rows={3}
                   />
                 </div>
@@ -221,10 +223,10 @@ const Team = () => {
 
               {/* Team Tags */}
               <TagsInput
-                label="Tags"
+                label={t('team.tags.label')}
                 value={team?.tags}
                 onChange={(value) => updateTeamField('tags', value)}
-                placeholder="Add a tag..."
+                placeholder={t('team.tags.placeholder')}
               />
 
               {/* Custom Sections from Customization */}
@@ -287,7 +289,7 @@ const Team = () => {
                   onClick={addMember}
                   className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
                 >
-                  + Add Team Member
+                  {t('team.addMember')}
                 </button>
               </div>
             </div>

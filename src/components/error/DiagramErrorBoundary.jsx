@@ -1,5 +1,6 @@
 import ErrorBoundary from './ErrorBoundary.jsx';
 import { useEditorStore } from '../../store.js';
+import i18n from '../../i18n';
 
 /**
  * Specialized error boundary for the DiagramView component
@@ -19,23 +20,23 @@ const DiagramErrorBoundary = ({ children }) => {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-red-800">
-              Diagram Rendering Error
+              {i18n.t('errorBoundary.diagram.title')}
             </h3>
             <p className="mt-1 text-xs text-red-700">
-              The diagram view encountered an error and could not be displayed.
+              {i18n.t('errorBoundary.diagram.description')}
             </p>
 
             <div className="mt-2 text-xs text-red-600">
-              <span className="font-medium">Error: </span>
-              {error?.message || 'Unknown rendering error'}
+              <span className="font-medium">{i18n.t('errorBoundary.diagram.errorLabel')} </span>
+              {error?.message || i18n.t('errorBoundary.diagram.unknownError')}
             </div>
 
             <div className="mt-3 space-y-2">
-              <p className="text-xs text-red-700 font-medium">Suggestions:</p>
+              <p className="text-xs text-red-700 font-medium">{i18n.t('errorBoundary.diagram.suggestions')}</p>
               <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                <li>Try using the Form view or YAML editor instead</li>
-                <li>Check if your schema definitions are valid</li>
-                <li>Verify property relationships are correctly formatted</li>
+                <li>{i18n.t('errorBoundary.diagram.suggestion1')}</li>
+                <li>{i18n.t('errorBoundary.diagram.suggestion2')}</li>
+                <li>{i18n.t('errorBoundary.diagram.suggestion3')}</li>
               </ul>
             </div>
 
@@ -44,26 +45,26 @@ const DiagramErrorBoundary = ({ children }) => {
                 onClick={resetError}
                 className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Retry Diagram
+                {i18n.t('errorBoundary.diagram.retry')}
               </button>
               <button
                 onClick={() => setView('form')}
                 className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Switch to Form
+                {i18n.t('errorBoundary.diagram.switchToForm')}
               </button>
               <button
                 onClick={() => setView('yaml')}
                 className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Switch to YAML
+                {i18n.t('errorBoundary.diagram.switchToYaml')}
               </button>
             </div>
 
             {process.env.NODE_ENV === 'development' && (
               <details className="mt-3">
                 <summary className="cursor-pointer text-xs font-medium text-red-700">
-                  Developer Details
+                  {i18n.t('errorBoundary.diagram.developerDetails')}
                 </summary>
                 <pre className="mt-2 text-xs text-red-600 whitespace-pre-wrap overflow-auto max-h-32 bg-red-100 p-2 rounded">
                   {error?.stack}

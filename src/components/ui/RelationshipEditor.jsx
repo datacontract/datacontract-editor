@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import Combobox from './Combobox.jsx';
 import LinkIcon from './icons/LinkIcon.jsx';
@@ -64,6 +65,7 @@ export const useSchemaPropertySuggestions = () => {
 };
 
 const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['foreignKey'], showFrom = false, focusTo = null, focusNonce = null }) => {
+  const { t } = useTranslation();
   const schemaPropertySuggestions = useSchemaPropertySuggestions();
 
   const handleAdd = () => {
@@ -94,13 +96,13 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
     <div className="space-y-2">
       {/* Header with label and add button */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-gray-700">Relationships</label>
+        <label className="text-xs font-medium text-gray-700">{t('relationship.heading')}</label>
         <button
           type="button"
           onClick={handleAdd}
           className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          + Add
+          + {t('relationship.add')}
         </button>
       </div>
 
@@ -125,6 +127,7 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
 };
 
 export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove, isFocusMatch = false, focusNonce = null, defaultExpanded = null }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(
     defaultExpanded !== null
       ? defaultExpanded
@@ -243,19 +246,19 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <LinkIcon className="size-3 text-indigo-600 shrink-0" />
-            <span className="text-xs font-medium text-gray-900">Relationship</span>
+            <span className="text-xs font-medium text-gray-900">{t('relationship.title')}</span>
             {item.type && (
               <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{item.type}</span>
             )}
             {isComposite && (
-              <span className="text-xs px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded">composite</span>
+              <span className="text-xs px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded">{t('relationship.composite')}</span>
             )}
           </div>
           <div className="text-xs text-gray-600 mt-0.5 truncate">
             {getSummary() ? (
               <span className="font-mono">{getSummary()}</span>
             ) : (
-              <span className="italic text-gray-400">New relationship</span>
+              <span className="italic text-gray-400">{t('relationship.new')}</span>
             )}
           </div>
         </div>
@@ -279,13 +282,13 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
           {/* Type row */}
           <div className="grid grid-cols-12 gap-2 items-end">
             <div className="col-span-11">
-              <label className="block text-xs font-medium text-gray-700 mb-0.5">Type</label>
+              <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('relationship.type.label')}</label>
               <select
                 value={item.type || ''}
                 onChange={(e) => onUpdate(index, 'type', e.target.value)}
                 className={inputClasses}
               >
-                <option value="">Select...</option>
+                <option value="">{t('relationship.select')}</option>
                 {relationshipTypeOptions.map(opt => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
@@ -295,7 +298,7 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
               type="button"
               onClick={() => onRemove(index)}
               className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
-              title="Remove"
+              title={t('relationship.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -310,7 +313,7 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
                 <div key={pairIndex} className="grid grid-cols-12 gap-2 items-end">
                   <div className="col-span-5">
                     <Combobox
-                      label={pairIndex === 0 ? <span className="text-xs font-medium text-gray-700">From</span> : null}
+                      label={pairIndex === 0 ? <span className="text-xs font-medium text-gray-700">{t('relationship.from')}</span> : null}
                       options={schemaPropertySuggestions}
                       value={fromArray[pairIndex] || ''}
                       onChange={(val) => updatePair(pairIndex, 'from', val)}
@@ -323,7 +326,7 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
                   </div>
                   <div className="col-span-5">
                     <Combobox
-                      label={pairIndex === 0 ? <span className="text-xs font-medium text-gray-700">To</span> : null}
+                      label={pairIndex === 0 ? <span className="text-xs font-medium text-gray-700">{t('relationship.to')}</span> : null}
                       options={schemaPropertySuggestions}
                       value={toArray[pairIndex] || ''}
                       onChange={(val) => updatePair(pairIndex, 'to', val)}
@@ -340,7 +343,7 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
                         type="button"
                         onClick={() => removePair(pairIndex)}
                         className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                        title="Remove pair"
+                        title={t('relationship.removePair')}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -355,12 +358,12 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
                 onClick={addPair}
                 className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
               >
-                + Add column pair (composite key)
+                + {t('relationship.addPair')}
               </button>
             </div>
           ) : (
             <Combobox
-              label={<span className="text-xs font-medium text-gray-700">To</span>}
+              label={<span className="text-xs font-medium text-gray-700">{t('relationship.to')}</span>}
               options={schemaPropertySuggestions}
               value={item.to || ''}
               onChange={(val) => onUpdate(index, 'to', val)}
@@ -374,12 +377,12 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
 
           {/* Description field */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-0.5">Description</label>
+            <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('relationship.description.label')}</label>
             <textarea
               value={item.description || ''}
               onChange={(e) => onUpdate(index, 'description', e.target.value)}
               className={inputClasses}
-              placeholder="Describe the relationship..."
+              placeholder={t('relationship.description.placeholder')}
               rows={2}
             />
           </div>

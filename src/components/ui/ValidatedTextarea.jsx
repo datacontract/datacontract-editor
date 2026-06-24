@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
 
@@ -22,6 +23,7 @@ const ValidatedTextarea = ({
   placeholderClassName = 'placeholder:text-gray-400',
   ...props
 }) => {
+  const { t } = useTranslation();
   const strValue = value || '';
   const trimmed = strValue.trim();
 
@@ -35,13 +37,13 @@ const ValidatedTextarea = ({
 
   const errorMessages = [];
   if (required && trimmed === '') {
-    errorMessages.push('This field is required');
+    errorMessages.push(t('input.required'));
   }
   if (trimmed !== '' && minLength !== undefined && trimmed.length < minLength) {
-    errorMessages.push(`Minimum length is ${minLength} (currently ${trimmed.length})`);
+    errorMessages.push(t('input.minLength', { min: minLength, current: trimmed.length }));
   }
   if (trimmed !== '' && maxLength !== undefined && trimmed.length > maxLength) {
-    errorMessages.push(`Maximum length is ${maxLength} (currently ${trimmed.length})`);
+    errorMessages.push(t('input.maxLength', { max: maxLength, current: trimmed.length }));
   }
 
   const hasError = errorMessages.length > 0;
@@ -66,7 +68,7 @@ const ValidatedTextarea = ({
         <div className="flex items-center gap-2">
           {actions}
           {required && (
-            <span className="text-xs leading-4 text-gray-500">Required</span>
+            <span className="text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
           )}
         </div>
       </div>

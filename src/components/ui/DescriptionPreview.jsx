@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import Tooltip from './Tooltip.jsx';
 import { IconResolver } from './IconResolver.jsx';
@@ -12,6 +13,7 @@ const MAX_COLLAPSED_LINES = 10;
 const MAX_HEIGHT = `${MAX_COLLAPSED_LINES * LINE_HEIGHT_REM}rem`;
 
 const MarkdownField = ({ id, label, text }) => {
+  const { t } = useTranslation();
   const isDocument = hasHeadline(text);
   const [expanded, setExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -43,7 +45,7 @@ const MarkdownField = ({ id, label, text }) => {
                 onClick={() => setExpanded(!expanded)}
                 className="mt-0.5 mb-3 text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer"
               >
-                {expanded ? 'Show less' : 'Show more...'}
+                {expanded ? t('descriptionPreview.showLess') : t('descriptionPreview.showMore')}
               </button>
             )}
           </>
@@ -56,6 +58,7 @@ const MarkdownField = ({ id, label, text }) => {
 };
 
 const DescriptionPreview = () => {
+  const { t } = useTranslation();
 	const description = useEditorStore(useShallow(state => state.getValue('description')));
   if (!description) return null;
 
@@ -74,8 +77,8 @@ const DescriptionPreview = () => {
   return (
     <section>
       <div className="px-4 sm:px-0">
-        <h1 className="text-base font-semibold leading-6 text-gray-900" id="terms-of-use">Terms of Use</h1>
-        <p className="text-sm text-gray-500">High level description of the dataset including purpose, usage guidelines, and limitations</p>
+        <h1 className="text-base font-semibold leading-6 text-gray-900" id="terms-of-use">{t('descriptionPreview.termsOfUse')}</h1>
+        <p className="text-sm text-gray-500">{t('descriptionPreview.subtitle')}</p>
       </div>
       <div className="mt-2 overflow-hidden shadow sm:rounded-lg bg-white">
         <div className="px-4 py-4 sm:px-6">
@@ -104,15 +107,15 @@ const DescriptionPreview = () => {
 
           <div className="flex flex-col gap-3">
             {description.purpose && (
-              <MarkdownField id="description-purpose" label="Purpose" text={description.purpose} />
+              <MarkdownField id="description-purpose" label={t('descriptionPreview.purpose')} text={description.purpose} />
             )}
 
             {description.usage && (
-              <MarkdownField id="description-usage" label="Usage" text={description.usage} />
+              <MarkdownField id="description-usage" label={t('descriptionPreview.usage')} text={description.usage} />
             )}
 
             {description.limitations && (
-              <MarkdownField id="description-limitations" label="Limitations" text={description.limitations} />
+              <MarkdownField id="description-limitations" label={t('descriptionPreview.limitations')} text={description.limitations} />
             )}
 
             {hasCustomProperties && (() => {
@@ -125,7 +128,7 @@ const DescriptionPreview = () => {
                   }));
               return (
                 <div>
-                  <div className="text-sm font-medium text-gray-500 mb-2">Custom Properties</div>
+                  <div className="text-sm font-medium text-gray-500 mb-2">{t('descriptionPreview.customProperties')}</div>
                   <div className="flex flex-wrap gap-x-4 gap-y-2">
                     {normalizedCustomProps.map((customProp, index) => (
                       <div key={index} className="min-w-0">

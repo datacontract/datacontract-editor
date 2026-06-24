@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../store.js';
 import { chatWithTools } from './aiService.js';
 import { registerBuiltInTools } from '../services/aiTools.js';
@@ -173,12 +174,12 @@ const LoadingSpinner = ({ className }) => (
 	</svg>
 );
 
-const SUGGESTED_PROMPTS = [
-	"Guide me",
-	"Create a data contract for this example data: ",
-	"Add a property business_timestamp",
-	"Generate quality rules",
-	"Find and fix issues",
+const SUGGESTED_PROMPT_KEYS = [
+	"ai.prompts.guideMe",
+	"ai.prompts.createFromExample",
+	"ai.prompts.addProperty",
+	"ai.prompts.generateQualityRules",
+	"ai.prompts.findAndFixIssues",
 ];
 
 // Parse OPTIONS blocks from AI response
@@ -237,6 +238,7 @@ const DocumentIcon = ({ className }) => (
 );
 
 export default function AiChat() {
+	const { t } = useTranslation();
 	const yaml = useEditorStore((state) => state.yaml);
 	const editorConfig = useEditorStore((state) => state.editorConfig);
 	const runTest = useEditorStore((state) => state.runTest);
@@ -298,13 +300,13 @@ export default function AiChat() {
 		if (!userMessage.trim() || isLoading || !isPromptReady) return;
 
 		if (!isAiConfigured) {
-			setError(new Error('AI not configured. Please set endpoint and apiKey in the AI configuration.'));
+			setError(new Error(t('ai.error.notConfiguredInline')));
 			return;
 		}
 
 		setError(null);
 		setIsLoading(true);
-		setStatusMessage('Thinking...');
+		setStatusMessage(t('ai.status.thinking'));
 
 		// Add user message to conversation
 		const userMsg = { id: Date.now(), role: 'user', content: userMessage };
@@ -341,7 +343,7 @@ export default function AiChat() {
 				signal: abortControllerRef.current.signal,
 				callbacks: {
 					onContent: (chunk, content) => {
-						setStatusMessage('Generating...');
+						setStatusMessage(t('ai.status.generating'));
 						setMessages(prev => prev.map(m =>
 							m.id === assistantMsgId ? { ...m, content } : m
 						));
@@ -349,9 +351,9 @@ export default function AiChat() {
 					onToolCallsStart: (toolCalls) => {
 						const names = toolCalls.map(tc => tc.function?.name).filter(Boolean);
 						if (names.length === 1) {
-							setStatusMessage(`Calling ${names[0]}...`);
+							setStatusMessage(t('ai.status.callingTool', { tool: names[0] }));
 						} else if (names.length > 1) {
-							setStatusMessage(`Calling ${names.length} tools...`);
+							setStatusMessage(t('ai.status.callingTools', { count: names.length }));
 						}
 					},
 					onToolCallsComplete: (toolCalls, toolResults) => {
@@ -375,7 +377,7 @@ export default function AiChat() {
 							if (name === 'updateContract' && parsedResult.updatedYaml) {
 								setPendingAiChange({
 									updatedYaml: parsedResult.updatedYaml,
-									summary: parsedResult.summary || 'AI suggested changes',
+									summary: parsedResult.summary || t('ai.toolCall.defaultSummary'),
 									validationErrors: parsedResult.validationErrors,
 									isValid: parsedResult.isValid,
 								});
@@ -398,7 +400,7 @@ export default function AiChat() {
 			setStatusMessage(null);
 			abortControllerRef.current = null;
 		}
-	}, [messages, systemPrompt, isPromptReady, isLoading, aiConfig, isAiConfigured, yaml, editorConfig, runTest, setPendingAiChange]);
+	}, [messages, systemPrompt, isPromptReady, isLoading, aiConfig, isAiConfigured, yaml, editorConfig, runTest, setPendingAiChange, t]);
 
 	const handleSuggestedPrompt = (prompt) => {
 		setInput(prompt);
@@ -424,9 +426,9 @@ export default function AiChat() {
 				<div className="flex-1 flex items-center justify-center p-4">
 					<div className="text-center max-w-sm">
 						<SparklesIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-						<h3 className="text-sm font-medium text-gray-900 mb-2">AI Assistant Not Configured</h3>
+						<h3 className="text-sm font-medium text-gray-900 mb-2">{t('ai.notConfigured.title')}</h3>
 						<p className="text-xs text-gray-500 mb-4">
-							{isAnthropic ? 'Configure an Anthropic API endpoint.' : 'Configure an OpenAI-compatible endpoint.'}
+							{isAnthropic ? t('ai.notConfigured.anthropicHint') : t('ai.notConfigured.openaiHint')}
 						</p>
 						<div className="bg-gray-50 rounded-lg p-3 text-left text-xs font-mono text-gray-600">
 							{isAnthropic ? (
@@ -457,18 +459,18 @@ export default function AiChat() {
 				{messages.length === 0 ? (
 					<div className="flex flex-col items-center justify-center h-full text-center">
 						<SparklesIcon className="h-12 w-12 text-indigo-400 mb-4" />
-						<h3 className="text-sm font-medium text-gray-900 mb-2">Data Contract Assistant</h3>
+						<h3 className="text-sm font-medium text-gray-900 mb-2">{t('ai.assistant.title')}</h3>
 						<p className="text-xs text-gray-500 mb-6 max-w-xs">
-							Ask questions about your data contract or request changes.
+							{t('ai.empty.description')}
 						</p>
 						<div className="space-y-2 w-full max-w-xs">
-							{SUGGESTED_PROMPTS.map((prompt, index) => (
+							{SUGGESTED_PROMPT_KEYS.map((promptKey, index) => (
 								<button
 									key={index}
-									onClick={() => handleSuggestedPrompt(prompt)}
+									onClick={() => handleSuggestedPrompt(t(promptKey))}
 									className="w-full text-left px-3 py-2 text-xs text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
 								>
-									{prompt}
+									{t(promptKey)}
 								</button>
 							))}
 						</div>
@@ -488,7 +490,7 @@ export default function AiChat() {
 												<div className="flex items-center gap-2 text-indigo-700">
 													<DocumentIcon className="h-4 w-4" />
 													<span className="font-medium">
-														{message.toolCall.name === 'updateContract' ? 'Contract Update' : message.toolCall.name}
+														{message.toolCall.name === 'updateContract' ? t('ai.toolCall.contractUpdate') : message.toolCall.name}
 													</span>
 												</div>
 												{lastAppliedAiChange && (
@@ -496,7 +498,7 @@ export default function AiChat() {
 														onClick={unapplyAiChange}
 														className="text-xs text-indigo-600 hover:text-indigo-800 underline"
 													>
-														Undo
+														{t('ai.toolCall.undo')}
 													</button>
 												)}
 											</div>
@@ -568,7 +570,7 @@ export default function AiChat() {
 						type="text"
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						placeholder={isPromptReady ? "Ask about your data contract..." : "Loading..."}
+						placeholder={isPromptReady ? t('ai.input.placeholder') : t('ai.input.loading')}
 						className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
 						disabled={isLoading || !isPromptReady}
 					/>

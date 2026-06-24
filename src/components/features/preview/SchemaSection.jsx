@@ -1,4 +1,5 @@
 import {Fragment, memo} from 'react';
+import {useTranslation} from 'react-i18next';
 import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
@@ -13,6 +14,7 @@ import {useInheritedDefinition} from "../../../hooks/useInheritedDefinition.js";
 
 // Memoized property row component
 const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
+	const { t } = useTranslation();
 	const hiddenNames = useHiddenCustomPropertyNames('schema.properties');
 	const { customProperties: customPropertyConfigs } = useCustomization('schema.properties');
 	const { definitionData: propDefinition } = useInheritedDefinition(property?.authoritativeDefinitions);
@@ -50,7 +52,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 								{effectiveLogicalType && (
 									<div
 										className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1"
-										{...(isLogicalTypeInherited ? { title: 'Inherited from semantic definition' } : {})}>
+										{...(isLogicalTypeInherited ? { title: t('preview.schema.inheritedFromSemantic') } : {})}>
 										<span>{effectiveLogicalType}</span>
 									</div>
 								)}
@@ -74,9 +76,9 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 					{property.description ? (
 						<div>{property.description}</div>
 					) : propDefinition?.description ? (
-						<div className="text-blue-400" title="Inherited from semantic definition">{propDefinition.description}</div>
+						<div className="text-blue-400" title={t('preview.schema.inheritedFromSemantic')}>{propDefinition.description}</div>
 					) : (
-						<div className="text-gray-400">No description</div>
+						<div className="text-gray-400">{t('preview.schema.noDescription')}</div>
 					)}
 
 					{(() => {
@@ -87,11 +89,11 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						return (
 							<div
 								className={`mt-1 italic${isExamplesInherited ? ' text-blue-400' : ''}`}
-								{...(isExamplesInherited ? { title: 'Inherited from semantic definition' } : {})}>
+								{...(isExamplesInherited ? { title: t('preview.schema.inheritedFromSemantic') } : {})}>
 								{examples.length === 1 ? (
-									<>Example: <span>{examples[0]}</span></>
+									<>{t('preview.schema.example')} <span>{examples[0]}</span></>
 								) : (
-									<>Examples: <span>{examples.join(', ')}</span></>
+									<>{t('preview.schema.examples')} <span>{examples.join(', ')}</span></>
 								)}
 							</div>
 						);
@@ -101,21 +103,21 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						{property.primaryKey && (
 							<span
 								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-								primaryKey{property.primaryKeyPosition && ` (${property.primaryKeyPosition})`}
+								{t('preview.schema.primaryKey')}{property.primaryKeyPosition && ` (${property.primaryKeyPosition})`}
 							</span>
 						)}
 						{property.required && (
 							<span
-								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">required</span>
+								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">{t('preview.schema.required')}</span>
 						)}
 						{property.unique && (
 							<span
-								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">unique</span>
+								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">{t('preview.schema.unique')}</span>
 						)}
 						{property.partitioned && (
 							<span
 								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-								partitioned{property.partitionKeyPosition && ` (${property.partitionKeyPosition})`}
+								{t('preview.schema.partitioned')}{property.partitionKeyPosition && ` (${property.partitionKeyPosition})`}
 							</span>
 						)}
 						{property.authoritativeDefinitions && property.authoritativeDefinitions.length > 0 && (
@@ -131,7 +133,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						{property.criticalDataElement && (
 							<span
 								className="inline-flex items-center rounded-md bg-red-50 px-1 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-700/10">
-								critical data element
+								{t('preview.schema.criticalDataElement')}
 							</span>
 						)}
 						{property.encryptedName && (
@@ -145,20 +147,20 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 								<div className="space-y-1">
 									{property.transformLogic && (
 										<div>
-											<div className="text-gray-300 font-medium">Transform Logic:</div>
+											<div className="text-gray-300 font-medium">{t('preview.schema.transformLogic')}</div>
 											<div>{property.transformLogic}</div>
 										</div>
 									)}
 									{property.transformDescription && (
 										<div>
-											<div className="text-gray-300 font-medium">Description:</div>
+											<div className="text-gray-300 font-medium">{t('preview.schema.transformDescription')}</div>
 											<div>{property.transformDescription}</div>
 										</div>
 									)}
 								</div>
 							}>
 								<span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 mr-1 mt-1">
-									transformation
+									{t('preview.schema.transformation')}
 								</span>
 							</Tooltip>
 						)}
@@ -167,54 +169,54 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						{property.logicalTypeOptions?.format && (
 							<Tooltip content={
 								<div className="space-y-1">
-									<div className="text-gray-300">Format: {property.logicalTypeOptions.format}</div>
+									<div className="text-gray-300">{t('preview.schema.format', { value: property.logicalTypeOptions.format })}</div>
 									{property.logicalTypeOptions.minLength !== undefined && (
-										<div className="text-gray-300">Min Length: {property.logicalTypeOptions.minLength}</div>
+										<div className="text-gray-300">{t('preview.schema.minLength', { value: property.logicalTypeOptions.minLength })}</div>
 									)}
 									{property.logicalTypeOptions.maxLength !== undefined && (
-										<div className="text-gray-300">Max Length: {property.logicalTypeOptions.maxLength}</div>
+										<div className="text-gray-300">{t('preview.schema.maxLength', { value: property.logicalTypeOptions.maxLength })}</div>
 									)}
 									{property.logicalTypeOptions.pattern && (
-										<div className="text-gray-300">Pattern: {property.logicalTypeOptions.pattern}</div>
+										<div className="text-gray-300">{t('preview.schema.pattern', { value: property.logicalTypeOptions.pattern })}</div>
 									)}
 									{property.logicalTypeOptions.minimum !== undefined && (
-										<div className="text-gray-300">Minimum: {property.logicalTypeOptions.minimum}</div>
+										<div className="text-gray-300">{t('preview.schema.minimum', { value: property.logicalTypeOptions.minimum })}</div>
 									)}
 									{property.logicalTypeOptions.maximum !== undefined && (
-										<div className="text-gray-300">Maximum: {property.logicalTypeOptions.maximum}</div>
+										<div className="text-gray-300">{t('preview.schema.maximum', { value: property.logicalTypeOptions.maximum })}</div>
 									)}
 									{property.logicalTypeOptions.exclusiveMinimum !== undefined && (
-										<div className="text-gray-300">Exclusive Minimum: {property.logicalTypeOptions.exclusiveMinimum}</div>
+										<div className="text-gray-300">{t('preview.schema.exclusiveMinimum', { value: property.logicalTypeOptions.exclusiveMinimum })}</div>
 									)}
 									{property.logicalTypeOptions.exclusiveMaximum !== undefined && (
-										<div className="text-gray-300">Exclusive Maximum: {property.logicalTypeOptions.exclusiveMaximum}</div>
+										<div className="text-gray-300">{t('preview.schema.exclusiveMaximum', { value: property.logicalTypeOptions.exclusiveMaximum })}</div>
 									)}
 									{property.logicalTypeOptions.multipleOf !== undefined && (
-										<div className="text-gray-300">Multiple Of: {property.logicalTypeOptions.multipleOf}</div>
+										<div className="text-gray-300">{t('preview.schema.multipleOf', { value: property.logicalTypeOptions.multipleOf })}</div>
 									)}
 									{property.logicalTypeOptions.minItems !== undefined && (
-										<div className="text-gray-300">Min Items: {property.logicalTypeOptions.minItems}</div>
+										<div className="text-gray-300">{t('preview.schema.minItems', { value: property.logicalTypeOptions.minItems })}</div>
 									)}
 									{property.logicalTypeOptions.maxItems !== undefined && (
-										<div className="text-gray-300">Max Items: {property.logicalTypeOptions.maxItems}</div>
+										<div className="text-gray-300">{t('preview.schema.maxItems', { value: property.logicalTypeOptions.maxItems })}</div>
 									)}
 									{property.logicalTypeOptions.uniqueItems !== undefined && (
-										<div className="text-gray-300">Unique Items: {property.logicalTypeOptions.uniqueItems ? 'Yes' : 'No'}</div>
+										<div className="text-gray-300">{t('preview.schema.uniqueItems', { value: property.logicalTypeOptions.uniqueItems ? t('preview.schema.yes') : t('preview.schema.no') })}</div>
 									)}
 									{property.logicalTypeOptions.minProperties !== undefined && (
-										<div className="text-gray-300">Min Properties: {property.logicalTypeOptions.minProperties}</div>
+										<div className="text-gray-300">{t('preview.schema.minProperties', { value: property.logicalTypeOptions.minProperties })}</div>
 									)}
 									{property.logicalTypeOptions.maxProperties !== undefined && (
-										<div className="text-gray-300">Max Properties: {property.logicalTypeOptions.maxProperties}</div>
+										<div className="text-gray-300">{t('preview.schema.maxProperties', { value: property.logicalTypeOptions.maxProperties })}</div>
 									)}
 									{property.logicalTypeOptions.required && Array.isArray(property.logicalTypeOptions.required) && (
-										<div className="text-gray-300">Required: {property.logicalTypeOptions.required.join(', ')}</div>
+										<div className="text-gray-300">{t('preview.schema.requiredList', { value: property.logicalTypeOptions.required.join(', ') })}</div>
 									)}
 									{property.logicalTypeOptions.timezone !== undefined && (
-										<div className="text-gray-300">Timezone: {property.logicalTypeOptions.timezone ? 'Yes' : 'No'}</div>
+										<div className="text-gray-300">{t('preview.schema.timezone', { value: property.logicalTypeOptions.timezone ? t('preview.schema.yes') : t('preview.schema.no') })}</div>
 									)}
 									{property.logicalTypeOptions.defaultTimezone && (
-										<div className="text-gray-300">Default Timezone: {property.logicalTypeOptions.defaultTimezone}</div>
+										<div className="text-gray-300">{t('preview.schema.defaultTimezone', { value: property.logicalTypeOptions.defaultTimezone })}</div>
 									)}
 								</div>
 							}>
@@ -228,17 +230,17 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 							const tooltipContent = (
 								<div className="space-y-1">
 									{qualityCheck.description && <div>{qualityCheck.description}</div>}
-									{qualityCheck.type && <div className="text-gray-300">Type: {qualityCheck.type}</div>}
+									{qualityCheck.type && <div className="text-gray-300">{t('preview.schema.qualityType', { value: qualityCheck.type })}</div>}
 									{qualityCheck.dimension &&
-										<div className="text-gray-300">Dimension: {qualityCheck.dimension}</div>}
+										<div className="text-gray-300">{t('preview.schema.qualityDimension', { value: qualityCheck.dimension })}</div>}
 									{qualityCheck.metric &&
-										<div className="text-gray-300">Metric: {qualityCheck.metric}</div>}
+										<div className="text-gray-300">{t('preview.schema.qualityMetric', { value: qualityCheck.metric })}</div>}
 									{qualityCheck.mustBeGreaterThan !== undefined &&
-										<div className="text-gray-300">Must be &gt; {qualityCheck.mustBeGreaterThan}</div>}
+										<div className="text-gray-300">{t('preview.schema.mustBeGreaterThan', { value: qualityCheck.mustBeGreaterThan })}</div>}
 									{qualityCheck.mustBeLessThan !== undefined &&
-										<div className="text-gray-300">Must be &lt; {qualityCheck.mustBeLessThan}</div>}
+										<div className="text-gray-300">{t('preview.schema.mustBeLessThan', { value: qualityCheck.mustBeLessThan })}</div>}
 									{qualityCheck.mustBe !== undefined &&
-										<div className="text-gray-300">Must be {qualityCheck.mustBe}</div>}
+										<div className="text-gray-300">{t('preview.schema.mustBe', { value: qualityCheck.mustBe })}</div>}
 								</div>
 							);
 
@@ -247,7 +249,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 									<span
 										className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
 										<QualityIcon className="w-3 h-3"/>
-										{qualityCheck.name || 'Quality Check'}
+										{qualityCheck.name || t('preview.schema.qualityCheck')}
 									</span>
 								</Tooltip>
 							);
@@ -271,6 +273,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 SchemaProperty.displayName = 'SchemaProperty';
 
 const SchemaTable = memo(({ schemaName, schema }) => {
+	const { t } = useTranslation();
 	const hiddenNames = useHiddenCustomPropertyNames('schema');
 	const { customProperties: customPropertyConfigs } = useCustomization('schema');
 	const { definitionData: schemaDefinition } = useInheritedDefinition(schema?.authoritativeDefinitions);
@@ -305,9 +308,9 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							{schema.description ? (
 								<div className="text-sm font-normal text-gray-500">{schema.description}</div>
 							) : schemaDefinition?.description ? (
-								<div className="text-sm font-normal text-blue-400" title="Inherited from semantic definition">{schemaDefinition.description}</div>
+								<div className="text-sm font-normal text-blue-400" title={t('preview.schema.inheritedFromSemantic')}>{schemaDefinition.description}</div>
 							) : (
-								<div className="text-sm font-normal text-gray-400">No description</div>
+								<div className="text-sm font-normal text-gray-400">{t('preview.schema.noDescription')}</div>
 							)}
 							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
               {schema && schema.tags && schema.tags.length > 0 && <Tags tags={schema.tags}/>}
@@ -319,11 +322,11 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 											<div className="space-y-1">
 												{qualityCheck.description && <div>{qualityCheck.description}</div>}
 												{qualityCheck.type &&
-													<div className="text-gray-300">Type: {qualityCheck.type}</div>}
+													<div className="text-gray-300">{t('preview.schema.qualityType', { value: qualityCheck.type })}</div>}
 												{qualityCheck.dimension &&
-													<div className="text-gray-300">Dimension: {qualityCheck.dimension}</div>}
+													<div className="text-gray-300">{t('preview.schema.qualityDimension', { value: qualityCheck.dimension })}</div>}
 												{qualityCheck.metric &&
-													<div className="text-gray-300">Metric: {qualityCheck.metric}</div>}
+													<div className="text-gray-300">{t('preview.schema.qualityMetric', { value: qualityCheck.metric })}</div>}
 											</div>
 										);
 
@@ -332,7 +335,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 													<span
 														className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
 														<QualityIcon className="w-3 h-3"/>
-														{qualityCheck.name || 'Quality Check'}
+														{qualityCheck.name || t('preview.schema.qualityCheck')}
 													</span>
 											</Tooltip>
 										);
@@ -365,6 +368,7 @@ SchemaTable.displayName = 'SchemaTable';
 
 // Main SchemaSection component
 const SchemaSection = () => {
+	const { t } = useTranslation();
 	const schema = useEditorStore(useShallow(state => state.getValue('schema')));
 	if (!schema || Object.keys(schema).length === 0) return null;
 
@@ -372,9 +376,8 @@ const SchemaSection = () => {
 		<section id="schema">
 			<div className="flex justify-between">
 				<div className="px-4 sm:px-0">
-					<h1 className="text-base font-semibold leading-6 text-gray-900">Schema</h1>
-					<p className="text-sm text-gray-500">Schema supports both a business representation and physical
-						implementation</p>
+					<h1 className="text-base font-semibold leading-6 text-gray-900">{t('preview.schema.heading')}</h1>
+					<p className="text-sm text-gray-500">{t('preview.schema.description')}</p>
 				</div>
 			</div>
 

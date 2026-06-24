@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import { isSafeKey } from '../../utils/safeProperty.js';
 import { Combobox, Tooltip } from '../ui/index.js';
@@ -13,6 +14,7 @@ import { convertEnumToOptions, useCustomization, useIsPropertyHidden, useStandar
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
 
 const ServerEditor = ({ serverIndex }) => {
+	const { t } = useTranslation();
 	const servers = useEditorStore(useShallow((state) => state.getValue('servers'))) || {};
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
 	const yamlParts = useEditorStore((state) => state.yamlParts);
@@ -220,8 +222,8 @@ const ServerEditor = ({ serverIndex }) => {
       <div className="h-full flex flex-col bg-white">
         <div className="flex-1 overflow-y-auto p-4">
           <div className="text-center py-6 text-gray-500">
-            <p className="text-xs">Server not found at index {serverIndex}.</p>
-            <p className="text-xs mt-1">It may have been deleted.</p>
+            <p className="text-xs">{t('server.notFound.title', { index: serverIndex })}</p>
+            <p className="text-xs mt-1">{t('server.notFound.description')}</p>
           </div>
         </div>
       </div>
@@ -234,18 +236,18 @@ const ServerEditor = ({ serverIndex }) => {
         <div className="space-y-4">
           <div className="relative">
             <h3 className="text-base font-semibold leading-6 text-gray-900">
-              {servers[serverIndex].server || `Server ${serverIndex + 1}`}
+              {servers[serverIndex].server || t('server.fallbackName', { number: serverIndex + 1 })}
             </h3>
-            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">Connection details and configuration for the data source or platform serving this data contract.</p>
+            <p className="mt-1 text-xs leading-4 text-gray-500 mb-4">{t('server.description')}</p>
             <button
               type="button"
               onClick={() => {
-                if (window.confirm('Are you sure you want to remove this server?')) {
+                if (window.confirm(t('server.confirm.remove'))) {
                   removeServer();
                 }
               }}
               className="absolute top-0 right-0 p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors"
-              title="Remove Server"
+              title={t('server.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -256,7 +258,7 @@ const ServerEditor = ({ serverIndex }) => {
                 {!isServerHidden && (
                   <ValidatedInput
                     name="server"
-                    label={serverOverride?.title || "Server"}
+                    label={serverOverride?.title || t('server.field.server.label')}
                     value={servers[serverIndex].server || ''}
                     onChange={(e) => updateServer('server', e.target.value)}
                     required={serverOverride?.required ?? true}
@@ -275,8 +277,8 @@ const ServerEditor = ({ serverIndex }) => {
                     <Combobox
                       label={
                         <div className="flex items-center gap-1">
-                          <span>{environmentOverride?.title || "Environment"}</span>
-                          <Tooltip content="Deployment stage (prod, preprod, dev, uat)">
+                          <span>{environmentOverride?.title || t('server.field.environment.label')}</span>
+                          <Tooltip content={t('server.field.environment.tooltip')}>
                             <QuestionMarkCircleIcon />
                           </Tooltip>
                         </div>
@@ -284,7 +286,7 @@ const ServerEditor = ({ serverIndex }) => {
                       options={environmentOptions}
                       value={servers[serverIndex].environment || ''}
                       onChange={(selectedValue) => updateServer('environment', selectedValue || '')}
-                      placeholder={environmentOverride?.placeholder || "Select environment..."}
+                      placeholder={environmentOverride?.placeholder || t('server.field.environment.placeholder')}
                       acceptAnyInput={true}
                     />
                   </div>
@@ -293,9 +295,9 @@ const ServerEditor = ({ serverIndex }) => {
                   <div className="sm:col-span-2">
                     <div className="flex items-center gap-1 mb-1">
                       <label className="block text-xs font-medium leading-4 text-gray-900">
-                        Description
+                        {t('server.field.description.label')}
                       </label>
-                      <Tooltip content="Server details">
+                      <Tooltip content={t('server.field.description.tooltip')}>
                         <QuestionMarkCircleIcon />
                       </Tooltip>
                     </div>
@@ -304,20 +306,20 @@ const ServerEditor = ({ serverIndex }) => {
                       value={servers[serverIndex].description || ''}
                       onChange={(e) => updateServer('description', e.target.value)}
                       className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                      placeholder="Describe this server..."
+                      placeholder={t('server.field.description.placeholder')}
                     />
                   </div>
                 )}
                 {!isTypeHidden && (
                   <div className="sm:col-span-2">
                     <ValidatedCombobox
-                      label={typeOverride?.title || "Type"}
-                      tooltip={typeOverride?.description || "Platform category (api, athena, bigquery, snowflake, postgres, etc.)"}
+                      label={typeOverride?.title || t('server.field.type.label')}
+                      tooltip={typeOverride?.description || t('server.field.type.tooltip')}
                       required={typeOverride?.required ?? true}
                       options={effectiveTypeOptions}
                       value={servers[serverIndex].type || ''}
                       onChange={(selectedValue) => updateServer('type', selectedValue || '')}
-                      placeholder={typeOverride?.placeholder || "Select server type..."}
+                      placeholder={typeOverride?.placeholder || t('server.field.type.placeholder')}
                       acceptAnyInput={!typeOverride?.enum}
                       validationKey={`servers.${serverIndex}.type`}
                       validationSection="Servers"
@@ -353,7 +355,7 @@ const ServerEditor = ({ serverIndex }) => {
                       <ValidatedInput
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-														Project
+														{t('server.field.project.label')}
 													</label>
 												}
 												required={true}
@@ -371,7 +373,7 @@ const ServerEditor = ({ serverIndex }) => {
 												required={true}
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-														Dataset
+														{t('server.field.dataset.label')}
 													</label>
 												}
                         type="text"
@@ -393,7 +395,7 @@ const ServerEditor = ({ serverIndex }) => {
 												required={true}
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-														Account
+														{t('server.field.account.label')}
 													</label>
 												}
                         type="text"
@@ -409,7 +411,7 @@ const ServerEditor = ({ serverIndex }) => {
                       <ValidatedInput
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-														Database
+														{t('server.field.database.label')}
 													</label>
 												}
 												required={true}
@@ -426,7 +428,7 @@ const ServerEditor = ({ serverIndex }) => {
                       <ValidatedInput
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-														Schema
+														{t('server.field.schema.label')}
 													</label>
 												}
 												required={true}
@@ -443,7 +445,7 @@ const ServerEditor = ({ serverIndex }) => {
 											<ValidatedInput
 												label={
 													<label className="block text-xs font-medium leading-4 text-gray-900">
-													Host
+													{t('server.field.host.label')}
 													</label>
 												}
 												required={false}
@@ -462,7 +464,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -472,7 +474,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -483,7 +485,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -493,7 +495,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -509,7 +511,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
-                        label="Location"
+                        label={t('server.field.location.label')}
                         value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
@@ -520,7 +522,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Format
+                        {t('server.field.format.label')}
                       </label>
                       <input
                         type="text"
@@ -532,7 +534,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Delimiter
+                        {t('server.field.delimiter.label')}
                       </label>
                       <input
                         type="text"
@@ -549,7 +551,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -559,7 +561,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -569,7 +571,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Host
+                        {t('server.field.host.label')}
                       </label>
                       <input
                         type="text"
@@ -586,7 +588,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="catalog"
-                      label="Catalog"
+                      label={t('server.field.catalog.label')}
                       value={servers[serverIndex].catalog || ''}
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
@@ -596,7 +598,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -606,7 +608,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Host
+                        {t('server.field.host.label')}
                       </label>
                       <input
                         type="text"
@@ -623,7 +625,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="location"
-                      label="Location"
+                      label={t('server.field.location.label')}
                       value={servers[serverIndex].location || ''}
                       onChange={(e) => updateServer('location', e.target.value)}
                       required={true}
@@ -633,7 +635,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="format"
-                      label="Format"
+                      label={t('server.field.format.label')}
                       value={servers[serverIndex].format || ''}
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
@@ -643,7 +645,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Delimiter
+                        {t('server.field.delimiter.label')}
                       </label>
                       <input
                         type="text"
@@ -660,7 +662,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="account"
-                      label="Account"
+                      label={t('server.field.account.label')}
                       value={servers[serverIndex].account || ''}
                       onChange={(e) => updateServer('account', e.target.value)}
                       required={true}
@@ -670,7 +672,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -680,7 +682,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Location
+                        {t('server.field.location.label')}
                       </label>
                       <input
                         type="text"
@@ -697,7 +699,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="stagingDir"
-                      label="Staging Dir"
+                      label={t('server.field.stagingDir.label')}
                       value={servers[serverIndex].stagingDir || ''}
                       onChange={(e) => updateServer('stagingDir', e.target.value)}
                       required={true}
@@ -707,7 +709,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -717,7 +719,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Catalog
+                        {t('server.field.catalog.label')}
                       </label>
                       <input
                         type="text"
@@ -734,7 +736,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -744,7 +746,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Format
+                        {t('server.field.format.label')}
                       </label>
                       <input
                         type="text"
@@ -761,7 +763,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -771,7 +773,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -782,7 +784,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -798,7 +800,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
-                        label="Location"
+                        label={t('server.field.location.label')}
                         value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
@@ -814,7 +816,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -824,7 +826,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -835,7 +837,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -850,7 +852,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -860,7 +862,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -871,7 +873,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -881,7 +883,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -896,7 +898,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -906,7 +908,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -917,7 +919,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -932,7 +934,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -942,7 +944,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -958,7 +960,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -968,7 +970,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -984,7 +986,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -999,7 +1001,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1009,7 +1011,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1025,9 +1027,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <div>
                       <div className="flex justify-between mb-1">
                         <label className="block text-xs font-medium leading-4 text-gray-900">
-                          Stream
+                          {t('server.field.stream.label')}
                         </label>
-                        <span className="text-xs leading-4 text-gray-500">Required</span>
+                        <span className="text-xs leading-4 text-gray-500">{t('server.field.required')}</span>
                       </div>
                       <input
                         type="text"
@@ -1044,7 +1046,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="path"
-                      label="Path"
+                      label={t('server.field.path.label')}
                       value={servers[serverIndex].path || ''}
                       onChange={(e) => updateServer('path', e.target.value)}
                       required={true}
@@ -1054,7 +1056,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="format"
-                      label="Format"
+                      label={t('server.field.format.label')}
                       value={servers[serverIndex].format || ''}
                       onChange={(e) => updateServer('format', e.target.value)}
                       required={true}
@@ -1069,7 +1071,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1079,7 +1081,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -1090,7 +1092,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1105,7 +1107,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1115,7 +1117,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -1126,7 +1128,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="serviceName"
-                      label="Service Name"
+                      label={t('server.field.serviceName.label')}
                       value={servers[serverIndex].serviceName || ''}
                       onChange={(e) => updateServer('serviceName', e.target.value)}
                       required={true}
@@ -1142,7 +1144,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1157,7 +1159,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="project"
-                      label="Project"
+                      label={t('server.field.project.label')}
                       value={servers[serverIndex].project || ''}
                       onChange={(e) => updateServer('project', e.target.value)}
                       required={true}
@@ -1173,7 +1175,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
-                        label="Location"
+                        label={t('server.field.location.label')}
                         value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
@@ -1189,7 +1191,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1199,7 +1201,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -1210,7 +1212,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="catalog"
-                      label="Catalog"
+                      label={t('server.field.catalog.label')}
                       value={servers[serverIndex].catalog || ''}
                       onChange={(e) => updateServer('catalog', e.target.value)}
                       required={true}
@@ -1220,7 +1222,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -1235,7 +1237,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1245,7 +1247,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="port"
-                      label="Port"
+                      label={t('server.field.port.label')}
                       type="number"
                       value={servers[serverIndex].port || ''}
                       onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
@@ -1256,7 +1258,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1266,7 +1268,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -1282,7 +1284,7 @@ const ServerEditor = ({ serverIndex }) => {
                     <div className="sm:col-span-2">
                       <ValidatedInput
                         name="location"
-                        label="Location"
+                        label={t('server.field.location.label')}
                         value={servers[serverIndex].location || ''}
                         onChange={(e) => updateServer('location', e.target.value)}
                         required={true}
@@ -1293,7 +1295,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Format
+                        {t('server.field.format.label')}
                       </label>
                       <input
                         type="text"
@@ -1305,7 +1307,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Delimiter
+                        {t('server.field.delimiter.label')}
                       </label>
                       <input
                         type="text"
@@ -1322,7 +1324,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1332,7 +1334,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Port
+                        {t('server.field.port.label')}
                       </label>
                       <input
                         type="number"
@@ -1344,7 +1346,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1359,7 +1361,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1369,7 +1371,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Port
+                        {t('server.field.port.label')}
                       </label>
                       <input
                         type="number"
@@ -1381,7 +1383,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1396,7 +1398,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1406,7 +1408,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Port
+                        {t('server.field.port.label')}
                       </label>
                       <input
                         type="number"
@@ -1418,7 +1420,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1428,7 +1430,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <ValidatedInput
                       name="schema"
-                      label="Schema"
+                      label={t('server.field.schema.label')}
                       value={servers[serverIndex].schema || ''}
                       onChange={(e) => updateServer('schema', e.target.value)}
                       required={true}
@@ -1443,7 +1445,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <ValidatedInput
                       name="host"
-                      label="Host"
+                      label={t('server.field.host.label')}
                       value={servers[serverIndex].host || ''}
                       onChange={(e) => updateServer('host', e.target.value)}
                       required={true}
@@ -1453,7 +1455,7 @@ const ServerEditor = ({ serverIndex }) => {
                     />
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Port
+                        {t('server.field.port.label')}
                       </label>
                       <input
                         type="number"
@@ -1465,7 +1467,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <ValidatedInput
                       name="database"
-                      label="Database"
+                      label={t('server.field.database.label')}
                       value={servers[serverIndex].database || ''}
                       onChange={(e) => updateServer('database', e.target.value)}
                       required={true}
@@ -1480,7 +1482,7 @@ const ServerEditor = ({ serverIndex }) => {
                   <>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Host
+                        {t('server.field.host.label')}
                       </label>
                       <input
                         type="text"
@@ -1492,7 +1494,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Port
+                        {t('server.field.port.label')}
                       </label>
                       <input
                         type="number"
@@ -1504,7 +1506,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Account
+                        {t('server.field.account.label')}
                       </label>
                       <input
                         type="text"
@@ -1516,7 +1518,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Project
+                        {t('server.field.project.label')}
                       </label>
                       <input
                         type="text"
@@ -1528,7 +1530,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Database
+                        {t('server.field.database.label')}
                       </label>
                       <input
                         type="text"
@@ -1540,7 +1542,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Dataset
+                        {t('server.field.dataset.label')}
                       </label>
                       <input
                         type="text"
@@ -1552,7 +1554,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Catalog
+                        {t('server.field.catalog.label')}
                       </label>
                       <input
                         type="text"
@@ -1564,7 +1566,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Schema
+                        {t('server.field.schema.label')}
                       </label>
                       <input
                         type="text"
@@ -1576,7 +1578,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Warehouse
+                        {t('server.field.warehouse.label')}
                       </label>
                       <input
                         type="text"
@@ -1588,7 +1590,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Service Name
+                        {t('server.field.serviceName.label')}
                       </label>
                       <input
                         type="text"
@@ -1600,7 +1602,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Location
+                        {t('server.field.location.label')}
                       </label>
                       <input
                         type="text"
@@ -1612,7 +1614,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Endpoint URL
+                        {t('server.field.endpointUrl.label')}
                       </label>
                       <input
                         type="text"
@@ -1624,7 +1626,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Path
+                        {t('server.field.path.label')}
                       </label>
                       <input
                         type="text"
@@ -1636,7 +1638,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Staging Dir
+                        {t('server.field.stagingDir.label')}
                       </label>
                       <input
                         type="text"
@@ -1648,7 +1650,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Format
+                        {t('server.field.format.label')}
                       </label>
                       <input
                         type="text"
@@ -1660,7 +1662,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Delimiter
+                        {t('server.field.delimiter.label')}
                       </label>
                       <input
                         type="text"
@@ -1672,7 +1674,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Region
+                        {t('server.field.region.label')}
                       </label>
                       <input
                         type="text"
@@ -1684,7 +1686,7 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                        Region Name
+                        {t('server.field.regionName.label')}
                       </label>
                       <input
                         type="text"

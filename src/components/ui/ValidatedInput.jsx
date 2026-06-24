@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
 
@@ -30,6 +31,7 @@ const ValidatedInput = forwardRef(({
   skipInternalValidation = false,
   ...props
 }, ref) => {
+  const { t } = useTranslation();
 
   // Internal validation - check if required field is empty
   const hasInternalError = !skipInternalValidation && required && (!value || value.toString().trim() === '');
@@ -56,22 +58,22 @@ const ValidatedInput = forwardRef(({
   // Combine internal and external errors
   const errorMessages = [];
   if (hasInternalError) {
-    errorMessages.push('This field is required');
+    errorMessages.push(t('input.required'));
   }
   if (hasPatternError) {
-    errorMessages.push(patternMessage || `Value must match pattern: ${pattern}`);
+    errorMessages.push(patternMessage || t('input.patternMismatch', { pattern }));
   }
   if (hasMinLengthError) {
-    errorMessages.push(`Minimum length is ${minLength} (currently ${trimmed.length})`);
+    errorMessages.push(t('input.minLength', { min: minLength, current: trimmed.length }));
   }
   if (hasMaxLengthError) {
-    errorMessages.push(`Maximum length is ${maxLength} (currently ${trimmed.length})`);
+    errorMessages.push(t('input.maxLength', { max: maxLength, current: trimmed.length }));
   }
   if (hasMinimumError) {
-    errorMessages.push(`Minimum value is ${minimum}`);
+    errorMessages.push(t('input.minValue', { min: minimum }));
   }
   if (hasMaximumError) {
-    errorMessages.push(`Maximum value is ${maximum}`);
+    errorMessages.push(t('input.maxValue', { max: maximum }));
   }
   errorMessages.push(...externalErrors);
 
@@ -94,7 +96,7 @@ const ValidatedInput = forwardRef(({
           </Tooltip>
         )}
         {required && (
-          <span className="ml-auto text-xs leading-4 text-gray-500">Required</span>
+          <span className="ml-auto text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
         )}
       </div>
       <input

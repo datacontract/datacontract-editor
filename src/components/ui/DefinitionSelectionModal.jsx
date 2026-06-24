@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useDefinition } from '../../hooks/useDefinition';
 
@@ -11,6 +12,7 @@ import { useDefinition } from '../../hooks/useDefinition';
  * selection correctly via resolveAuthDefType.
  */
 export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
+  const { t } = useTranslation();
   const { getSemanticTree } = useDefinition();
 
   const [selectedDefinition, setSelectedDefinition] = useState(null);
@@ -137,10 +139,10 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
 
             {/* Header */}
             <div className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 relative">
-              <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 pr-8">Find Definition</DialogTitle>
-              <p className="mt-1 text-sm text-gray-500 pr-8">Browse definitions</p>
+              <DialogTitle as="h3" className="text-lg font-semibold text-gray-900 pr-8">{t('definitionSelect.title')}</DialogTitle>
+              <p className="mt-1 text-sm text-gray-500 pr-8">{t('definitionSelect.subtitle')}</p>
               <button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <span className="sr-only">Close</span>
+                <span className="sr-only">{t('definitionSelect.close')}</span>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -155,21 +157,21 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                     <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <input type="text" placeholder="Search..." value={treeFilter} onChange={(e) => setTreeFilter(e.target.value)} autoFocus
+                <input type="text" placeholder={t('definitionSelect.search')} value={treeFilter} onChange={(e) => setTreeFilter(e.target.value)} autoFocus
                   className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
               </div>
               {!isLoadingTree && tree.length > 0 && (
                 <div className="mt-2 text-xs text-gray-500">
-                  {stats.concepts} concept{stats.concepts !== 1 ? 's' : ''}, {stats.properties} propert{stats.properties !== 1 ? 'ies' : 'y'}
+                  {t('definitionSelect.conceptCount', { count: stats.concepts })}, {t('definitionSelect.propertyCount', { count: stats.properties })}
                 </div>
               )}
             </div>
 
             {/* Tree */}
             <div className="flex-1 overflow-y-auto bg-white">
-              {isLoadingTree && <LoadingSpinner text="Loading definitions..." />}
+              {isLoadingTree && <LoadingSpinner text={t('definitionSelect.loading')} />}
               {!isLoadingTree && filteredTree.length === 0 && (
-                <EmptyState text={treeFilter ? 'No matching elements' : 'No definitions yet'} />
+                <EmptyState text={treeFilter ? t('definitionSelect.noMatches') : t('definitionSelect.empty')} />
               )}
               {!isLoadingTree && filteredTree.length > 0 && (
                 <div className="px-4 py-2">
@@ -185,11 +187,11 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
             <div className="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
               <button type="button" onClick={onClose}
                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                Cancel
+                {t('definitionSelect.cancel')}
               </button>
               <button type="button" onClick={handleSelect} disabled={!selectedDefinition}
                 className="rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
-                Select
+                {t('definitionSelect.select')}
               </button>
             </div>
           </DialogPanel>

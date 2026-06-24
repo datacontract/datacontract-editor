@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CustomPropertyIcon from './icons/CustomPropertyIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 
@@ -11,6 +12,7 @@ import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
  * @param {boolean} showDescription - Whether to show description field (default: false)
  */
 const CustomPropertiesEditor = ({ value, onChange, showDescription = false, managedProperties = [] }) => {
+  const { t } = useTranslation();
   // Normalize value to array format
   // Handle both array format [{property, value}] and object format {key: value}
   const normalizedValue = Array.isArray(value)
@@ -57,13 +59,13 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false, mana
     <div className="space-y-2">
       {/* Header with label and add button */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-gray-700">Custom Properties</label>
+        <label className="text-xs font-medium text-gray-700">{t('customProperty.heading')}</label>
         <button
           type="button"
           onClick={handleAdd}
           className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
         >
-          + Add
+          + {t('customProperty.add')}
         </button>
       </div>
 
@@ -83,6 +85,7 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false, mana
 };
 
 const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!item.property);
   const [editingType, setEditingType] = useState(false);
 
@@ -190,14 +193,14 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <CustomPropertyIcon className="size-3 text-indigo-600 shrink-0" />
-            <span className="text-xs font-medium text-gray-900">Custom Property</span>
+            <span className="text-xs font-medium text-gray-900">{t('customProperty.title')}</span>
             <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{type}</span>
           </div>
           <div className="text-xs text-gray-600 mt-0.5 truncate">
             {getSummaryLine() ? (
               <span className="font-mono">{getSummaryLine()}</span>
             ) : (
-              <span className="italic text-gray-400">New property</span>
+              <span className="italic text-gray-400">{t('customProperty.new')}</span>
             )}
           </div>
         </div>
@@ -221,7 +224,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
           {/* Property, Value, and Remove button in one line */}
           <div className="grid grid-cols-12 gap-2 items-end">
             <div className="col-span-4">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Property</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('customProperty.property.label')}</label>
               <input
                 type="text"
                 value={item.property || ''}
@@ -232,7 +235,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
             </div>
             <div className="col-span-7">
               <div className="flex items-center gap-1 h-6">
-                <label className="text-xs font-medium text-gray-700">Value</label>
+                <label className="text-xs font-medium text-gray-700">{t('customProperty.value.label')}</label>
                 {editingType ? (
                   <select
                     value={type}
@@ -292,7 +295,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
                   value={getValueString(item.value, type)}
                   onChange={(e) => handleValueChange(e.target.value, type)}
                   className={inputClasses}
-                  placeholder="Enter value..."
+                  placeholder={t('customProperty.value.placeholder')}
                 />
               )}
             </div>
@@ -300,7 +303,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
               type="button"
               onClick={() => onRemove(index)}
               className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
-              title="Remove"
+              title={t('customProperty.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -311,12 +314,12 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
           {/* Description field (optional) */}
           {showDescription && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-0.5">Description</label>
+              <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('customProperty.description.label')}</label>
               <textarea
                 value={item.description || ''}
                 onChange={(e) => onUpdate(index, 'description', e.target.value)}
                 className={inputClasses}
-                placeholder="Optional description..."
+                placeholder={t('customProperty.description.placeholder')}
                 rows={2}
               />
             </div>

@@ -1,4 +1,5 @@
 import ErrorBoundary from './ErrorBoundary.jsx';
+import i18n from '../../i18n';
 
 /**
  * Specialized error boundary for the DataContractPreview component
@@ -16,23 +17,23 @@ const PreviewErrorBoundary = ({ children, yamlContent }) => {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-red-800">
-              Preview Error
+              {i18n.t('errorBoundary.preview.title')}
             </h3>
             <p className="mt-1 text-xs text-red-700">
-              The preview could not be rendered. This usually happens when the YAML contains unexpected data structures.
+              {i18n.t('errorBoundary.preview.description')}
             </p>
 
             <div className="mt-2 text-xs text-red-600">
-              <span className="font-medium">Error: </span>
-              {error?.message || 'Unknown error'}
+              <span className="font-medium">{i18n.t('errorBoundary.preview.errorLabel')} </span>
+              {error?.message || i18n.t('errorBoundary.preview.unknownError')}
             </div>
 
             <div className="mt-3 space-y-2">
-              <p className="text-xs text-red-700 font-medium">Suggestions:</p>
+              <p className="text-xs text-red-700 font-medium">{i18n.t('errorBoundary.preview.suggestions')}</p>
               <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                <li>Check your YAML syntax for errors</li>
-                <li>Verify data contract structure matches the ODCS schema</li>
-                <li>Try editing the YAML directly to fix the issue</li>
+                <li>{i18n.t('errorBoundary.preview.suggestion1')}</li>
+                <li>{i18n.t('errorBoundary.preview.suggestion2')}</li>
+                <li>{i18n.t('errorBoundary.preview.suggestion3')}</li>
               </ul>
             </div>
 
@@ -41,14 +42,14 @@ const PreviewErrorBoundary = ({ children, yamlContent }) => {
                 onClick={resetError}
                 className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Retry Preview
+                {i18n.t('errorBoundary.preview.retry')}
               </button>
             </div>
 
             {process.env.NODE_ENV === 'development' && (
               <details className="mt-3">
                 <summary className="cursor-pointer text-xs font-medium text-red-700">
-                  Developer Details
+                  {i18n.t('errorBoundary.preview.developerDetails')}
                 </summary>
                 <pre className="mt-2 text-xs text-red-600 whitespace-pre-wrap overflow-auto max-h-32 bg-red-100 p-2 rounded">
                   {error?.stack}

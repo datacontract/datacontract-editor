@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { configureMonacoYaml } from 'monaco-yaml';
@@ -7,6 +8,7 @@ import { mergeCustomizationsIntoSchema } from '../../../utils/mergeCustomization
 import { registerSchemaCompletionProvider } from '../../../services/schemaCompletionProvider.js';
 
 const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
+		const { t } = useTranslation();
 		const yaml = useEditorStore((state) => state.yaml);
 		const setYaml = useEditorStore((state) => state.setYaml);
     const editorRef = useRef(null);
@@ -243,7 +245,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                         }`}
                     >
-                        Edit
+                        {t('code.diff.edit')}
                     </button>
                     <button
                         onClick={() => setShowDiff(true)}
@@ -269,7 +271,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Split
+                            {t('code.diff.split')}
                         </button>
                         <button
                             onClick={() => setDiffRenderSideBySide(false)}
@@ -279,7 +281,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Unified
+                            {t('code.diff.unified')}
                         </button>
                     </div>
                 )}
@@ -290,7 +292,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                     <div className="flex">
                         <div className="ml-3">
                             <p className="text-sm text-red-700">
-                                <strong>Schema Error:</strong> {schemaError}
+                                <strong>{t('code.schemaError')}</strong> {schemaError}
                             </p>
                         </div>
                     </div>
@@ -345,8 +347,8 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                     />
                                 </svg>
-                                <h3 className="mt-2 text-sm font-medium">No changes</h3>
-                                <p className="mt-1 text-sm">Your contract matches the last saved version.</p>
+                                <h3 className="mt-2 text-sm font-medium">{t('code.noChanges.title')}</h3>
+                                <p className="mt-1 text-sm">{t('code.noChanges.description')}</p>
                             </div>
                         </div>
                     )

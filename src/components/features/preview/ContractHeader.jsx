@@ -1,7 +1,9 @@
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
+import {useTranslation} from 'react-i18next';
 
 const ContractHeader = () => {
+	const { t } = useTranslation();
 	const id = useEditorStore(useShallow(state => state.getValue('id')));
 	const name = useEditorStore(useShallow(state => state.getValue('name')));
 	const version = useEditorStore(useShallow(state => state.getValue('version')));
@@ -13,7 +15,7 @@ const ContractHeader = () => {
 
 	const hasData = id || version || name || status || apiVersion || tenant || dataProduct || team?.name;
 
-	if (!hasData) return <div>no data yet</div>;
+	if (!hasData) return <div>{t('preview.contractHeader.noData')}</div>;
 
 	return (
 		<div className="min-w-0">

@@ -1,4 +1,5 @@
 import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
 import {useEditorStore} from "../store.js";
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
@@ -8,7 +9,7 @@ import {useCallback, useMemo} from "react";
 const navigationItems = [
         {
             id: 'overview',
-            title: 'Fundamentals',
+            titleKey: 'nav.fundamentals',
             path: '/overview',
             yamlProperty: 'info',
             icon: (
@@ -18,7 +19,7 @@ const navigationItems = [
         },
         {
             id: 'terms-of-use',
-            title: 'Terms of Use',
+            titleKey: 'nav.termsOfUse',
             path: '/terms-of-use',
             yamlProperty: 'description',
             icon: (
@@ -26,7 +27,7 @@ const navigationItems = [
         },
         {
             id: 'schemas',
-            title: 'Schemas',
+            titleKey: 'nav.schemas',
             path: '/schemas',
             yamlProperty: 'schema',
             icon: (
@@ -39,7 +40,7 @@ const navigationItems = [
         },
         {
             id: 'servers',
-            title: 'Servers',
+            titleKey: 'nav.servers',
             path: '/servers',
             yamlProperty: 'servers',
             icon: (
@@ -51,7 +52,7 @@ const navigationItems = [
         },
         {
             id: 'team',
-            title: 'Team',
+            titleKey: 'nav.team',
             path: '/team',
             yamlProperty: 'team',
             icon: (
@@ -63,7 +64,7 @@ const navigationItems = [
         },
         {
             id: 'support',
-            title: 'Support',
+            titleKey: 'nav.support',
             path: '/support',
             yamlProperty: 'support',
             icon: (
@@ -75,7 +76,7 @@ const navigationItems = [
         },
         {
             id: 'roles',
-            title: 'Roles',
+            titleKey: 'nav.roles',
             path: '/roles',
             yamlProperty: 'roles',
             icon: (
@@ -87,7 +88,7 @@ const navigationItems = [
         },
         {
             id: 'pricing',
-            title: 'Pricing',
+            titleKey: 'nav.pricing',
             path: '/pricing',
             yamlProperty: 'pricing',
             icon: (
@@ -99,7 +100,7 @@ const navigationItems = [
         },
         {
             id: 'sla',
-            title: 'SLA',
+            titleKey: 'nav.sla',
             path: '/sla',
             yamlProperty: 'slaProperties',
             icon: (
@@ -111,7 +112,7 @@ const navigationItems = [
         },
         {
             id: 'custom-properties',
-            title: 'Custom Properties',
+            titleKey: 'nav.customProperties',
             path: '/custom-properties',
             yamlProperty: 'customProperties',
             icon: (
@@ -146,7 +147,9 @@ const SchemaIcon = () => (
 );
 
 // Reusable navigation link component
-const NavLink = ({ item, isActive, onClick }) => (
+const NavLink = ({ item, isActive, onClick }) => {
+    const { t } = useTranslation();
+    return (
     <Link
         to={item.path}
         onClick={onClick}
@@ -155,11 +158,13 @@ const NavLink = ({ item, isActive, onClick }) => (
         <div className="size-4 shrink-0" aria-hidden="true">
             {item.icon || <div className="size-2 rounded-full bg-gray-300" />}
         </div>
-        <p className="ml-1.5 text-sm font-medium">{item.title}</p>
+        <p className="ml-1.5 text-sm font-medium">{t(item.titleKey)}</p>
     </Link>
-);
+    );
+};
 
 const SidebarNavigation = ({ isMobile = false }) => {
+    const { t } = useTranslation();
     // Consolidated store access - single subscription with useShallow
     const {
         schemas,
@@ -326,7 +331,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
-                    Documentation
+                    {t('nav.footer.documentation')}
                 </a>
                 <a
                     href="https://entropy-data.com"
@@ -342,7 +347,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                 </a>
             </div>
         </>
-    ), [schemas, servers, handleNavigationClick, isPathActive, isSchemaActive]);
+    ), [schemas, servers, handleNavigationClick, isPathActive, isSchemaActive, t]);
 
     // Mobile drawer mode
     if (isMobile) {

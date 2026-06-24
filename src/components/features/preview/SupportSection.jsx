@@ -1,10 +1,12 @@
 import { memo } from 'react';
+import {useTranslation} from 'react-i18next';
 import supportIcons from '../../../assets/support-icons/supportIcons.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 
 // Memoized Support Channel component
 const SupportChannel = memo(({ channel }) => {
+	const { t } = useTranslation();
 	const getSupportIcon = (toolType) => {
 		if (!toolType) return null;
 		const type = toolType.toLowerCase();
@@ -25,14 +27,14 @@ const SupportChannel = memo(({ channel }) => {
 				{channel.tool && (
 					<div className="flex items-center gap-x-4">
 						<div className="flex flex-col">
-							<dt className="text-sm font-medium text-gray-500">Tool</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.support.tool')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{channel.tool}</dd>
 						</div>
 					</div>
 				)}
 				<div className="flex items-center gap-x-4">
 					<div className="flex flex-col">
-						<dt className="text-sm font-medium text-gray-500">Channel</dt>
+						<dt className="text-sm font-medium text-gray-500">{t('preview.support.channel')}</dt>
 						<dd className="mt-1 text-sm text-gray-900">
 							{channel.url ? (
 								<a href={channel.url}
@@ -46,7 +48,7 @@ const SupportChannel = memo(({ channel }) => {
 				{channel.scope && (
 					<div className="flex items-center gap-x-4">
 						<div className="flex flex-col">
-							<dt className="text-sm font-medium text-gray-500">Scope</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.support.scope')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{channel.scope}</dd>
 						</div>
 					</div>
@@ -54,7 +56,7 @@ const SupportChannel = memo(({ channel }) => {
 				{channel.description && (
 					<div className="flex items-center gap-x-4">
 						<div className="flex flex-col">
-							<dt className="text-sm font-medium text-gray-500">Description</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.support.description')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{channel.description}</dd>
 						</div>
 					</div>
@@ -62,11 +64,11 @@ const SupportChannel = memo(({ channel }) => {
 				{channel.invitationUrl && (
 					<div className="flex items-center gap-x-4">
 						<div className="flex flex-col">
-							<dt className="text-sm font-medium text-gray-500">Invitation URL</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.support.invitationUrl')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">
 								<a href={channel.invitationUrl} target="_blank" rel="noopener noreferrer"
 								   className="text-indigo-600 hover:text-indigo-500">
-									Invitation
+									{t('preview.support.invitation')}
 								</a>
 							</dd>
 						</div>
@@ -87,17 +89,15 @@ SupportChannel.displayName = 'SupportChannel';
 
 // Main SupportSection component
 const SupportSection = () => {
+	const { t } = useTranslation();
 	const support = useEditorStore(useShallow(state => state.getValue('support')));
 	if (!support || support.length === 0) return null;
 
 	return (
 		<section>
 			<div className="px-4 sm:px-0">
-				<h1 className="text-base font-semibold leading-6 text-gray-900" id="support">Support & Communication
-					Channels</h1>
-				<p className="text-sm text-gray-500">Support and communication channels help consumers find help
-					regarding
-					their use of the data contract</p>
+				<h1 className="text-base font-semibold leading-6 text-gray-900" id="support">{t('preview.support.heading')}</h1>
+				<p className="text-sm text-gray-500">{t('preview.support.sectionDescription')}</p>
 			</div>
 			<ul role="list"
 				className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">

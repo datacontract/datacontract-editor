@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import {useTranslation} from 'react-i18next';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
@@ -6,6 +7,7 @@ import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/use
 
 // Memoized Role Item component
 const RoleItem = memo(({ role }) => {
+	const { t } = useTranslation();
 	const hiddenNames = useHiddenCustomPropertyNames('roles');
 	const { customProperties: customPropertyConfigs } = useCustomization('roles');
 	return (
@@ -14,7 +16,7 @@ const RoleItem = memo(({ role }) => {
 				{role.role && (
 					<div className="flex items-center gap-x-4">
 						<div className="hidden sm:flex sm:flex-col">
-							<dt className="text-sm font-medium text-gray-500">Role</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.roles.role')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{role.role}</dd>
 						</div>
 					</div>
@@ -22,7 +24,7 @@ const RoleItem = memo(({ role }) => {
 				{role.access && (
 					<div className="flex items-center gap-x-4">
 						<div className="sm:flex sm:flex-col">
-							<dt className="text-sm font-medium text-gray-500">Access</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.roles.access')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{role.access}</dd>
 						</div>
 					</div>
@@ -30,7 +32,7 @@ const RoleItem = memo(({ role }) => {
 				{role.firstLevelApprovers && (
 					<div className="flex items-center gap-x-4">
 						<div className="sm:flex sm:flex-col">
-							<dt className="text-sm font-medium text-gray-500">First Level Approvers</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.roles.firstLevelApprovers')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{role.firstLevelApprovers}</dd>
 						</div>
 					</div>
@@ -38,14 +40,14 @@ const RoleItem = memo(({ role }) => {
 				{role.secondLevelApprovers && (
 					<div className="flex items-center gap-x-4">
 						<div className="sm:flex sm:flex-col">
-							<dt className="text-sm font-medium text-gray-500">Second Level Approvers</dt>
+							<dt className="text-sm font-medium text-gray-500">{t('preview.roles.secondLevelApprovers')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{role.secondLevelApprovers}</dd>
 						</div>
 					</div>
 				)}
 				<div className="flex items-center gap-x-4">
 					<div className="sm:flex sm:flex-col">
-						<dt className="text-sm font-medium text-gray-500">Custom Properties</dt>
+						<dt className="text-sm font-medium text-gray-500">{t('preview.roles.customProperties')}</dt>
 						<dd className="flex flex-wrap gap-x-4 gap-y-1">
 							<CustomPropertiesPreview properties={role.customProperties} hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
 						</dd>
@@ -66,15 +68,15 @@ RoleItem.displayName = 'RoleItem';
 
 // Main RolesSection component
 const RolesSection = () => {
+	const { t } = useTranslation();
 	const roles = useEditorStore(useShallow(state => state.getValue('roles')));
 	if (!roles || roles.length === 0) return null;
 
 	return (
 		<section>
 			<div className="px-4 sm:px-0">
-				<h1 className="text-base font-semibold leading-6 text-gray-900" id="roles">Roles</h1>
-				<p className="text-sm text-gray-500">Roles that a consumer may need to access the dataset, 
-					depending on the type of access they require</p>
+				<h1 className="text-base font-semibold leading-6 text-gray-900" id="roles">{t('preview.roles.heading')}</h1>
+				<p className="text-sm text-gray-500">{t('preview.roles.description')}</p>
 			</div>
 			<ul role="list"
 				className="mt-2 divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">

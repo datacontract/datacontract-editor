@@ -1,5 +1,6 @@
 import ErrorBoundary from './ErrorBoundary.jsx';
 import { useEditorStore } from '../../store.js';
+import i18n from '../../i18n';
 
 /**
  * Specialized error boundary for form pages (Overview, Schema, Servers, etc.)
@@ -20,24 +21,24 @@ const FormPageErrorBoundary = ({ children, pageName = 'form' }) => {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-red-800">
-              Form Error
+              {i18n.t('errorBoundary.form.title')}
             </h3>
             <p className="mt-1 text-xs text-red-700">
-              The {pageName} form encountered an error and could not be displayed.
+              {i18n.t('errorBoundary.form.description', { pageName })}
             </p>
 
             <div className="mt-2 text-xs text-red-600">
-              <span className="font-medium">Error: </span>
-              {error?.message || 'Unknown form error'}
+              <span className="font-medium">{i18n.t('errorBoundary.form.errorLabel')} </span>
+              {error?.message || i18n.t('errorBoundary.form.unknownError')}
             </div>
 
             <div className="mt-3 space-y-2">
-              <p className="text-xs text-red-700 font-medium">What you can do:</p>
+              <p className="text-xs text-red-700 font-medium">{i18n.t('errorBoundary.form.whatYouCanDo')}</p>
               <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                <li>Switch to YAML view to edit your data contract directly</li>
-                <li>Check if your YAML structure is valid</li>
-                <li>Try navigating to a different form page</li>
-                <li>Your data is safe - the YAML has been preserved</li>
+                <li>{i18n.t('errorBoundary.form.suggestion1')}</li>
+                <li>{i18n.t('errorBoundary.form.suggestion2')}</li>
+                <li>{i18n.t('errorBoundary.form.suggestion3')}</li>
+                <li>{i18n.t('errorBoundary.form.suggestion4')}</li>
               </ul>
             </div>
 
@@ -46,20 +47,20 @@ const FormPageErrorBoundary = ({ children, pageName = 'form' }) => {
                 onClick={resetError}
                 className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Retry Form
+                {i18n.t('errorBoundary.form.retry')}
               </button>
               <button
                 onClick={() => setView('yaml')}
                 className="inline-flex items-center px-3 py-1.5 border border-indigo-600 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Edit YAML Directly
+                {i18n.t('errorBoundary.form.editYaml')}
               </button>
             </div>
 
             {process.env.NODE_ENV === 'development' && (
               <details className="mt-3">
                 <summary className="cursor-pointer text-xs font-medium text-red-700">
-                  Developer Details
+                  {i18n.t('errorBoundary.form.developerDetails')}
                 </summary>
                 <pre className="mt-2 text-xs text-red-600 whitespace-pre-wrap overflow-auto max-h-32 bg-red-100 p-2 rounded">
                   {error?.stack}

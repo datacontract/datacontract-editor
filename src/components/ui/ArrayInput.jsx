@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ArrayInput component for editing array of strings
  * Allows adding/removing items dynamically
  */
-const ArrayInput = ({ label, value = [], onChange, placeholder = "Add item...", helpText }) => {
+const ArrayInput = ({ label, value = [], onChange, placeholder, helpText }) => {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder === undefined ? t('arrayInput.placeholder') : placeholder;
   const [newItem, setNewItem] = useState('');
 
   const handleAdd = () => {
@@ -42,7 +45,7 @@ const ArrayInput = ({ label, value = [], onChange, placeholder = "Add item...", 
                 onClick={() => handleRemove(index)}
                 className="text-red-600 hover:text-red-800 font-medium"
               >
-                Remove
+                {t('arrayInput.remove')}
               </button>
             </div>
           ))}
@@ -57,14 +60,14 @@ const ArrayInput = ({ label, value = [], onChange, placeholder = "Add item...", 
           onChange={(e) => setNewItem(e.target.value)}
           onKeyPress={handleKeyPress}
           className="flex-1 rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
         />
         <button
           type="button"
           onClick={handleAdd}
           className="px-2 py-1 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
-          Add
+          {t('arrayInput.add')}
         </button>
       </div>
 
