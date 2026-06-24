@@ -41,7 +41,16 @@ export function stringifyYaml(value, options = {}) {
   const doc = new YAML.Document(value);
   YAML.visit(doc, {
     Scalar(key, node) {
-      if (typeof node.value === "string" && node.value.includes("\n")) {
+      // Render multi-line strings as readable block literals (|-), but only when
+      // safe to do so. Block scalars cannot carry significant trailing whitespace
+      // through applyYamlFormat (which strips trailing whitespace per line), so
+      // strings with trailing whitespace on any line keep the default
+      // (double-quoted) style, where the whitespace survives inside the quotes.
+      if (
+        typeof node.value === "string" &&
+        node.value.includes("\n") &&
+        !node.value.split("\n").some((line) => /[ \t]$/.test(line))
+      ) {
         node.type = "BLOCK_LITERAL";
       }
     },
