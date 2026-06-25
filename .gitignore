@@ -26,6 +26,9 @@ dist-ssr
 # superpowers docs
 docs/superpowers
 
+# API specs (kept locally, not tracked)
+docs/api/
+
 # local templates
 /templates
 /.playwright-mcp
