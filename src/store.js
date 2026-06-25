@@ -6,6 +6,7 @@ import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { isSafeKey } from './utils/safeProperty.js';
+import { createAuthDefinitionsSlice, initialAuthDefinitionsState } from './lib/authDefinitionsSlice.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -103,6 +104,7 @@ export function extractParseErrorPos(e) {
 }
 
 export function defaultStoreConfig(set, get) {
+	const authDefinitionsSlice = createAuthDefinitionsSlice(set, get);
 	// Define action functions to ensure stable references
 	const actions = {
 		setYaml: (newYaml) => {
@@ -117,6 +119,7 @@ export function defaultStoreConfig(set, get) {
 			try {
 				const yamlParts = Yaml.parse(newYaml);
 				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
+				get().collectAndFetchAuthDefinitions();
 			} catch(e) {
 				// NOOP
 			}
@@ -411,6 +414,7 @@ export function defaultStoreConfig(set, get) {
 			tests: DEFAULT_TESTS_CONFIG,
 			ai: DEFAULT_AI_CONFIG,
 			semantics: null, // { baseUrl, pageParam, queryParam } for the semantic ontology tree API
+			batchSemanticsUrl: null, // when set, authoritativeDefinitions are batch-fetched on load
       managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
       allowUnmanagedTags: true,
 			customizations: null, // See CUSTOMIZATION.md for documentation
@@ -420,6 +424,7 @@ export function defaultStoreConfig(set, get) {
 		aiChatHasMessages: false,
 		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
 		lastAppliedAiChange: null, // { originalYaml, summary } - for unapply
+		...authDefinitionsSlice,
 		...actions,
 	};
 }
@@ -459,6 +464,7 @@ const defaultEditorStore = create()(
 					...currentState,
 					...persistedState,
 					editorConfig: mergedEditorConfig,
+					authDefinitions: { ...initialAuthDefinitionsState },
 				};
 			},
 			onRehydrateStorage: () => (state) => {
@@ -473,6 +479,7 @@ const defaultEditorStore = create()(
 						try {
 							const yamlParts = Yaml.parse(state.yaml);
 							defaultEditorStore.setState({ yamlParts });
+							defaultEditorStore.getState().collectAndFetchAuthDefinitions();
 						} catch (e) {
 							console.warn('Failed to parse yaml during rehydration:', e);
 						}
