@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { collectAuthDefinitionUrls, fetchAuthDefinitionsBatch } from './authoritativeDefinitions.js';
+import { collectAuthoritativeDefinitionUrls, fetchAuthoritativeDefinitionsBatch } from './authoritativeDefinitions.js';
 
 // urlUtils reads window.location; stub a same-host base for the node test env.
 beforeEach(() => {
@@ -12,7 +12,7 @@ afterEach(() => {
 
 const sem = (url, extra = {}) => ({ type: 'semantics', url, ...extra });
 
-describe('collectAuthDefinitionUrls', () => {
+describe('collectAuthoritativeDefinitionUrls', () => {
   it('collects internal semantic and definition URLs from every nesting level', () => {
     const contract = {
       authoritativeDefinitions: [sem('https://app.example.com/org/definitions/root')],
@@ -26,7 +26,7 @@ describe('collectAuthDefinitionUrls', () => {
         },
       ],
     };
-    const urls = collectAuthDefinitionUrls(contract);
+    const urls = collectAuthoritativeDefinitionUrls(contract);
     expect(urls).toContain('https://app.example.com/org/definitions/root');
     expect(urls).toContain('https://app.example.com/org/definitions/desc');
     expect(urls).toContain('https://app.example.com/org/definitions/schemaA');
@@ -42,7 +42,7 @@ describe('collectAuthDefinitionUrls', () => {
         { type: 'semantics' },
       ],
     };
-    expect(collectAuthDefinitionUrls(contract)).toEqual([]);
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([]);
   });
 
   it('de-duplicates repeated URLs', () => {
@@ -50,22 +50,22 @@ describe('collectAuthDefinitionUrls', () => {
       authoritativeDefinitions: [sem('/org/definitions/x'), sem('/org/definitions/x')],
       schema: [{ authoritativeDefinitions: [sem('/org/definitions/x')] }],
     };
-    expect(collectAuthDefinitionUrls(contract)).toEqual(['https://app.example.com/org/definitions/x']);
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual(['https://app.example.com/org/definitions/x']);
   });
 
   it('tolerates null / malformed input', () => {
-    expect(collectAuthDefinitionUrls(null)).toEqual([]);
-    expect(collectAuthDefinitionUrls(undefined)).toEqual([]);
-    expect(collectAuthDefinitionUrls({ authoritativeDefinitions: 'nope' })).toEqual([]);
-    expect(collectAuthDefinitionUrls({ authoritativeDefinitions: [null, 42] })).toEqual([]);
+    expect(collectAuthoritativeDefinitionUrls(null)).toEqual([]);
+    expect(collectAuthoritativeDefinitionUrls(undefined)).toEqual([]);
+    expect(collectAuthoritativeDefinitionUrls({ authoritativeDefinitions: 'nope' })).toEqual([]);
+    expect(collectAuthoritativeDefinitionUrls({ authoritativeDefinitions: [null, 42] })).toEqual([]);
   });
 });
 
-describe('fetchAuthDefinitionsBatch', () => {
+describe('fetchAuthoritativeDefinitionsBatch', () => {
   it('POSTs { urls } and returns the parsed map', async () => {
     const map = { '/a': { name: 'A' } };
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(map) });
-    const result = await fetchAuthDefinitionsBatch('https://api/batch', ['/a'], 'application/json');
+    const result = await fetchAuthoritativeDefinitionsBatch('https://api/batch', ['/a'], 'application/json');
     expect(result).toEqual(map);
     expect(global.fetch).toHaveBeenCalledWith('https://api/batch', expect.objectContaining({
       method: 'POST',
@@ -76,6 +76,6 @@ describe('fetchAuthDefinitionsBatch', () => {
 
   it('throws on a non-ok response', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
-    await expect(fetchAuthDefinitionsBatch('https://api/batch', ['/a'])).rejects.toThrow();
+    await expect(fetchAuthoritativeDefinitionsBatch('https://api/batch', ['/a'])).rejects.toThrow();
   });
 });

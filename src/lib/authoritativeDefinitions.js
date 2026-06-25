@@ -12,7 +12,7 @@ import { isInternalUrl, toAbsoluteUrl } from './urlUtils.js';
  * @param {*} yamlParts - parsed contract (any nested structure; null-safe)
  * @returns {string[]} de-duplicated absolute urls (stable order)
  */
-export function collectAuthDefinitionUrls(yamlParts) {
+export function collectAuthoritativeDefinitionUrls(yamlParts) {
   const urls = [];
   const seen = new Set();
 
@@ -55,7 +55,7 @@ export function collectAuthDefinitionUrls(yamlParts) {
  * @returns {Promise<Object>} url-keyed map
  * @throws on network error or non-ok response
  */
-export async function fetchAuthDefinitionsBatch(batchSemanticsUrl, urls, acceptHeader = 'application/json') {
+export async function fetchAuthoritativeDefinitionsBatch(batchSemanticsUrl, urls, acceptHeader = 'application/json') {
   const response = await fetch(batchSemanticsUrl, {
     method: 'POST',
     headers: {

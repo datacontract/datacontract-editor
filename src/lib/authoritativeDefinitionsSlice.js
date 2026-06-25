@@ -1,8 +1,8 @@
-import { collectAuthDefinitionUrls, fetchAuthDefinitionsBatch } from './authoritativeDefinitions.js';
+import { collectAuthoritativeDefinitionUrls, fetchAuthoritativeDefinitionsBatch } from './authoritativeDefinitions.js';
 import { fetchDefinition } from './definitionsApi.js';
 import { isExternalUrl, toAbsoluteUrl } from './urlUtils.js';
 
-export const initialAuthDefinitionsState = {
+export const initialAuthoritativeDefinitionsState = {
   byUrl: {},
   status: 'idle', // 'idle' | 'loading' | 'ready' | 'error'
   error: null,
@@ -14,7 +14,7 @@ export const initialAuthDefinitionsState = {
  * Runtime refs (generation/batchPromise/inflight) are closure-local so each
  * store instance is independent.
  */
-export function createAuthDefinitionsSlice(set, get) {
+export function createAuthoritativeDefinitionsSlice(set, get) {
   let generation = 0;
   let batchPromise = null;
   const inflight = new Map();
@@ -25,45 +25,45 @@ export function createAuthDefinitionsSlice(set, get) {
   const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
   return {
-    authDefinitions: { ...initialAuthDefinitionsState },
+    authoritativeDefinitions: { ...initialAuthoritativeDefinitionsState },
 
-    collectAndFetchAuthDefinitions: async () => {
+    collectAndFetchAuthoritativeDefinitions: async () => {
       const batchSemanticsUrl = get().editorConfig?.batchSemanticsUrl;
       if (!batchSemanticsUrl) {
         batchPromise = null;
-        set({ authDefinitions: { byUrl: {}, status: 'idle', error: null } });
+        set({ authoritativeDefinitions: { byUrl: {}, status: 'idle', error: null } });
         return;
       }
 
       const gen = ++generation;
-      set({ authDefinitions: { byUrl: {}, status: 'loading', error: null } });
+      set({ authoritativeDefinitions: { byUrl: {}, status: 'loading', error: null } });
 
-      const urls = collectAuthDefinitionUrls(get().yamlParts);
+      const urls = collectAuthoritativeDefinitionUrls(get().yamlParts);
 
       if (urls.length === 0) {
         batchPromise = null;
-        set({ authDefinitions: { byUrl: {}, status: 'ready', error: null } });
+        set({ authoritativeDefinitions: { byUrl: {}, status: 'ready', error: null } });
         return;
       }
 
-      const promise = fetchAuthDefinitionsBatch(batchSemanticsUrl, urls, getAcceptHeader());
+      const promise = fetchAuthoritativeDefinitionsBatch(batchSemanticsUrl, urls, getAcceptHeader());
       batchPromise = promise;
       try {
         const map = await promise;
         if (gen !== generation) return;
-        set({ authDefinitions: { byUrl: map || {}, status: 'ready', error: null } });
+        set({ authoritativeDefinitions: { byUrl: map || {}, status: 'ready', error: null } });
       } catch (error) {
         console.error('Failed to batch-fetch authoritative definitions:', error);
         if (gen !== generation) return;
         set((state) => ({
-          authDefinitions: { ...state.authDefinitions, status: 'error', error: String(error) },
+          authoritativeDefinitions: { ...state.authoritativeDefinitions, status: 'error', error: String(error) },
         }));
       } finally {
         if (batchPromise === promise) batchPromise = null;
       }
     },
 
-    resolveAuthDefinition: async (url) => {
+    resolveAuthoritativeDefinition: async (url) => {
       if (!url || isExternalUrl(url)) return null;
       const abs = toAbsoluteUrl(url);
       if (!abs) return null;
@@ -73,14 +73,14 @@ export function createAuthDefinitionsSlice(set, get) {
         return fetchDefinition(abs, getAcceptHeader());
       }
 
-      if (has(get().authDefinitions.byUrl, abs)) {
-        return get().authDefinitions.byUrl[abs];
+      if (has(get().authoritativeDefinitions.byUrl, abs)) {
+        return get().authoritativeDefinitions.byUrl[abs];
       }
 
       if (batchPromise) {
         try { await batchPromise; } catch { /* fall through to lazy fetch */ }
-        if (has(get().authDefinitions.byUrl, abs)) {
-          return get().authDefinitions.byUrl[abs];
+        if (has(get().authoritativeDefinitions.byUrl, abs)) {
+          return get().authoritativeDefinitions.byUrl[abs];
         }
       }
 
@@ -90,9 +90,9 @@ export function createAuthDefinitionsSlice(set, get) {
         const data = await fetchDefinition(abs, getAcceptHeader());
         if (gen === generation) {
           set((state) => ({
-            authDefinitions: {
-              ...state.authDefinitions,
-              byUrl: { ...state.authDefinitions.byUrl, [abs]: data },
+            authoritativeDefinitions: {
+              ...state.authoritativeDefinitions,
+              byUrl: { ...state.authoritativeDefinitions.byUrl, [abs]: data },
             },
           }));
         }

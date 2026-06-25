@@ -6,7 +6,7 @@ import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { isSafeKey } from './utils/safeProperty.js';
-import { createAuthDefinitionsSlice, initialAuthDefinitionsState } from './lib/authDefinitionsSlice.js';
+import { createAuthoritativeDefinitionsSlice, initialAuthoritativeDefinitionsState } from './lib/authoritativeDefinitionsSlice.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -104,7 +104,7 @@ export function extractParseErrorPos(e) {
 }
 
 export function defaultStoreConfig(set, get) {
-	const authDefinitionsSlice = createAuthDefinitionsSlice(set, get);
+	const authoritativeDefinitionsSlice = createAuthoritativeDefinitionsSlice(set, get);
 	// Define action functions to ensure stable references
 	const actions = {
 		setYaml: (newYaml) => {
@@ -119,7 +119,7 @@ export function defaultStoreConfig(set, get) {
 			try {
 				const yamlParts = Yaml.parse(newYaml);
 				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
-				get().collectAndFetchAuthDefinitions();
+				get().collectAndFetchAuthoritativeDefinitions();
 			} catch(e) {
 				// NOOP
 			}
@@ -424,7 +424,7 @@ export function defaultStoreConfig(set, get) {
 		aiChatHasMessages: false,
 		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
 		lastAppliedAiChange: null, // { originalYaml, summary } - for unapply
-		...authDefinitionsSlice,
+		...authoritativeDefinitionsSlice,
 		...actions,
 	};
 }
@@ -440,7 +440,7 @@ const defaultEditorStore = create()(
 		? persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: storageConfig,
-			partialize: ({ authDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
+			partialize: ({ authoritativeDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
 			merge: (persistedState, currentState) => {
 				// Deep merge editorConfig, ensuring empty strings don't override build-time defaults
 				const persistedAi = persistedState?.editorConfig?.ai || {};
@@ -465,7 +465,7 @@ const defaultEditorStore = create()(
 					...currentState,
 					...persistedState,
 					editorConfig: mergedEditorConfig,
-					authDefinitions: { ...initialAuthDefinitionsState },
+					authoritativeDefinitions: { ...initialAuthoritativeDefinitionsState },
 				};
 			},
 			onRehydrateStorage: () => (state) => {
@@ -480,7 +480,7 @@ const defaultEditorStore = create()(
 						try {
 							const yamlParts = Yaml.parse(state.yaml);
 							defaultEditorStore.setState({ yamlParts });
-							defaultEditorStore.getState().collectAndFetchAuthDefinitions();
+							defaultEditorStore.getState().collectAndFetchAuthoritativeDefinitions();
 						} catch (e) {
 							console.warn('Failed to parse yaml during rehydration:', e);
 						}

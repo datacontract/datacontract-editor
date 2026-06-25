@@ -10,7 +10,7 @@ import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
-import { createAuthDefinitionsSlice } from './lib/authDefinitionsSlice.js';
+import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
@@ -131,7 +131,7 @@ function createConfiguredStore(config) {
   globalBackend = storageBackend;
 
 	const storeConfig = (set, get) => {
-		const authDefinitionsSlice = createAuthDefinitionsSlice(set, get);
+		const authoritativeDefinitionsSlice = createAuthoritativeDefinitionsSlice(set, get);
 		const actions = {
 			setYaml: (newYaml) => {
 				try {
@@ -144,7 +144,7 @@ function createConfiguredStore(config) {
 			loadYaml: (newYaml) => {
 				get().setYaml(newYaml);
 				set({ baselineYaml: newYaml, isDirty: false });
-				get().collectAndFetchAuthDefinitions();
+				get().collectAndFetchAuthoritativeDefinitions();
 			},
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
@@ -391,7 +391,7 @@ function createConfiguredStore(config) {
 				ai: config.ai,
 				csrf: config.csrf,
 			},
-			...authDefinitionsSlice,
+			...authoritativeDefinitionsSlice,
 			...actions,
 		};
 	};
@@ -410,7 +410,7 @@ function createConfiguredStore(config) {
       persist(storeConfig, {
         name: 'editor-store',
         storage: storageConfig,
-        partialize: ({ authDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
+        partialize: ({ authoritativeDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
       })
     );
   } else {
