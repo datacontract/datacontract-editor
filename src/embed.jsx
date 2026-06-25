@@ -90,8 +90,10 @@ const DEFAULT_CONFIG = {
 	titlePrefix: null,
 
   // Semantic ontology tree browser (the tree may also include business definitions)
-  semantics: null, // { baseUrl, pageParam, queryParam }
-  batchSemanticsUrl: null, // string; when set, authoritativeDefinitions are batch-fetched on load (POST { urls } -> { url: data })
+  // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl }
+  // When semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched
+  // on load (POST { urls } -> { url: data }).
+  semantics: null,
 
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,
@@ -381,7 +383,6 @@ function createConfiguredStore(config) {
 				saveLabel: config.saveLabel,
 				titlePrefix: config.titlePrefix,
 				semantics: config.semantics,
-				batchSemanticsUrl: config.batchSemanticsUrl,
         managedTags: config.managedTags,
         allowUnmanagedTags: config.allowUnmanagedTags,
 				teams: config.teams,
@@ -490,6 +491,13 @@ export function init(userConfig = {}) {
 
   // Inject the configured store so all components will use it
   setOverrideStore(globalEditorStore);
+
+  // The initial yaml is seeded straight into store state (see createConfiguredStore's
+  // returned state), so loadYaml's batch trigger never runs for it. Kick off the
+  // authoritativeDefinitions batch-resolve once on open; without this it only fires on a
+  // later loadYaml (re-open/import/AI apply), so links stay unresolved on first paint.
+  // No-op when semantics.batchResolveUrl is unset or the contract has no resolvable links.
+  globalEditorStore.getState().collectAndFetchAuthoritativeDefinitions();
 
   // Create root and render
   const root = createRoot(containerElement);

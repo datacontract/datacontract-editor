@@ -46,17 +46,17 @@ export function collectAuthoritativeDefinitionUrls(yamlParts) {
 }
 
 /**
- * Batch-fetch definitions. POST { urls } to batchSemanticsUrl, expecting a
+ * Batch-fetch definitions. POST { urls } to batchResolveUrl, expecting a
  * url-keyed map { url: definitionData } in response.
  *
- * @param {string} batchSemanticsUrl
+ * @param {string} batchResolveUrl
  * @param {string[]} urls - absolute urls
  * @param {string} [acceptHeader]
  * @returns {Promise<Object>} url-keyed map
  * @throws on network error or non-ok response
  */
-export async function fetchAuthoritativeDefinitionsBatch(batchSemanticsUrl, urls, acceptHeader = 'application/json') {
-  const response = await fetch(batchSemanticsUrl, {
+export async function fetchAuthoritativeDefinitionsBatch(batchResolveUrl, urls, acceptHeader = 'application/json') {
+  const response = await fetch(batchResolveUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

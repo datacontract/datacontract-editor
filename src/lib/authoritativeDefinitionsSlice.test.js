@@ -25,7 +25,7 @@ function makeStore(initialEditorConfig, yamlParts) {
 const ad = (url) => ({ type: 'semantics', url });
 
 describe('createAuthoritativeDefinitionsSlice', () => {
-  it('idle when no batchSemanticsUrl; resolveAuthoritativeDefinition single-fetches', async () => {
+  it('idle when no semantics.batchResolveUrl; resolveAuthoritativeDefinition single-fetches', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ name: 'X' }) });
     const { get } = makeStore({ semantics: {} }, { authoritativeDefinitions: [ad('/org/definitions/x')] });
     await get().collectAndFetchAuthoritativeDefinitions();
@@ -40,7 +40,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
     const map = { 'https://app.example.com/org/definitions/x': { name: 'X' } };
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(map) });
     const { get } = makeStore(
-      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { semantics: { batchResolveUrl: 'https://api/batch' } },
       { authoritativeDefinitions: [ad('/org/definitions/x')] },
     );
 
@@ -56,7 +56,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
   it('lazy-fetches and merges a URL missing from the batch', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ name: 'Lazy' }) });
     const { get } = makeStore(
-      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { semantics: { batchResolveUrl: 'https://api/batch' } },
       { authoritativeDefinitions: [] },
     );
     await get().collectAndFetchAuthoritativeDefinitions();
@@ -69,7 +69,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
   it('skips the batch request when no internal definition URLs are present', async () => {
     global.fetch = vi.fn();
     const { get } = makeStore(
-      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { semantics: { batchResolveUrl: 'https://api/batch' } },
       { authoritativeDefinitions: [] },
     );
     await get().collectAndFetchAuthoritativeDefinitions();
@@ -83,7 +83,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
       .mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err' }) // batch fails
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ name: 'Fallback' }) }); // single
     const { get } = makeStore(
-      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { semantics: { batchResolveUrl: 'https://api/batch' } },
       { authoritativeDefinitions: [ad('/org/definitions/x')] },
     );
     await get().collectAndFetchAuthoritativeDefinitions();
@@ -99,7 +99,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ 'https://app.example.com/org/definitions/x': { name: 'X' } }) })
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ name: 'Lazy' }) });
     const { get } = makeStore(
-      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { semantics: { batchResolveUrl: 'https://api/batch' } },
       { authoritativeDefinitions: [ad('/org/definitions/x')] },
     );
     await get().collectAndFetchAuthoritativeDefinitions();
@@ -113,7 +113,7 @@ describe('createAuthoritativeDefinitionsSlice', () => {
 
   it('returns null for external URLs in batch mode', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
-    const { get } = makeStore({ batchSemanticsUrl: 'https://api/batch', semantics: {} }, { authoritativeDefinitions: [] });
+    const { get } = makeStore({ semantics: { batchResolveUrl: 'https://api/batch' } }, { authoritativeDefinitions: [] });
     await get().collectAndFetchAuthoritativeDefinitions();
     expect(await get().resolveAuthoritativeDefinition('https://other-host.com/x')).toBeNull();
   });

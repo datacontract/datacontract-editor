@@ -28,8 +28,8 @@ export function createAuthoritativeDefinitionsSlice(set, get) {
     authoritativeDefinitions: { ...initialAuthoritativeDefinitionsState },
 
     collectAndFetchAuthoritativeDefinitions: async () => {
-      const batchSemanticsUrl = get().editorConfig?.batchSemanticsUrl;
-      if (!batchSemanticsUrl) {
+      const batchResolveUrl = get().editorConfig?.semantics?.batchResolveUrl;
+      if (!batchResolveUrl) {
         batchPromise = null;
         set({ authoritativeDefinitions: { byUrl: {}, status: 'idle', error: null } });
         return;
@@ -46,7 +46,9 @@ export function createAuthoritativeDefinitionsSlice(set, get) {
         return;
       }
 
-      const promise = fetchAuthoritativeDefinitionsBatch(batchSemanticsUrl, urls, getAcceptHeader());
+      // The batch endpoint serves plain application/json (not the odcs+json the single-item
+      // endpoints use), so request that explicitly — otherwise the odcs Accept header 406s.
+      const promise = fetchAuthoritativeDefinitionsBatch(batchResolveUrl, urls, 'application/json');
       batchPromise = promise;
       try {
         const map = await promise;
@@ -68,8 +70,8 @@ export function createAuthoritativeDefinitionsSlice(set, get) {
       const abs = toAbsoluteUrl(url);
       if (!abs) return null;
 
-      const batchSemanticsUrl = get().editorConfig?.batchSemanticsUrl;
-      if (!batchSemanticsUrl) {
+      const batchResolveUrl = get().editorConfig?.semantics?.batchResolveUrl;
+      if (!batchResolveUrl) {
         return fetchDefinition(abs, getAcceptHeader());
       }
 
