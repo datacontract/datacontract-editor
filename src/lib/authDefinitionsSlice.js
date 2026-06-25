@@ -40,6 +40,12 @@ export function createAuthDefinitionsSlice(set, get) {
 
       const urls = collectAuthDefinitionUrls(get().yamlParts);
 
+      if (urls.length === 0) {
+        batchPromise = null;
+        set({ authDefinitions: { byUrl: {}, status: 'ready', error: null } });
+        return;
+      }
+
       const promise = fetchAuthDefinitionsBatch(batchSemanticsUrl, urls, getAcceptHeader());
       batchPromise = promise;
       try {

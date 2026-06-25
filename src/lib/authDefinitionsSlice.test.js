@@ -54,10 +54,7 @@ describe('createAuthDefinitionsSlice', () => {
   });
 
   it('lazy-fetches and merges a URL missing from the batch', async () => {
-    global.fetch = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // batch: empty
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ name: 'Lazy' }) }); // single
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ name: 'Lazy' }) });
     const { get } = makeStore(
       { batchSemanticsUrl: 'https://api/batch', semantics: {} },
       { authoritativeDefinitions: [] },
@@ -67,6 +64,17 @@ describe('createAuthDefinitionsSlice', () => {
     const data = await get().resolveAuthDefinition('/org/definitions/late');
     expect(data).toEqual({ name: 'Lazy' });
     expect(get().authDefinitions.byUrl['https://app.example.com/org/definitions/late']).toEqual({ name: 'Lazy' });
+  });
+
+  it('skips the batch request when no internal definition URLs are present', async () => {
+    global.fetch = vi.fn();
+    const { get } = makeStore(
+      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { authoritativeDefinitions: [] },
+    );
+    await get().collectAndFetchAuthDefinitions();
+    expect(get().authDefinitions.status).toBe('ready');
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('batch error sets status error and resolveAuthDefinition falls back to single fetch', async () => {
