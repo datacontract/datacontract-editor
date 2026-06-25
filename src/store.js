@@ -440,6 +440,7 @@ const defaultEditorStore = create()(
 		? persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: storageConfig,
+			partialize: ({ authDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
 			merge: (persistedState, currentState) => {
 				// Deep merge editorConfig, ensuring empty strings don't override build-time defaults
 				const persistedAi = persistedState?.editorConfig?.ai || {};

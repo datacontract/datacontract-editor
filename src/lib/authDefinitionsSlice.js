@@ -85,14 +85,17 @@ export function createAuthDefinitionsSlice(set, get) {
       }
 
       if (inflight.has(abs)) return inflight.get(abs);
+      const gen = generation;
       const p = (async () => {
         const data = await fetchDefinition(abs, getAcceptHeader());
-        set((state) => ({
-          authDefinitions: {
-            ...state.authDefinitions,
-            byUrl: { ...state.authDefinitions.byUrl, [abs]: data },
-          },
-        }));
+        if (gen === generation) {
+          set((state) => ({
+            authDefinitions: {
+              ...state.authDefinitions,
+              byUrl: { ...state.authDefinitions.byUrl, [abs]: data },
+            },
+          }));
+        }
         return data;
       })();
       inflight.set(abs, p);

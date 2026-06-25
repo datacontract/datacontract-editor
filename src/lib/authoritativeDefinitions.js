@@ -35,8 +35,9 @@ export function collectAuthDefinitionUrls(yamlParts) {
     for (const [key, value] of Object.entries(node)) {
       if (key === 'authoritativeDefinitions' && Array.isArray(value)) {
         value.forEach(addEntry);
+      } else {
+        walk(value);
       }
-      walk(value);
     }
   };
 

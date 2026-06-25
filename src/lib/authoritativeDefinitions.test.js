@@ -69,6 +69,7 @@ describe('fetchAuthDefinitionsBatch', () => {
     expect(result).toEqual(map);
     expect(global.fetch).toHaveBeenCalledWith('https://api/batch', expect.objectContaining({
       method: 'POST',
+      headers: expect.objectContaining({ 'Content-Type': 'application/json', Accept: 'application/json' }),
       body: JSON.stringify({ urls: ['/a'] }),
     }));
   });

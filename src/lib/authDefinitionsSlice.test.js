@@ -93,6 +93,24 @@ describe('createAuthDefinitionsSlice', () => {
     expect(data).toEqual({ name: 'Fallback' });
   });
 
+  it('lazy-fetches a URL the batch response omitted', async () => {
+    global.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ 'https://app.example.com/org/definitions/x': { name: 'X' } }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ name: 'Lazy' }) });
+    const { get } = makeStore(
+      { batchSemanticsUrl: 'https://api/batch', semantics: {} },
+      { authoritativeDefinitions: [ad('/org/definitions/x')] },
+    );
+    await get().collectAndFetchAuthDefinitions();
+    expect(get().authDefinitions.status).toBe('ready');
+
+    const data = await get().resolveAuthDefinition('/org/definitions/late');
+    expect(data).toEqual({ name: 'Lazy' });
+    expect(get().authDefinitions.byUrl['https://app.example.com/org/definitions/late']).toEqual({ name: 'Lazy' });
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('returns null for external URLs in batch mode', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) });
     const { get } = makeStore({ batchSemanticsUrl: 'https://api/batch', semantics: {} }, { authoritativeDefinitions: [] });
