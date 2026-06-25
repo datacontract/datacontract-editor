@@ -2,47 +2,86 @@ import { isSemanticAuthDef } from '../utils/authDefTypes.js';
 import { isInternalUrl, toAbsoluteUrl } from './urlUtils.js';
 
 /**
- * Recursively walk a parsed contract and collect absolute URLs of
- * authoritativeDefinitions entries that are resolvable internal definitions.
+ * Collect absolute URLs of authoritativeDefinitions entries that are resolvable
+ * internal definitions, visiting only the locations where the ODCS v3.1.0
+ * standard allows authoritativeDefinitions instead of walking the whole tree.
+ *
+ * ODCS locations covered (keep in sync with the standard):
+ *   - contract root: `authoritativeDefinitions`
+ *   - `description.authoritativeDefinitions`
+ *   - `schema[]` (SchemaObject): own `authoritativeDefinitions`, each
+ *     `quality[]` (DataQuality), and `properties[]`
+ *   - schema property (SchemaProperty / SchemaItemProperty): own
+ *     `authoritativeDefinitions`, `quality[]`, and — because object/array
+ *     properties nest — recursively its `properties[]` and `items`
+ *   - `team`: object form (`team.authoritativeDefinitions` + `team.members[]`)
+ *     or the deprecated `team[]` array; both members are TeamMember-shaped
  *
  * An entry qualifies when it is a semantic/business definition
  * (type 'semantics' | 'semantic' | 'definition'), has a url, and the url is
  * internal (same host). Collected urls are normalized to absolute and de-duped.
  *
- * @param {*} yamlParts - parsed contract (any nested structure; null-safe)
+ * @param {*} yamlParts - parsed contract (null-safe)
  * @returns {string[]} de-duplicated absolute urls (stable order)
  */
 export function collectAuthoritativeDefinitionUrls(yamlParts) {
   const urls = [];
-  const seen = new Set();
 
-  const addEntry = (entry) => {
-    if (!entry || typeof entry !== 'object') return;
-    const qualifies = isSemanticAuthDef(entry) || entry.type === 'definition';
-    if (!qualifies || !entry.url || !isInternalUrl(entry.url)) return;
-    const abs = toAbsoluteUrl(entry.url);
-    if (!abs || seen.has(abs)) return;
-    seen.add(abs);
-    urls.push(abs);
-  };
-
-  const walk = (node) => {
-    if (!node || typeof node !== 'object') return;
-    if (Array.isArray(node)) {
-      node.forEach(walk);
-      return;
-    }
-    for (const [key, value] of Object.entries(node)) {
-      if (key === 'authoritativeDefinitions' && Array.isArray(value)) {
-        value.forEach(addEntry);
-      } else {
-        walk(value);
-      }
+  const addEntries = (entries) => {
+    if (!Array.isArray(entries)) return;
+    for (const entry of entries) {
+      if (!entry || typeof entry !== 'object') continue;
+      const qualifies = isSemanticAuthDef(entry) || entry.type === 'definition';
+      if (!qualifies || !entry.url || !isInternalUrl(entry.url)) continue;
+      const abs = toAbsoluteUrl(entry.url);
+      if (abs) urls.push(abs);
     }
   };
 
-  walk(yamlParts);
-  return urls;
+  // DataQuality items each carry their own authoritativeDefinitions.
+  const visitQuality = (quality) => {
+    if (!Array.isArray(quality)) return;
+    for (const check of quality) addEntries(check?.authoritativeDefinitions);
+  };
+
+  // SchemaProperty / SchemaItemProperty — recurses because object properties
+  // nest via `properties[]` and array properties via `items`.
+  const visitProperty = (property) => {
+    if (!property || typeof property !== 'object') return;
+    addEntries(property.authoritativeDefinitions);
+    visitQuality(property.quality);
+    if (Array.isArray(property.properties)) property.properties.forEach(visitProperty);
+    visitProperty(property.items);
+  };
+
+  if (!yamlParts || typeof yamlParts !== 'object') return urls;
+
+  // Contract root + description.
+  addEntries(yamlParts.authoritativeDefinitions);
+  addEntries(yamlParts.description?.authoritativeDefinitions);
+
+  // Schema objects, their quality checks, and their (nested) properties.
+  if (Array.isArray(yamlParts.schema)) {
+    for (const object of yamlParts.schema) {
+      if (!object || typeof object !== 'object') continue;
+      addEntries(object.authoritativeDefinitions);
+      visitQuality(object.quality);
+      if (Array.isArray(object.properties)) object.properties.forEach(visitProperty);
+    }
+  }
+
+  // Team: object form (with members) or the deprecated array-of-members form.
+  const team = yamlParts.team;
+  if (Array.isArray(team)) {
+    for (const member of team) addEntries(member?.authoritativeDefinitions);
+  } else if (team && typeof team === 'object') {
+    addEntries(team.authoritativeDefinitions);
+    if (Array.isArray(team.members)) {
+      for (const member of team.members) addEntries(member?.authoritativeDefinitions);
+    }
+  }
+
+  return [...new Set(urls)];
 }
 
 /**

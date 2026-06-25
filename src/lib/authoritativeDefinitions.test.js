@@ -34,6 +34,66 @@ describe('collectAuthoritativeDefinitionUrls', () => {
     expect(urls).toHaveLength(4);
   });
 
+  it('collects from every ODCS location: schema/quality, nested + array properties, team', () => {
+    const abs = (p) => `https://app.example.com${p}`;
+    const contract = {
+      authoritativeDefinitions: [sem('/d/root')],
+      description: { authoritativeDefinitions: [sem('/d/desc')] },
+      schema: [
+        {
+          authoritativeDefinitions: [sem('/d/object')],
+          quality: [{ authoritativeDefinitions: [sem('/d/objectQuality')] }],
+          properties: [
+            {
+              authoritativeDefinitions: [sem('/d/prop')],
+              quality: [{ authoritativeDefinitions: [sem('/d/propQuality')] }],
+              properties: [{ authoritativeDefinitions: [sem('/d/nestedProp')] }], // object nesting
+            },
+            {
+              items: { // array nesting
+                authoritativeDefinitions: [sem('/d/itemsProp')],
+                properties: [{ authoritativeDefinitions: [sem('/d/itemsNestedProp')] }],
+              },
+            },
+          ],
+        },
+      ],
+      team: {
+        authoritativeDefinitions: [sem('/d/team')],
+        members: [{ authoritativeDefinitions: [sem('/d/member')] }],
+      },
+    };
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual(
+      [
+        '/d/root', '/d/desc', '/d/object', '/d/objectQuality', '/d/prop',
+        '/d/propQuality', '/d/nestedProp', '/d/itemsProp', '/d/itemsNestedProp',
+        '/d/team', '/d/member',
+      ].map(abs),
+    );
+  });
+
+  it('supports the deprecated team-array (TeamMember[]) form', () => {
+    const contract = {
+      team: [
+        { authoritativeDefinitions: [sem('/d/m1')] },
+        { authoritativeDefinitions: [sem('/d/m2')] },
+      ],
+    };
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([
+      'https://app.example.com/d/m1',
+      'https://app.example.com/d/m2',
+    ]);
+  });
+
+  it('ignores authoritativeDefinitions placed at non-ODCS locations', () => {
+    const contract = {
+      servers: [{ authoritativeDefinitions: [sem('/d/server')] }],
+      customProperties: [{ property: 'x', value: { authoritativeDefinitions: [sem('/d/custom')] } }],
+      support: { authoritativeDefinitions: [sem('/d/support')] },
+    };
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([]);
+  });
+
   it('skips non-definition types, external URLs, and entries without a URL', () => {
     const contract = {
       authoritativeDefinitions: [
