@@ -88,8 +88,10 @@ const DEFAULT_CONFIG = {
   saveLabel: 'Save',   // string - custom label for Save button in EMBEDDED mode
 	titlePrefix: null,
 
-  // Semantic ontology tree browser (the tree may also include business definitions)
-  semantics: null, // { baseUrl, pageParam, queryParam }
+  // Semantic ontology tree browser (the tree may also include business definitions).
+  // `batchResolveUrl` (optional): host endpoint that resolves many authoritativeDefinitions
+  // in one POST {refs:[{url}]} -> [{url, found, definition}]; enables batched link resolution.
+  semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl }
 
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,

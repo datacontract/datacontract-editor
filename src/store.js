@@ -410,7 +410,7 @@ export function defaultStoreConfig(set, get) {
 			domains: null,
 			tests: DEFAULT_TESTS_CONFIG,
 			ai: DEFAULT_AI_CONFIG,
-			semantics: null, // { baseUrl, pageParam, queryParam } for the semantic ontology tree API
+			semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl } for the semantic ontology tree API
       managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
       allowUnmanagedTags: true,
 			customizations: null, // See CUSTOMIZATION.md for documentation
