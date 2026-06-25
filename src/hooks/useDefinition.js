@@ -6,10 +6,17 @@ import { isExternalUrl } from "../lib/urlUtils.js";
 /**
  * Hook for fetching definitions on-demand from the semantic ontology tree.
  * The tree may also include business definitions merged in by the backend.
+ *
+ * When editorConfig.semantics.batchResolveUrl is configured, single-definition reads
+ * are served from the store slice (resolveAuthoritativeDefinition), which was populated
+ * by the batch fetch on load and lazily fills cache misses. Otherwise reads
+ * fall back to per-URL fetching.
  */
 export function useDefinition() {
     const editorConfig = useEditorStore(state => state.editorConfig);
+    const resolveAuthoritativeDefinition = useEditorStore(state => state.resolveAuthoritativeDefinition);
     const semantics = editorConfig?.semantics;
+    const batchResolveUrl = semantics?.batchResolveUrl;
 
     /**
      * Fetch a single definition by URL
@@ -18,8 +25,11 @@ export function useDefinition() {
         if (!definitionUrl || isExternalUrl(definitionUrl)) {
             return null;
         }
+        if (batchResolveUrl && resolveAuthoritativeDefinition) {
+            return await resolveAuthoritativeDefinition(definitionUrl);
+        }
         return await fetchDefinition(definitionUrl, semantics?.definitionAcceptHeader);
-    }, [semantics?.definitionAcceptHeader]);
+    }, [batchResolveUrl, resolveAuthoritativeDefinition, semantics?.definitionAcceptHeader]);
 
     /**
      * Fetch the semantic ontology tree

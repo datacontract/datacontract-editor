@@ -10,6 +10,7 @@ import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
+import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
@@ -89,7 +90,10 @@ const DEFAULT_CONFIG = {
 	titlePrefix: null,
 
   // Semantic ontology tree browser (the tree may also include business definitions)
-  semantics: null, // { baseUrl, pageParam, queryParam }
+  // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl }
+  // When semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched
+  // on load (POST { urls } -> { url: data }).
+  semantics: null,
 
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,
@@ -129,6 +133,7 @@ function createConfiguredStore(config) {
   globalBackend = storageBackend;
 
 	const storeConfig = (set, get) => {
+		const authoritativeDefinitionsSlice = createAuthoritativeDefinitionsSlice(set, get);
 		const actions = {
 			setYaml: (newYaml) => {
 				try {
@@ -141,6 +146,7 @@ function createConfiguredStore(config) {
 			loadYaml: (newYaml) => {
 				get().setYaml(newYaml);
 				set({ baselineYaml: newYaml, isDirty: false });
+				get().collectAndFetchAuthoritativeDefinitions();
 			},
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
@@ -386,6 +392,7 @@ function createConfiguredStore(config) {
 				ai: config.ai,
 				csrf: config.csrf,
 			},
+			...authoritativeDefinitionsSlice,
 			...actions,
 		};
 	};
@@ -404,6 +411,7 @@ function createConfiguredStore(config) {
       persist(storeConfig, {
         name: 'editor-store',
         storage: storageConfig,
+        partialize: ({ authoritativeDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
       })
     );
   } else {
@@ -483,6 +491,13 @@ export function init(userConfig = {}) {
 
   // Inject the configured store so all components will use it
   setOverrideStore(globalEditorStore);
+
+  // The initial yaml is seeded straight into store state (see createConfiguredStore's
+  // returned state), so loadYaml's batch trigger never runs for it. Kick off the
+  // authoritativeDefinitions batch-resolve once on open; without this it only fires on a
+  // later loadYaml (re-open/import/AI apply), so links stay unresolved on first paint.
+  // No-op when semantics.batchResolveUrl is unset or the contract has no resolvable links.
+  globalEditorStore.getState().collectAndFetchAuthoritativeDefinitions();
 
   // Create root and render
   const root = createRoot(containerElement);

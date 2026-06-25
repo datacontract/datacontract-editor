@@ -26,4 +26,12 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Test files run under vitest in a node environment and use node globals
+    // (e.g. `global`) to stub browser APIs like window/fetch.
+    files: ['**/*.test.{js,jsx}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
 ])
