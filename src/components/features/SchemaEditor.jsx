@@ -19,7 +19,7 @@ import {SparkleButton} from '../../ai/index.js';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import PropertyRow from './schema/PropertyRow.jsx';
 import {useSchemaOperations} from './schema/useSchemaOperations.js';
-import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
+import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions} from '../../hooks/useCustomization.js';
 import {useInheritedDefinition} from '../../hooks/useInheritedDefinition.js';
 import {CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
@@ -348,7 +348,9 @@ const SchemaEditor = ({schemaIndex}) => {
 	}, [jsonSchema]);
 
 	// Schema type options for the combobox
-	const schemaTypeOptions = [
+	// Physical-type options: the `enum` customization override (if any) restricts the choices;
+	// otherwise the built-in ODCS defaults are offered.
+	const schemaTypeOptions = convertEnumToOptions(physicalTypeOverride?.enum) || [
 		{id: 'table', name: 'table'},
 		{id: 'view', name: 'view'},
 		{id: 'stream', name: 'stream'},
