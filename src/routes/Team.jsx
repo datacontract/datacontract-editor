@@ -27,6 +27,7 @@ const Team = () => {
   // Check hidden status for standard properties
   const isNameHidden = useIsPropertyHidden('team', 'name');
   const isDescriptionHidden = useIsPropertyHidden('team', 'description');
+  const isTagsHidden = useIsPropertyHidden('team', 'tags');
 
   // Get standard property overrides
   const nameOverride = useStandardPropertyOverride('team', 'name');
@@ -222,12 +223,14 @@ const Team = () => {
               )}
 
               {/* Team Tags */}
-              <TagsInput
-                label={t('team.tags.label')}
-                value={team?.tags}
-                onChange={(value) => updateTeamField('tags', value)}
-                placeholder={t('team.tags.placeholder')}
-              />
+              {!isTagsHidden && (
+                <TagsInput
+                  label={t('team.tags.label')}
+                  value={team?.tags}
+                  onChange={(value) => updateTeamField('tags', value)}
+                  placeholder={t('team.tags.placeholder')}
+                />
+              )}
 
               {/* Custom Sections from Customization */}
               <CustomSections

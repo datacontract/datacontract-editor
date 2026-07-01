@@ -111,7 +111,7 @@ The `pattern` field accepts regular expressions for input validation. Be aware t
 - `server`, `type`, `environment`, `description`
 
 #### team
-- `name`, `description`
+- `name`, `description`, `tags`
 
 #### team.members
 - `username`, `name`, `role`, `description`, `dateIn`, `dateOut`
