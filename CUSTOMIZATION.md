@@ -122,7 +122,7 @@ The `pattern` field accepts regular expressions for input validation. Be aware t
 #### support
 - `channel`, `url`, `description`, `tool`, `scope`, `invitationUrl`
 
-> **Note:** override support is wired per field. `hidden` works for every property listed above. The other keys (`title`, `description`, `placeholder`, `required`, `enum`, `pattern`, `minLength`, `maxLength`) are honored only where the field supports them — for example `enum` applies to `schema.properties.classification`, `servers.type`, `servers.environment`, and `support.tool`/`scope`, while free-text and boolean fields typically honor just `hidden` (and sometimes `title`).
+> **Note:** override support is wired per field. `hidden` works for every property listed above. The other keys (`title`, `description`, `placeholder`, `required`, `enum`, `pattern`, `minLength`, `maxLength`) are honored only where the field supports them — for example `enum` applies to `schema.properties.classification`, `servers.type`, `servers.environment`, and `support.tool`/`scope`. Text fields such as `schema.properties.description` and `schema.properties.examples` honor `title`, `description`, `required`, `placeholder`, `minLength` and `maxLength` (for these two, `description` renders as help text **below** the field); boolean fields typically honor just `hidden` (and sometimes `title`). Where an override is not set, the built-in i18n label/help for the requested language is used.
 
 ---
 

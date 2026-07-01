@@ -12,6 +12,7 @@ import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
 import TagsInput from '../ui/TagsInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
@@ -95,6 +96,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   const partitionedOverride = useStandardPropertyOverride('schema.properties', 'partitioned');
   const criticalDataElementOverride = useStandardPropertyOverride('schema.properties', 'criticalDataElement');
   const transformSourceObjectsOverride = useStandardPropertyOverride('schema.properties', 'transformSourceObjects');
+  const descriptionOverride = useStandardPropertyOverride('schema.properties', 'description');
+  const examplesOverride = useStandardPropertyOverride('schema.properties', 'examples');
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -392,23 +395,30 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Description */}
               {!isDescriptionHidden && (
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.description.label')}</label>
-                    <SparkleButton
-                      fieldName={`Description for "${property.name || 'property'}"`}
-                      fieldPath="property.description"
-                      currentValue={property.description}
-                      onSuggestion={(value) => updateField('description', value)}
-                      placeholder={`Description of the ${property.name || 'data'} field`}
-                    />
-                  </div>
-                  <textarea
+                  <ValidatedTextarea
+                    name="property-description"
+                    label={descriptionOverride?.title || t('diagram.field.description.label')}
                     value={property.description || ''}
                     onChange={(e) => updateField('description', e.target.value)}
-                    rows={3}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.description && !property.description ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.description || t('diagram.field.description.placeholder')}
+                    required={descriptionOverride?.required}
+                    placeholder={definitionData?.description || descriptionOverride?.placeholder || t('diagram.field.description.placeholder')}
+                    placeholderClassName={definitionData?.description && !property.description ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    minLength={descriptionOverride?.minLength}
+                    maxLength={descriptionOverride?.maxLength}
+                    actions={
+                      <SparkleButton
+                        fieldName={`Description for "${property.name || 'property'}"`}
+                        fieldPath="property.description"
+                        currentValue={property.description}
+                        onSuggestion={(value) => updateField('description', value)}
+                        placeholder={`Description of the ${property.name || 'data'} field`}
+                      />
+                    }
                   />
+                  {/* Customization `description` renders as help text below the field; no i18n fallback (no help key). */}
+                  {descriptionOverride?.description && (
+                    <p className="mt-1 text-xs text-gray-500">{descriptionOverride.description}</p>
+                  )}
                 </div>
               )}
               {renderCustomAfter('description')}
@@ -416,23 +426,26 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Examples */}
               {!isExamplesHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.examples.label')}</label>
-                  <textarea
+                  <ValidatedTextarea
+                    name="property-examples"
+                    label={examplesOverride?.title || t('diagram.field.examples.label')}
                     value={property.examples?.join('\n') || ''}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value === '') {
                         updateField('examples', undefined);
                       } else {
-                        const examples = value.split('\n');
-                        updateField('examples', examples);
+                        updateField('examples', value.split('\n'));
                       }
                     }}
-                    rows={3}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.examples && !property.examples ? 'placeholder:text-blue-400' : ''}`}
+                    required={examplesOverride?.required}
                     placeholder={definitionData?.examples ? definitionData.examples.join('\n') : "example1\nexample2\nexample3"}
+                    placeholderClassName={definitionData?.examples && !property.examples ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    minLength={examplesOverride?.minLength}
+                    maxLength={examplesOverride?.maxLength}
                   />
-                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.examples.help')}</p>
+                  {/* Customization `description` overrides the help text below the field; falls back to i18n. */}
+                  <p className="mt-1 text-xs text-gray-500">{examplesOverride?.description || t('diagram.field.examples.help')}</p>
                 </div>
               )}
               {renderCustomAfter('examples')}
