@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import ChevronRightIcon from './icons/ChevronRightIcon';
 import CustomPropertyField from './CustomPropertyField';
+import { evaluateCondition } from '../../lib/conditionEvaluator';
 
 /**
  * Renders a collapsible section containing custom properties
@@ -47,22 +48,35 @@ const CustomSection = ({
 		}
 	}, [propertyNames, customPropertyConfigs, sectionConfig.section]);
 
-	// Don't render if no properties in this section
-	if (sectionProperties.length === 0) {
-		return null;
-	}
-
-	// Auto-expand if any property in the section is required
-	const hasRequiredField = useMemo(() => {
-		return sectionProperties.some((p) => p.required);
-	}, [sectionProperties]);
-
-	// Build context including current custom property values
+	// Build context including current custom property values (also used for condition evaluation)
 	const extendedContext = useMemo(() => ({
 		...context,
 		...values,
 		customProperties: values,
 	}), [context, values]);
+
+	// Properties that will actually render: not hidden, and any display `condition` passes.
+	// Mirrors CustomPropertyField's `shouldShow`, so the section is dropped entirely when every
+	// child is hidden or filtered out — rather than showing an empty section header.
+	const visibleProperties = useMemo(() => {
+		return sectionProperties.filter((p) => {
+			if (p.hidden === true) return false;
+			if (!p.condition) return true;
+			return evaluateCondition(p.condition, yamlParts, extendedContext);
+		});
+	}, [sectionProperties, yamlParts, extendedContext]);
+
+	// Auto-expand if any visible property in the section is required
+	const hasRequiredField = useMemo(() => {
+		return visibleProperties.some((p) => p.required);
+	}, [visibleProperties]);
+
+	// Don't render the section when nothing is visible (no resolvable properties, or every child
+	// is hidden / filtered by its condition). All hooks above run unconditionally so hook order
+	// stays stable across renders.
+	if (visibleProperties.length === 0) {
+		return null;
+	}
 
 	return (
 		<Disclosure defaultOpen={expanded || hasRequiredField}>

@@ -245,6 +245,8 @@ dataContract:
 
 The `customProperties` list references custom property names defined under the same level. Names must match exactly — if a reference can't be resolved, the section is skipped and a warning is logged to the browser console (`[Customization] customSection "..." references unknown customProperties: ...`).
 
+A section is **automatically hidden when all of its custom properties are hidden** — that is, every referenced property has `hidden: true` or is currently filtered out by its `condition`. This avoids showing an empty section header. The section keeps rendering as long as at least one of its properties is visible (including a `required` one), so a mandatory field is never hidden by this behavior.
+
 `positionAfter` is currently supported in the property detail drawer (`schema.properties` level) and renders the section inline after the named anchor. Sections without `positionAfter` render below the standard sections in the order they're declared.
 
 
