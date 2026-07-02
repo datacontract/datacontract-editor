@@ -63,12 +63,12 @@ const Overview = () => {
 
 	// Default status options (can be overridden by customization)
 	const defaultStatusOptions = [
-		{ id: 'draft', name: 'draft' },
-		{ id: 'proposed', name: 'proposed' },
-		{ id: 'in development', name: 'in development' },
-		{ id: 'active', name: 'active' },
-		{ id: 'deprecated', name: 'deprecated' },
-		{ id: 'retired', name: 'retired' }
+		{ id: 'draft', name: t('overview.status.options.draft') },
+		{ id: 'proposed', name: t('overview.status.options.proposed') },
+		{ id: 'in development', name: t('overview.status.options.inDevelopment') },
+		{ id: 'active', name: t('overview.status.options.active') },
+		{ id: 'deprecated', name: t('overview.status.options.deprecated') },
+		{ id: 'retired', name: t('overview.status.options.retired') }
 	];
 
 	// Apply status override
