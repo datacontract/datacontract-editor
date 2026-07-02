@@ -94,7 +94,7 @@ describe('collectAuthoritativeDefinitionUrls', () => {
     expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([]);
   });
 
-  it('skips non-definition types, external URLs, and entries without a URL', () => {
+  it('skips non-definition types and entries without a URL, but keeps external URLs', () => {
     const contract = {
       authoritativeDefinitions: [
         { type: 'videoTutorial', url: '/org/definitions/video' },
@@ -102,7 +102,23 @@ describe('collectAuthoritativeDefinitionUrls', () => {
         { type: 'semantics' },
       ],
     };
-    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([]);
+    // The external URL is kept: the backend batch resolver handles it server-side
+    // (no CORS), so only the non-qualifying type and the url-less entry drop.
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([
+      'https://other-host.com/org/definitions/ext',
+    ]);
+  });
+
+  it('collects host-agnostic concept IRIs for backend resolution', () => {
+    const contract = {
+      schema: [
+        { properties: [{ authoritativeDefinitions: [sem('http://www.example-ns.com/ns/main/orderId')] }] },
+      ],
+    };
+    // An IRI is an identity string on any host; the backend resolves it by exact match.
+    expect(collectAuthoritativeDefinitionUrls(contract)).toEqual([
+      'http://www.example-ns.com/ns/main/orderId',
+    ]);
   });
 
   it('de-duplicates repeated URLs', () => {

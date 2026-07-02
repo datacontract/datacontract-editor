@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDefinition } from './useDefinition.js';
 import { isSemanticAuthDef } from '../utils/authDefTypes.js';
-import { toAbsoluteUrl, isExternalUrl } from '../lib/urlUtils.js';
+import { toAbsoluteUrl } from '../lib/urlUtils.js';
 
 /**
  * Resolve the semantic (or fallback `definition`) entry from an
@@ -37,16 +37,13 @@ export function useInheritedDefinition(authoritativeDefinitions) {
     [semanticDefinition?.url]
   );
 
-  const external = useMemo(
-    () => (semanticDefinition?.url ? isExternalUrl(semanticDefinition.url) : false),
-    [semanticDefinition?.url]
-  );
-
   useEffect(() => {
-    if (!absoluteUrl || external) {
+    if (!absoluteUrl) {
       setDefinitionData(null);
       return;
     }
+    // getDefinition resolves external/IRI references via the backend when configured,
+    // and returns null for references it cannot resolve — no need to gate on host here.
     let cancelled = false;
     setIsFetching(true);
     getDefinition(absoluteUrl)
@@ -62,7 +59,7 @@ export function useInheritedDefinition(authoritativeDefinitions) {
     return () => {
       cancelled = true;
     };
-  }, [absoluteUrl, external, getDefinition]);
+  }, [absoluteUrl, getDefinition]);
 
   // A field is "inherited" when the definition has it but the entity doesn't.
   const isInherited = (entity, field) =>

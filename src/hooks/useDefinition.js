@@ -22,11 +22,16 @@ export function useDefinition() {
      * Fetch a single definition by URL
      */
     const getDefinition = useCallback(async (definitionUrl) => {
-        if (!definitionUrl || isExternalUrl(definitionUrl)) {
+        if (!definitionUrl) {
             return null;
         }
+        // A configured backend resolver handles external/IRI references too (server-side, no CORS).
         if (batchResolveUrl && resolveAuthoritativeDefinition) {
             return await resolveAuthoritativeDefinition(definitionUrl);
+        }
+        // Direct per-URL fetch works same-host only (CORS); skip external references.
+        if (isExternalUrl(definitionUrl)) {
+            return null;
         }
         return await fetchDefinition(definitionUrl, semantics?.definitionAcceptHeader);
     }, [batchResolveUrl, resolveAuthoritativeDefinition, semantics?.definitionAcceptHeader]);
