@@ -81,7 +81,17 @@ const ComboboxComponent = ({
           className={`block w-full rounded-md border-0 py-1.5 ${renderSelectedIcon && value ? 'pl-9' : 'pl-2'} pr-8 text-gray-900 bg-white shadow-sm ring-1 ring-inset ${hasError ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4`}
           onChange={handleInputChange}
           onBlur={() => setQuery('')}
-          displayValue={acceptAnyInput ? (item) => item || '' : displayValue}
+          displayValue={acceptAnyInput
+            ? (item) => {
+                // Map a stored canonical value (e.g. 'active') to its localized
+                // option label (e.g. 'Aktiv'); fall back to the raw value for
+                // custom/free-text entries that don't match any option.
+                const match = options.find(
+                  (o) => (o?.id ?? o?.value ?? o?.name ?? o) === item
+                );
+                return match ? displayValue(match) : (item || '');
+              }
+            : displayValue}
           placeholder={placeholder || t('input.selectOption')}
         />
         <ComboboxButton className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden">
@@ -106,7 +116,7 @@ const ComboboxComponent = ({
           {filteredOptions.length > 0 && filteredOptions.map((option, index) => (
             <ComboboxOption
               key={option.id || option.value || index}
-              value={acceptAnyInput ? (option[filterKey] || option.name || option.label || option) : option}
+              value={acceptAnyInput ? (option.id ?? option.value ?? option.name ?? option.label ?? option) : option}
               className="cursor-default px-3 py-2 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white data-focus:outline-hidden"
             >
               {renderOption ? (
