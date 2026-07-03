@@ -89,12 +89,14 @@ function validateValue(value, config, t) {
 /**
  * Renders the form-field label as the configured human-friendly title with
  * the technical property name appended inline in monospace — but only when a
- * title is configured and differs from the property name. For unconfigured
- * (freeform) custom properties the property name IS the label, so no
- * duplicate is shown.
+ * title is configured and differs from the property name (compared
+ * case-insensitively: a title that is just a cased variant of the property,
+ * e.g. "Classification" vs "classification", adds no information). For
+ * unconfigured (freeform) custom properties the property name IS the label,
+ * so no duplicate is shown.
  */
 const FieldLabel = ({ title, property }) => {
-  const showTechnicalName = !!title && title !== property;
+  const showTechnicalName = !!title && title.toLowerCase() !== String(property).toLowerCase();
   return (
     <>
       {title || property}
