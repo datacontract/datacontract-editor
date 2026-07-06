@@ -1,5 +1,5 @@
 import { isSemanticAuthDef } from '../utils/authDefTypes.js';
-import { isInternalUrl, toAbsoluteUrl } from './urlUtils.js';
+import { toAbsoluteUrl } from './urlUtils.js';
 
 /**
  * Collect absolute URLs of authoritativeDefinitions entries that are resolvable
@@ -18,8 +18,11 @@ import { isInternalUrl, toAbsoluteUrl } from './urlUtils.js';
  *     or the deprecated `team[]` array; both members are TeamMember-shaped
  *
  * An entry qualifies when it is a semantic/business definition
- * (type 'semantics' | 'semantic' | 'definition'), has a url, and the url is
- * internal (same host). Collected urls are normalized to absolute and de-duped.
+ * (type 'semantics' | 'semantic' | 'definition') and has a url. External
+ * (different-host) urls are included too: this collection feeds the backend
+ * batch resolver, which resolves references server-side (including host-agnostic
+ * concept IRIs) with no CORS constraint. Collected urls are normalized to
+ * absolute and de-duped.
  *
  * @param {*} yamlParts - parsed contract (null-safe)
  * @returns {string[]} de-duplicated absolute urls (stable order)
@@ -32,7 +35,7 @@ export function collectAuthoritativeDefinitionUrls(yamlParts) {
     for (const entry of entries) {
       if (!entry || typeof entry !== 'object') continue;
       const qualifies = isSemanticAuthDef(entry) || entry.type === 'definition';
-      if (!qualifies || !entry.url || !isInternalUrl(entry.url)) continue;
+      if (!qualifies || !entry.url) continue;
       const abs = toAbsoluteUrl(entry.url);
       if (abs) urls.push(abs);
     }

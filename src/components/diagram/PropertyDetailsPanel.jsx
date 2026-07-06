@@ -167,60 +167,49 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
 
   // Get semantic definition from authoritative definitions (type === 'semantics' / 'semantic', with fallback to 'definition')
   const semanticDefinition = useMemo(() => {
-    const def = property.authoritativeDefinitions?.find(d => isSemanticAuthDef(d))
+    return property.authoritativeDefinitions?.find(d => isSemanticAuthDef(d))
       || property.authoritativeDefinitions?.find(d => d.type === 'definition');
-    console.log('Semantic definition found:', def);
-    return def;
   }, [property.authoritativeDefinitions]);
 
-  // Get absolute URL and check if external
-  const semanticDefinitionAbsoluteUrl = useMemo(() => {
-    const url = semanticDefinition?.url ? toAbsoluteUrl(semanticDefinition.url) : null;
-    console.log('Absolute URL:', url, 'Original URL:', semanticDefinition?.url);
-    return url;
-  }, [semanticDefinition?.url]);
+  const semanticDefinitionAbsoluteUrl = useMemo(
+    () => (semanticDefinition?.url ? toAbsoluteUrl(semanticDefinition.url) : null),
+    [semanticDefinition?.url]
+  );
 
+  // Whether the reference points at a different host — drives the external-link
+  // affordance only. Resolution no longer depends on it: getDefinition resolves
+  // external/IRI references via the backend when configured.
   const isSemanticDefinitionExternal = useMemo(() => {
     if (!semanticDefinition?.url) return false;
-		return isExternalUrl(semanticDefinition.url);
+    return isExternalUrl(semanticDefinition.url);
   }, [semanticDefinition?.url]);
 
-  // Fetch definition data when semantic definition URL is available
+  // Fetch definition data when a semantic definition URL is available. getDefinition
+  // handles host-agnostic IRIs / external references through the backend resolver and
+  // returns null for anything it can't resolve, so there's no host gate here.
   useEffect(() => {
     if (!semanticDefinitionAbsoluteUrl) {
       setDefinitionData(null);
       return;
     }
 
-    // Only fetch for internal URLs to avoid CORS issues
-    if (isSemanticDefinitionExternal) {
-      console.log('Skipping fetch - external URL');
-      setDefinitionData(null);
-      return;
-    }
-
+    let cancelled = false;
     const fetchDefinitionData = async () => {
       setIsFetchingDefinition(true);
       try {
-        console.log('Fetching definition:', semanticDefinitionAbsoluteUrl);
         const data = await getDefinition(semanticDefinitionAbsoluteUrl);
-        if (data) {
-          console.log('Fetched definition data:', data);
-          setDefinitionData(data);
-        } else {
-          console.warn('No definition data returned for:', semanticDefinitionAbsoluteUrl);
-          setDefinitionData(null);
-        }
+        if (!cancelled) setDefinitionData(data || null);
       } catch (error) {
         console.error('Failed to fetch definition:', error);
-        setDefinitionData(null);
+        if (!cancelled) setDefinitionData(null);
       } finally {
-        setIsFetchingDefinition(false);
+        if (!cancelled) setIsFetchingDefinition(false);
       }
     };
 
     fetchDefinitionData();
-  }, [semanticDefinitionAbsoluteUrl, isSemanticDefinitionExternal, getDefinition]);
+    return () => { cancelled = true; };
+  }, [semanticDefinitionAbsoluteUrl, getDefinition]);
 
   // Remove semantic definition
   const removeSemanticDefinition = useCallback(() => {
@@ -488,9 +477,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
 
                       {/* Buttons - Right aligned */}
                       <div className="flex justify-end gap-2">
-                        {!isSemanticDefinitionExternal && (
+                        {(definitionData || isFetchingDefinition) && (
                           <Popover className="relative">
-                            {({ open }) => (
+                            {() => (
                               <>
                                 <PopoverButton className="rounded bg-white px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none">
                                   {t('diagram.semantics.showDetails')}

@@ -66,15 +66,20 @@ export function createAuthoritativeDefinitionsSlice(set, get) {
     },
 
     resolveAuthoritativeDefinition: async (url) => {
-      if (!url || isExternalUrl(url)) return null;
+      if (!url) return null;
       const abs = toAbsoluteUrl(url);
       if (!abs) return null;
 
       const batchResolveUrl = get().editorConfig?.semantics?.batchResolveUrl;
       if (!batchResolveUrl) {
+        // No backend resolver: fall back to a direct per-URL GET, which only works
+        // same-host (CORS). External references stay unresolved.
+        if (isExternalUrl(url)) return null;
         return fetchDefinition(abs, getAcceptHeader());
       }
 
+      // Backend-mediated resolution works for internal urls and host-agnostic IRIs
+      // alike (server-side lookup, no CORS), so external references resolve here too.
       if (has(get().authoritativeDefinitions.byUrl, abs)) {
         return get().authoritativeDefinitions.byUrl[abs];
       }
@@ -89,7 +94,11 @@ export function createAuthoritativeDefinitionsSlice(set, get) {
       if (inflight.has(abs)) return inflight.get(abs);
       const gen = generation;
       const p = (async () => {
-        const data = await fetchDefinition(abs, getAcceptHeader());
+        // Resolve the cache miss through the batch endpoint rather than a direct GET,
+        // so external/IRI references resolve too. The endpoint echoes the request url
+        // as the map key; a missing/null entry means "no match".
+        const map = await fetchAuthoritativeDefinitionsBatch(batchResolveUrl, [abs], 'application/json');
+        const data = map && has(map, abs) ? map[abs] : null;
         if (gen === generation) {
           set((state) => ({
             authoritativeDefinitions: {
