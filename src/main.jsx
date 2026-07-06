@@ -26,8 +26,9 @@ async function init() {
   const editorConfig = buildEditorConfig(runtimeConfig);
 
   // Standalone locale is resolved by i18next-browser-languagedetector (querystring →
-  // localStorage → browser), configured in ./i18n. The in-app language switcher persists
-  // the user's choice; nothing to do here.
+  // localStorage → English fallback; the browser locale is intentionally not consulted),
+  // configured in ./i18n. The in-app language switcher persists the user's choice; nothing
+  // to do here.
 
   createRoot(document.getElementById('root')).render(
     <StrictMode>

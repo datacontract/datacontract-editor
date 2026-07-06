@@ -67,8 +67,9 @@ const DEFAULT_CONFIG = {
 
   // UI language as a BCP-47 tag (e.g. 'en', 'de'). When the host passes one (embedded
   // use, e.g. entropy-data) it wins. When omitted (standalone, e.g. editor.datacontract.com)
-  // the i18n language detector resolves it (?lang / localStorage / navigator). See
-  // src/i18n/index.js. Unknown/unsupported tags fall back to English.
+  // the i18n language detector resolves it (?lang / localStorage, then English — the browser
+  // locale is never auto-detected). See src/i18n/index.js. Unknown/unsupported tags fall
+  // back to English.
   locale: null,
 
   // Editor mode: 'SERVER' (default), 'DESKTOP', 'CLI', or 'EMBEDDED'
@@ -430,8 +431,9 @@ export function init(userConfig = {}) {
   const config = { ...DEFAULT_CONFIG, ...userConfig };
 
   // Locale: an explicit host-supplied locale wins (embedded). Otherwise leave the
-  // language to the detector configured in ./i18n (standalone: ?lang / localStorage /
-  // navigator), and keep <html lang> in sync since the editor owns the page in that case.
+  // language to the detector configured in ./i18n (standalone: ?lang / localStorage, then
+  // English — never the browser locale), and keep <html lang> in sync since the editor owns
+  // the page in that case.
   if (config.locale) {
     i18n.changeLanguage(config.locale);
   } else if (typeof document !== 'undefined') {

@@ -17,9 +17,11 @@ import de from './locales/de.json';
  *        which calls `i18n.changeLanguage(locale)` AFTER init — so the host always wins,
  *        regardless of what the detector found.
  *      • Standalone (editor.datacontract.com): `i18next-browser-languagedetector` picks
- *        the locale from, in order, the `?lang=` query param (deep links), the user's saved
- *        choice in localStorage (`dce-locale`, written by the in-app switcher), then the
- *        browser language; falling back to English.
+ *        the locale from, in order, the `?lang=` query param (deep links) then the user's
+ *        saved choice in localStorage (`dce-locale`, written by the in-app switcher),
+ *        falling back to English. The browser language is deliberately NOT consulted — a
+ *        customer reported the UI silently coming up in their browser locale; language is
+ *        instead an explicit choice (config, deep link, or the in-app switcher).
  *  - `fallbackLng: 'en'` + `supportedLngs` + `load: 'languageOnly'` mean a regional tag
  *    like `de-DE` resolves to `de` and anything unsupported degrades to English.
  *
@@ -42,7 +44,7 @@ i18n
     supportedLngs: ['en', 'de'],
     load: 'languageOnly', // map de-DE -> de
     detection: {
-      order: ['querystring', 'localStorage', 'navigator'],
+      order: ['querystring', 'localStorage'], // no 'navigator': never auto-detect browser locale
       caches: ['localStorage'],
       lookupQuerystring: 'lang',
       lookupLocalStorage: 'dce-locale',
