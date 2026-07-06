@@ -35,7 +35,15 @@
     "status": {
       "label": "Status",
       "placeholder": "Select a status...",
-      "tooltip": "Current status of the data contract"
+      "tooltip": "Current status of the data contract",
+      "options": {
+        "draft": "draft",
+        "proposed": "proposed",
+        "inDevelopment": "in development",
+        "active": "active",
+        "deprecated": "deprecated",
+        "retired": "retired"
+      }
     },
     "tenant": {
       "label": "Tenant",

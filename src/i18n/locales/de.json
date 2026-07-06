@@ -35,11 +35,19 @@
     "status": {
       "label": "Status",
       "placeholder": "Status auswählen...",
-      "tooltip": "Aktueller Status des Data Contracts"
+      "tooltip": "Aktueller Status des Data Contracts",
+      "options": {
+        "draft": "Entwurf",
+        "proposed": "Vorgeschlagen",
+        "inDevelopment": "In Entwicklung",
+        "active": "Aktiv",
+        "deprecated": "Veraltet",
+        "retired": "Außer Betrieb"
+      }
     },
     "tenant": {
-      "label": "Tenant",
-      "tooltip": "Tenant oder Organisation, zu der dieser Data Contract gehört"
+      "label": "Mandant",
+      "tooltip": "Mandant oder Organisation, zu der dieser Data Contract gehört"
     },
     "domain": {
       "label": "Domain",
@@ -1088,7 +1096,7 @@
       "version": "Version",
       "id": "ID",
       "status": "Status",
-      "tenant": "Tenant",
+      "tenant": "Mandant",
       "domain": "Domain",
       "dataProduct": "Data Product",
       "contractCreated": "Contract erstellt",
