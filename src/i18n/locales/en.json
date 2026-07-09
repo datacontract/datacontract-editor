@@ -823,6 +823,7 @@
       "label": "Value",
       "placeholder": "Enter value..."
     },
+    "arrayItemType": "Item type",
     "description": {
       "label": "Description",
       "placeholder": "Optional description..."

@@ -823,6 +823,7 @@
       "label": "Wert",
       "placeholder": "Wert eingeben…"
     },
+    "arrayItemType": "Elementtyp",
     "description": {
       "label": "Beschreibung",
       "placeholder": "Optionale Beschreibung…"
