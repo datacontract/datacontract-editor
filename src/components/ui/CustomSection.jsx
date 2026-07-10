@@ -291,16 +291,18 @@ export const UngroupedCustomProperties = ({
 		);
 	}, [customProperties, groupedNames]);
 
-	if (ungroupedProps.length === 0) {
-		return null;
-	}
-
-	// Build context including current custom property values
+	// Build context including current custom property values. Kept before the
+	// early return so the hook order stays stable when ungroupedProps changes
+	// from empty to non-empty (e.g. customizations loaded asynchronously).
 	const extendedContext = useMemo(() => ({
 		...context,
 		...values,
 		customProperties: values,
 	}), [context, values]);
+
+	if (ungroupedProps.length === 0) {
+		return null;
+	}
 
 	return (
 		<div className="space-y-3">

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ValidatedInput from './ValidatedInput';
 import { ValidatedCombobox } from './index';
 import TagsInput from './TagsInput.jsx';
+import ObjectYamlEditor from './ObjectYamlEditor.jsx';
 import Tooltip from './Tooltip';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
@@ -552,6 +553,53 @@ const ArrayField = ({ config, value, onChange, errors }) => {
 };
 
 /**
+ * Object / array-of-objects field sub-component.
+ * Edits the value as free-form YAML via ObjectYamlEditor; the stored value is a real
+ * object (kind="object") or array (kind="array"). An empty value is stored as undefined
+ * so `required` still applies and the property isn't persisted while empty.
+ */
+const ObjectField = ({ config, value, onChange, errors, kind }) => {
+  const { t } = useTranslation();
+  const { property, title, description, required } = config;
+
+  const isEmpty = (val) => {
+    if (val === null || val === undefined) return true;
+    if (kind === 'array') return Array.isArray(val) && val.length === 0;
+    return typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0;
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 mb-1">
+        <label className="block text-xs font-medium leading-4 text-gray-900">
+          <FieldLabel title={title} property={property} />
+        </label>
+        {description && (
+          <Tooltip content={description}>
+            <QuestionMarkCircleIcon />
+          </Tooltip>
+        )}
+        {required && (
+          <span className="ml-auto text-xs leading-4 text-gray-500">
+            {t('customProperty.required')}
+          </span>
+        )}
+      </div>
+      <ObjectYamlEditor
+        kind={kind}
+        value={value}
+        onChange={(val) => onChange(isEmpty(val) ? undefined : val)}
+      />
+      {errors?.map((err, i) => (
+        <p key={i} className="mt-1 text-xs text-red-600">
+          {err}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+/**
  * Main CustomPropertyField component
  * Renders a custom property field based on its type configuration
  *
@@ -656,6 +704,28 @@ const CustomPropertyField = ({
 
     case 'boolean':
       return <BooleanField config={config} value={value} onChange={onChange} />;
+
+    case 'object':
+      return (
+        <ObjectField
+          config={config}
+          value={value}
+          onChange={onChange}
+          errors={validationErrors}
+          kind="object"
+        />
+      );
+
+    case 'objectArray':
+      return (
+        <ObjectField
+          config={config}
+          value={value}
+          onChange={onChange}
+          errors={validationErrors}
+          kind="array"
+        />
+      );
 
     case 'date':
     case 'datetime':

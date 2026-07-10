@@ -131,6 +131,19 @@
             type: 'textarea',
             description: 'Internal notes about this contract',
             rows: 4
+          },
+          {
+            property: 'retentionConfig',
+            title: 'Retention Config',
+            type: 'object',
+            description: 'A structured object value, edited as free-form YAML'
+          },
+          {
+            property: 'contacts',
+            title: 'Contacts',
+            type: 'objectArray',
+            description: 'A list of objects, edited as free-form YAML',
+            minItems: 1
           }
         ],
         customSections: [
@@ -143,6 +156,11 @@
             section: 'lifecycle',
             title: 'Lifecycle',
             customProperties: ['retentionDays', 'effectiveDate', 'isPublic']
+          },
+          {
+            section: 'configuration',
+            title: 'Configuration',
+            customProperties: ['retentionConfig', 'contacts']
           }
         ]
       },
@@ -481,6 +499,21 @@ customProperties:
     value: 365
   - property: isPublic
     value: false
+  - property: retentionConfig
+    value:
+      days: 365
+      enabled: true
+      tiers:
+        - hot
+        - cold
+  - property: contacts
+    value:
+      - name: Jane Doe
+        role: owner
+        email: jane.doe@company.com
+      - name: Bob Smith
+        role: steward
+        email: bob.smith@company.com
 schema:
   - name: transactions
     description: Financial transactions

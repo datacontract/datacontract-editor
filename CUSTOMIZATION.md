@@ -179,6 +179,8 @@ Currently implemented in the property detail drawer (`schema.properties` level).
 | `select` | Single-select dropdown | `enum` (required) |
 | `multiselect` | Multi-select dropdown | `enum` (required) |
 | `array` | Array of strings | `placeholder`, `minItems`, `maxItems` |
+| `object` | Object edited as YAML | - |
+| `objectArray` | Array of objects edited as YAML | `minItems`, `maxItems` |
 | `boolean` | Toggle/checkbox | - |
 | `date` | Date picker | `minimum`, `maximum` |
 | `datetime` | Date and time picker | `minimum`, `maximum` |
