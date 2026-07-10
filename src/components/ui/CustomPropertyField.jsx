@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ValidatedInput from './ValidatedInput';
 import { ValidatedCombobox } from './index';
 import TagsInput from './TagsInput.jsx';
+import ObjectYamlEditor from './ObjectYamlEditor.jsx';
 import Tooltip from './Tooltip';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
@@ -552,6 +553,47 @@ const ArrayField = ({ config, value, onChange, errors }) => {
 };
 
 /**
+ * YAML field sub-component.
+ * Edits the value as free-form YAML via ObjectYamlEditor, accepting any valid YAML
+ * (object, list, or scalar) and surfacing a syntax error inline while invalid. The stored
+ * value is the parsed value; an empty editor stores undefined so `required` still applies.
+ */
+const YamlField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
+  const { property, title, description, required } = config;
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 mb-1">
+        <label className="block text-xs font-medium leading-4 text-gray-900">
+          <FieldLabel title={title} property={property} />
+        </label>
+        {description && (
+          <Tooltip content={description}>
+            <QuestionMarkCircleIcon />
+          </Tooltip>
+        )}
+        {required && (
+          <span className="ml-auto text-xs leading-4 text-gray-500">
+            {t('customProperty.required')}
+          </span>
+        )}
+      </div>
+      <ObjectYamlEditor
+        kind="yaml"
+        value={value}
+        onChange={(val) => onChange(val === null || val === undefined ? undefined : val)}
+      />
+      {errors?.map((err, i) => (
+        <p key={i} className="mt-1 text-xs text-red-600">
+          {err}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+/**
  * Main CustomPropertyField component
  * Renders a custom property field based on its type configuration
  *
@@ -656,6 +698,16 @@ const CustomPropertyField = ({
 
     case 'boolean':
       return <BooleanField config={config} value={value} onChange={onChange} />;
+
+    case 'yaml':
+      return (
+        <YamlField
+          config={config}
+          value={value}
+          onChange={onChange}
+          errors={validationErrors}
+        />
+      );
 
     case 'date':
     case 'datetime':
