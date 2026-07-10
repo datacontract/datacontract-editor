@@ -17,24 +17,29 @@ if (monaco?.languages && !monaco.languages.getLanguages().some((l) => l.id === O
 }
 
 /**
- * ObjectYamlEditor edits an object (or an array of objects) as free-form YAML using
- * Monaco, with syntax highlighting. It keeps local text so partially-typed / temporarily
- * invalid YAML is not clobbered, parses on every change, and only propagates a valid
- * value of the expected shape. Invalid input shows an inline error and leaves the last
- * valid value untouched.
+ * ObjectYamlEditor edits a value as free-form YAML using Monaco, with syntax highlighting.
+ * It keeps local text so partially-typed / temporarily invalid YAML is not clobbered,
+ * parses on every change, and propagates the parsed value once it is valid. Invalid input
+ * shows an inline error and leaves the last valid value untouched.
  *
- * @param {object|Array} value - The current object or array value
+ * The `kind` constrains the accepted shape:
+ * - `'object'`: must parse to a YAML mapping
+ * - `'array'`: must parse to a YAML sequence
+ * - `'yaml'`: any valid YAML (object, list, or scalar); only syntax is validated
+ *
+ * @param {*} value - The current value
  * @param {Function} onChange - Called with the parsed value when it is valid
- * @param {'object'|'array'} kind - Whether the value is a single object or an array
+ * @param {'object'|'array'|'yaml'} kind - Accepted YAML shape (see above)
  * @param {number} height - Editor height in pixels
  */
-const emptyFor = (kind) => (kind === 'array' ? [] : {});
+const emptyFor = (kind) => (kind === 'array' ? [] : kind === 'yaml' ? undefined : {});
 
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 const toYaml = (value, kind) => {
   const v = value == null ? emptyFor(kind) : value;
   // Start empty for empty values so the editor is a clean slate to type into.
+  if (v === null || v === undefined) return '';
   if (kind === 'array' && Array.isArray(v) && v.length === 0) return '';
   if (kind === 'object' && isPlainObject(v) && Object.keys(v).length === 0) return '';
   try {
@@ -87,10 +92,13 @@ const ObjectYamlEditor = ({ value, onChange, kind = 'object', height = 180 }) =>
         setError(t('customProperty.yaml.expectedArray'));
         return;
       }
-    } else if (!isPlainObject(parsed)) {
-      setError(t('customProperty.yaml.expectedObject'));
-      return;
+    } else if (kind === 'object') {
+      if (!isPlainObject(parsed)) {
+        setError(t('customProperty.yaml.expectedObject'));
+        return;
+      }
     }
+    // kind === 'yaml': any valid YAML is accepted; only syntax is validated above.
 
     setError(null);
     onChange(parsed);

@@ -135,15 +135,14 @@
           {
             property: 'retentionConfig',
             title: 'Retention Config',
-            type: 'object',
+            type: 'yaml',
             description: 'A structured object value, edited as free-form YAML'
           },
           {
             property: 'contacts',
             title: 'Contacts',
-            type: 'objectArray',
-            description: 'A list of objects, edited as free-form YAML',
-            minItems: 1
+            type: 'yaml',
+            description: 'A list of objects, edited as free-form YAML'
           }
         ],
         customSections: [

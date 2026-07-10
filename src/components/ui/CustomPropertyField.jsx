@@ -553,20 +553,14 @@ const ArrayField = ({ config, value, onChange, errors }) => {
 };
 
 /**
- * Object / array-of-objects field sub-component.
- * Edits the value as free-form YAML via ObjectYamlEditor; the stored value is a real
- * object (kind="object") or array (kind="array"). An empty value is stored as undefined
- * so `required` still applies and the property isn't persisted while empty.
+ * YAML field sub-component.
+ * Edits the value as free-form YAML via ObjectYamlEditor, accepting any valid YAML
+ * (object, list, or scalar) and surfacing a syntax error inline while invalid. The stored
+ * value is the parsed value; an empty editor stores undefined so `required` still applies.
  */
-const ObjectField = ({ config, value, onChange, errors, kind }) => {
+const YamlField = ({ config, value, onChange, errors }) => {
   const { t } = useTranslation();
   const { property, title, description, required } = config;
-
-  const isEmpty = (val) => {
-    if (val === null || val === undefined) return true;
-    if (kind === 'array') return Array.isArray(val) && val.length === 0;
-    return typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0;
-  };
 
   return (
     <div>
@@ -586,9 +580,9 @@ const ObjectField = ({ config, value, onChange, errors, kind }) => {
         )}
       </div>
       <ObjectYamlEditor
-        kind={kind}
+        kind="yaml"
         value={value}
-        onChange={(val) => onChange(isEmpty(val) ? undefined : val)}
+        onChange={(val) => onChange(val === null || val === undefined ? undefined : val)}
       />
       {errors?.map((err, i) => (
         <p key={i} className="mt-1 text-xs text-red-600">
@@ -705,25 +699,13 @@ const CustomPropertyField = ({
     case 'boolean':
       return <BooleanField config={config} value={value} onChange={onChange} />;
 
-    case 'object':
+    case 'yaml':
       return (
-        <ObjectField
+        <YamlField
           config={config}
           value={value}
           onChange={onChange}
           errors={validationErrors}
-          kind="object"
-        />
-      );
-
-    case 'objectArray':
-      return (
-        <ObjectField
-          config={config}
-          value={value}
-          onChange={onChange}
-          errors={validationErrors}
-          kind="array"
         />
       );
 
