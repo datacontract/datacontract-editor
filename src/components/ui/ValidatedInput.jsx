@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
+import useBufferedField from '../../hooks/useBufferedField.js';
 
 
 /**
@@ -29,29 +30,38 @@ const ValidatedInput = forwardRef(({
   validationKey,
   validationSection,
   skipInternalValidation = false,
+  onBlur,
   ...props
 }, ref) => {
   const { t } = useTranslation();
 
+  // Buffer keystrokes locally; committing to the store re-serializes the
+  // whole document, so it only happens after a typing pause or on blur
+  const [displayValue, handleBufferedChange, flush] = useBufferedField(value, onChange, name);
+  const handleBlur = (e) => {
+    flush();
+    onBlur?.(e);
+  };
+
   // Internal validation - check if required field is empty
-  const hasInternalError = !skipInternalValidation && required && (!value || value.toString().trim() === '');
+  const hasInternalError = !skipInternalValidation && required && (!displayValue || displayValue.toString().trim() === '');
 
   // Pattern validation
-  const hasPatternError = !skipInternalValidation && pattern && value && typeof value === 'string' && value.trim() !== '' && (() => {
+  const hasPatternError = !skipInternalValidation && pattern && displayValue && typeof displayValue === 'string' && displayValue.trim() !== '' && (() => {
     try {
-      return !new RegExp(pattern).test(value);
+      return !new RegExp(pattern).test(displayValue);
     } catch {
       return false;
     }
   })();
 
   // Length validation
-  const trimmed = value && typeof value === 'string' ? value.trim() : '';
+  const trimmed = displayValue && typeof displayValue === 'string' ? displayValue.trim() : '';
   const hasMinLengthError = !skipInternalValidation && minLength !== undefined && trimmed !== '' && trimmed.length < minLength;
   const hasMaxLengthError = !skipInternalValidation && maxLength !== undefined && trimmed !== '' && trimmed.length > maxLength;
 
   // Numeric range validation
-  const numericValue = value !== undefined && value !== null && value !== '' ? Number(value) : NaN;
+  const numericValue = displayValue !== undefined && displayValue !== null && displayValue !== '' ? Number(displayValue) : NaN;
   const hasMinimumError = !skipInternalValidation && minimum !== undefined && !isNaN(numericValue) && numericValue < minimum;
   const hasMaximumError = !skipInternalValidation && maximum !== undefined && !isNaN(numericValue) && numericValue > maximum;
 
@@ -104,8 +114,9 @@ const ValidatedInput = forwardRef(({
         type="text"
         name={name}
         id={name}
-        value={value}
-        onChange={onChange}
+        value={displayValue}
+        onChange={handleBufferedChange}
+        onBlur={handleBlur}
         className={`mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ${ringClass} ${placeholderClassName} focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4 ${className}`}
         placeholder={placeholder}
         aria-invalid={hasError}

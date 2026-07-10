@@ -23,9 +23,26 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
     const setSchemaInfo = useEditorStore((state) => state.setSchemaInfo);
     const baselineYaml = useEditorStore((state) => state.baselineYaml);
     const customizations = useEditorStore((state) => state.editorConfig?.customizations);
+    const currentView = useEditorStore((state) => state.currentView);
     const location = useLocation();
 
     const hasChanges = yaml !== baselineYaml;
+
+    // While the form/diagram view is active this editor is hidden and only
+    // exists to produce validation markers. Applying an external value makes
+    // Monaco replace the full document (re-tokenize, re-wrap, push an undo
+    // stop), so feed it a debounced copy instead of every keystroke. In the
+    // YAML view the live value is used, exactly as before.
+    const [debouncedYaml, setDebouncedYaml] = useState(yaml);
+    useEffect(() => {
+        if (currentView === 'yaml') {
+            setDebouncedYaml(yaml);
+            return undefined;
+        }
+        const timer = setTimeout(() => setDebouncedYaml(yaml), 500);
+        return () => clearTimeout(timer);
+    }, [yaml, currentView]);
+    const editorYaml = currentView === 'yaml' ? yaml : debouncedYaml;
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
@@ -191,7 +208,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                 }
             }, 200);
         }
-    }, [yaml, setMarkers]);
+    }, [editorYaml, setMarkers]);
 
     // Scroll to specific line when requested from navigation
     useEffect(() => {
@@ -356,7 +373,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                     <Editor
                         height="100%"
                         language="yaml"
-                        value={yaml || '# Enter your YAML here\n'}
+                        value={editorYaml || '# Enter your YAML here\n'}
                         onChange={handleChange}
                         onMount={handleEditorDidMount}
                         theme="vs-light"

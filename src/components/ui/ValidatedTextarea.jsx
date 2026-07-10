@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
+import useBufferedField from '../../hooks/useBufferedField.js';
 
 /**
  * A self-validating textarea component that shows errors for required, minLength, maxLength
@@ -21,19 +22,29 @@ const ValidatedTextarea = ({
   actions,
   className = '',
   placeholderClassName = 'placeholder:text-gray-400',
+  onBlur,
   ...props
 }) => {
   const { t } = useTranslation();
-  const strValue = value || '';
-  const trimmed = strValue.trim();
 
-  const handleChange = (e) => {
+  const commitChange = (e) => {
     if (onClear && e.target.value.trim() === '') {
       onClear();
       return;
     }
     onChange?.(e);
   };
+
+  // Buffer keystrokes locally; committing to the store re-serializes the
+  // whole document, so it only happens after a typing pause or on blur
+  const [displayValue, handleChange, flush] = useBufferedField(value, commitChange, name);
+  const handleBlur = (e) => {
+    flush();
+    onBlur?.(e);
+  };
+
+  const strValue = displayValue || '';
+  const trimmed = strValue.trim();
 
   const errorMessages = [];
   if (required && trimmed === '') {
@@ -76,8 +87,9 @@ const ValidatedTextarea = ({
         id={name}
         name={name}
         rows={rows}
-        value={value}
+        value={displayValue}
         onChange={handleChange}
+        onBlur={handleBlur}
         className={`mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ${ringClass} ${placeholderClassName} focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4 ${className}`}
         placeholder={placeholder}
         aria-invalid={hasError}

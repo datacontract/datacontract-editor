@@ -67,15 +67,33 @@ const MarkdownEditor = ({
       maxHeight: '150px',
     });
 
-    easyMDE.codemirror.on('change', () => {
+    // EasyMDE keeps its own buffer, so typing stays responsive either way;
+    // the store commit re-serializes the whole document, so debounce it and
+    // flush on blur/unmount instead of committing per keystroke
+    let commitTimer = null;
+    const commit = () => {
+      commitTimer = null;
       const newValue = easyMDE.value();
       isInternalChange.current = true;
       onChangeRef.current(newValue);
+    };
+    const flushCommit = () => {
+      if (commitTimer !== null) {
+        clearTimeout(commitTimer);
+        commit();
+      }
+    };
+
+    easyMDE.codemirror.on('change', () => {
+      if (commitTimer !== null) clearTimeout(commitTimer);
+      commitTimer = setTimeout(commit, 300);
     });
+    easyMDE.codemirror.on('blur', flushCommit);
 
     easyMDERef.current = easyMDE;
 
     return () => {
+      flushCommit();
       easyMDE.toTextArea();
       easyMDE.cleanup();
       easyMDERef.current = null;
