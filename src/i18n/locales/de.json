@@ -823,6 +823,17 @@
       "label": "Wert",
       "placeholder": "Wert eingeben…"
     },
+    "arrayItemType": "Elementtyp",
+    "typeChangeWarning": {
+      "message": "Ein Wechsel des Typs zu {{type}} löscht den aktuellen Wert.",
+      "confirm": "Trotzdem ändern",
+      "cancel": "Abbrechen"
+    },
+    "yaml": {
+      "invalid": "Ungültiges YAML: {{message}}",
+      "expectedObject": "Wert muss ein YAML-Objekt sein",
+      "expectedArray": "Wert muss eine YAML-Liste sein"
+    },
     "description": {
       "label": "Beschreibung",
       "placeholder": "Optionale Beschreibung…"

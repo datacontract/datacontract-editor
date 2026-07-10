@@ -2,6 +2,23 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CustomPropertyIcon from './icons/CustomPropertyIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
+import TypedArrayEditor from './TypedArrayEditor.jsx';
+import ObjectYamlEditor from './ObjectYamlEditor.jsx';
+import TypeChangeWarning from './TypeChangeWarning.jsx';
+import { usePendingTypeChange } from '../../hooks/usePendingTypeChange.js';
+
+// A value is "empty" when there is nothing to lose by changing its type.
+const isEmptyValue = (val) =>
+  val === null ||
+  val === undefined ||
+  val === '' ||
+  (Array.isArray(val) && val.length === 0) ||
+  (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0);
+
+// Changing a custom-property value type is destructive when the current value holds
+// content that the new type cannot carry over. Any target other than "string" (which
+// simply stringifies the current value) resets the field to an empty default.
+const isDestructiveTypeChange = (val, newType) => !isEmptyValue(val) && newType !== 'string';
 
 /**
  * CustomPropertiesEditor component for editing custom properties
@@ -87,10 +104,9 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false, mana
 const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!item.property);
-  const [editingType, setEditingType] = useState(false);
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
-  const selectClasses = "rounded border border-gray-300 bg-white px-1 py-0.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs text-gray-500";
+  const selectClasses = "rounded border border-gray-300 bg-white px-1 py-0.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs text-gray-600";
 
   // Detect value type from actual value
   const detectType = (val) => {
@@ -102,19 +118,16 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
     return 'string';
   };
 
-  // Convert string input to typed value
+  // Convert a text input into the typed scalar value. Array and object values are edited
+  // by dedicated components (TypedArrayEditor / ObjectYamlEditor), so only the scalar
+  // types flow through here.
   const convertValue = (strVal, type) => {
-    if (type === 'string') return strVal;
     if (type === 'number') {
       const num = parseFloat(strVal);
       return isNaN(num) ? 0 : num;
     }
     if (type === 'boolean') {
       return strVal === 'true';
-    }
-    if (type === 'array' || type === 'object') {
-      // Store the raw string value directly without parsing
-      return strVal;
     }
     return strVal;
   };
@@ -139,7 +152,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
     return val?.toString() || '';
   };
 
-  const handleTypeChange = (newType) => {
+  const applyTypeChange = (newType) => {
     const currentType = detectType(item.value);
     if (currentType === newType) return;
 
@@ -158,6 +171,10 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
 
     onUpdate(index, 'value', newValue);
   };
+
+  // Confirm destructive type changes before they clear the current value.
+  const { pendingType, request: requestTypeChange, confirm: confirmTypeChange, cancel: cancelTypeChange } =
+    usePendingTypeChange(applyTypeChange);
 
   const handleValueChange = (strVal, type) => {
     const converted = convertValue(strVal, type);
@@ -221,9 +238,9 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
       {/* Expandable content */}
       {isExpanded && (
         <div className="border-t border-gray-200 px-3 py-3 space-y-3">
-          {/* Property, Value, and Remove button in one line */}
-          <div className="grid grid-cols-12 gap-2 items-end">
-            <div className="col-span-4">
+          {/* Property field with remove button */}
+          <div className="flex items-end gap-2">
+            <div className="flex-1 min-w-0">
               <label className="block text-xs font-medium text-gray-700 mb-1">{t('customProperty.property.label')}</label>
               <input
                 type="text"
@@ -233,82 +250,79 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
                 placeholder="myCustomProperty"
               />
             </div>
-            <div className="col-span-7">
-              <div className="flex items-center gap-1 h-6">
-                <label className="text-xs font-medium text-gray-700">{t('customProperty.value.label')}</label>
-                {editingType ? (
-                  <select
-                    value={type}
-                    onChange={(e) => {
-                      handleTypeChange(e.target.value);
-                      setEditingType(false);
-                    }}
-                    onBlur={() => setEditingType(false)}
-                    autoFocus
-                    className={selectClasses}
-                  >
-                    <option value="string">string</option>
-                    <option value="number">number</option>
-                    <option value="boolean">boolean</option>
-                    <option value="array">array</option>
-                    <option value="object">object</option>
-                  </select>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setEditingType(true)}
-                    className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    ({type})
-                  </button>
-                )}
-              </div>
-              {type === 'boolean' ? (
-                <select
-                  value={item.value === true ? 'true' : item.value === false ? 'false' : ''}
-                  onChange={(e) => handleValueChange(e.target.value, 'boolean')}
-                  className={inputClasses}
-                >
-                  <option value="false">false</option>
-                  <option value="true">true</option>
-                </select>
-              ) : type === 'number' ? (
-                <input
-                  type="number"
-                  step="any"
-                  value={item.value ?? ''}
-                  onChange={(e) => handleValueChange(e.target.value, 'number')}
-                  className={inputClasses}
-                  placeholder="0"
-                />
-              ) : type === 'array' || type === 'object' ? (
-                <input
-                  type="text"
-                  value={getValueString(item.value, type)}
-                  onChange={(e) => handleValueChange(e.target.value, type)}
-                  className={`${inputClasses} font-mono`}
-                  placeholder={type === 'array' ? '["item1", "item2"]' : '{"key": "value"}'}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={getValueString(item.value, type)}
-                  onChange={(e) => handleValueChange(e.target.value, type)}
-                  className={inputClasses}
-                  placeholder={t('customProperty.value.placeholder')}
-                />
-              )}
-            </div>
             <button
               type="button"
               onClick={() => onRemove(index)}
-              className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors justify-self-end"
+              className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors shrink-0"
               title={t('customProperty.remove')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
+          </div>
+
+          {/* Value field (below the property) */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 h-6">
+              <label className="text-xs font-medium text-gray-700">{t('customProperty.value.label')}</label>
+              <select
+                value={type}
+                onChange={(e) => requestTypeChange(e.target.value, isDestructiveTypeChange(item.value, e.target.value))}
+                className={selectClasses}
+              >
+                <option value="string">string</option>
+                <option value="number">number</option>
+                <option value="boolean">boolean</option>
+                <option value="array">array</option>
+                <option value="object">object</option>
+              </select>
+            </div>
+            {pendingType && (
+              <TypeChangeWarning
+                targetType={pendingType}
+                onConfirm={confirmTypeChange}
+                onCancel={cancelTypeChange}
+              />
+            )}
+            {type === 'boolean' ? (
+              <select
+                value={item.value === true ? 'true' : item.value === false ? 'false' : ''}
+                onChange={(e) => handleValueChange(e.target.value, 'boolean')}
+                className={inputClasses}
+              >
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select>
+            ) : type === 'number' ? (
+              <input
+                type="number"
+                step="any"
+                value={item.value ?? ''}
+                onChange={(e) => handleValueChange(e.target.value, 'number')}
+                className={inputClasses}
+                placeholder="0"
+              />
+            ) : type === 'array' ? (
+              <TypedArrayEditor
+                value={Array.isArray(item.value) ? item.value : []}
+                onChange={(val) => onUpdate(index, 'value', val)}
+              />
+            ) : type === 'object' ? (
+              <ObjectYamlEditor
+                kind="object"
+                value={item.value && typeof item.value === 'object' && !Array.isArray(item.value) ? item.value : {}}
+                onChange={(val) => onUpdate(index, 'value', val)}
+              />
+            ) : (
+              <input
+                type="text"
+                value={getValueString(item.value, type)}
+                onChange={(e) => handleValueChange(e.target.value, type)}
+                className={inputClasses}
+                placeholder={t('customProperty.value.placeholder')}
+              />
+            )}
           </div>
 
           {/* Description field (optional) */}
@@ -320,7 +334,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
                 onChange={(e) => onUpdate(index, 'description', e.target.value)}
                 className={inputClasses}
                 placeholder={t('customProperty.description.placeholder')}
-                rows={2}
+                rows={1}
               />
             </div>
           )}
