@@ -960,7 +960,7 @@
     "advancedMetadata": "Erweiterte Metadaten",
     "properties": {
       "heading": "Eigenschaften",
-      "addFromDefinition": "Aus Business Definition hinzufügen",
+      "addFromSemantics": "Aus Semantics hinzufügen",
       "addProperty": "Eigenschaft hinzufügen",
       "empty": "Keine Eigenschaften definiert",
       "addSubProperty": "Untereigenschaft hinzufügen",

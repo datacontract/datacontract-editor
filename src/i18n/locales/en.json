@@ -960,7 +960,7 @@
     "advancedMetadata": "Advanced Metadata",
     "properties": {
       "heading": "Properties",
-      "addFromDefinition": "Add from Definition",
+      "addFromSemantics": "Add from Semantics",
       "addProperty": "Add property",
       "empty": "No properties defined",
       "addSubProperty": "Add sub-property",
