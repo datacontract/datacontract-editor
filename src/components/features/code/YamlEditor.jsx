@@ -185,7 +185,10 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                     schemas: [
                         {
                             uri: schemaUrl || 'http://myserver/schema.json',
-                            fileMatch: ['*'],
+                            // Scope validation to the main contract model so standalone
+                            // YAML editors (e.g. custom-property object editors) are not
+                            // validated against the ODCS schema.
+                            fileMatch: ['datacontract.yaml'],
                             schema
                         }
                     ]
@@ -373,6 +376,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
                     <Editor
                         height="100%"
                         language="yaml"
+                        path="datacontract.yaml"
                         value={editorYaml || '# Enter your YAML here\n'}
                         onChange={handleChange}
                         onMount={handleEditorDidMount}

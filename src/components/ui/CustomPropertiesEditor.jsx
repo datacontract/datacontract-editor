@@ -3,6 +3,22 @@ import { useTranslation } from 'react-i18next';
 import CustomPropertyIcon from './icons/CustomPropertyIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import TypedArrayEditor from './TypedArrayEditor.jsx';
+import ObjectYamlEditor from './ObjectYamlEditor.jsx';
+import TypeChangeWarning from './TypeChangeWarning.jsx';
+import { usePendingTypeChange } from '../../hooks/usePendingTypeChange.js';
+
+// A value is "empty" when there is nothing to lose by changing its type.
+const isEmptyValue = (val) =>
+  val === null ||
+  val === undefined ||
+  val === '' ||
+  (Array.isArray(val) && val.length === 0) ||
+  (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0);
+
+// Changing a custom-property value type is destructive when the current value holds
+// content that the new type cannot carry over. Any target other than "string" (which
+// simply stringifies the current value) resets the field to an empty default.
+const isDestructiveTypeChange = (val, newType) => !isEmptyValue(val) && newType !== 'string';
 
 /**
  * CustomPropertiesEditor component for editing custom properties
@@ -88,10 +104,9 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false, mana
 const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!item.property);
-  const [editingType, setEditingType] = useState(false);
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
-  const selectClasses = "rounded border border-gray-300 bg-white px-1 py-0.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs text-gray-500";
+  const selectClasses = "rounded border border-gray-300 bg-white px-1 py-0.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs text-gray-600";
 
   // Detect value type from actual value
   const detectType = (val) => {
@@ -103,19 +118,16 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
     return 'string';
   };
 
-  // Convert string input to typed value
+  // Convert a text input into the typed scalar value. Array and object values are edited
+  // by dedicated components (TypedArrayEditor / ObjectYamlEditor), so only the scalar
+  // types flow through here.
   const convertValue = (strVal, type) => {
-    if (type === 'string') return strVal;
     if (type === 'number') {
       const num = parseFloat(strVal);
       return isNaN(num) ? 0 : num;
     }
     if (type === 'boolean') {
       return strVal === 'true';
-    }
-    if (type === 'array' || type === 'object') {
-      // Store the raw string value directly without parsing
-      return strVal;
     }
     return strVal;
   };
@@ -140,7 +152,7 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
     return val?.toString() || '';
   };
 
-  const handleTypeChange = (newType) => {
+  const applyTypeChange = (newType) => {
     const currentType = detectType(item.value);
     if (currentType === newType) return;
 
@@ -159,6 +171,10 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
 
     onUpdate(index, 'value', newValue);
   };
+
+  // Confirm destructive type changes before they clear the current value.
+  const { pendingType, request: requestTypeChange, confirm: confirmTypeChange, cancel: cancelTypeChange } =
+    usePendingTypeChange(applyTypeChange);
 
   const handleValueChange = (strVal, type) => {
     const converted = convertValue(strVal, type);
@@ -247,36 +263,28 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
           </div>
 
           {/* Value field (below the property) */}
-          <div>
-            <div className="flex items-center gap-1 h-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 h-6">
               <label className="text-xs font-medium text-gray-700">{t('customProperty.value.label')}</label>
-              {editingType ? (
-                <select
-                  value={type}
-                  onChange={(e) => {
-                    handleTypeChange(e.target.value);
-                    setEditingType(false);
-                  }}
-                  onBlur={() => setEditingType(false)}
-                  autoFocus
-                  className={selectClasses}
-                >
-                  <option value="string">string</option>
-                  <option value="number">number</option>
-                  <option value="boolean">boolean</option>
-                  <option value="array">array</option>
-                  <option value="object">object</option>
-                </select>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setEditingType(true)}
-                  className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  ({type})
-                </button>
-              )}
+              <select
+                value={type}
+                onChange={(e) => requestTypeChange(e.target.value, isDestructiveTypeChange(item.value, e.target.value))}
+                className={selectClasses}
+              >
+                <option value="string">string</option>
+                <option value="number">number</option>
+                <option value="boolean">boolean</option>
+                <option value="array">array</option>
+                <option value="object">object</option>
+              </select>
             </div>
+            {pendingType && (
+              <TypeChangeWarning
+                targetType={pendingType}
+                onConfirm={confirmTypeChange}
+                onCancel={cancelTypeChange}
+              />
+            )}
             {type === 'boolean' ? (
               <select
                 value={item.value === true ? 'true' : item.value === false ? 'false' : ''}
@@ -301,12 +309,10 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
                 onChange={(val) => onUpdate(index, 'value', val)}
               />
             ) : type === 'object' ? (
-              <input
-                type="text"
-                value={getValueString(item.value, type)}
-                onChange={(e) => handleValueChange(e.target.value, type)}
-                className={`${inputClasses} font-mono`}
-                placeholder='{"key": "value"}'
+              <ObjectYamlEditor
+                kind="object"
+                value={item.value && typeof item.value === 'object' && !Array.isArray(item.value) ? item.value : {}}
+                onChange={(val) => onUpdate(index, 'value', val)}
               />
             ) : (
               <input

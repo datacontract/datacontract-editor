@@ -824,6 +824,16 @@
       "placeholder": "Enter value..."
     },
     "arrayItemType": "Item type",
+    "typeChangeWarning": {
+      "message": "Changing the type to {{type}} will clear the current value.",
+      "confirm": "Change anyway",
+      "cancel": "Cancel"
+    },
+    "yaml": {
+      "invalid": "Invalid YAML: {{message}}",
+      "expectedObject": "Value must be a YAML object",
+      "expectedArray": "Value must be a YAML list"
+    },
     "description": {
       "label": "Description",
       "placeholder": "Optional description..."

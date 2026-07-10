@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ObjectYamlEditor from './ObjectYamlEditor.jsx';
+import TypeChangeWarning from './TypeChangeWarning.jsx';
+import { usePendingTypeChange } from '../../hooks/usePendingTypeChange.js';
 
 /**
  * TypedArrayEditor edits an array whose elements are all the same primitive/object type.
@@ -39,15 +42,14 @@ const coerceObject = (item) => {
 };
 
 const defaultRow = (type) => {
-  if (type === 'boolean') return false;
   if (type === 'object') return {};
-  return ''; // string and number both start as empty text
+  return ''; // string/number start as empty text; boolean starts unset ('')
 };
 
 // Convert an actual array value into a raw editing row for the given element type.
 const toRow = (item, type) => {
   if (type === 'number') return item === null || item === undefined || item === '' ? '' : String(item);
-  if (type === 'boolean') return item === true;
+  if (type === 'boolean') return item === true ? true : item === false ? false : ''; // '' = unset
   if (type === 'object') return coerceObject(item);
   if (item === null || item === undefined) return '';
   if (typeof item === 'object') {
@@ -60,14 +62,15 @@ const toRow = (item, type) => {
   return String(item);
 };
 
-// Derive the actual array from the editing rows. Empty number rows are dropped.
+// Derive the actual array from the editing rows. Empty number rows and unset boolean rows
+// are dropped, so an untouched auto-added first row leaves the stored value empty.
 const rowsToArray = (rows, type) => {
   if (type === 'number') {
     return rows
       .map((r) => (String(r).trim() === '' ? null : parseFloat(r)))
       .filter((n) => n !== null && !isNaN(n));
   }
-  if (type === 'boolean') return rows.map((r) => r === true);
+  if (type === 'boolean') return rows.filter((r) => r === true || r === false);
   if (type === 'object') return rows.map((r) => coerceObject(r));
   return rows.map((r) => (r === null || r === undefined ? '' : String(r)));
 };
@@ -80,6 +83,23 @@ const sameArray = (a, b) => {
   }
 };
 
+const hasContent = (v) =>
+  !(v === '' || v === null || v === undefined ||
+    (typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0));
+
+// Changing the element type is destructive when existing items with content cannot be
+// carried over: converting to "string" always stringifies (safe), but object<->scalar or
+// a conversion that drops items (e.g. non-numeric strings -> number) clears content.
+// Empty items (e.g. the auto-added first row) carry nothing, so they never warn.
+const isDestructiveElementChange = (currentRows, fromType, toType) => {
+  const values = rowsToArray(currentRows, fromType).filter(hasContent);
+  if (values.length === 0) return false;
+  if (toType === 'string') return false;
+  if (fromType === 'object' || toType === 'object') return true;
+  const after = rowsToArray(values.map((v) => toRow(v, toType)), toType);
+  return after.length < values.length;
+};
+
 const TypedArrayEditor = ({ value = [], onChange }) => {
   const { t } = useTranslation();
   const externalArray = Array.isArray(value) ? value : [];
@@ -89,7 +109,14 @@ const TypedArrayEditor = ({ value = [], onChange }) => {
   // Detected type wins when the array has items, otherwise use the selected type.
   const type = detected || elementType;
 
-  const [rows, setRows] = useState(() => externalArray.map((it) => toRow(it, detected || 'string')));
+  // Show at least one row so an empty array (e.g. right after switching to the array type)
+  // presents an element to edit. The empty row is local only — it is not written back until
+  // the user gives it content.
+  const withMinRow = (nextRows) => (nextRows.length ? nextRows : [defaultRow(type)]);
+
+  const [rows, setRows] = useState(() =>
+    withMinRow(externalArray.map((it) => toRow(it, detected || 'string')))
+  );
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
 
@@ -97,7 +124,7 @@ const TypedArrayEditor = ({ value = [], onChange }) => {
   // echo of our own onChange — otherwise an in-progress empty row would be wiped.
   useEffect(() => {
     if (!sameArray(rowsToArray(rowsRef.current, type), externalArray)) {
-      setRows(externalArray.map((it) => toRow(it, type)));
+      setRows(withMinRow(externalArray.map((it) => toRow(it, type))));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -110,12 +137,16 @@ const TypedArrayEditor = ({ value = [], onChange }) => {
     onChange(rowsToArray(nextRows, forType));
   };
 
-  const handleTypeChange = (newType) => {
+  const applyTypeChange = (newType) => {
     const values = rowsToArray(rows, type);
     const newRows = values.map((v) => toRow(v, newType));
     setElementType(newType);
     commit(newRows, newType);
   };
+
+  // Confirm destructive element-type changes before they clear existing items.
+  const { pendingType, request: requestTypeChange, confirm: confirmTypeChange, cancel: cancelTypeChange } =
+    usePendingTypeChange(applyTypeChange);
 
   const handleAdd = () => {
     commit([...rows, defaultRow(type)]);
@@ -132,13 +163,13 @@ const TypedArrayEditor = ({ value = [], onChange }) => {
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       {/* Element type selector */}
       <div className="flex items-center gap-2">
         <label className="text-xs text-gray-500">{t('customProperty.arrayItemType')}</label>
         <select
           value={type}
-          onChange={(e) => handleTypeChange(e.target.value)}
+          onChange={(e) => requestTypeChange(e.target.value, isDestructiveElementChange(rows, type, e.target.value))}
           className="rounded border border-gray-300 bg-white px-1 py-0.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs text-gray-600"
         >
           {ELEMENT_TYPES.map((et) => (
@@ -149,127 +180,90 @@ const TypedArrayEditor = ({ value = [], onChange }) => {
         </select>
       </div>
 
-      {/* Existing items */}
-      {rows.length > 0 && (
-        <div className="space-y-1">
-          {rows.map((row, index) => (
-            <div key={`${type}-${index}`} className="flex items-start gap-1">
-              {type === 'number' ? (
-                <input
-                  type="number"
-                  step="any"
-                  value={row}
-                  onChange={(e) => handleUpdate(index, e.target.value)}
-                  className={inputClasses}
-                  placeholder="0"
-                />
-              ) : type === 'boolean' ? (
-                <select
-                  value={row === true ? 'true' : 'false'}
-                  onChange={(e) => handleUpdate(index, e.target.value === 'true')}
-                  className={inputClasses}
-                >
-                  <option value="false">false</option>
-                  <option value="true">true</option>
-                </select>
-              ) : type === 'object' ? (
-                <ObjectItemInput
-                  value={row}
-                  onChange={(val) => handleUpdate(index, val)}
-                  className={`${inputClasses} font-mono`}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={row}
-                  onChange={(e) => handleUpdate(index, e.target.value)}
-                  className={inputClasses}
-                  placeholder={t('arrayInput.placeholder')}
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => handleRemove(index)}
-                className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors shrink-0"
-                title={t('arrayInput.remove')}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
+      {pendingType && (
+        <TypeChangeWarning
+          targetType={pendingType}
+          onConfirm={confirmTypeChange}
+          onCancel={cancelTypeChange}
+        />
       )}
 
-      {/* Add button */}
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-      >
-        + {t('arrayInput.add')}
-      </button>
+      {type === 'object' ? (
+        /* Whole array edited as free-form YAML */
+        <ObjectYamlEditor
+          kind="array"
+          value={rowsToArray(rows, 'object')}
+          onChange={(arr) => commit(arr.map((it) => toRow(it, 'object')), 'object')}
+        />
+      ) : (
+        <>
+          {/* Existing items */}
+          {rows.length > 0 && (
+            <div className="space-y-1.5">
+              {rows.map((row, index) => (
+                <div key={`${type}-${index}`} className="flex items-start gap-1">
+                  {type === 'number' ? (
+                    <input
+                      type="number"
+                      step="any"
+                      value={row}
+                      onChange={(e) => handleUpdate(index, e.target.value)}
+                      className={inputClasses}
+                      placeholder="0"
+                    />
+                  ) : type === 'boolean' ? (
+                    <select
+                      value={row === true ? 'true' : row === false ? 'false' : ''}
+                      onChange={(e) =>
+                        handleUpdate(index, e.target.value === '' ? '' : e.target.value === 'true')
+                      }
+                      className={inputClasses}
+                    >
+                      <option value="">{t('customProperty.boolean.notSet')}</option>
+                      <option value="false">false</option>
+                      <option value="true">true</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={row}
+                      onChange={(e) => handleUpdate(index, e.target.value)}
+                      className={inputClasses}
+                      placeholder={t('arrayInput.placeholder')}
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="p-1 text-gray-400 cursor-pointer border border-gray-300 rounded hover:text-red-400 hover:border-red-400 transition-colors shrink-0"
+                    title={t('arrayInput.remove')}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add button */}
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            + {t('arrayInput.add')}
+          </button>
+        </>
+      )}
     </div>
-  );
-};
-
-/**
- * ObjectItemInput edits a single object array element as JSON, keeping local text
- * state so partially-typed (temporarily invalid) JSON is not clobbered on every keystroke.
- */
-const ObjectItemInput = ({ value, onChange, className }) => {
-  const stringify = (val) => {
-    try {
-      return JSON.stringify(val ?? {}, null, 2);
-    } catch {
-      return '{}';
-    }
-  };
-
-  const [text, setText] = useState(() => stringify(value));
-  const [error, setError] = useState(false);
-
-  // Sync when the value changes externally (e.g. type conversion) while not focused.
-  const [focused, setFocused] = useState(false);
-  useEffect(() => {
-    if (!focused) {
-      setText(stringify(value));
-      setError(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  const handleChange = (e) => {
-    const next = e.target.value;
-    setText(next);
-    try {
-      const parsed = JSON.parse(next);
-      setError(false);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        onChange(parsed);
-      }
-    } catch {
-      setError(true);
-    }
-  };
-
-  return (
-    <textarea
-      value={text}
-      onChange={handleChange}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      rows={2}
-      className={`${className} ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : ''}`}
-      placeholder='{"key": "value"}'
-    />
   );
 };
 
