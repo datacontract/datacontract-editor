@@ -25,9 +25,11 @@ jobs:
           node-version: '22.20.0'
           registry-url: 'https://registry.npmjs.org'
 
-      # Ensure npm 11.5.1 or later is installed (required for OIDC trusted publishing)
+      # Ensure npm 11.5.1 or later is installed (required for OIDC trusted publishing).
+      # Pinned to npm 11: npm 12 requires Node >=22.22.2, which conflicts with the
+      # 22.20.0 pin above.
       - name: Update npm
-        run: npm install -g npm@latest
+        run: npm install -g npm@11
 
       - name: Set version from release tag
         run: |
