@@ -57,8 +57,10 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						if (opts.maxLength !== undefined) rows.push(t('preview.schema.maxLength', { value: opts.maxLength }));
 						if (opts.pattern) rows.push(t('preview.schema.pattern', { value: opts.pattern }));
 						if (opts.format) rows.push(t('preview.schema.format', { value: opts.format }));
-						if (opts.minimum !== undefined) rows.push(t('preview.schema.minimum', { value: opts.exclusiveMinimum === true ? `${opts.minimum} (${t('preview.schema.exclusive')})` : opts.minimum }));
-						if (opts.maximum !== undefined) rows.push(t('preview.schema.maximum', { value: opts.exclusiveMaximum === true ? `${opts.maximum} (${t('preview.schema.exclusive')})` : opts.maximum }));
+						if (opts.minimum !== undefined) rows.push(t('preview.schema.minimum', { value: opts.minimum }));
+						if (opts.exclusiveMinimum !== undefined) rows.push(t('preview.schema.exclusiveMinimum', { value: opts.exclusiveMinimum }));
+						if (opts.maximum !== undefined) rows.push(t('preview.schema.maximum', { value: opts.maximum }));
+						if (opts.exclusiveMaximum !== undefined) rows.push(t('preview.schema.exclusiveMaximum', { value: opts.exclusiveMaximum }));
 						if (opts.multipleOf !== undefined) rows.push(t('preview.schema.multipleOf', { value: opts.multipleOf }));
 						if (opts.minItems !== undefined) rows.push(t('preview.schema.minItems', { value: opts.minItems }));
 						if (opts.maxItems !== undefined) rows.push(t('preview.schema.maxItems', { value: opts.maxItems }));
@@ -68,11 +70,11 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						if (Array.isArray(opts.required) && opts.required.length > 0) rows.push(t('preview.schema.requiredList', { value: opts.required.join(', ') }));
 						if (opts.timezone !== undefined) rows.push(t('preview.schema.timezone', { value: opts.timezone ? t('preview.schema.yes') : t('preview.schema.no') }));
 						if (opts.defaultTimezone) rows.push(t('preview.schema.defaultTimezone', { value: opts.defaultTimezone }));
+						if (isLogicalTypeInherited) rows.push(t('preview.schema.inheritedFromSemantic'));
 
 						const logicalPill = (
 							<div
-								className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1"
-								{...(isLogicalTypeInherited ? { title: t('preview.schema.inheritedFromSemantic') } : {})}>
+								className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
 								<span>{effectiveLogicalType}</span>
 							</div>
 						);

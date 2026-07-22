@@ -1163,7 +1163,6 @@
       "timezone": "Zeitzone: {{value}}",
       "defaultTimezone": "Standard-Zeitzone: {{value}}",
       "physicalType": "Physischer Typ: {{value}}",
-      "exclusive": "exklusiv",
       "yes": "Ja",
       "no": "Nein",
       "qualityType": "Typ: {{value}}",
