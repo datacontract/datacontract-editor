@@ -28,12 +28,17 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						{indent > 0 && <span className="mr-1">↳</span>}
 					</span>
 					<div>
-						{property.businessName && (
+						{property.businessName ? (
 							<>
 								<span>{property.businessName}</span>
 								<br/>
 							</>
-						)}
+						) : propDefinition?.businessName ? (
+							<>
+								<span className="text-blue-400" title={t('preview.schema.inheritedFromSemantic')}>{propDefinition.businessName}</span>
+								<br/>
+							</>
+						) : null}
 						<span className="font-mono">{propertyName}
 							{property.physicalName && (
 								<Tooltip content={property.physicalName}>
