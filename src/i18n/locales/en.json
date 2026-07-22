@@ -1162,6 +1162,8 @@
       "requiredList": "Required: {{value}}",
       "timezone": "Timezone: {{value}}",
       "defaultTimezone": "Default Timezone: {{value}}",
+      "physicalType": "Physical Type: {{value}}",
+      "exclusive": "exclusive",
       "yes": "Yes",
       "no": "No",
       "qualityType": "Type: {{value}}",
