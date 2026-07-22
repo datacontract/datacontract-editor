@@ -199,7 +199,7 @@ const PropertyRow = ({
 								}}
 								onClick={(e) => e.stopPropagation()}
 								ref={inputRef}
-								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 min-w-0"
+								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 shrink-0"
 								placeholder="property name"
 								autoFocus
 							/>
@@ -216,7 +216,7 @@ const PropertyRow = ({
 									: 'text-gray-400 italic';
 							return (
 								<span
-									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 min-w-0 truncate ${colorClass}`}
+									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 shrink-0 truncate ${colorClass}`}
 									onClick={(e) => {
 										e.stopPropagation();
 										onSelectProperty(currentPath, property);
@@ -260,14 +260,16 @@ const PropertyRow = ({
 						    in blue when the property has none of its own, mirroring the type-from-
 						    definition affordance just above. */}
 						{property.description ? (
-							<span className="text-xs text-gray-400 truncate flex-1" title={property.description}>
+							<span className="text-xs text-gray-400 truncate flex-1 min-w-0" title={property.description}>
                                 {property.description}
                             </span>
 						) : definition?.description ? (
-							<span className="text-xs text-blue-400 truncate flex-1" title={`Inherited: ${definition.description}`}>
+							<span className="text-xs text-blue-400 truncate flex-1 min-w-0" title={`Inherited: ${definition.description}`}>
                                 {definition.description}
                             </span>
-						) : null}
+						) : (
+							<span className="flex-1 min-w-0"/>
+						)}
 
 						{/* Examples preview — own examples in gray, otherwise fall back to the
 						    inherited definition's examples in blue, mirroring description above. */}
@@ -277,19 +279,20 @@ const PropertyRow = ({
 							if (!examples || examples.length === 0) return null;
 							const text = `e.g. ${examples.join(', ')}`;
 							return hasOwnExamples ? (
-								<span className="text-xs text-gray-400 truncate shrink-0" title={text}>
+								<span className="text-xs text-gray-400 truncate text-right basis-52 min-w-0 shrink" title={text}>
                                 {text}
                             </span>
 							) : (
-								<span className="text-xs text-blue-400 truncate shrink-0" title={`Inherited: ${text}`}>
+								<span className="text-xs text-blue-400 truncate text-right basis-52 min-w-0 shrink" title={`Inherited: ${text}`}>
                                 {text}
                             </span>
 							);
 						})()}
 					</div>
 
-					{/* Action Icons */}
-					<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+					{/* Action Icons — fixed slot so the examples column ends on the same edge
+					    regardless of which actions a row offers */}
+					<div className="flex items-center justify-end gap-1 w-14 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
 						{isObject && (
 							<Tooltip content={t("schema.properties.addSubProperty")}>
 								<button
