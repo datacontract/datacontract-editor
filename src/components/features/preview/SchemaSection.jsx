@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
-import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
+import CodeBracketIcon from '../../ui/icons/CodeBracketIcon.jsx';
 import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
@@ -35,9 +35,9 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 							</>
 						)}
 						<span className="font-mono">{propertyName}
-							{(property.physicalName && property.physicalName !== propertyName) && (
-								<Tooltip content={`physicalName: ${property.physicalName}`}>
-									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+							{property.physicalName && (
+								<Tooltip content={property.physicalName}>
+									<CodeBracketIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
 								</Tooltip>
 							)}
 						</span>
@@ -292,9 +292,9 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 								</>
 							)}
 							<span className="font-mono font-medium">{schemaName}
-								{(schema.physicalName && schema.physicalName !== schemaName) && (
-									<Tooltip content={`physicalName: ${schema.physicalName}`}>
-										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+								{schema.physicalName && (
+									<Tooltip content={schema.physicalName}>
+										<CodeBracketIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
 									</Tooltip>
 								)}
 							</span>
