@@ -4,6 +4,7 @@ import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
+import InfoIcon from '../../ui/icons/InfoIcon.jsx';
 import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
@@ -28,16 +29,21 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						{indent > 0 && <span className="mr-1">↳</span>}
 					</span>
 					<div>
-						{property.businessName && (
+						{property.businessName ? (
 							<>
 								<span>{property.businessName}</span>
 								<br/>
 							</>
-						)}
+						) : propDefinition?.businessName ? (
+							<>
+								<span className="text-blue-400" title={t('preview.schema.inheritedFromSemantic')}>{propDefinition.businessName}</span>
+								<br/>
+							</>
+						) : null}
 						<span className="font-mono">{propertyName}
-							{(property.physicalName && property.physicalName !== propertyName) && (
-								<Tooltip content={`physicalName: ${property.physicalName}`}>
-									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+							{property.physicalName && (
+								<Tooltip content={property.physicalName}>
+									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />
 								</Tooltip>
 							)}
 						</span>
@@ -45,24 +51,69 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 					{(() => {
-						const effectiveLogicalType = property.logicalType || propDefinition?.logicalType;
-						const isLogicalTypeInherited = !property.logicalType && !!propDefinition?.logicalType;
+						const typeSource = property.items != null ? property.items : property;
+						const effectiveLogicalType = typeSource.logicalType || propDefinition?.logicalType;
+						const isLogicalTypeInherited = !typeSource.logicalType && !!propDefinition?.logicalType;
+						const physicalType = typeSource.physicalType;
+						const opts = typeSource.logicalTypeOptions || {};
+
+						const rows = [];
+						if (physicalType) rows.push(t('preview.schema.physicalType', { value: physicalType }));
+						if (opts.minLength !== undefined) rows.push(t('preview.schema.minLength', { value: opts.minLength }));
+						if (opts.maxLength !== undefined) rows.push(t('preview.schema.maxLength', { value: opts.maxLength }));
+						if (opts.pattern) rows.push(t('preview.schema.pattern', { value: opts.pattern }));
+						if (opts.format) rows.push(t('preview.schema.format', { value: opts.format }));
+						if (opts.minimum !== undefined) rows.push(t('preview.schema.minimum', { value: opts.minimum }));
+						if (opts.exclusiveMinimum !== undefined) rows.push(t('preview.schema.exclusiveMinimum', { value: opts.exclusiveMinimum }));
+						if (opts.maximum !== undefined) rows.push(t('preview.schema.maximum', { value: opts.maximum }));
+						if (opts.exclusiveMaximum !== undefined) rows.push(t('preview.schema.exclusiveMaximum', { value: opts.exclusiveMaximum }));
+						if (opts.multipleOf !== undefined) rows.push(t('preview.schema.multipleOf', { value: opts.multipleOf }));
+						if (opts.minItems !== undefined) rows.push(t('preview.schema.minItems', { value: opts.minItems }));
+						if (opts.maxItems !== undefined) rows.push(t('preview.schema.maxItems', { value: opts.maxItems }));
+						if (opts.uniqueItems !== undefined) rows.push(t('preview.schema.uniqueItems', { value: opts.uniqueItems ? t('preview.schema.yes') : t('preview.schema.no') }));
+						if (opts.minProperties !== undefined) rows.push(t('preview.schema.minProperties', { value: opts.minProperties }));
+						if (opts.maxProperties !== undefined) rows.push(t('preview.schema.maxProperties', { value: opts.maxProperties }));
+						if (Array.isArray(opts.required) && opts.required.length > 0) rows.push(t('preview.schema.requiredList', { value: opts.required.join(', ') }));
+						if (opts.timezone !== undefined) rows.push(t('preview.schema.timezone', { value: opts.timezone ? t('preview.schema.yes') : t('preview.schema.no') }));
+						if (opts.defaultTimezone) rows.push(t('preview.schema.defaultTimezone', { value: opts.defaultTimezone }));
+						if (isLogicalTypeInherited) rows.push(t('preview.schema.inheritedFromSemantic'));
+
+						// Only show the tooltip when there's metadata beyond the logical type
+						// itself; when shown, lead with the logical type as the first line.
+						const tooltipRows = rows.length > 0
+							? [t('preview.schema.logicalType', { value: effectiveLogicalType }), ...rows]
+							: [];
+
+						const logicalPill = (
+							<div
+								className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
+								<span>{effectiveLogicalType}</span>
+								{tooltipRows.length > 0 && <InfoIcon className="size-3.5 text-blue-500 cursor-pointer" />}
+							</div>
+						);
+
 						return (
 							<>
 								{effectiveLogicalType && (
-									<div
-										className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1"
-										{...(isLogicalTypeInherited ? { title: t('preview.schema.inheritedFromSemantic') } : {})}>
-										<span>{effectiveLogicalType}</span>
-									</div>
+									tooltipRows.length > 0 ? (
+										<Tooltip content={
+											<div className="space-y-1">
+												{tooltipRows.map((row, i) => (
+													<div key={i} className="text-gray-300">{row}</div>
+												))}
+											</div>
+										} className="inline-flex cursor-pointer">
+											{logicalPill}
+										</Tooltip>
+									) : logicalPill
 								)}
-								{property.physicalType && (
+								{!effectiveLogicalType && physicalType && (
 									<div
 										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 mr-1 mb-1">
-										<span>{property.physicalType}</span>
+										<span>{physicalType}</span>
 									</div>
 								)}
-								{!effectiveLogicalType && !property.physicalType && property.type && (
+								{!effectiveLogicalType && !physicalType && property.type && (
 									<div
 										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
 										<span>{property.type}</span>
@@ -166,65 +217,6 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						)}
 						<CustomPropertiesPreview properties={property.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
             {property.tags && Array.isArray(property.tags) && <Tags tags={property.tags}/>}
-						{property.logicalTypeOptions?.format && (
-							<Tooltip content={
-								<div className="space-y-1">
-									<div className="text-gray-300">{t('preview.schema.format', { value: property.logicalTypeOptions.format })}</div>
-									{property.logicalTypeOptions.minLength !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.minLength', { value: property.logicalTypeOptions.minLength })}</div>
-									)}
-									{property.logicalTypeOptions.maxLength !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.maxLength', { value: property.logicalTypeOptions.maxLength })}</div>
-									)}
-									{property.logicalTypeOptions.pattern && (
-										<div className="text-gray-300">{t('preview.schema.pattern', { value: property.logicalTypeOptions.pattern })}</div>
-									)}
-									{property.logicalTypeOptions.minimum !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.minimum', { value: property.logicalTypeOptions.minimum })}</div>
-									)}
-									{property.logicalTypeOptions.maximum !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.maximum', { value: property.logicalTypeOptions.maximum })}</div>
-									)}
-									{property.logicalTypeOptions.exclusiveMinimum !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.exclusiveMinimum', { value: property.logicalTypeOptions.exclusiveMinimum })}</div>
-									)}
-									{property.logicalTypeOptions.exclusiveMaximum !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.exclusiveMaximum', { value: property.logicalTypeOptions.exclusiveMaximum })}</div>
-									)}
-									{property.logicalTypeOptions.multipleOf !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.multipleOf', { value: property.logicalTypeOptions.multipleOf })}</div>
-									)}
-									{property.logicalTypeOptions.minItems !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.minItems', { value: property.logicalTypeOptions.minItems })}</div>
-									)}
-									{property.logicalTypeOptions.maxItems !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.maxItems', { value: property.logicalTypeOptions.maxItems })}</div>
-									)}
-									{property.logicalTypeOptions.uniqueItems !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.uniqueItems', { value: property.logicalTypeOptions.uniqueItems ? t('preview.schema.yes') : t('preview.schema.no') })}</div>
-									)}
-									{property.logicalTypeOptions.minProperties !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.minProperties', { value: property.logicalTypeOptions.minProperties })}</div>
-									)}
-									{property.logicalTypeOptions.maxProperties !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.maxProperties', { value: property.logicalTypeOptions.maxProperties })}</div>
-									)}
-									{property.logicalTypeOptions.required && Array.isArray(property.logicalTypeOptions.required) && (
-										<div className="text-gray-300">{t('preview.schema.requiredList', { value: property.logicalTypeOptions.required.join(', ') })}</div>
-									)}
-									{property.logicalTypeOptions.timezone !== undefined && (
-										<div className="text-gray-300">{t('preview.schema.timezone', { value: property.logicalTypeOptions.timezone ? t('preview.schema.yes') : t('preview.schema.no') })}</div>
-									)}
-									{property.logicalTypeOptions.defaultTimezone && (
-										<div className="text-gray-300">{t('preview.schema.defaultTimezone', { value: property.logicalTypeOptions.defaultTimezone })}</div>
-									)}
-								</div>
-							}>
-								<span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20 mr-1 mt-1">
-									{property.logicalTypeOptions.format}
-								</span>
-							</Tooltip>
-						)}
 						{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => {
 							const QualityIcon = getQualityCheckIcon(qualityCheck.type);
 							const tooltipContent = (
@@ -292,9 +284,9 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 								</>
 							)}
 							<span className="font-mono font-medium">{schemaName}
-								{(schema.physicalName && schema.physicalName !== schemaName) && (
-									<Tooltip content={`physicalName: ${schema.physicalName}`}>
-										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+								{schema.physicalName && (
+									<Tooltip content={schema.physicalName}>
+										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />
 									</Tooltip>
 								)}
 							</span>
