@@ -88,7 +88,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 							<div
 								className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
 								<span>{effectiveLogicalType}</span>
-								{tooltipRows.length > 0 && <InfoIcon className="size-3.5 text-blue-500" />}
+								{tooltipRows.length > 0 && <InfoIcon className="size-3.5 text-blue-500 cursor-pointer" />}
 							</div>
 						);
 
