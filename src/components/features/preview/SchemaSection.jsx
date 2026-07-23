@@ -43,7 +43,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						<span className="font-mono">{propertyName}
 							{property.physicalName && (
 								<Tooltip content={property.physicalName}>
-									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />
 								</Tooltip>
 							)}
 						</span>
@@ -102,7 +102,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 													<div key={i} className="text-gray-300">{row}</div>
 												))}
 											</div>
-										}>
+										} className="inline-flex cursor-pointer">
 											{logicalPill}
 										</Tooltip>
 									) : logicalPill
@@ -286,7 +286,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							<span className="font-mono font-medium">{schemaName}
 								{schema.physicalName && (
 									<Tooltip content={schema.physicalName}>
-										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-help" />
+										<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />
 									</Tooltip>
 								)}
 							</span>
