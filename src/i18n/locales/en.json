@@ -30,7 +30,8 @@
     },
     "id": {
       "label": "ID",
-      "tooltip": "Unique identifier for this data contract"
+      "tooltip": "Unique identifier for this data contract",
+      "usedByDataProducts": "This ID can't be changed while it's used by data products: {{products}}."
     },
     "status": {
       "label": "Status",

@@ -99,6 +99,10 @@ const DEFAULT_CONFIG = {
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,
 
+  // Data products referencing this contract via a port. When non-empty the ID (`id`) field is
+  // locked, since renaming would break those references. [{name, externalId}, ...]
+  dataProductsUsingContract: [],
+
   // Optional lists for dropdowns (if not provided, text fields are used)
   teams: null,         // Array of {id: string, name: string} or null
   domains: null,       // Array of {id: string, name: string} or null
@@ -386,6 +390,7 @@ function createConfiguredStore(config) {
 				semantics: config.semantics,
         managedTags: config.managedTags,
         allowUnmanagedTags: config.allowUnmanagedTags,
+				dataProductsUsingContract: config.dataProductsUsingContract,
 				teams: config.teams,
 				domains: config.domains,
 				tests: config.tests,
