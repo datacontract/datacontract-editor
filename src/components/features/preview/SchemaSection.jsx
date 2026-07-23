@@ -4,6 +4,7 @@ import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
+import InfoIcon from '../../ui/icons/InfoIcon.jsx';
 import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
@@ -84,8 +85,9 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 
 						const logicalPill = (
 							<div
-								className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
+								className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
 								<span>{effectiveLogicalType}</span>
+								{tooltipRows.length > 0 && <InfoIcon className="size-3.5 text-blue-500" />}
 							</div>
 						);
 
