@@ -77,9 +77,8 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						if (opts.defaultTimezone) rows.push(t('preview.schema.defaultTimezone', { value: opts.defaultTimezone }));
 						if (isLogicalTypeInherited) rows.push(t('preview.schema.inheritedFromSemantic'));
 
-						// Lead the tooltip with the logical type, but only when there's other
-						// content to show — a bare pill already displays the logical type.
-						const tooltipRows = rows.length > 0
+						// Lead the tooltip with the logical type, always as the first line.
+						const tooltipRows = effectiveLogicalType
 							? [t('preview.schema.logicalType', { value: effectiveLogicalType }), ...rows]
 							: [];
 
