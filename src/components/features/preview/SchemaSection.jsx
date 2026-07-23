@@ -77,6 +77,12 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						if (opts.defaultTimezone) rows.push(t('preview.schema.defaultTimezone', { value: opts.defaultTimezone }));
 						if (isLogicalTypeInherited) rows.push(t('preview.schema.inheritedFromSemantic'));
 
+						// Lead the tooltip with the logical type, but only when there's other
+						// content to show — a bare pill already displays the logical type.
+						const tooltipRows = rows.length > 0
+							? [t('preview.schema.logicalType', { value: effectiveLogicalType }), ...rows]
+							: [];
+
 						const logicalPill = (
 							<div
 								className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10 mr-1 mb-1">
@@ -87,10 +93,10 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						return (
 							<>
 								{effectiveLogicalType && (
-									rows.length > 0 ? (
+									tooltipRows.length > 0 ? (
 										<Tooltip content={
 											<div className="space-y-1">
-												{rows.map((row, i) => (
+												{tooltipRows.map((row, i) => (
 													<div key={i} className="text-gray-300">{row}</div>
 												))}
 											</div>

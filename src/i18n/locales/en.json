@@ -1162,6 +1162,7 @@
       "requiredList": "Required: {{value}}",
       "timezone": "Timezone: {{value}}",
       "defaultTimezone": "Default Timezone: {{value}}",
+      "logicalType": "Logical Type: {{value}}",
       "physicalType": "Physical Type: {{value}}",
       "yes": "Yes",
       "no": "No",
