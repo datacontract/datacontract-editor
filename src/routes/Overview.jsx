@@ -40,6 +40,11 @@ const Overview = () => {
 
 	const editorConfig = useEditorStore((state) => state.editorConfig);
 
+	// Data products that reference this contract via a port lock the ID: renaming it would break the
+	// ODPS contractId references and external URLs pointing at this contract.
+	const dataProductsUsingContract = editorConfig.dataProductsUsingContract || [];
+	const isIdLocked = dataProductsUsingContract.length > 0;
+
 	// Get customization config for root level
 	const { customProperties: customPropertyConfigs, customSections } = useCustomization('root');
 
@@ -198,21 +203,32 @@ const Overview = () => {
 
 								{/* ID Field */}
 								{!isIdHidden && (
-									<ValidatedInput
-										name="id"
-										label={idOverride?.title || t("overview.id.label")}
-										value={id}
-										onChange={(e) => setId(e.target.value)}
-										required={idOverride?.required ?? true}
-										tooltip={idOverride?.description || t("overview.id.tooltip")}
-										placeholder={idOverride?.placeholder || "unique-identifier"}
-										pattern={idOverride?.pattern}
-										patternMessage={idOverride?.patternMessage}
-										minLength={idOverride?.minLength}
-										maxLength={idOverride?.maxLength}
-										validationKey="root.id"
-										validationSection="Overview"
-									/>
+									<div>
+										<ValidatedInput
+											name="id"
+											label={idOverride?.title || t("overview.id.label")}
+											value={id}
+											onChange={(e) => setId(e.target.value)}
+											required={idOverride?.required ?? true}
+											tooltip={idOverride?.description || t("overview.id.tooltip")}
+											placeholder={idOverride?.placeholder || "unique-identifier"}
+											pattern={idOverride?.pattern}
+											patternMessage={idOverride?.patternMessage}
+											minLength={idOverride?.minLength}
+											maxLength={idOverride?.maxLength}
+											validationKey="root.id"
+											validationSection="Overview"
+											disabled={isIdLocked}
+											skipInternalValidation={isIdLocked}
+										/>
+										{isIdLocked && (
+											<p className="mt-1 text-xs text-gray-500">
+												{t("overview.id.usedByDataProducts", {
+													products: dataProductsUsingContract.map((d) => d.name).join(", "),
+												})}
+											</p>
+										)}
+									</div>
 								)}
 
 								{/* Status Field */}

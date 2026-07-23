@@ -30,7 +30,8 @@
     },
     "id": {
       "label": "ID",
-      "tooltip": "Eindeutige Kennung für diesen Data Contract"
+      "tooltip": "Eindeutige Kennung für diesen Data Contract",
+      "usedByDataProducts": "Diese ID kann nicht geändert werden, solange sie von Data Products verwendet wird: {{products}}."
     },
     "status": {
       "label": "Status",
