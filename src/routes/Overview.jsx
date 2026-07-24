@@ -308,6 +308,7 @@ const Overview = () => {
 									<AuthoritativeDefinitionsEditor
 										value={authoritativeDefinitions}
 										onChange={(value) => setAuthoritativeDefinitions(value)}
+										enableDefinitionPicker
 									/>
 								</div>
 							</div>

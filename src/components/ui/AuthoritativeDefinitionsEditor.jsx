@@ -4,6 +4,9 @@ import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import ExternalLinkIcon from './icons/ExternalLinkIcon.jsx';
 import Tooltip from './Tooltip.jsx';
+import { DefinitionSelectionModal } from './DefinitionSelectionModal.jsx';
+import { useDefinition } from '../../hooks/useDefinition.js';
+import { resolveAuthDefType } from '../../utils/authDefTypes.js';
 import { toAbsoluteUrl, isExternalUrl } from '../../lib/urlUtils.js';
 
 /**
@@ -12,12 +15,27 @@ import { toAbsoluteUrl, isExternalUrl } from '../../lib/urlUtils.js';
  *
  * @param {Array} value - Array of authoritative definition objects
  * @param {Function} onChange - Callback when array changes
+ * @param {boolean} enableDefinitionPicker - Offer "Add from Definition" alongside the blank add.
+ *   Opt-in, because levels that already own a dedicated semantics section (properties) would
+ *   otherwise expose two competing ways to link the same concept.
  */
-const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
+const AuthoritativeDefinitionsEditor = ({ value = [], onChange, enableDefinitionPicker = false }) => {
   const { t } = useTranslation();
+  const { hasSemanticsConfig } = useDefinition();
+  const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
+  const showDefinitionPicker = enableDefinitionPicker && hasSemanticsConfig;
+
   const handleAdd = () => {
     const updatedArray = [...value, { type: '', url: '', description: '' }];
     onChange(updatedArray);
+  };
+
+  const handleAddFromDefinition = (definition) => {
+    // Tree nodes without a URL fall back to their externalId, mirroring the property-level picker.
+    const url = definition.url || definition.name;
+    const type = resolveAuthDefType(definition);
+    if (value.some((item) => item?.url === url && item?.type === type)) return;
+    onChange([...value, { type, url }]);
   };
 
   const handleRemove = (index) => {
@@ -33,16 +51,27 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
 
   return (
     <div className="space-y-2">
-      {/* Header with label and add button */}
+      {/* Header with label and add buttons */}
       <div className="flex items-center justify-between">
         <label className="text-xs font-medium text-gray-700">{t('authDef.heading')}</label>
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-        >
-          + {t('authDef.add')}
-        </button>
+        <div className="flex items-center gap-3">
+          {showDefinitionPicker && (
+            <button
+              type="button"
+              onClick={() => setIsDefinitionModalOpen(true)}
+              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              + {t('authDef.addFromDefinition')}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            + {t('authDef.add')}
+          </button>
+        </div>
       </div>
 
       {/* Existing definitions */}
@@ -55,6 +84,14 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
           onRemove={handleRemove}
         />
       ))}
+
+      {showDefinitionPicker && (
+        <DefinitionSelectionModal
+          isOpen={isDefinitionModalOpen}
+          onClose={() => setIsDefinitionModalOpen(false)}
+          onSelect={handleAddFromDefinition}
+        />
+      )}
     </div>
   );
 };

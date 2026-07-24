@@ -866,6 +866,7 @@
   },
   "authDef": {
     "heading": "Maßgebliche Definitionen",
+    "addFromDefinition": "Aus Business Definition hinzufügen",
     "add": "Hinzufügen",
     "title": "Maßgebliche Definition",
     "new": "Neue Definition",

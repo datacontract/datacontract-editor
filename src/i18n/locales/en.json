@@ -866,6 +866,7 @@
   },
   "authDef": {
     "heading": "Authoritative Definitions",
+    "addFromDefinition": "Add from Definition",
     "add": "Add",
     "title": "Authoritative Definition",
     "new": "New definition",
