@@ -2,11 +2,12 @@ import { Routes, Route } from 'react-router';
 import { useRef, useState } from 'react';
 import { YamlEditor, DataContractPreview, TestResultsPanel } from "../components/features/index.js";
 import WarningsPanel from "../components/features/WarningsPanel.jsx";
-import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties } from "../routes/index.js";
+import { Overview, TermsOfUse, Schemas, Schema, Diagram, Pricing, Team, Support, Servers, Server, Roles, ServiceLevelAgreement, CustomProperties, Context } from "../routes/index.js";
 import { useEditorStore } from "../store.js";
 import YamlParseErrorPage from "../components/features/code/YamlParseErrorPage.jsx";
 import { PreviewErrorBoundary, DiagramErrorBoundary, FormPageErrorBoundary, ErrorBoundary } from "../components/error/index.js";
 import ResizeDivider from "../components/ui/ResizeDivider.jsx";
+import { odcsVersionEntryFor, resolveSchemaUrl } from "../services/schemaRegistry.js";
 
 const MainContent = () => {
   const isPreviewVisible = useEditorStore((state) => state.isPreviewVisible);
@@ -16,9 +17,15 @@ const MainContent = () => {
   const setView = useEditorStore((state) => state.setView);
   const yamlParseError = useEditorStore((state) => state.yamlParseError);
 
-  // Use schema URL from store if provided (e.g., from embed config), otherwise use default
-  const schemaUrl = useEditorStore((state) => state.schemaUrl) ||
-    'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
+  // The schema of the document's own ODCS version when the host lists versions, so a v3.1.0
+  // document is validated as 3.1.0 even under a 3.2.0 default; otherwise the single configured
+  // (or built-in default) schema.
+  const odcsVersions = useEditorStore((state) => state.odcsVersions);
+  const documentApiVersion = useEditorStore((state) => state.getValue('apiVersion'));
+  const configuredSchemaUrl = useEditorStore((state) => state.schemaUrl);
+  const schemaUrl = odcsVersions?.length
+    ? odcsVersionEntryFor(odcsVersions, documentApiVersion).schema
+    : resolveSchemaUrl(configuredSchemaUrl);
 
   // Reference to the YAML editor to call its methods
   const editorRef = useRef(null);
@@ -118,6 +125,11 @@ const MainContent = () => {
                 <Route path="/terms-of-use" element={
                   <FormPageErrorBoundary pageName="Terms of Use">
                     <TermsOfUse />
+                  </FormPageErrorBoundary>
+                } />
+                <Route path="/context" element={
+                  <FormPageErrorBoundary pageName="Context">
+                    <Context />
                   </FormPageErrorBoundary>
                 } />
                 <Route path="/schemas" element={

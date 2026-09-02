@@ -12,12 +12,62 @@ import RolesList from '../features/RolesList.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { convertEnumToOptions, useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
+import SchemaDrivenServerFields from './SchemaDrivenServerFields.jsx';
+import { parsePortInput } from '../../lib/serverTypeFields.js';
+import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
+import { useDocumentSupportsSchemaVersion } from '../../hooks/useSchemaCapability.js';
+
+
+const typeOptions = [
+    { id: 'api', name: 'api' },
+    { id: 'athena', name: 'athena' },
+    { id: 'azure', name: 'azure' },
+    { id: 'bigquery', name: 'bigquery' },
+    { id: 'clickhouse', name: 'clickhouse' },
+    { id: 'cloudsql', name: 'cloudsql' },
+    { id: 'custom', name: 'custom' },
+    { id: 'databricks', name: 'databricks' },
+    { id: 'db2', name: 'db2' },
+    { id: 'denodo', name: 'denodo' },
+    { id: 'dremio', name: 'dremio' },
+    { id: 'duckdb', name: 'duckdb' },
+    { id: 'gcs', name: 'gcs' },
+    { id: 'glue', name: 'glue' },
+    { id: 'hive', name: 'hive' },
+    { id: 'impala', name: 'impala' },
+    { id: 'informix', name: 'informix' },
+    { id: 'kafka', name: 'kafka' },
+    { id: 'kinesis', name: 'kinesis' },
+    { id: 'local', name: 'local' },
+    { id: 'mysql', name: 'mysql' },
+    { id: 'oracle', name: 'oracle' },
+    { id: 'postgres', name: 'postgres' },
+    { id: 'postgresql', name: 'postgresql' },
+    { id: 'presto', name: 'presto' },
+    { id: 'pubsub', name: 'pubsub' },
+    { id: 'redshift', name: 'redshift' },
+    { id: 's3', name: 's3' },
+    { id: 'sftp', name: 'sftp' },
+    { id: 'snowflake', name: 'snowflake' },
+    { id: 'sqlserver', name: 'sqlserver' },
+    { id: 'synapse', name: 'synapse' },
+    { id: 'trino', name: 'trino' },
+    { id: 'vertica', name: 'vertica' },
+    { id: 'zen', name: 'zen' }
+];
+
+// Server types with a hand-written form below; any other type renders entirely from the schema.
+const HANDWRITTEN_SERVER_TYPES = new Set(typeOptions.map((option) => option.id));
+// Fields newer ODCS schemas add to hand-written types (3.2.0: encoding, Athena's workgroup);
+// rendered from the schema so they appear without duplicating the curated inputs.
+const SCHEMA_ONLY_SERVER_FIELDS = ['encoding', 'workgroup'];
 
 const ServerEditor = ({ serverIndex }) => {
 	const { t } = useTranslation();
 	const servers = useEditorStore(useShallow((state) => state.getValue('servers'))) || {};
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
 	const yamlParts = useEditorStore((state) => state.yamlParts);
+	const schemaData = useEditorStore((state) => state.schemaData);
 
   // Get customization config for servers level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('servers');
@@ -94,43 +144,6 @@ const ServerEditor = ({ serverIndex }) => {
     setValue('servers', updatedServers);
   }, [servers, serverIndex, setValue]);
 
-  const typeOptions = [
-    { id: 'api', name: 'api' },
-    { id: 'athena', name: 'athena' },
-    { id: 'azure', name: 'azure' },
-    { id: 'bigquery', name: 'bigquery' },
-    { id: 'clickhouse', name: 'clickhouse' },
-    { id: 'cloudsql', name: 'cloudsql' },
-    { id: 'custom', name: 'custom' },
-    { id: 'databricks', name: 'databricks' },
-    { id: 'db2', name: 'db2' },
-    { id: 'denodo', name: 'denodo' },
-    { id: 'dremio', name: 'dremio' },
-    { id: 'duckdb', name: 'duckdb' },
-    { id: 'gcs', name: 'gcs' },
-    { id: 'glue', name: 'glue' },
-    { id: 'hive', name: 'hive' },
-    { id: 'impala', name: 'impala' },
-    { id: 'informix', name: 'informix' },
-    { id: 'kafka', name: 'kafka' },
-    { id: 'kinesis', name: 'kinesis' },
-    { id: 'local', name: 'local' },
-    { id: 'mysql', name: 'mysql' },
-    { id: 'oracle', name: 'oracle' },
-    { id: 'postgres', name: 'postgres' },
-    { id: 'postgresql', name: 'postgresql' },
-    { id: 'presto', name: 'presto' },
-    { id: 'pubsub', name: 'pubsub' },
-    { id: 'redshift', name: 'redshift' },
-    { id: 's3', name: 's3' },
-    { id: 'sftp', name: 'sftp' },
-    { id: 'snowflake', name: 'snowflake' },
-    { id: 'sqlserver', name: 'sqlserver' },
-    { id: 'synapse', name: 'synapse' },
-    { id: 'trino', name: 'trino' },
-    { id: 'vertica', name: 'vertica' },
-    { id: 'zen', name: 'zen' }
-  ];
 
   const defaultEnvironmentOptions = [
     { id: 'prod', name: 'prod' },
@@ -139,13 +152,28 @@ const ServerEditor = ({ serverIndex }) => {
     { id: 'uat', name: 'uat' }
   ];
 
+  const documentSupportsSchema = useDocumentSupportsSchemaVersion();
+
+  // Server types come from the active schema when it defines them (ODCS 3.2.0 adds ten) and the
+  // document's apiVersion is on the schema's version: known types keep the curated order,
+  // additional schema types are appended as-is.
+  const schemaTypeOptions = useMemo(() => {
+    const schemaTypes = documentSupportsSchema ? getSchemaEnumValues(schemaData, 'type', 'server') : null;
+    if (!schemaTypes || schemaTypes.length === 0) return typeOptions;
+    const known = new Set(typeOptions.map((option) => option.id));
+    return [
+      ...typeOptions.filter((option) => schemaTypes.includes(option.id)),
+      ...schemaTypes.filter((type) => !known.has(type)).map((type) => ({ id: type, name: type })),
+    ];
+  }, [schemaData, documentSupportsSchema]);
+
   // Apply type override
   const effectiveTypeOptions = useMemo(() => {
     if (typeOverride?.enum) {
       return convertEnumToOptions(typeOverride.enum);
     }
-    return typeOptions;
-  }, [typeOverride]);
+    return schemaTypeOptions;
+  }, [typeOverride, schemaTypeOptions]);
 
   // Apply environment override
   const environmentOptions = useMemo(() => {
@@ -475,9 +503,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="5432"
                       validationKey={`servers.${serverIndex}.port`}
@@ -774,9 +802,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="1433"
                       validationKey={`servers.${serverIndex}.port`}
@@ -827,9 +855,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="9000"
                       validationKey={`servers.${serverIndex}.port`}
@@ -863,9 +891,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="3306"
                       validationKey={`servers.${serverIndex}.port`}
@@ -909,9 +937,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="50000"
                       validationKey={`servers.${serverIndex}.port`}
@@ -945,9 +973,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="9999"
                       validationKey={`servers.${serverIndex}.port`}
@@ -971,9 +999,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="31010"
                       validationKey={`servers.${serverIndex}.port`}
@@ -1082,9 +1110,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="3306"
                       validationKey={`servers.${serverIndex}.port`}
@@ -1118,9 +1146,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="1521"
                       validationKey={`servers.${serverIndex}.port`}
@@ -1202,9 +1230,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="8080"
                       validationKey={`servers.${serverIndex}.port`}
@@ -1248,9 +1276,9 @@ const ServerEditor = ({ serverIndex }) => {
                     <ValidatedInput
                       name="port"
                       label={t('server.field.port.label')}
-                      type="number"
+                      type="text"
                       value={servers[serverIndex].port || ''}
-                      onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                       required={true}
                       placeholder="5433"
                       validationKey={`servers.${serverIndex}.port`}
@@ -1337,9 +1365,9 @@ const ServerEditor = ({ serverIndex }) => {
                         {t('server.field.port.label')}
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={servers[serverIndex].port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="10000"
                       />
@@ -1374,9 +1402,9 @@ const ServerEditor = ({ serverIndex }) => {
                         {t('server.field.port.label')}
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={servers[serverIndex].port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="21050"
                       />
@@ -1411,9 +1439,9 @@ const ServerEditor = ({ serverIndex }) => {
                         {t('server.field.port.label')}
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={servers[serverIndex].port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="1433"
                       />
@@ -1458,9 +1486,9 @@ const ServerEditor = ({ serverIndex }) => {
                         {t('server.field.port.label')}
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={servers[serverIndex].port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="50000"
                       />
@@ -1497,9 +1525,9 @@ const ServerEditor = ({ serverIndex }) => {
                         {t('server.field.port.label')}
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={servers[serverIndex].port || ''}
-                        onChange={(e) => updateServer('port', parseInt(e.target.value) || undefined)}
+                        onChange={(e) => updateServer('port', parsePortInput(e.target.value))}
                         className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
                         placeholder="port number"
                       />
@@ -1698,6 +1726,14 @@ const ServerEditor = ({ serverIndex }) => {
                     </div>
                   </>
                 )}
+
+                {/* Fields the active schema defines beyond the hand-written forms (ODCS 3.2.0+) */}
+                <SchemaDrivenServerFields
+                  serverType={servers[serverIndex].type}
+                  server={servers[serverIndex]}
+                  updateServer={updateServer}
+                  only={!servers[serverIndex].type || HANDWRITTEN_SERVER_TYPES.has(servers[serverIndex].type) ? SCHEMA_ONLY_SERVER_FIELDS : null}
+                />
 
                 {/* Roles */}
                 <div className="sm:col-span-2">

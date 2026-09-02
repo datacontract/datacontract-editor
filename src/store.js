@@ -398,6 +398,7 @@ export function defaultStoreConfig(set, get) {
 		yamlParseErrorPos: null,
 		pendingScrollToPos: null,
 		currentView: 'form', // 'yaml' or 'form'
+		odcsVersions: null, // [{ version, schema, default }] from the host; null = built-in default (schemaRegistry.js)
 		schemaUrl: null,
 		schemaData: null,
 		yamlCursorLine: 1,

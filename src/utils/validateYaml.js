@@ -1,63 +1,26 @@
 import { parseYaml } from './yaml.js';
 import Ajv2019 from 'ajv/dist/2019.js';
 import addFormats from 'ajv-formats';
-import { mergeCustomizationsIntoSchema } from './mergeCustomizationsIntoSchema.js';
-import { useEditorStore } from '../store.js';
+import { activeSchemaUrl, hashCustomizations, loadMergedSchema } from '../services/schemaRegistry.js';
 
-const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
-
-let cachedSchema = null;
-
-// Cache for compiled validators keyed by customizations hash
-let cachedValidatorHash = null;
+// The compiled validator is kept for the schema URL and customization set it was built from and
+// recompiled when either changes.
+let cachedValidatorKey = null;
 let cachedValidateFn = null;
 
 /**
- * Fetch and cache the ODCS JSON schema
- */
-async function getSchema() {
-	if (cachedSchema) return cachedSchema;
-
-	try {
-		const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch schema: ${response.status}`);
-		}
-		cachedSchema = await response.json();
-		return cachedSchema;
-	} catch (e) {
-		console.warn('Failed to fetch ODCS schema:', e.message);
-		return null;
-	}
-}
-
-/**
- * Compute a simple hash of customizations for cache invalidation
- */
-function hashCustomizations(customizations) {
-	if (!customizations) return null;
-	try {
-		return JSON.stringify(customizations);
-	} catch {
-		return null;
-	}
-}
-
-/**
- * Get or create AJV validator, recompiling when customizations change
+ * Get or create AJV validator, recompiling when the schema or the customizations change
  */
 async function getValidator(customizations) {
-	const hash = hashCustomizations(customizations);
+	const url = activeSchemaUrl();
+	const key = `${url}::${hashCustomizations(customizations)}`;
 
-	if (cachedValidateFn && cachedValidatorHash === hash) {
+	if (cachedValidateFn && cachedValidatorKey === key) {
 		return cachedValidateFn;
 	}
 
-	const baseSchema = await getSchema();
-	if (!baseSchema) return null;
-
-	const schema = mergeCustomizationsIntoSchema(baseSchema, customizations);
+	const schema = await loadMergedSchema(customizations, url);
+	if (!schema) return null;
 
 	const ajvInstance = new Ajv2019({
 		allErrors: true,
@@ -68,7 +31,7 @@ async function getValidator(customizations) {
 
 	try {
 		cachedValidateFn = ajvInstance.compile(schema);
-		cachedValidatorHash = hash;
+		cachedValidatorKey = key;
 		return cachedValidateFn;
 	} catch (e) {
 		console.warn('Failed to compile ODCS schema:', e.message);
@@ -77,7 +40,7 @@ async function getValidator(customizations) {
 }
 
 /**
- * Validate a YAML string against ODCS v3.1.0 schema.
+ * Validate a YAML string against the active ODCS schema.
  *
  * @param {string} yamlString - The YAML content to validate
  * @param {Object|null} customizations - Optional customizations to merge into schema

@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 import { getLogicalTypeIcon, fallbackLogicalTypeOptions } from '../../features/schema/propertyIcons';
+import { useEditorStore } from '../../../store.js';
+import { getSchemaEnumValues } from '../../../lib/schemaEnumExtractor.js';
+import { useDocumentSupportsSchemaVersion } from '../../../hooks/useSchemaCapability.js';
 
 const ChevronDownIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -29,6 +32,15 @@ const LogicalTypeCombobox = ({
 }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const schemaData = useEditorStore((state) => state.schemaData);
+  const documentSupportsSchema = useDocumentSupportsSchemaVersion();
+
+  // Logical types come from the active schema when it defines them (ODCS 3.2.0 adds map and
+  // vector) and the document's apiVersion is on the schema's version; otherwise the baseline list.
+  const logicalTypeOptions = useMemo(
+    () => (documentSupportsSchema && getSchemaEnumValues(schemaData, 'logicalType', 'property')) || fallbackLogicalTypeOptions,
+    [schemaData, documentSupportsSchema],
+  );
 
   // Effective value: use value if set, otherwise use fallback from definition
   const effectiveValue = value || fallbackValue;
@@ -36,13 +48,13 @@ const LogicalTypeCombobox = ({
 
   // Filter types based on query
   const filteredTypes = useMemo(() => {
-    if (!query) return fallbackLogicalTypeOptions;
+    if (!query) return logicalTypeOptions;
 
     const lowerQuery = query.toLowerCase();
-    return fallbackLogicalTypeOptions.filter(type =>
+    return logicalTypeOptions.filter(type =>
       type.toLowerCase().includes(lowerQuery)
     );
-  }, [query]);
+  }, [query, logicalTypeOptions]);
 
   const handleChange = (selectedValue) => {
     setQuery('');

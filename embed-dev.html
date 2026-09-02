@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Contract Editor - Embed Example</title>
-    <link rel="stylesheet" href="./dist/datacontract-editor.css">
+    
     <style>
         body {
             margin: 0;
@@ -26,7 +26,8 @@
 
 <script type="module">
     // Import the ESM build
-    import { init } from './dist/datacontract-editor.es.js';
+    import { init, getEditorStore } from '/src/embed.jsx';
+    window.__getEditorStore = getEditorStore;
 
     // Function to load initial YAML content
     async function loadInitialYaml() {
@@ -281,10 +282,7 @@ servers:
         container: '#editor',
         mode: 'EMBEDDED',
         yaml: initialYaml,
-        odcsVersions: [
-            { version: 'v3.2.0', schema: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.2.0.json' },
-            { version: 'v3.1.0', schema: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json', default: true },
-        ],
+        schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/dev/schema/odcs-json-schema-v3.1.0.json',
         initialView: 'form',
 
         // Callbacks

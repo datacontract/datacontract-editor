@@ -7,11 +7,9 @@
 
 import { registerTool } from '../ai/aiService.js';
 import { validateYaml } from '../utils/validateYaml.js';
-import { useEditorStore } from '../store.js';
+import { loadSchema } from './schemaRegistry.js';
 
 // Cache for ODCS schema
-let odcsSchemaCache = null;
-const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
 /**
  * Built-in tool: Update data contract YAML
@@ -267,30 +265,23 @@ async function handleTestContract({ server }, context) {
  * Handler for getJsonSchema tool
  */
 async function handleGetJsonSchema({ section = 'full' }) {
-  // Fetch and cache schema
-  if (!odcsSchemaCache) {
-    try {
-      const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
-      const response = await fetch(url);
-      if (!response.ok) {
-        return { error: `Failed to fetch schema: ${response.status}` };
-      }
-      odcsSchemaCache = await response.json();
-    } catch (error) {
-      return { error: `Failed to fetch schema: ${error.message}` };
-    }
+  let schema;
+  try {
+    schema = await loadSchema();
+  } catch (error) {
+    return { error: `Failed to fetch schema: ${error.message}` };
   }
 
   switch (section) {
     case 'properties':
-      return { section: 'properties', data: odcsSchemaCache.properties || {} };
+      return { section: 'properties', data: schema.properties || {} };
     case 'definitions':
-      return { section: 'definitions', data: odcsSchemaCache.$defs || odcsSchemaCache.definitions || {} };
+      return { section: 'definitions', data: schema.$defs || schema.definitions || {} };
     case 'required':
-      return { section: 'required', data: odcsSchemaCache.required || [] };
+      return { section: 'required', data: schema.required || [] };
     case 'full':
     default:
-      return { section: 'full', data: odcsSchemaCache };
+      return { section: 'full', data: schema };
   }
 }
 

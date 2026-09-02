@@ -5,12 +5,19 @@ import { Combobox, Tooltip } from '../components/ui/index.js';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import {useShallow} from "zustand/react/shallow";
+import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
+import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
+import { useSchemaProperty } from '../hooks/useSchemaCapability.js';
 
 const ServiceLevelAgreement = () => {
 	const { t } = useTranslation();
 	const slaProperties = useEditorStore(useShallow((state) => state.getValue('slaProperties'))) || [];
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
 	const schema = useEditorStore(useShallow((state) => state.getValue('schema'))) || [];
+
+	// ODCS 3.2.0 capabilities on SLA properties
+	const hasSlaCustomProperties = useSchemaProperty('customProperties', 'ServiceLevelAgreementProperty');
+	const hasSlaAuthoritativeDefinitions = useSchemaProperty('authoritativeDefinitions', 'ServiceLevelAgreementProperty');
 
   // Generate schema.property suggestions from schema
   const schemaPropertySuggestions = useMemo(() => {
@@ -258,6 +265,28 @@ const ServiceLevelAgreement = () => {
                             placeholder={t('sla.descriptionField.placeholder')}
                           />
                         </div>
+                        {hasSlaCustomProperties && (
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                              {t('sla.customPropertiesField.label')}
+                            </label>
+                            <CustomPropertiesEditor
+                              value={sla?.customProperties || []}
+                              onChange={(value) => updateSLA(index, 'customProperties', value?.length ? value : undefined)}
+                            />
+                          </div>
+                        )}
+                        {hasSlaAuthoritativeDefinitions && (
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
+                              {t('sla.authoritativeDefinitionsField.label')}
+                            </label>
+                            <AuthoritativeDefinitionsEditor
+                              value={sla?.authoritativeDefinitions || []}
+                              onChange={(value) => updateSLA(index, 'authoritativeDefinitions', value?.length ? value : undefined)}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

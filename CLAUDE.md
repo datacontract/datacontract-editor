@@ -32,9 +32,10 @@ Use Tailwind CSS with Tailwind Plus as a style guide.
 Use TailwindPlus react for TailwindCSS v4.
 Do never use Heroicons
 
+Unit tests are vitest files next to the code (`src/**/*.test.js`); run them with `npm test`.
 `@playwright/test` is available for ad-hoc browser checks, but there is no committed Playwright
-config or test suite yet — there is no `test` script in package.json. Run the dev server
-(`npm run dev`) and drive it manually when you need to verify UI behavior.
+config or test suite yet. Run the dev server (`npm run dev`) and drive it manually when you need
+to verify UI behavior.
 If you need to start a server, use port 9090 or greater.
 To test stuff that is only available in embedded mode, use the /embed suburl.
 
