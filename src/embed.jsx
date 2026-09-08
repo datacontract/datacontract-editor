@@ -1,4 +1,5 @@
 import { StrictMode } from 'react'
+import { defaultOdcsVersionEntry, odcsVersionsFromConfig } from './services/schemaRegistry.js';
 import { createRoot } from 'react-dom/client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -46,8 +47,15 @@ const DEFAULT_CONFIG = {
   // Initial YAML content
   yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n',
 
-  // Schema URL for validation
-  schemaUrl: 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json',
+  // The ODCS versions the host supports, each with the JSON schema a document of that version is
+  // validated against, e.g. [{ version: 'v3.2.0', schema: '<url>', default: true }, { version:
+  // 'v3.1.0', schema: '<url>' }]. The default is what new contracts get and what the Migrate
+  // action in Fundamentals targets; null means the built-in list (see schemaRegistry.js).
+  odcsVersions: null,
+
+  // Deprecated: a single schema URL for validation. Use odcsVersions instead; when both are
+  // absent the built-in default schema is used.
+  schemaUrl: null,
 
   // Available server types (null = all, array = filtered list)
   serverTypes: null,
@@ -142,6 +150,7 @@ const DEFAULT_CONFIG = {
  * Create a custom Zustand store with configuration
  */
 function createConfiguredStore(config) {
+  const odcsVersions = odcsVersionsFromConfig(config);
   const storageBackend = config.backend || new LocalFileStorageBackend();
   globalBackend = storageBackend;
 
@@ -380,7 +389,8 @@ function createConfiguredStore(config) {
 			yamlParseErrorPos: null,
 			pendingScrollToPos: null,
 			currentView: config.initialView,
-			schemaUrl: config.schemaUrl,
+			odcsVersions,
+			schemaUrl: defaultOdcsVersionEntry(odcsVersions).schema,
 			schemaData: null,
 			yamlCursorLine: 1,
 			lastSaveInfo: null,

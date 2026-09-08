@@ -12,6 +12,14 @@ npm run dev
 
 The app runs at http://localhost:5173
 
+## Tests
+
+Unit tests live next to the code as `src/**/*.test.js` and run with vitest:
+
+```bash
+npm test
+```
+
 ## Build
 
 Builds the ES module and the standalone app for production to the `dist` folder.

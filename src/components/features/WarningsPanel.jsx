@@ -1,12 +1,35 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store';
+import { getSchemaFilename } from '../../services/schemaRegistry.js';
+
+/**
+ * Footer naming the schema in use. The document's own ODCS version is edited under Fundamentals.
+ */
+const SchemaFooter = ({ schemaUrl }) => {
+  const schemaFilename = getSchemaFilename(schemaUrl);
+  if (!schemaFilename) return null;
+
+  return (
+    <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center gap-2 text-xs">
+        <a
+          href={schemaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+        >
+          {schemaFilename}
+        </a>
+      </div>
+    </div>
+  );
+};
 
 const WarningsPanel = ({ onMarkerClick }) => {
   const { t } = useTranslation();
   const markers = useEditorStore((state) => state.markers);
   const schemaUrl = useEditorStore((state) => state.schemaUrl);
-  const schemaData = useEditorStore((state) => state.schemaData);
 
   const handleMarkerClick = (marker) => {
     if (onMarkerClick) {
@@ -14,41 +37,7 @@ const WarningsPanel = ({ onMarkerClick }) => {
     }
   };
 
-  // Extract default apiVersion from schema
-  const getSchemaApiVersion = () => {
-    if (!schemaData) return null;
-
-    // Try to find apiVersion in schema properties
-    const apiVersionProp = schemaData?.properties?.apiVersion;
-    if (apiVersionProp) {
-      // Check for default value
-      if (apiVersionProp.default) {
-        return apiVersionProp.default;
-      }
-      // Check for const value
-      if (apiVersionProp.const) {
-        return apiVersionProp.const;
-      }
-      // Check for single enum value
-      if (apiVersionProp.enum && apiVersionProp.enum.length === 1) {
-        return apiVersionProp.enum[0];
-      }
-    }
-
-    return null;
-  };
-
-  // Get schema filename from URL
-  const getSchemaFilename = () => {
-    if (schemaUrl) {
-      const filename = schemaUrl.split('/').pop();
-      return filename || 'schema.json';
-    }
-    return null;
-  };
-
-  const schemaApiVersion = getSchemaApiVersion();
-  const schemaFilename = getSchemaFilename();
+  const footer = <SchemaFooter schemaUrl={schemaUrl} />;
 
   if (markers.length === 0) {
     return (
@@ -73,27 +62,7 @@ const WarningsPanel = ({ onMarkerClick }) => {
             <p className="mt-1 text-sm">{t('warnings.empty.subtitle')}</p>
           </div>
         </div>
-
-        {/* Schema Information Footer */}
-        {schemaFilename && (
-          <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-xs">
-              <a
-                href={schemaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-              >
-                {schemaFilename}
-              </a>
-              {schemaApiVersion && (
-                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                  {schemaApiVersion}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {footer}
       </div>
     );
   }
@@ -130,27 +99,7 @@ const WarningsPanel = ({ onMarkerClick }) => {
           ))}
         </div>
       </div>
-
-      {/* Schema Information Footer */}
-      {schemaFilename && (
-        <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-xs">
-            <a
-              href={schemaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-            >
-              {schemaFilename}
-            </a>
-            {schemaApiVersion && (
-              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                {schemaApiVersion}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+      {footer}
     </div>
   );
 };

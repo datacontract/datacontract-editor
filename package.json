@@ -21,6 +21,7 @@
     "build": "vite build --mode production",
     "build:debug": "vite build --mode debug",
     "lint": "eslint .",
+    "test": "vitest run",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
     "start": "npm run build && node bin/datacontract-editor.js",
@@ -74,6 +75,7 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.8.0",
     "tailwindcss": "^4.1.17",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.11"
   }
 }

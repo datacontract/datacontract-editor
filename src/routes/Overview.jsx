@@ -1,5 +1,6 @@
 import {useCallback, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
+import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import {useEditorStore} from '../store.js';
 import {isSafeKey} from '../utils/safeProperty.js';
 import {ValidatedCombobox} from '../components/ui/index.js';
@@ -14,9 +15,13 @@ import {
   useStandardPropertyOverride
 } from '../hooks/useCustomization.js';
 import {CustomSections, UngroupedCustomProperties} from '../components/ui/CustomSection.jsx';
+import {compareApiVersions} from '../lib/apiVersion.js';
+import {odcsUpgradeSteps, upgradeOdcsDocument} from '../lib/odcsMigrations.js';
+import {useOdcsVersions} from '../hooks/useSchemaCapability.js';
 
 const Overview = () => {
 	const { t } = useTranslation();
+	const apiVersion = useEditorStore(useShallow((state) => state.getValue('apiVersion')));
 	const id = useEditorStore(useShallow((state) => state.getValue('id')));
 	const name = useEditorStore(useShallow((state) => state.getValue('name')));
 	const version = useEditorStore(useShallow((state) => state.getValue('version')));
@@ -28,6 +33,7 @@ const Overview = () => {
 	const customProperties = useEditorStore(useShallow((state) => state.getValue('customProperties'))) || [];
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 
+	const getValue = useEditorStore((state) => state.getValue);
 	const setValue = useEditorStore((state) => state.setValue);
 	const setId = (newValue) => setValue('id', newValue);
 	const setName = (newValue) => setValue('name', newValue);
@@ -49,6 +55,7 @@ const Overview = () => {
 	const { customProperties: customPropertyConfigs, customSections } = useCustomization('root');
 
 	// Check hidden status for each standard property
+	const isApiVersionHidden = useIsPropertyHidden('root', 'apiVersion');
 	const isNameHidden = useIsPropertyHidden('root', 'name');
 	const isVersionHidden = useIsPropertyHidden('root', 'version');
 	const isIdHidden = useIsPropertyHidden('root', 'id');
@@ -58,7 +65,40 @@ const Overview = () => {
 	const isTagsHidden = useIsPropertyHidden('root', 'tags');
 
 	// Get overrides for standard properties
+	const apiVersionOverride = useStandardPropertyOverride('root', 'apiVersion');
 	const nameOverride = useStandardPropertyOverride('root', 'name');
+
+	// The ODCS version is a pick from what the host supports (its odcsVersions list, or what a
+	// single schema accepts), never typed: a value outside it fails validation on every save. Only
+	// the document's own version and newer ones are offered, since the migrations an upgrade applies
+	// (see upgradeOdcsDocument) have no reverse.
+	const documentApiVersion = typeof apiVersion === 'string' && apiVersion.trim() ? apiVersion.trim() : '';
+	const { versions: supportedApiVersions, defaultVersion: defaultApiVersion } = useOdcsVersions();
+	const apiVersionOptions = useMemo(() => {
+		const accepted = (apiVersionOverride?.enum
+			? convertEnumToOptions(apiVersionOverride.enum).map((o) => o.id)
+			: supportedApiVersions
+		).filter((v) => !documentApiVersion || compareApiVersions(v, documentApiVersion) >= 0);
+		const withCurrent = documentApiVersion && !accepted.includes(documentApiVersion)
+			? [documentApiVersion, ...accepted]
+			: accepted;
+		return withCurrent
+			.slice()
+			.sort((a, b) => compareApiVersions(b, a))
+			.map((v) => ({ id: v, name: v }));
+	}, [apiVersionOverride, supportedApiVersions, documentApiVersion]);
+	const isApiVersionBehind = Boolean(
+		documentApiVersion && defaultApiVersion && compareApiVersions(documentApiVersion, defaultApiVersion) < 0
+	);
+	const apiVersionUpgradeSteps = isApiVersionBehind ? odcsUpgradeSteps(documentApiVersion, defaultApiVersion) : [];
+	const setApiVersion = (chosen) => {
+		if (!chosen || chosen === documentApiVersion) return;
+		if (!documentApiVersion) {
+			setValue('apiVersion', chosen);
+			return;
+		}
+		upgradeOdcsDocument({ getValue, setValue }, documentApiVersion, chosen);
+	};
 	const versionOverride = useStandardPropertyOverride('root', 'version');
 	const idOverride = useStandardPropertyOverride('root', 'id');
 	const statusOverride = useStandardPropertyOverride('root', 'status');
@@ -162,6 +202,88 @@ const Overview = () => {
 
 						<div className="space-y-4">
 							<div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+								{/* ODCS version (apiVersion): the standard's version, not the contract's, hence the
+								    branded label so it is not mistaken for the Version field. Shown only while the
+								    document is behind the configured schema: on the latest version there is nothing
+								    to pick and nothing to migrate, so the row would be noise. */}
+								{!isApiVersionHidden && isApiVersionBehind && (
+									<div className="sm:col-span-2">
+										<div className="flex items-end gap-2">
+											<div className="min-w-0 flex-1">
+												<ValidatedCombobox
+													name="apiVersion"
+													label={apiVersionOverride?.title || t("overview.apiVersion.label")}
+													options={apiVersionOptions}
+													value={documentApiVersion}
+													onChange={setApiVersion}
+													placeholder={apiVersionOverride?.placeholder || t("overview.apiVersion.placeholder")}
+													allowCustomValue={false}
+													acceptAnyInput={false}
+													required={apiVersionOverride?.required ?? true}
+													tooltip={apiVersionOverride?.description || t("overview.apiVersion.tooltip")}
+													validationKey="root.apiVersion"
+													validationSection="Overview"
+												/>
+											</div>
+											{/* Migrating rewrites the document (apiVersion, plus the structural changes a
+											    version jump requires), so the button asks first and says what happens. */}
+											<Popover className="relative shrink-0">
+												<PopoverButton className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+													{t("overview.apiVersion.migrate", { target: defaultApiVersion })}
+												</PopoverButton>
+												<PopoverPanel
+													anchor="bottom end"
+													className="z-50 mt-1 w-96 rounded-md bg-white p-4 shadow-lg ring-1 ring-gray-200 text-xs text-gray-700"
+												>
+													{({ close }) => (
+														<div className="space-y-2">
+															<p className="text-sm font-semibold text-gray-900">
+																{t("overview.apiVersion.confirm.title", { target: defaultApiVersion })}
+															</p>
+															<p>{t("overview.apiVersion.confirm.why", { current: documentApiVersion, target: defaultApiVersion })}</p>
+															{apiVersionUpgradeSteps.length === 0 ? (
+																<p>{t("overview.apiVersion.confirm.whatOnlyVersion", { target: defaultApiVersion })}</p>
+															) : (
+																<div>
+																	<p>{t("overview.apiVersion.confirm.whatWithSteps", { target: defaultApiVersion })}</p>
+																	<ul className="mt-1 list-disc pl-4">
+																		{apiVersionUpgradeSteps.map((step) => (
+																			<li key={step}>{t(`overview.apiVersion.confirm.steps.${step}`)}</li>
+																		))}
+																	</ul>
+																</div>
+															)}
+															<p className="text-gray-500">{t("overview.apiVersion.confirm.note")}</p>
+															<div className="flex justify-end gap-2 pt-1">
+																<button
+																	type="button"
+																	onClick={() => close()}
+																	className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
+																>
+																	{t("overview.apiVersion.confirm.dismiss")}
+																</button>
+																<button
+																	type="button"
+																	onClick={() => {
+																		setApiVersion(defaultApiVersion);
+																		close();
+																	}}
+																	className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+																>
+																	{t("overview.apiVersion.confirm.migrate", { target: defaultApiVersion })}
+																</button>
+															</div>
+														</div>
+													)}
+												</PopoverPanel>
+											</Popover>
+										</div>
+										<p className="mt-1 text-xs text-amber-700">
+											{t("overview.apiVersion.behind", { target: defaultApiVersion })}
+										</p>
+									</div>
+								)}
+
 								{/* Name Field */}
 								{!isNameHidden && (
 									<ValidatedInput

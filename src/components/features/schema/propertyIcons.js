@@ -7,6 +7,8 @@ import TimestampIcon from "../../ui/icons/TimestampIcon.jsx";
 import ObjectIcon from "../../ui/icons/ObjectIcon.jsx";
 import ArrayIcon from "../../ui/icons/ArrayIcon.jsx";
 import BooleanIcon from "../../ui/icons/BooleanIcon.jsx";
+import MapIcon from "../../ui/icons/MapIcon.jsx";
+import VectorIcon from "../../ui/icons/VectorIcon.jsx";
 
 /**
  * Get icon component for a logical type
@@ -23,7 +25,9 @@ export const getLogicalTypeIcon = (logicalType) => {
         'timestamp': TimestampIcon,
         'object': ObjectIcon,
         'array': ArrayIcon,
-        'boolean': BooleanIcon
+        'boolean': BooleanIcon,
+        'map': MapIcon,
+        'vector': VectorIcon
     };
     return iconMap[logicalType] || null;
 };
@@ -40,5 +44,7 @@ export const fallbackLogicalTypeOptions = [
     'integer',
     'object',
     'array',
-    'boolean'
+    'boolean',
+    'map',
+    'vector'
 ];

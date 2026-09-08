@@ -37,6 +37,11 @@ import SynapseIcon from './synapse.svg';
 import TrinoIcon from './trino.svg';
 import VerticaIcon from './vertica.svg';
 import ZenIcon from './zen.svg';
+import ActianIcon from './actian.svg';
+import ExasolIcon from './exasol.svg';
+import HanaIcon from './hana.svg';
+import IcebergIcon from './iceberg.svg';
+import TeradataIcon from './teradata.svg';
 
 // Wrapper component to render SVG as img tag with consistent styling
 const IconWrapper = ({ src }) => <img src={src} className="w-5 h-5" alt="" />;
@@ -78,6 +83,19 @@ const serverIcons = {
   trino: () => <IconWrapper src={TrinoIcon} />,
   vertica: () => <IconWrapper src={VerticaIcon} />,
   zen: () => <IconWrapper src={ZenIcon} />,
+
+  // ODCS 3.2.0 server types. The Actian family (Btrieve, FastObjects, Ingres, POET, Vectorwise,
+  // Versant) shares the vendor's mark; Zen keeps its own above.
+  btrieve: () => <IconWrapper src={ActianIcon} />,
+  fastobjects: () => <IconWrapper src={ActianIcon} />,
+  ingres: () => <IconWrapper src={ActianIcon} />,
+  poet: () => <IconWrapper src={ActianIcon} />,
+  vectorwise: () => <IconWrapper src={ActianIcon} />,
+  versant: () => <IconWrapper src={ActianIcon} />,
+  exasol: () => <IconWrapper src={ExasolIcon} />,
+  hana: () => <IconWrapper src={HanaIcon} />,
+  iceberg: () => <IconWrapper src={IcebergIcon} />,
+  teradata: () => <IconWrapper src={TeradataIcon} />,
 
   // Fallback for unknown server types
   database: () => <IconWrapper src={DatabaseIcon} />,

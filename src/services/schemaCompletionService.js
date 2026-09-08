@@ -1,26 +1,11 @@
 import { YAML } from '../utils/yaml.js';
-import { useEditorStore } from '../store.js';
-
-const ODCS_SCHEMA_URL = 'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
-
-let cachedSchema = null;
+import { loadSchemaOrNull } from './schemaRegistry.js';
 
 /**
- * Fetch and cache the ODCS JSON schema
+ * The active ODCS JSON schema (loaded and cached by the schema registry); null when unavailable.
  */
-export async function getOdcsSchema() {
-  if (cachedSchema) return cachedSchema;
-
-  try {
-    const url = useEditorStore.getState().schemaUrl || ODCS_SCHEMA_URL;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    cachedSchema = await response.json();
-    return cachedSchema;
-  } catch (e) {
-    console.warn('Failed to fetch ODCS schema:', e.message);
-    return null;
-  }
+export function getOdcsSchema() {
+  return loadSchemaOrNull();
 }
 
 /**

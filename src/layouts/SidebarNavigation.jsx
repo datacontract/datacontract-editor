@@ -4,6 +4,7 @@ import {useEditorStore} from "../store.js";
 import serverIcons from '../assets/server-icons/serverIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
 import {useCallback, useMemo} from "react";
+import { useDocumentSupportsSchemaVersion, useSchemaDefinesProperty } from '../hooks/useSchemaCapability.js';
 
 // Static navigation items - defined outside component to avoid recreation
 const navigationItems = [
@@ -111,6 +112,18 @@ const navigationItems = [
             )
         },
         {
+            id: 'context',
+            titleKey: 'nav.context',
+            path: '/context',
+            yamlProperty: 'context',
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+            )
+        },
+        {
             id: 'custom-properties',
             titleKey: 'nav.customProperties',
             path: '/custom-properties',
@@ -147,8 +160,22 @@ const SchemaIcon = () => (
 );
 
 // Reusable navigation link component
-const NavLink = ({ item, isActive, onClick }) => {
+const NavLink = ({ item, isActive, onClick, disabled = false, disabledTitle }) => {
     const { t } = useTranslation();
+    if (disabled) {
+        return (
+        <div
+            className={`${NAV_LINK_BASE} ${INACTIVE_CLASSES} opacity-50 cursor-not-allowed`}
+            title={disabledTitle}
+            aria-disabled="true"
+        >
+            <div className="size-4 shrink-0" aria-hidden="true">
+                {item.icon || <div className="size-2 rounded-full bg-gray-300" />}
+            </div>
+            <p className="ml-1.5 text-sm font-medium">{t(item.titleKey)}</p>
+        </div>
+        );
+    }
     return (
     <Link
         to={item.path}
@@ -223,6 +250,11 @@ const SidebarNavigation = ({ isMobile = false }) => {
     }, [isMobile, currentView, navigate, setView, closeMobileSidebar]);
 
     // Helper to determine if a path is active
+    // The Context section exists only when the active schema defines root-level `context`
+    // (ODCS 3.2.0+); it shows but stays locked while the document declares an older apiVersion.
+    const schemaHasContext = useSchemaDefinesProperty('context', 'root');
+    const documentSupportsSchemaVersion = useDocumentSupportsSchemaVersion();
+
     const isPathActive = useCallback((path) => location.pathname === path, [location.pathname]);
 
     // Helper to determine if schema sub-item is active
@@ -238,11 +270,13 @@ const SidebarNavigation = ({ isMobile = false }) => {
         <>
             <nav className="flex mt-2 w-full" aria-label="Progress">
                 <ol role="list" className="space-y-3 w-full">
-                    {navigationItems.map((item) => (
+                    {navigationItems.filter((item) => item.id !== 'context' || schemaHasContext).map((item) => (
                         <li key={item.id}>
                             {item.id === 'schemas' ? (
                                 <div>
                                     <NavLink
+                                        disabled={item.id === 'context' && !documentSupportsSchemaVersion}
+                                        disabledTitle={t('overview.apiVersion.sectionLocked')}
                                         item={item}
                                         isActive={isPathActive(item.path)}
                                         onClick={(e) => handleNavigationClick(e, item)}
@@ -272,6 +306,8 @@ const SidebarNavigation = ({ isMobile = false }) => {
                             ) : item.id === 'servers' ? (
                                 <div>
                                     <NavLink
+                                        disabled={item.id === 'context' && !documentSupportsSchemaVersion}
+                                        disabledTitle={t('overview.apiVersion.sectionLocked')}
                                         item={item}
                                         isActive={isPathActive(item.path)}
                                         onClick={(e) => handleNavigationClick(e, item)}
@@ -298,6 +334,8 @@ const SidebarNavigation = ({ isMobile = false }) => {
                                 </div>
                             ) : (
                                 <NavLink
+                                        disabled={item.id === 'context' && !documentSupportsSchemaVersion}
+                                        disabledTitle={t('overview.apiVersion.sectionLocked')}
                                     item={item}
                                     isActive={isPathActive(item.path)}
                                     onClick={(e) => handleNavigationClick(e, item)}
@@ -347,7 +385,7 @@ const SidebarNavigation = ({ isMobile = false }) => {
                 </a>
             </div>
         </>
-    ), [schemas, servers, handleNavigationClick, isPathActive, isSchemaActive, t]);
+    ), [schemas, servers, handleNavigationClick, isPathActive, isSchemaActive, t, schemaHasContext, documentSupportsSchemaVersion]);
 
     // Mobile drawer mode
     if (isMobile) {

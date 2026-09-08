@@ -4,7 +4,7 @@ import { useLocation } from 'react-router';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { configureMonacoYaml } from 'monaco-yaml';
 import { useEditorStore } from '../../../store.js';
-import { mergeCustomizationsIntoSchema } from '../../../utils/mergeCustomizationsIntoSchema.js';
+import { loadSchema, mergeSchema } from '../../../services/schemaRegistry.js';
 import { registerSchemaCompletionProvider } from '../../../services/schemaCompletionProvider.js';
 
 const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
@@ -96,31 +96,29 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
         });
     };
 
-    // Fetch schema from URL if provided
+    // Load the schema through the registry (shared with validation, completion and AI tools)
     useEffect(() => {
-        if (schemaUrl && schemaUrl.trim()) {
-            fetch(schemaUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(schemaData => {
-                    setFetchedSchema(schemaData);
-                    setSchemaError(null);
-                    setSchemaInfo(schemaUrl, schemaData);
-                })
-                .catch(error => {
-                    setSchemaError(`Failed to load schema: ${error.message}`);
-                    setFetchedSchema(null);
-                    setSchemaInfo(schemaUrl, null);
-                });
-        } else {
+        if (!schemaUrl || !schemaUrl.trim()) {
             setFetchedSchema(null);
             setSchemaError(null);
             setSchemaInfo(null, null);
+            return undefined;
         }
+        let cancelled = false;
+        loadSchema(schemaUrl)
+            .then(schemaData => {
+                if (cancelled) return;
+                setFetchedSchema(schemaData);
+                setSchemaError(null);
+                setSchemaInfo(schemaUrl, schemaData);
+            })
+            .catch(error => {
+                if (cancelled) return;
+                setSchemaError(`Failed to load schema: ${error.message}`);
+                setFetchedSchema(null);
+                setSchemaInfo(schemaUrl, null);
+            });
+        return () => { cancelled = true; };
     }, [schemaUrl, setSchemaInfo]);
 
     const configureEditor = (monaco) => {
@@ -174,7 +172,7 @@ const YamlEditor = forwardRef(({ schemaUrl }, ref) => {
     useEffect(() => {
         if (monacoYamlRef.current && fetchedSchema) {
             try {
-                const schema = mergeCustomizationsIntoSchema(fetchedSchema, customizations);
+                const schema = mergeSchema(fetchedSchema, customizations);
                 // Update monaco-yaml schemas
                 monacoYamlRef.current.update({
                     enableSchemaRequest: true,

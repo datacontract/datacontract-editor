@@ -12,12 +12,33 @@
     "customProperties": "Custom Properties",
     "footer": {
       "documentation": "Documentation"
-    }
+    },
+    "context": "Context"
   },
   "overview": {
     "section": {
       "fundamentals": "Fundamentals",
       "fundamentalsDescription": "Core metadata identifying the data contract, including name, version, status, and organizational context."
+    },
+    "apiVersion": {
+      "label": "ODCS Version (apiVersion)",
+      "placeholder": "Select an ODCS version...",
+      "tooltip": "Version of the Open Data Contract Standard this contract is written in (apiVersion). Only the current and newer versions can be chosen; upgrading migrates the document where the standard changed shape and leaves the contract's own version untouched.",
+      "behind": "Your organization has configured ODCS {{target}} as default.",
+      "migrate": "Migrate to {{target}}",
+      "confirm": {
+        "title": "Migrate to ODCS {{target}}",
+        "why": "This contract declares ODCS {{current}}, while {{target}} is the version your organization uses. Fields the standard added in {{target}} are hidden until the contract declares it.",
+        "whatOnlyVersion": "Migrating sets apiVersion to {{target}}. This version needs no structural changes, so nothing else in the document is touched.",
+        "whatWithSteps": "Migrating sets apiVersion to {{target}} and applies the structural changes that version requires:",
+        "steps": {
+          "teamMembers": "The plain team list becomes the team object with a members list."
+        },
+        "note": "The contract's own version and its content stay untouched; whether adopting the new standard version warrants a contract version bump is your call. You can undo the migration like any other edit.",
+        "migrate": "Migrate",
+        "dismiss": "Not now"
+      },
+      "sectionLocked": "Requires a newer ODCS version. Upgrade via the ODCS version under Fundamentals."
     },
     "name": {
       "label": "Name",
@@ -230,7 +251,13 @@
       "tooltip": "Human-readable explanation",
       "placeholder": "Human-readable explanation..."
     },
-    "add": "+ Add SLA"
+    "add": "+ Add SLA",
+    "customPropertiesField": {
+      "label": "Custom Properties"
+    },
+    "authoritativeDefinitionsField": {
+      "label": "Authoritative Definitions"
+    }
   },
   "ai": {
     "fab": {
@@ -385,7 +412,9 @@
       "dataQuality": "Data Quality",
       "authoritativeDefinitions": "Authoritative Definitions",
       "relationships": "Relationships",
-      "customProperties": "Custom Properties"
+      "customProperties": "Custom Properties",
+      "enumValues": "Allowed Values",
+      "synonyms": "Synonyms"
     },
     "semantics": {
       "semanticConcept": "Semantic Concept",
@@ -518,6 +547,33 @@
         "label": "Transform Description",
         "placeholder": "Business-friendly explanation of transformation...",
         "help": "Non-technical description of how field is derived"
+      },
+      "semanticType": {
+        "label": "Semantic Type"
+      },
+      "deprecated": {
+        "label": "Deprecated"
+      },
+      "mapKeyType": {
+        "label": "Map Key Type"
+      },
+      "mapValueType": {
+        "label": "Map Value Type"
+      },
+      "vectorDimensions": {
+        "label": "Dimensions"
+      },
+      "vectorElementType": {
+        "label": "Element Type"
+      },
+      "vectorDistanceMetric": {
+        "label": "Distance Metric"
+      },
+      "vectorEmbeddingModel": {
+        "label": "Embedding Model"
+      },
+      "vectorNormalized": {
+        "label": "Normalized"
       }
     },
     "option": {
@@ -567,7 +623,11 @@
       "subtitle": "Your YAML is valid with no errors or warnings."
     },
     "problems": "Problems ({{count}})",
-    "lineColumn": "Line {{line}}, Column {{column}}"
+    "lineColumn": "Line {{line}}, Column {{column}}",
+    "apiVersion": {
+      "document": "Document {{version}}",
+      "schema": "Schema default {{version}}"
+    }
   },
   "rolesList": {
     "accessRoles": "Access Roles",
@@ -909,6 +969,10 @@
       "edit": "Edit Property",
       "editNamed": "Edit Property: {{name}}",
       "close": "Close panel"
+    },
+    "vendor": {
+      "label": "Vendor",
+      "placeholder": "e.g. entropy-data"
     }
   },
   "authDef": {
@@ -1014,6 +1078,15 @@
         "label": "Tags",
         "tooltip": "Tags for categorizing and organizing schemas",
         "placeholder": "Add a tag..."
+      },
+      "deprecated": {
+        "label": "Deprecated"
+      },
+      "synonyms": {
+        "label": "Synonyms"
+      },
+      "context": {
+        "label": "Context"
       }
     },
     "advancedMetadata": "Advanced Metadata",
@@ -1373,5 +1446,57 @@
   "typeSelector": {
     "use": "Use:",
     "customValueHint": "Type to enter a custom value"
+  },
+  "context": {
+    "heading": "Context",
+    "description": "Guidance for AI agents and consumers working with this data contract (ODCS 3.2.0)."
+  },
+  "contextEditor": {
+    "instructions": {
+      "label": "Instructions",
+      "placeholder": "How this data should be used, joined, and interpreted…"
+    },
+    "statements": {
+      "label": "Verified statements",
+      "help": "Questions this data can reliably answer, optionally with the verified answer.",
+      "question": {
+        "placeholder": "Question"
+      },
+      "answer": {
+        "placeholder": "Verified answer (optional)"
+      },
+      "add": "+ Add statement",
+      "remove": "Remove statement"
+    },
+    "constraints": {
+      "label": "Constraints",
+      "help": "Rules consumers and agents must follow when using this data.",
+      "placeholder": "Constraint",
+      "add": "+ Add constraint",
+      "remove": "Remove constraint"
+    }
+  },
+  "synonyms": {
+    "add": "+ Add synonym",
+    "remove": "Remove synonym",
+    "synonym": {
+      "placeholder": "Synonym"
+    },
+    "description": {
+      "placeholder": "Description (optional)"
+    }
+  },
+  "enumValues": {
+    "add": "+ Add value",
+    "remove": "Remove value",
+    "value": {
+      "placeholder": "Value"
+    },
+    "label": {
+      "placeholder": "Label (optional)"
+    },
+    "description": {
+      "placeholder": "Description (optional)"
+    }
   }
 }

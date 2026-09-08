@@ -12,12 +12,33 @@
     "customProperties": "Benutzerdefinierte Eigenschaften",
     "footer": {
       "documentation": "Dokumentation"
-    }
+    },
+    "context": "Kontext"
   },
   "overview": {
     "section": {
       "fundamentals": "Grundlagen",
       "fundamentalsDescription": "Kernmetadaten zur Identifikation des Data Contracts, darunter Name, Version, Status und organisatorischer Kontext."
+    },
+    "apiVersion": {
+      "label": "ODCS-Version (apiVersion)",
+      "placeholder": "ODCS-Version auswählen...",
+      "tooltip": "Version des Open Data Contract Standard, in der dieser Data Contract geschrieben ist (apiVersion). Wählbar sind nur die aktuelle und neuere Versionen; eine Aktualisierung migriert das Dokument dort, wo sich der Standard strukturell geändert hat, und lässt die eigene Version des Data Contracts unverändert.",
+      "behind": "Ihre Organisation hat ODCS {{target}} als Standard konfiguriert.",
+      "migrate": "Auf {{target}} migrieren",
+      "confirm": {
+        "title": "Auf ODCS {{target}} migrieren",
+        "why": "Dieser Data Contract deklariert ODCS {{current}}, Ihre Organisation verwendet {{target}}. Felder, die der Standard in {{target}} hinzugefügt hat, bleiben ausgeblendet, bis der Data Contract diese Version deklariert.",
+        "whatOnlyVersion": "Die Migration setzt apiVersion auf {{target}}. Diese Version erfordert keine strukturellen Änderungen, sonst wird nichts im Dokument angefasst.",
+        "whatWithSteps": "Die Migration setzt apiVersion auf {{target}} und wendet die strukturellen Änderungen an, die diese Version erfordert:",
+        "steps": {
+          "teamMembers": "Die einfache Team-Liste wird zum Team-Objekt mit einer Mitgliederliste."
+        },
+        "note": "Die eigene Version des Data Contracts und sein Inhalt bleiben unverändert; ob die neue Standard-Version eine Erhöhung der Contract-Version rechtfertigt, entscheiden Sie. Die Migration lässt sich wie jede andere Änderung rückgängig machen.",
+        "migrate": "Migrieren",
+        "dismiss": "Nicht jetzt"
+      },
+      "sectionLocked": "Erfordert eine neuere ODCS-Version. Aktualisierung über die ODCS-Version unter Fundamentals."
     },
     "name": {
       "label": "Name",
@@ -230,7 +251,13 @@
       "tooltip": "Menschenlesbare Erläuterung",
       "placeholder": "Menschenlesbare Erläuterung..."
     },
-    "add": "+ SLA hinzufügen"
+    "add": "+ SLA hinzufügen",
+    "customPropertiesField": {
+      "label": "Custom Properties"
+    },
+    "authoritativeDefinitionsField": {
+      "label": "Maßgebliche Definitionen"
+    }
   },
   "ai": {
     "fab": {
@@ -385,7 +412,9 @@
       "dataQuality": "Datenqualität",
       "authoritativeDefinitions": "Maßgebliche Definitionen",
       "relationships": "Beziehungen",
-      "customProperties": "Benutzerdefinierte Eigenschaften"
+      "customProperties": "Benutzerdefinierte Eigenschaften",
+      "enumValues": "Erlaubte Werte",
+      "synonyms": "Synonyme"
     },
     "semantics": {
       "semanticConcept": "Semantic Concept",
@@ -518,6 +547,33 @@
         "label": "Transformationsbeschreibung",
         "placeholder": "Fachlich verständliche Erklärung der Transformation...",
         "help": "Nicht-technische Beschreibung, wie das Feld abgeleitet wird"
+      },
+      "semanticType": {
+        "label": "Semantischer Typ"
+      },
+      "deprecated": {
+        "label": "Veraltet"
+      },
+      "mapKeyType": {
+        "label": "Map-Schlüsseltyp"
+      },
+      "mapValueType": {
+        "label": "Map-Werttyp"
+      },
+      "vectorDimensions": {
+        "label": "Dimensionen"
+      },
+      "vectorElementType": {
+        "label": "Elementtyp"
+      },
+      "vectorDistanceMetric": {
+        "label": "Distanzmetrik"
+      },
+      "vectorEmbeddingModel": {
+        "label": "Embedding-Modell"
+      },
+      "vectorNormalized": {
+        "label": "Normalisiert"
       }
     },
     "option": {
@@ -567,7 +623,11 @@
       "subtitle": "Dein YAML ist gültig, ohne Fehler oder Warnungen."
     },
     "problems": "Probleme ({{count}})",
-    "lineColumn": "Zeile {{line}}, Spalte {{column}}"
+    "lineColumn": "Zeile {{line}}, Spalte {{column}}",
+    "apiVersion": {
+      "document": "Dokument {{version}}",
+      "schema": "Schema-Standard {{version}}"
+    }
   },
   "rolesList": {
     "accessRoles": "Zugriffsrollen",
@@ -909,6 +969,10 @@
       "edit": "Eigenschaft bearbeiten",
       "editNamed": "Eigenschaft bearbeiten: {{name}}",
       "close": "Panel schließen"
+    },
+    "vendor": {
+      "label": "Anbieter",
+      "placeholder": "z. B. entropy-data"
     }
   },
   "authDef": {
@@ -1014,6 +1078,15 @@
         "label": "Tags",
         "tooltip": "Tags zum Kategorisieren und Organisieren von Schema",
         "placeholder": "Tag hinzufügen..."
+      },
+      "deprecated": {
+        "label": "Veraltet"
+      },
+      "synonyms": {
+        "label": "Synonyme"
+      },
+      "context": {
+        "label": "Kontext"
       }
     },
     "advancedMetadata": "Erweiterte Metadaten",
@@ -1373,5 +1446,57 @@
   "typeSelector": {
     "use": "Verwenden:",
     "customValueHint": "Tippen, um einen eigenen Wert einzugeben"
+  },
+  "context": {
+    "heading": "Kontext",
+    "description": "Hinweise für KI-Agenten und Konsumenten dieses Data Contracts (ODCS 3.2.0)."
+  },
+  "contextEditor": {
+    "instructions": {
+      "label": "Anweisungen",
+      "placeholder": "Wie diese Daten genutzt, verknüpft und interpretiert werden sollen…"
+    },
+    "statements": {
+      "label": "Verifizierte Aussagen",
+      "help": "Fragen, die diese Daten zuverlässig beantworten, optional mit der verifizierten Antwort.",
+      "question": {
+        "placeholder": "Frage"
+      },
+      "answer": {
+        "placeholder": "Verifizierte Antwort (optional)"
+      },
+      "add": "+ Aussage hinzufügen",
+      "remove": "Aussage entfernen"
+    },
+    "constraints": {
+      "label": "Einschränkungen",
+      "help": "Regeln, die Konsumenten und Agenten bei der Nutzung einhalten müssen.",
+      "placeholder": "Einschränkung",
+      "add": "+ Einschränkung hinzufügen",
+      "remove": "Einschränkung entfernen"
+    }
+  },
+  "synonyms": {
+    "add": "+ Synonym hinzufügen",
+    "remove": "Synonym entfernen",
+    "synonym": {
+      "placeholder": "Synonym"
+    },
+    "description": {
+      "placeholder": "Beschreibung (optional)"
+    }
+  },
+  "enumValues": {
+    "add": "+ Wert hinzufügen",
+    "remove": "Wert entfernen",
+    "value": {
+      "placeholder": "Wert"
+    },
+    "label": {
+      "placeholder": "Bezeichnung (optional)"
+    },
+    "description": {
+      "placeholder": "Beschreibung (optional)"
+    }
   }
 }

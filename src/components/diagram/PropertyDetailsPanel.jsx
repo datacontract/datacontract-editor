@@ -15,6 +15,9 @@ import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
 import TagsInput from '../ui/TagsInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
+import SynonymsEditor from '../ui/SynonymsEditor.jsx';
+import EnumValuesEditor from '../ui/EnumValuesEditor.jsx';
+import { useSchemaProperty } from '../../hooks/useSchemaCapability.js';
 import Tooltip from '../ui/Tooltip.jsx';
 import {SparkleButton} from '../../ai/index.js';
 import {useEditorStore} from '../../store.js';
@@ -49,6 +52,14 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   const editorConfig = useEditorStore((state) => state.editorConfig);
   const { getDefinition } = useDefinition();
   const serverType = useActiveServerType();
+
+  // ODCS 3.2.0 capabilities: fields are offered only when the active schema defines them
+  const hasSemanticType = useSchemaProperty('semanticType', 'property');
+  const hasDeprecated = useSchemaProperty('deprecated', 'property');
+  const hasSynonyms = useSchemaProperty('synonyms', 'property');
+  const hasEnumValues = useSchemaProperty('enum', 'property');
+  const hasMapType = useSchemaProperty('map', 'property');
+  const hasVectorOptions = useSchemaProperty('logicalTypeOptions.dimensions', 'property');
 
   // Modal state
   const [isDefinitionModalOpen, setIsDefinitionModalOpen] = useState(false);
@@ -361,6 +372,18 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               )}
               {renderCustomAfter('logicalType')}
 
+              {/* Semantic Type (ODCS 3.2.0+) */}
+              {hasSemanticType && (
+                <EnumField
+                  propertyPath="semanticType"
+                  context="property"
+                  value={property.semanticType || ''}
+                  onChange={(value) => updateField('semanticType', value || undefined)}
+                  label={t('diagram.field.semanticType.label')}
+                  fallbackOptions={['column', 'measure', 'dimension']}
+                />
+              )}
+
               {/* Array Item Type - only shown when logical type is array */}
               {!isLogicalTypeHidden && property.logicalType === 'array' && (
                 <EnumField
@@ -375,6 +398,81 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   placeholder={t('diagram.field.arrayItemType.placeholder')}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                 />
+              )}
+
+              {/* Map key/value types - only when logical type is map (ODCS 3.2.0+) */}
+              {hasMapType && property.logicalType === 'map' && (
+                <>
+                  <EnumField
+                    propertyPath="logicalType"
+                    context="property"
+                    value={property.map?.key?.logicalType || ''}
+                    onChange={(value) => updateField('map', { ...property.map, key: { ...property.map?.key, logicalType: value || undefined } })}
+                    label={t('diagram.field.mapKeyType.label')}
+                    fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
+                  />
+                  <EnumField
+                    propertyPath="logicalType"
+                    context="property"
+                    value={property.map?.value?.logicalType || ''}
+                    onChange={(value) => updateField('map', { ...property.map, value: { ...property.map?.value, logicalType: value || undefined } })}
+                    label={t('diagram.field.mapValueType.label')}
+                    fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
+                  />
+                </>
+              )}
+
+              {/* Vector options - only when logical type is vector (ODCS 3.2.0+) */}
+              {hasVectorOptions && property.logicalType === 'vector' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.vectorDimensions.label')}</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={property.logicalTypeOptions?.dimensions ?? ''}
+                      onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, dimensions: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                      placeholder="1536"
+                    />
+                  </div>
+                  <EnumField
+                    propertyPath="logicalTypeOptions.elementType"
+                    context="property"
+                    value={property.logicalTypeOptions?.elementType || ''}
+                    onChange={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, elementType: value || undefined })}
+                    label={t('diagram.field.vectorElementType.label')}
+                    fallbackOptions={['bfloat16', 'binary', 'float16', 'float32', 'float64', 'int8', 'uint8']}
+                  />
+                  <EnumField
+                    propertyPath="logicalTypeOptions.distanceMetric"
+                    context="property"
+                    value={property.logicalTypeOptions?.distanceMetric || ''}
+                    onChange={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, distanceMetric: value || undefined })}
+                    label={t('diagram.field.vectorDistanceMetric.label')}
+                    fallbackOptions={['cosine', 'dotProduct', 'euclidean', 'hamming', 'manhattan']}
+                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.vectorEmbeddingModel.label')}</label>
+                    <input
+                      type="text"
+                      value={property.logicalTypeOptions?.embeddingModel || ''}
+                      onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, embeddingModel: e.target.value || undefined })}
+                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                      placeholder="openai/text-embedding-3-small"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="vector-normalized"
+                      type="checkbox"
+                      checked={property.logicalTypeOptions?.normalized === true}
+                      onChange={(e) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, normalized: e.target.checked ? true : undefined })}
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <label htmlFor="vector-normalized" className="text-xs font-medium text-gray-700">{t('diagram.field.vectorNormalized.label')}</label>
+                  </div>
+                </>
               )}
 
               {/* Physical Type */}
@@ -1007,6 +1105,28 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   </p>
                 </div>
               )}
+              {/* Deprecated (ODCS 3.2.0+) */}
+              {hasDeprecated && (
+                <div>
+                  <label htmlFor="deprecated" className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.deprecated.label')}</label>
+                  <div className="grid grid-cols-1">
+                    <select
+                      id="deprecated"
+                      value={property.deprecated === true ? 'true' : property.deprecated === false ? 'false' : ''}
+                      onChange={(e) => updateField('deprecated', e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined)}
+                      className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs text-gray-900"
+                    >
+                      <option value="">{t('diagram.option.notSet')}</option>
+                      <option value="false">{t('diagram.option.false')}</option>
+                      <option value="true">{t('diagram.option.true')}</option>
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-500"
+                    />
+                  </div>
+                </div>
+              )}
               {renderCustomAfter('required')}
               {renderCustomAfter('unique')}
               {renderCustomAfter('primaryKey')}
@@ -1016,6 +1136,44 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         )}
       </Disclosure>
       {renderCustomSectionsAfter('constraints')}
+
+      {/* Allowed Values Section (enum, ODCS 3.2.0+) */}
+      {hasEnumValues && (
+        <Disclosure>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
+                <span>{t('diagram.section.enumValues')}</span>
+                <ChevronRightIcon
+                  className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
+                <EnumValuesEditor value={property.enum} onChange={(value) => updateField('enum', value)} />
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
+      )}
+
+      {/* Synonyms Section (ODCS 3.2.0+) */}
+      {hasSynonyms && (
+        <Disclosure>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
+                <span>{t('diagram.section.synonyms')}</span>
+                <ChevronRightIcon
+                  className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
+                <SynonymsEditor value={property.synonyms} onChange={(value) => updateField('synonyms', value)} />
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
+      )}
 
       {/* Classification & Security Section */}
       <Disclosure>

@@ -6,6 +6,7 @@ import TypedArrayEditor from './TypedArrayEditor.jsx';
 import ObjectYamlEditor from './ObjectYamlEditor.jsx';
 import TypeChangeWarning from './TypeChangeWarning.jsx';
 import { usePendingTypeChange } from '../../hooks/usePendingTypeChange.js';
+import { useSchemaProperty } from '../../hooks/useSchemaCapability.js';
 
 // A value is "empty" when there is nothing to lose by changing its type.
 const isEmptyValue = (val) =>
@@ -103,6 +104,8 @@ const CustomPropertiesEditor = ({ value, onChange, showDescription = false, mana
 
 const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }) => {
   const { t } = useTranslation();
+  // ODCS 3.2.0+: vendor attribution on custom properties
+  const showVendor = useSchemaProperty('vendor', 'CustomProperty');
   const [isExpanded, setIsExpanded] = useState(!item.property);
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
@@ -261,6 +264,20 @@ const CustomPropertyCard = ({ item, index, showDescription, onUpdate, onRemove }
               </svg>
             </button>
           </div>
+
+          {/* Vendor (ODCS 3.2.0+) */}
+          {(showVendor || item.vendor) && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('customProperty.vendor.label')}</label>
+              <input
+                type="text"
+                value={item.vendor || ''}
+                onChange={(e) => onUpdate(index, 'vendor', e.target.value || undefined)}
+                className={inputClasses}
+                placeholder={t('customProperty.vendor.placeholder')}
+              />
+            </div>
+          )}
 
           {/* Value field (below the property) */}
           <div className="space-y-2">

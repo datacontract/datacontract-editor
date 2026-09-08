@@ -128,7 +128,14 @@ init({
 
   // Content
   yaml: '...',                       // Initial YAML content
-  schemaUrl: 'https://...',          // JSON schema URL for validation
+  // The ODCS versions you support, each with the JSON schema a document of that version is
+  // validated against. The default is what new contracts get and what the Migrate action in
+  // Fundamentals offers to documents on an older version. Omit for the built-in default (v3.1.0).
+  odcsVersions: [
+    { version: 'v3.2.0', schema: 'https://.../odcs-json-schema-v3.2.0.json', default: true },
+    { version: 'v3.1.0', schema: 'https://.../odcs-json-schema-v3.1.0.json' },
+  ],
+  schemaUrl: 'https://...',          // Deprecated: a single schema URL; use odcsVersions
 
   // Views
   availableViews: ['yaml', 'form', 'diagram'],

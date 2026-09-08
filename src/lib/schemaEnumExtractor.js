@@ -1,79 +1,130 @@
 /**
  * Utility to extract enum values from JSON schemas dynamically.
- * Supports custom schemas by traversing the schema structure at runtime.
+ *
+ * Works against the loaded ODCS schema (any version) and against host-composed schemas: it reads
+ * `$defs` (with `definitions` as a fallback for older documents), follows `$ref`, and looks through
+ * `allOf` / `anyOf` / `oneOf` / `if-then-else` composition and array `items`, which is where ODCS
+ * keeps most of its structure (`SchemaBaseProperty` inherits from `SchemaElement` via `allOf`, and
+ * `logicalTypeOptions` only gains properties inside conditional `then` branches).
  */
+
+/** Editor contexts and the ODCS definition they refer to. Any other context is used as a definition name. */
+const CONTEXT_DEFINITIONS = {
+  property: 'SchemaBaseProperty',
+  schema: 'SchemaObject',
+  server: 'Server',
+};
+
+const definitionsOf = (schema) => schema?.$defs || schema?.definitions || {};
+
+const resolveRef = (schema, ref) => {
+  if (typeof ref !== 'string' || !ref.startsWith('#/')) return null;
+  const segments = ref.slice(2).split('/');
+  if (segments[0] !== '$defs' && segments[0] !== 'definitions') return null;
+  // Nested definitions are legal and ODCS uses them (`#/$defs/ServerSource/KafkaServer`).
+  let node = definitionsOf(schema);
+  for (const segment of segments.slice(1)) {
+    node = node?.[segment];
+    if (!node) return null;
+  }
+  return node;
+};
+
+const branchesOf = (def) => [
+  ...(Array.isArray(def.allOf) ? def.allOf : []),
+  ...(Array.isArray(def.anyOf) ? def.anyOf : []),
+  ...(Array.isArray(def.oneOf) ? def.oneOf : []),
+  def.then,
+  def.else,
+];
+
+/** The definition an editor context starts from. */
+const baseDefinition = (schema, context) => {
+  if (!schema) return null;
+  if (context === 'root') return schema;
+  const name = CONTEXT_DEFINITIONS[context] || context;
+  return definitionsOf(schema)[name] || schema;
+};
+
+/**
+ * Every sub-schema that describes property [name] inside [def], across `$ref` and composition.
+ * More than one can match: `logicalTypeOptions` is declared as a bare object on the property and
+ * refined inside each conditional branch.
+ */
+const findPropertyCandidates = (schema, def, name, seen = new Set()) => {
+  if (!def || typeof def !== 'object' || seen.has(def)) return [];
+  seen.add(def);
+
+  const found = [];
+  if (def.$ref) found.push(...findPropertyCandidates(schema, resolveRef(schema, def.$ref), name, seen));
+  if (def.properties && Object.prototype.hasOwnProperty.call(def.properties, name)) {
+    found.push(def.properties[name]);
+  }
+  for (const branch of branchesOf(def)) {
+    found.push(...findPropertyCandidates(schema, branch, name, seen));
+  }
+  if (def.items) found.push(...findPropertyCandidates(schema, def.items, name, seen));
+  return found;
+};
+
+/** The `enum` declared by [def] itself or by anything it composes. */
+const findEnum = (schema, def, seen = new Set()) => {
+  if (!def || typeof def !== 'object' || seen.has(def)) return null;
+  seen.add(def);
+
+  if (Array.isArray(def.enum)) return def.enum;
+  if (def.$ref) {
+    const viaRef = findEnum(schema, resolveRef(schema, def.$ref), seen);
+    if (viaRef) return viaRef;
+  }
+  for (const branch of branchesOf(def)) {
+    const viaBranch = findEnum(schema, branch, seen);
+    if (viaBranch) return viaBranch;
+  }
+  return null;
+};
 
 /**
  * Get enum values for a property from the JSON schema
  * @param {Object} schema - The JSON schema object
  * @param {string} propertyPath - Dot-notation path to the property (e.g., 'logicalType', 'logicalTypeOptions.integerFormat')
- * @param {string} [context='property'] - Context where to look ('property', 'root', 'server', etc.)
+ * @param {string} [context='property'] - Context where to look ('property', 'schema', 'server', 'root', or a definition name)
  * @returns {Array<string>|null} - Array of enum values or null if not found
  */
 export const getSchemaEnumValues = (schema, propertyPath, context = 'property') => {
-  if (!schema || !propertyPath) return null;
-
-  // Split the path into parts
-  const pathParts = propertyPath.split('.');
-
-  // Start from different base definitions depending on context
-  let currentDef = null;
-
-  if (context === 'property') {
-    // Look in the SchemaBaseProperty definition (for property-level fields)
-    currentDef = schema?.definitions?.SchemaBaseProperty;
-  } else if (context === 'root') {
-    // Look at root level properties
-    currentDef = schema;
-  } else {
-    // Try to find the definition by name
-    currentDef = schema?.definitions?.[context] || schema;
+  const frontier = resolvePropertyCandidates(schema, propertyPath, context);
+  for (const def of frontier) {
+    const values = findEnum(schema, def);
+    if (values) return values;
   }
-
-  if (!currentDef) return null;
-
-  // Traverse the path
-  for (let i = 0; i < pathParts.length; i++) {
-    const part = pathParts[i];
-
-    // Check in properties
-    if (currentDef.properties && currentDef.properties[part]) {
-      currentDef = currentDef.properties[part];
-      continue;
-    }
-
-    // Check in definitions (for $ref references)
-    if (currentDef.$ref) {
-      const refPath = currentDef.$ref.replace('#/definitions/', '');
-      currentDef = schema.definitions?.[refPath];
-      if (currentDef && currentDef.properties && currentDef.properties[part]) {
-        currentDef = currentDef.properties[part];
-        continue;
-      }
-    }
-
-    // Check if current definition has items (for arrays)
-    if (currentDef && currentDef.items) {
-      currentDef = currentDef.items;
-      if (currentDef.properties && currentDef.properties[part]) {
-        currentDef = currentDef.properties[part];
-        continue;
-      }
-    }
-
-    // Path not found
-    return null;
-  }
-
-  // Follow $ref if present
-  if (currentDef?.$ref) {
-    const refPath = currentDef.$ref.replace('#/definitions/', '');
-    currentDef = schema.definitions?.[refPath];
-  }
-
-  // Return enum if found
-  return currentDef?.enum || null;
+  return null;
 };
+
+/** Every sub-schema describing [propertyPath] in [context]; empty when the schema lacks it. */
+const resolvePropertyCandidates = (schema, propertyPath, context) => {
+  if (!schema || !propertyPath) return [];
+
+  const base = baseDefinition(schema, context);
+  if (!base) return [];
+
+  let frontier = [base];
+  for (const part of propertyPath.split('.')) {
+    const next = [];
+    for (const def of frontier) {
+      next.push(...findPropertyCandidates(schema, def, part));
+    }
+    if (next.length === 0) return [];
+    frontier = next;
+  }
+  return frontier;
+};
+
+/**
+ * Whether the schema defines a property at all — enum or not. This is the capability check the
+ * form uses to offer version-specific fields (e.g. `semanticType` exists in ODCS 3.2.0+ only).
+ */
+export const hasSchemaProperty = (schema, propertyPath, context = 'property') =>
+  resolvePropertyCandidates(schema, propertyPath, context).length > 0;
 
 /**
  * Get all enum fields from the schema for a given context
@@ -84,53 +135,30 @@ export const getSchemaEnumValues = (schema, propertyPath, context = 'property') 
 export const getAllSchemaEnums = (schema, context = 'property') => {
   if (!schema) return {};
 
+  const base = baseDefinition(schema, context);
+  if (!base) return {};
+
   const enums = {};
-  let baseDef = null;
+  const seen = new Set();
 
-  if (context === 'property') {
-    baseDef = schema?.definitions?.SchemaBaseProperty;
-  } else if (context === 'root') {
-    baseDef = schema;
-  } else {
-    baseDef = schema?.definitions?.[context] || schema;
-  }
+  const walk = (def, prefix) => {
+    if (!def || typeof def !== 'object' || seen.has(def)) return;
+    seen.add(def);
 
-  if (!baseDef?.properties) return {};
-
-  // Recursively find all enums in the properties
-  const findEnums = (obj, prefix = '') => {
-    if (!obj || typeof obj !== 'object') return;
-
-    // Check if current object has enum
-    if (obj.enum && Array.isArray(obj.enum)) {
-      const key = prefix.replace(/\.$/, '');
-      if (key) enums[key] = obj.enum;
+    if (Array.isArray(def.enum) && prefix) {
+      enums[prefix] = enums[prefix] || def.enum;
     }
-
-    // Check properties
-    if (obj.properties) {
-      Object.keys(obj.properties).forEach(key => {
-        const prop = obj.properties[key];
-        findEnums(prop, `${prefix}${key}.`);
-      });
-    }
-
-    // Follow $ref
-    if (obj.$ref) {
-      const refPath = obj.$ref.replace('#/definitions/', '');
-      const refDef = schema.definitions?.[refPath];
-      if (refDef) {
-        findEnums(refDef, prefix);
+    if (def.$ref) walk(resolveRef(schema, def.$ref), prefix);
+    if (def.properties) {
+      for (const [key, prop] of Object.entries(def.properties)) {
+        walk(prop, prefix ? `${prefix}.${key}` : key);
       }
     }
-
-    // Check items (for arrays)
-    if (obj.items) {
-      findEnums(obj.items, prefix);
-    }
+    for (const branch of branchesOf(def)) walk(branch, prefix);
+    if (def.items) walk(def.items, prefix);
   };
 
-  findEnums(baseDef);
+  walk(base, '');
   return enums;
 };
 
