@@ -1221,6 +1221,13 @@
     "dragToResize": "Drag to resize"
   },
   "preview": {
+    "context": {
+      "heading": "Context",
+      "description": "Guidance for consumers and AI agents",
+      "instructions": "Instructions",
+      "verifiedStatements": "Verified statements",
+      "constraints": "Constraints"
+    },
     "fundamentals": {
       "heading": "Fundamentals",
       "description": "Information about the data contract",

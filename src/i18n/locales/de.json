@@ -1221,6 +1221,13 @@
     "dragToResize": "Zum Anpassen ziehen"
   },
   "preview": {
+    "context": {
+      "heading": "Kontext",
+      "description": "Hinweise für Konsumenten und KI-Agenten",
+      "instructions": "Anweisungen",
+      "verifiedStatements": "Verifizierte Aussagen",
+      "constraints": "Einschränkungen"
+    },
     "fundamentals": {
       "heading": "Grundlagen",
       "description": "Informationen zum Data Contract",

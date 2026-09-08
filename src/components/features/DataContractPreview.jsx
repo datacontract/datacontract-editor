@@ -1,6 +1,7 @@
 import DescriptionPreview from '../ui/DescriptionPreview.jsx';
 import ContractHeader from './preview/ContractHeader.jsx';
 import FundamentalsSection from './preview/FundamentalsSection.jsx';
+import ContextSection from './preview/ContextSection.jsx';
 import SchemaSection from './preview/SchemaSection.jsx';
 import ServersSection from './preview/ServersSection.jsx';
 import TeamSection from './preview/TeamSection.jsx';
@@ -25,6 +26,9 @@ const DataContractPreview = () => {
 
 					{/* 2. Description Section */}
 					<DescriptionPreview />
+
+					{/* 2b. Context Section (ODCS 3.2.0): guidance for consumers and AI agents */}
+					<ContextSection />
 
 					{/* 3. Data Model Section */}
 					<SchemaSection />

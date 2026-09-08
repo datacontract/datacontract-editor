@@ -8,6 +8,7 @@ import InfoIcon from '../../ui/icons/InfoIcon.jsx';
 import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
+import {ContextDisclosure} from './ContextSection.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
@@ -306,6 +307,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							)}
 							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
               {schema && schema.tags && schema.tags.length > 0 && <Tags tags={schema.tags}/>}
+							<ContextDisclosure context={schema?.context} />
 							{schema && schema.quality && schema.quality.length > 0 && (
 								<div className="mt-2">
 									{schema.quality.map((qualityCheck, idx) => {
