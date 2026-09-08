@@ -12,7 +12,7 @@ import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js'
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
 
-export const initialYaml = 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n';
+export const initialYaml = 'apiVersion: "v3.2.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n';
 
 /**
  * Set the file storage backend to use for the editor

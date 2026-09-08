@@ -80,7 +80,7 @@ Do NOT just show YAML in your text response - use the updateContract tool so cha
 ODCS v3.x Schema):
 
 Root fields:
-- apiVersion: "v3.1.0" (required, or newer)
+- apiVersion: "v3.2.0" (required, or newer)
 - kind: "DataContract" (required)
 - id: string (required)
 - name: string

@@ -130,7 +130,7 @@ init({
   yaml: '...',                       // Initial YAML content
   // The ODCS versions you support, each with the JSON schema a document of that version is
   // validated against. The default is what new contracts get and what the Migrate action in
-  // Fundamentals offers to documents on an older version. Omit for the built-in default (v3.1.0).
+  // Fundamentals offers to documents on an older version. Omit for the built-in default (v3.2.0, with v3.1.0 documents validated against the v3.1.0 schema).
   odcsVersions: [
     { version: 'v3.2.0', schema: 'https://.../odcs-json-schema-v3.2.0.json', default: true },
     { version: 'v3.1.0', schema: 'https://.../odcs-json-schema-v3.1.0.json' },

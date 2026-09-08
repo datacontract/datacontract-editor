@@ -1,5 +1,5 @@
 kind: "DataContract"
-apiVersion: "v3.1.0"
+apiVersion: "v3.2.0"
 id: "urn:datacontract:orders:v1"
 name: "orders_data_contract"
 version: "1.0.0"
@@ -184,3 +184,22 @@ slaProperties:
     unit: "years"
     driver: "regulatory"
     description: "Order and line item data retained for 10 years for compliance purposes"
+context:
+  instructions: >-
+    Use the orders table for order-level analysis and join line_items on order_id for product-level
+    detail. All monetary values are integer cents, so divide by 100 before presenting amounts in
+    EUR. Filter on order_status to separate successful orders from cancelled or refunded ones.
+  verifiedStatements:
+    - id: "revenue-definition"
+      question: "How is revenue calculated?"
+      answer: "Sum of order_total over orders with order_status in (paid, processing, shipped, delivered), in cents."
+      tags:
+        - "finance"
+    - id: "order-count-per-day"
+      question: "How many orders were placed per day?"
+      answer: "Count orders grouped by the calendar date of order_timestamp in UTC."
+  constraints:
+    - id: "no-customer-profiling"
+      constraint: "Do not use customer_id to profile or identify individual customers."
+    - id: "no-partial-refund-inference"
+      constraint: "Do not infer partial refunds from order_total; refunds are only tracked via order_status."

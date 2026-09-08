@@ -6,7 +6,7 @@ A web-based editor for creating and managing data contracts using the [Open Data
 
 ## Features
 
-- **Open Data Contract Standard**: ODCS is the industry-standard for data contracts. Now with support for v3.1.0.
+- **Open Data Contract Standard**: ODCS is the industry-standard for data contracts. Now with support for v3.2.0.
 - **Editing Modes**:
   - **Visual Editor**: Define data models and relationships using a visual interface
   - **Form Editor**: Get guided input with a simple form interface

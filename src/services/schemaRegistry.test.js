@@ -9,6 +9,7 @@ vi.mock('../store.js', () => ({
 import {
   DEFAULT_ODCS_SCHEMA_URL,
   DEFAULT_ODCS_VERSIONS,
+  ODCS_SCHEMA_URL_V3_1_0,
   activeSchemaUrl,
   clearSchemaCache,
   defaultOdcsVersion,
@@ -95,7 +96,9 @@ describe('odcsVersionEntryFor and defaultOdcsVersion', () => {
     expect(odcsVersionEntryFor(versions, '3.1.0').schema).toBe('/s/3.1.0');
     expect(odcsVersionEntryFor(versions, 'v3.0.2').schema).toBe('/s/3.2.0');
     expect(odcsVersionEntryFor(versions, null).schema).toBe('/s/3.2.0');
-    expect(odcsVersionEntryFor(null, 'v3.1.0').schema).toBe(DEFAULT_ODCS_SCHEMA_URL);
+    expect(odcsVersionEntryFor(null, 'v3.2.0').schema).toBe(DEFAULT_ODCS_SCHEMA_URL);
+    expect(odcsVersionEntryFor(null, 'v3.1.0').schema).toBe(ODCS_SCHEMA_URL_V3_1_0);
+    expect(odcsVersionEntryFor(null, 'v3.0.2').schema).toBe(DEFAULT_ODCS_SCHEMA_URL);
   });
 
   it('takes the default version from the list, or from the loaded schema for a legacy entry', () => {
@@ -223,7 +226,7 @@ describe('getSchemaApiVersion', () => {
 
 describe('getSchemaFilename', () => {
   it('takes the last path segment and drops the query string', () => {
-    expect(getSchemaFilename(DEFAULT_ODCS_SCHEMA_URL)).toBe('odcs-json-schema-v3.1.0.json');
+    expect(getSchemaFilename(DEFAULT_ODCS_SCHEMA_URL)).toBe('odcs-json-schema-v3.2.0.json');
     expect(getSchemaFilename('/acme/datacontract-editor-api/odcs-schema?apiVersion=v3.1.0')).toBe('odcs-schema');
     expect(getSchemaFilename(null)).toBeNull();
   });

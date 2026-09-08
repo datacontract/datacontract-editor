@@ -45,7 +45,7 @@ const DEFAULT_CONFIG = {
   container: '#datacontract-editor',
 
   // Initial YAML content
-  yaml: 'apiVersion: "v3.1.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n',
+  yaml: 'apiVersion: "v3.2.0"\nkind: "DataContract"\nid: "example-id"\nversion: "0.0.1"\nstatus: "draft"\nname: "Example Data Contract"\n',
 
   // The ODCS versions the host supports, each with the JSON schema a document of that version is
   // validated against, e.g. [{ version: 'v3.2.0', schema: '<url>', default: true }, { version:

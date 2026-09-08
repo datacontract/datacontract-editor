@@ -12,11 +12,20 @@ import { compareApiVersions } from '../lib/apiVersion.js';
 
 /** Used when neither the host nor the store provides a schema URL. */
 export const DEFAULT_ODCS_SCHEMA_URL =
+  'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.2.0.json';
+
+/** The previous ODCS release, kept so documents still on it validate against their own schema. */
+export const ODCS_SCHEMA_URL_V3_1_0 =
   'https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/refs/heads/main/schema/odcs-json-schema-v3.1.0.json';
 
-/** The version list when the host configures none: the default schema, under the version it names. */
+/**
+ * The version list when the host configures none: the current release as the default (what new
+ * contracts get and what Migrate targets) plus the previous one, so a `v3.1.0` document is still
+ * validated against the 3.1.0 schema and offered the upgrade.
+ */
 export const DEFAULT_ODCS_VERSIONS = Object.freeze([
-  Object.freeze({ version: 'v3.1.0', schema: DEFAULT_ODCS_SCHEMA_URL, default: true }),
+  Object.freeze({ version: 'v3.2.0', schema: DEFAULT_ODCS_SCHEMA_URL, default: true }),
+  Object.freeze({ version: 'v3.1.0', schema: ODCS_SCHEMA_URL_V3_1_0, default: false }),
 ]);
 
 const normalizeApiVersion = (value) => {
