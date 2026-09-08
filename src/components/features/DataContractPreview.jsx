@@ -27,11 +27,12 @@ const DataContractPreview = () => {
 					{/* 2. Description Section */}
 					<DescriptionPreview />
 
-					{/* 2b. Context Section (ODCS 3.2.0): guidance for consumers and AI agents */}
-					<ContextSection />
-
 					{/* 3. Data Model Section */}
 					<SchemaSection />
+
+					{/* 3b. Context Section (ODCS 3.2.0): guidance for consumers and AI agents, below the
+					    schema as on the Entropy Data contract page */}
+					<ContextSection />
 
 					{/* 4. Servers Section */}
 					<ServersSection />
