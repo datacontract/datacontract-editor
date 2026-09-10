@@ -155,8 +155,9 @@ const ServerEditor = ({ serverIndex }) => {
   const documentSupportsSchema = useDocumentSupportsSchemaVersion();
 
   // Server types come from the active schema when it defines them (ODCS 3.2.0 adds ten) and the
-  // document's apiVersion is on the schema's version: known types keep the curated order,
-  // additional schema types are appended as-is.
+  // document's apiVersion is on the schema's version. The whole list is sorted alphabetically,
+  // so a type sits where the reader expects it rather than schema-only types landing in a block
+  // at the bottom.
   const schemaTypeOptions = useMemo(() => {
     const schemaTypes = documentSupportsSchema ? getSchemaEnumValues(schemaData, 'type', 'server') : null;
     if (!schemaTypes || schemaTypes.length === 0) return typeOptions;
@@ -164,7 +165,7 @@ const ServerEditor = ({ serverIndex }) => {
     return [
       ...typeOptions.filter((option) => schemaTypes.includes(option.id)),
       ...schemaTypes.filter((type) => !known.has(type)).map((type) => ({ id: type, name: type })),
-    ];
+    ].sort((a, b) => a.name.localeCompare(b.name));
   }, [schemaData, documentSupportsSchema]);
 
   // Apply type override
