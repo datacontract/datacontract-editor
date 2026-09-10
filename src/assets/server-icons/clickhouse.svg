@@ -1,12 +1,4 @@
-<svg version="1.1" id="Layer_1" xmlns:x="ns_extend;" xmlns:i="ns_ai;" xmlns:graph="ns_graphs;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50.6 50.6" style="enable-background:new 0 0 50.6 50.6;" xml:space="preserve">
- <metadata>
-  <sfw xmlns="ns_sfw;">
-   <slices>
-   </slices>
-   <sliceSourceBounds bottomLeftOrigin="true" height="50.6" width="50.6" x="0" y="0">
-   </sliceSourceBounds>
-  </sfw>
- </metadata>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50.6 50.6">
  <g>
   <g>
    <path d="M0.6,0H5c0.3,0,0.6,0.3,0.6,0.6V50c0,0.3-0.3,0.6-0.6,0.6H0.6C0.3,50.6,0,50.4,0,50V0.6C0,0.3,0.3,0,0.6,0z">
