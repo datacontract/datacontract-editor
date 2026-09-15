@@ -69,56 +69,56 @@ const FundamentalsSection = () => {
 						{name && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.name')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{name}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{name}</dd>
 							</div>
 						)}
 
 						{version && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.version')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{version}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{version}</dd>
 							</div>
 						)}
 
 						{id && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.id')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{id}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{id}</dd>
 							</div>
 						)}
 
 						{status && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.status')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{status}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{status}</dd>
 							</div>
 						)}
 
 						{tenant && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.tenant')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{tenant}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{tenant}</dd>
 							</div>
 						)}
 
 						{domain && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.domain')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{domain}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{domain}</dd>
 							</div>
 						)}
 
 						{dataProduct && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.dataProduct')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{dataProduct}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{dataProduct}</dd>
 							</div>
 						)}
 
 						{contractCreatedTs && (
 							<div className="sm:col-span-1">
 								<dt className="text-sm font-medium text-gray-500">{t('preview.fundamentals.contractCreated')}</dt>
-								<dd className="mt-1 text-sm text-gray-900">{new Date(contractCreatedTs).toLocaleString()}</dd>
+								<dd className="mt-1 text-sm text-gray-900 break-words">{new Date(contractCreatedTs).toLocaleString()}</dd>
 							</div>
 						)}
 
