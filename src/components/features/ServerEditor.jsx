@@ -479,10 +479,12 @@ const ServerEditor = ({ serverIndex }) => {
 												}
 												required={false}
 												type="text"
-												value={servers[serverIndex].schema || ''}
-												onChange={(e) => updateServer('schema', e.target.value)}
+												value={servers[serverIndex].host || ''}
+												onChange={(e) => updateServer('host', e.target.value)}
 												className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
 												placeholder="YOUR_HOSTNAME"
+												validationKey={`servers.${serverIndex}.host`}
+												validationSection="Servers"
 											/>
 										</div>
 
