@@ -20,7 +20,12 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 	const hiddenNames = useHiddenCustomPropertyNames('schema.properties');
 	const { customProperties: customPropertyConfigs } = useCustomization('schema.properties');
 	const { definitionData: propDefinition } = useInheritedDefinition(property?.authoritativeDefinitions);
-	const hasChildren = property.properties && Array.isArray(property.properties) && property.properties.length > 0;
+	const childProperties = (property.properties && Array.isArray(property.properties) && property.properties.length > 0)
+		? property.properties
+		: (property.items?.properties && Array.isArray(property.items.properties) && property.items.properties.length > 0)
+			? property.items.properties
+			: null;
+	const hasChildren = childProperties !== null;
 
 	return (
 		<Fragment key={`${schemaName}-${propertyName}`}>
@@ -52,11 +57,10 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 					{(() => {
-						const typeSource = property.items != null ? property.items : property;
-						const effectiveLogicalType = typeSource.logicalType || propDefinition?.logicalType;
-						const isLogicalTypeInherited = !typeSource.logicalType && !!propDefinition?.logicalType;
-						const physicalType = typeSource.physicalType;
-						const opts = typeSource.logicalTypeOptions || {};
+						const effectiveLogicalType = property.logicalType || property.items?.logicalType || propDefinition?.logicalType;
+						const isLogicalTypeInherited = !property.logicalType && !property.items?.logicalType && !!propDefinition?.logicalType;
+						const physicalType = property.physicalType || property.items?.physicalType;
+						const opts = { ...(property.items?.logicalTypeOptions || {}), ...(property.logicalTypeOptions || {}) };
 
 						const rows = [];
 						if (physicalType) rows.push(t('preview.schema.physicalType', { value: physicalType }));
@@ -250,7 +254,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 					</div>
 				</td>
 			</tr>
-			{hasChildren && property.properties.map((childProp, index) =>
+			{hasChildren && childProperties.map((childProp, index) =>
 				<SchemaProperty
 					key={`${schemaName}-${propertyName}-${childProp?.name || index}`}
 					property={childProp}
