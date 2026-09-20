@@ -13,6 +13,9 @@ import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
 import {useInheritedDefinition} from "../../../hooks/useInheritedDefinition.js";
+import {resolveChildProperties, resolvePropertyTypeInfo} from "../../../utils/previewSchemaUtils.js";
+
+export { resolveChildProperties, resolvePropertyTypeInfo };
 
 // Memoized property row component
 const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
@@ -20,11 +23,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 	const hiddenNames = useHiddenCustomPropertyNames('schema.properties');
 	const { customProperties: customPropertyConfigs } = useCustomization('schema.properties');
 	const { definitionData: propDefinition } = useInheritedDefinition(property?.authoritativeDefinitions);
-	const childProperties = (property.properties && Array.isArray(property.properties) && property.properties.length > 0)
-		? property.properties
-		: (property.items?.properties && Array.isArray(property.items.properties) && property.items.properties.length > 0)
-			? property.items.properties
-			: null;
+	const childProperties = resolveChildProperties(property);
 	const hasChildren = childProperties !== null;
 
 	return (
@@ -57,10 +56,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 					{(() => {
-						const effectiveLogicalType = property.logicalType || property.items?.logicalType || propDefinition?.logicalType;
-						const isLogicalTypeInherited = !property.logicalType && !property.items?.logicalType && !!propDefinition?.logicalType;
-						const physicalType = property.physicalType || property.items?.physicalType;
-						const opts = { ...(property.items?.logicalTypeOptions || {}), ...(property.logicalTypeOptions || {}) };
+						const { effectiveLogicalType, isLogicalTypeInherited, physicalType, opts } = resolvePropertyTypeInfo(property, propDefinition);
 
 						const rows = [];
 						if (physicalType) rows.push(t('preview.schema.physicalType', { value: physicalType }));
