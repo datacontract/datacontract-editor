@@ -13,6 +13,7 @@ import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
 import {useInheritedDefinition} from "../../../hooks/useInheritedDefinition.js";
+import {resolveChildProperties, resolvePropertyTypeInfo} from "../../../utils/previewSchemaUtils.js";
 
 // Memoized property row component
 const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
@@ -20,7 +21,8 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 	const hiddenNames = useHiddenCustomPropertyNames('schema.properties');
 	const { customProperties: customPropertyConfigs } = useCustomization('schema.properties');
 	const { definitionData: propDefinition } = useInheritedDefinition(property?.authoritativeDefinitions);
-	const hasChildren = property.properties && Array.isArray(property.properties) && property.properties.length > 0;
+	const childProperties = resolveChildProperties(property);
+	const hasChildren = childProperties !== null;
 
 	return (
 		<Fragment key={`${schemaName}-${propertyName}`}>
@@ -41,7 +43,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 								<br/>
 							</>
 						) : null}
-						<span className="font-mono">{propertyName}
+						<span className="font-mono">{propertyName}{property.items != null && "[]"}
 							{property.physicalName && (
 								<Tooltip content={property.physicalName}>
 									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />
@@ -52,11 +54,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 					{(() => {
-						const typeSource = property.items != null ? property.items : property;
-						const effectiveLogicalType = typeSource.logicalType || propDefinition?.logicalType;
-						const isLogicalTypeInherited = !typeSource.logicalType && !!propDefinition?.logicalType;
-						const physicalType = typeSource.physicalType;
-						const opts = typeSource.logicalTypeOptions || {};
+						const { effectiveLogicalType, isLogicalTypeInherited, physicalType, opts } = resolvePropertyTypeInfo(property, propDefinition);
 
 						const rows = [];
 						if (physicalType) rows.push(t('preview.schema.physicalType', { value: physicalType }));
@@ -250,7 +248,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 					</div>
 				</td>
 			</tr>
-			{hasChildren && property.properties.map((childProp, index) =>
+			{hasChildren && childProperties.map((childProp, index) =>
 				<SchemaProperty
 					key={`${schemaName}-${propertyName}-${childProp?.name || index}`}
 					property={childProp}

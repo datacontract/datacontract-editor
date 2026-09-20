@@ -1,0 +1,68 @@
+apiVersion: "v3.2.0"
+kind: "DataContract"
+id: "warehouse-pdu"
+name: "WAREHOUSE.PDU"
+version: "1.0.0"
+status: "draft"
+domain: "logistics"
+description:
+  purpose: "Warehouse product data update feed with nested line items."
+schema:
+  - name: "WarehousePdu"
+    logicalType: "object"
+    properties:
+      - name: "PDU"
+        logicalType: "object"
+        properties:
+          - name: "RecordType"
+            businessName: "Record type"
+            logicalType: "string"
+            required: true
+            examples:
+              - "Amend"
+          - name: "Warehouse"
+            businessName: "Warehouse ID"
+            logicalType: "string"
+            required: true
+            examples:
+              - "WH-01"
+          - name: "StyleCode"
+            businessName: "Style code"
+            logicalType: "string"
+            required: true
+            examples:
+              - "B2931"
+          - name: "PDL"
+            businessName: "Product Detail Lines"
+            logicalType: "array"
+            description: "Product line items."
+            items:
+              logicalType: "object"
+              properties:
+                - name: "ColourCode"
+                  businessName: "Item colour code"
+                  logicalType: "string"
+                  required: true
+                  examples:
+                    - "BLU"
+                - name: "ColourName"
+                  businessName: "Item colour name"
+                  logicalType: "string"
+                  examples:
+                    - "Sky Blue"
+                - name: "Size"
+                  businessName: "Item size"
+                  logicalType: "string"
+                  examples:
+                    - "M"
+                - name: "SKU"
+                  businessName: "SKU code"
+                  logicalType: "string"
+                  required: true
+                  examples:
+                    - "B2931BLU-M"
+                - name: "Barcode"
+                  businessName: "Barcode EAN"
+                  logicalType: "string"
+                  examples:
+                    - "8000000047650"
