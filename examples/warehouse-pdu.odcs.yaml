@@ -1,0 +1,722 @@
+apiVersion: "v3.2.0"
+kind: "DataContract"
+id: "warehouse-pdu"
+name: "WAREHOUSE.PDU"
+version: "1.0.0"
+status: "draft"
+domain: "commercial"
+tenant: "retail-demo"
+description:
+  purpose: "Product Data Update feed to WAREHOUSE. Four product catalog event streams are folded into one DynamoDB projection item per option (style + colour); a generator emits three identical XML files, one per destination warehouse (WH-01, WH-02, WH-03)."
+  usage: "Warehouse master-data feed. WAREHOUSE uses these records to receive, store and pick stock. One file per destination warehouse per run; the payload is identical across the three files. This contract is the single source of truth for the mapping — the Confluence mapping table, WAREHOUSE.PDU.xsd, the x-mapping blocks in warehouse-pdu.asyncapi.yaml and the OpenLineage column-lineage facets are generated from it. Do not hand-edit the generated artefacts."
+  limitations: "Option-level master data only. It carries no price, no stock and no order information. BackOrderQty is a hardcoded constant and must not be read as a live quantity. The EffectivePriceChanged v1 stream is listed as consumed by the upstream contract but no element derives from it and the projection has no price watermark — confirm or remove."
+schema:
+  - name: "WarehousePdu"
+    logicalType: "object"
+    physicalName: "WAREHOUSE.PDU"
+    physicalType: "file"
+    tags:
+      - "warehouse"
+      - "pdu"
+      - "product-data"
+      - "warehouse"
+    authoritativeDefinitions:
+      - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+        type: "businessDefinition"
+      - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+        type: "businessDefinition"
+      - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+        type: "businessDefinition"
+      - url: "https://design.example.com/diagrams/warehouse-feed"
+        type: "implementation"
+    properties:
+      - name: "PDU"
+        logicalType: "object"
+        properties:
+          - name: "RecordType"
+            businessName: "Record type"
+            logicalType: "string"
+            physicalType: "VARCHAR(6)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "Amend"
+            description: "Always 'Amend', see https://wiki.example.com/display/DATA/Warehouse+Product+Requirements"
+            customProperties:
+              - property: "hardcoded"
+                value: "true"
+          - name: "Warehouse"
+            businessName: "Warehouse ID"
+            logicalType: "string"
+            physicalType: "VARCHAR(5)"
+            required: true
+            primaryKey: true
+            primaryKeyPosition: 1
+            criticalDataElement: false
+            examples:
+              - "WH-01"
+            description: "Destination warehouse. Constant per generated file; three files per run. WH-01, WH-02 or WH-03, depending on the destination warehouse. Generate three otherwise-identical files."
+            customProperties:
+              - property: "hardcoded"
+                value: "true"
+          - name: "DepartmentCode"
+            businessName: "Department code"
+            logicalType: "string"
+            physicalType: "VARCHAR(2)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "BD"
+            description: "Constant 'BD'."
+            customProperties:
+              - property: "hardcoded"
+                value: "true"
+          - name: "DepartmentName"
+            businessName: "Department name"
+            logicalType: "string"
+            physicalType: "VARCHAR(19)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "CENTRAL GARMENT DEPT"
+            description: "Constant 'CENTRAL GARMENT DEPT'."
+            customProperties:
+              - property: "hardcoded"
+                value: "true"
+          - name: "SubDepartmentNo"
+            businessName: "Sub department number"
+            logicalType: "string"
+            physicalType: "VARCHAR(2)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "02"
+            description: "The value is set based on the 'Division' value received from the 'product-hierarchy-events'\""
+            transformSourceObjects:
+              - "product-hierarchy-events/body/hierarchyAssignments/hierarchyName"
+            transformLogic: |-
+              1. Find the hierarchyAssignments[hierarchyName="merchandisinghierarchyroot"].
+              2. If the value is 'Childrenswear' - set '02';
+              3. Othervise, set '01'.
+            transformDescription: "Derived from the DIVISION value of the assignment hierarchy."
+            customProperties:
+              - property: "market"
+                value: "UK"
+          - name: "SubDepartmentName"
+            businessName: "Sub department name"
+            logicalType: "string"
+            physicalType: "VARCHAR(5)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "Mini"
+            description: "The value is set based on the 'Division' value received from the 'product-hierarchy-events'\""
+            transformLogic: |-
+              1. Find the hierarchyAssignments[hierarchyName="merchandisinghierarchyroot"].
+              2. If the value is 'Childrenswear' - set 'Mini';
+              3. Othervise, set 'Adult'.
+            transformDescription: "Derived from the DIVISION level of the assignment hierarchy."
+            transformSourceObjects:
+              - "product-hierarchy-events/body/hierarchyAssignments/hierarchyName"
+            customProperties:
+              - property: "market"
+                value: "UK"
+          - name: "StyleCode"
+            businessName: "Style code"
+            logicalType: "string"
+            physicalType: "CHAR(5)"
+            required: true
+            primaryKey: true
+            primaryKeyPosition: 2
+            criticalDataElement: true
+            examples:
+              - "B2931"
+            description: "Style code. Absent or shorter than 5 drops the whole record (gate 2, logged as an error); longer than 5 is truncated."
+            logicalTypeOptions:
+              minLength: 5
+              maxLength: 5
+            customProperties:
+              - property: "market"
+                value: "UK"
+            transformSourceObjects:
+              - "product-option-events/body/styCo"
+          - name: "StyleDescr"
+            businessName: "Style description"
+            logicalType: "string"
+            physicalType: "VARCHAR(30)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "Garment Dye Sweatshorts"
+            description: |-
+              Style description, truncated to 30. Sent empty when absent.
+              the specification specifies defaultstyledescription, but catalog event contains only optionstyledescription calculated as alternativestyledescription ??styledescription ?? defaultstyledescription from Catalog export."
+            logicalTypeOptions:
+              maxLength: 30
+            customProperties:
+              - property: "market"
+                value: "UK"
+              - property: "requiresReview"
+                value: "true"
+            transformSourceObjects:
+              - "product-option-events.body.props[optionstyledescription].value"
+            transformLogic: |-
+              props.x means props[name="x"].value.
+              Use 'props[name="optionstyledescription "].value' to get the value.
+          - name: "SegmentCode"
+            businessName: "Segment code"
+            logicalType: "string"
+            physicalType: "VARCHAR(4)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "M004"
+            description: "Truncate to 4 if longer. Not defined or shorter than 2 ⇒ send 00 and log.  Upstream system's assignment table says \"exclude whole PDU, log error\" instead "
+            logicalTypeOptions:
+              minLength: 2
+              maxLength: 4
+            transformSourceObjects:
+              - "product-hierarchy-events/body/hierarchyAssignments/id"
+            transformLogic: "Truncate to 4 if longer. Not defined, or shorter than 2 ⇒ send 00 and log.  Upstream system's assignment table says \"exclude whole PDU, log error\" instead "
+          - name: "SegmentName"
+            businessName: "Segment name"
+            logicalType: "string"
+            physicalType: "VARCHAR(30)"
+            customProperties:
+              - property: "market"
+                value: "UK"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "Childrenswear Boys"
+            description: "DEPARTMENT name when it starts with WW, MW or CW, or when it equals the SEGMENT name. Otherwise SEGMENT name, a space, then DEPARTMENT name, trimmed."
+            logicalTypeOptions:
+              maxLength: 30
+            transformSourceObjects:
+              - "product.assignemets.nodes.children[].name"
+              - "product.assignemets.nodes.children[].children[].name"
+            transformLogic: "DEPARTMENT name when it starts with WW, MW or CW, or when it equals the SEGMENT name. Otherwise SEGMENT name, a space, then DEPARTMENT name, trimmed."
+            transformDescription: "SEGMENT and DEPARTMENT names combined, with de-duplication."
+          - name: "CategoryCode"
+            businessName: "Category code"
+            logicalType: "string"
+            physicalType: "VARCHAR(4)"
+            required: true
+            criticalDataElement: false
+            customProperties:
+              - property: "market"
+                value: "UK"
+            examples:
+              - "M034"
+            description: "CATEGORY id from the assignment hierarchy. Sent empty when absent."
+            logicalTypeOptions:
+              maxLength: 4
+          - name: "CategoryName"
+            businessName: "Category name"
+            logicalType: "string"
+            physicalType: "VARCHAR(30)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "Boys Bottoms"
+            description: "CATEGORY name from the assignment hierarchy. Sent empty when absent."
+            logicalTypeOptions:
+              maxLength: 30
+          - name: "StorageType"
+            businessName: "Storage type"
+            logicalType: "string"
+            physicalType: "CHAR(1)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "F"
+            description: "Storage type. Defaults to F when absent, logged as a warning."
+            customProperties:
+              - property: "market"
+                value: "UK"
+            transformSourceObjects:
+              - "product-option-events.body.props[storagetype].value"
+            transformLogic: |-
+              props.x means props[name="x"].value.
+              Use 'props[name="storagetype"].value' to get the value.
+            logicalTypeOptions:
+              minLength: 1
+              maxLength: 1
+            transformDescription: "Not defined ⇒ send F from configuration DefaultStorageType and log."
+          - name: "MarketingItemsIndicator"
+            businessName: "Marketing items indicator"
+            logicalType: "string"
+            physicalType: "CHAR(1)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "N"
+            description: "CATEGORY name is Global Offers gives Y, otherwise N."
+            transformSourceObjects:
+              - "product-hierarchy-events/body/hierarchyAssignments/id"
+            transformLogic: "CATEGORY name is Global Offers gives Y, otherwise N."
+            transformDescription: "Derived from the CATEGORY level of the assignment hierarchy."
+            customProperties:
+              - property: "market"
+                value: "UK"
+          - name: "CatImgURL"
+            businessName: "Category image URL"
+            logicalType: "string"
+            physicalType: "VARCHAR(500)"
+            required: true
+            criticalDataElement: false
+            examples:
+              - "https://images.example.com/products/preview.jpg"
+            description: |-
+              Category image, resolved on ingest (imageType Internet Still, lowest sequence).
+              Falls back to the DefaultCategoryImageUrl constant, so it is never empty.
+              Still can have no sequence."
+            transformSourceObjects:
+              - "product-image-events.body.props[damimagepreviewurl].value"
+            transformLogic: |-
+              Filter images by imageType = Internet Still, imageSequence ≠ null, props.damimagepreviewurl ≠ null.
+              Take damimagepreviewurl of the first image with the lowest imageSequence.
+              If none, send https://images.example.com/products/preview.jpg from configuration DefaultCategoryImageUrl."
+            logicalTypeOptions:
+              minLength: 1
+              maxLength: 500
+              format: "uri"
+            customProperties:
+              - property: "market"
+                value: "UK"
+              - property: "requiresReview"
+                value: "true"
+          - name: "PDL"
+            businessName: "PDL lines"
+            logicalType: "array"
+            physicalType: "ARRAY"
+            description: "One entry per surviving SKU. A line is dropped when a DROP_PDL condition fires; if no lines survive, the whole record is dropped."
+            items:
+              logicalType: "object"
+              physicalType: "object"
+              transformDescription: "isActive = true ⇒ include the <PDL>; false ⇒ exclude it. A <PDU> left with no <PDL>s is not sent."
+              properties:
+                - name: "ColourCode"
+                  businessName: "Item colour code"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(3)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "SBL"
+                  description: |-
+                    Option colour code.
+                    Re-check if should be rejected in case of a problem?
+                  logicalTypeOptions:
+                    maxLength: 3
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                    - property: "requiresReview"
+                      value: "true"
+                  transformSourceObjects:
+                    - "product-sku-events.body.colourCode"
+                  transformLogic: "Truncate to 3 chars. Send blank if not defined."
+                - name: "ColourName"
+                  businessName: "Item colour name"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(30)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "Clear Sky Blue"
+                  description: "Option description used as the colour name. Sent empty when absent."
+                  logicalTypeOptions:
+                    maxLength: 30
+                  customProperties:
+                    - property: "onTooLong"
+                      value: "TRUNCATE"
+                    - property: "market"
+                      value: "UK"
+                      description: ""
+                - name: "Size"
+                  businessName: "Item size"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(10)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "10-11y"
+                  description: "SKU size code. Absent drops the line with a warning; longer than 10 is truncated."
+                  logicalTypeOptions:
+                    maxLength: 10
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                  transformSourceObjects:
+                    - "product-sku-events.body.sizeCodes[].sizeCode"
+                  transformLogic: "Find a record in the 'sizeCodes' array with the \nisPrimary=true and take the 'sizeCode'"
+                - name: "SizeSeq"
+                  businessName: "Item size sequence number"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(10)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "595"
+                  description: "Sort order rendered as digits. Sent empty when absent, logged as a warning."
+                  logicalTypeOptions:
+                    pattern: "^$|^[0-9]{1,10}$"
+                  transformSourceObjects:
+                    - "product-sku-events.body.sizeCodes[].sortOrder"
+                  transformLogic: "Find a record in the 'sizeCodes' array with the \nisPrimary=true and take the 'sortOrder'"
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "ProdID"
+                  businessName: "Item product ID (EDP)"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(8)"
+                  required: true
+                  criticalDataElement: true
+                  examples:
+                    - "80002312"
+                  description: "EDP number. Absent drops the line (gate 5); longer than 8 is truncated."
+                  logicalTypeOptions:
+                    maxLength: 8
+                  transformSourceObjects:
+                    - "product-sku-events.body.edp"
+                  transformLogic: "Truncate to 8 chars. Not defined ⇒ exclude the <PDL> and log a warning; if no <PDL>s remain, exclude the whole <PDU>."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "SKU"
+                  businessName: "SKU"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(18)"
+                  required: true
+                  criticalDataElement: true
+                  examples:
+                    - "B2931SBL10-11y"
+                  description: "SKU code. Absent drops the line (gate 5); longer than 18 is truncated."
+                  logicalTypeOptions:
+                    maxLength: 18
+                  transformSourceObjects:
+                    - "product-sku-events.body.skuCode"
+                  transformLogic: "Truncate to 18 chars. Not defined ⇒ exclude the <PDL> and log; if no <PDL>s remain, exclude the whole <PDU>."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "SkuID"
+                  businessName: "SKU ID"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(50)"
+                  required: true
+                  criticalDataElement: true
+                  examples:
+                    - "P-B2931SBL10-11y"
+                  description: "SKU identifier. Production files carry a P- prefix; the sample projection item does not. Whether the prefix is stored or added by the generator is open (D11)."
+                  logicalTypeOptions:
+                    maxLength: 50
+                  transformSourceObjects:
+                    - "product-sku-events.body.skuId"
+                  transformLogic: "Not defined ⇒ exclude the <PDL> and log; if no <PDL>s remain, exclude the whole <PDU>. Format observed: P- + SKU code."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "ReturnsID"
+                  businessName: "Item returns identifier (check digits)"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(10)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "16"
+                  description: "Returns check digits. Sent empty when absent."
+                  logicalTypeOptions:
+                    maxLength: 10
+                  transformSourceObjects:
+                    - "product-sku-events.body.props[returnscheckdigits].value"
+                  transformLogic: "Send blank if not defined."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "Weight"
+                  businessName: "Item weight"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(13)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "0.00"
+                  description: "Bare number to two decimal places. The stored value carries a unit suffix such as 500g, so a parse and an agreed unit are required (D10, blocking). Defaults to 0.00."
+                  logicalTypeOptions:
+                    pattern: "^[0-9]{1,10}\\.[0-9]{2}$"
+                  transformSourceObjects:
+                    - "product-sku-events.body.props[productweight].value"
+                  transformLogic: "Format as 0.00. Send 0.00 if not defined."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "BackOrderQty"
+                  businessName: "Backordered quantity"
+                  logicalType: "integer"
+                  physicalType: "INT"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - 0
+                  description: "Hardcoded 0 from configuration. See https://wiki.example.com/display/DATA/Warehouse+Product+Requirements"
+                - name: "SwatchImgURL"
+                  businessName: "Swatch image URL"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(500)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - ""
+                  description: "Swatch image, resolved on ingest (imageType Swatch, lowest sequence). Sent empty when absent; the DefaultSwatchImageUrl constant is itself empty."
+                  logicalTypeOptions:
+                    maxLength: 500
+                  transformSourceObjects:
+                    - "product-image-events.body.images.props[damimagepreviewurl].value"
+                  transformLogic: |-
+                    Filter images by imageType = Swatch, imageSequence ≠ null
+                    props.damimagepreviewurl ≠ null. Take damimagepreviewurl of the first image with the lowest imageSequence.
+                    If none, send blank (configuration DefaultSwatchImageUrl = "").
+                    Swatch images do not have sequence"
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                    - property: "requiresReview"
+                      value: "true"
+                - name: "Barcode"
+                  businessName: "Item barcode (EAN)"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(14)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "8000000047650"
+                  description: "EAN. Absent drops the line (gate 5), logged as a warning."
+                  logicalTypeOptions:
+                    pattern: "^[0-9]{8,14}$"
+                  transformSourceObjects:
+                    - "product-sku-events.body.ean"
+                  transformLogic: "Not defined ⇒ exclude the <PDL> and log a warning.  AR says 'send blank' — see Open decisions D4."
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "USSize"
+                  businessName: "Item US size"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(20)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "10-11y"
+                  description: "US market size description. Sent empty when absent."
+                  logicalTypeOptions:
+                    maxLength: 20
+                  transformSourceObjects:
+                    - "product-sku-events.body.sizeCodes[].sizeDescription"
+                  transformLogic: "Find the isPrimary=true record in the 'sizeCodes' array. Truncate to 20 chars. Send blank if not defined. Populated in all three warehouse files, not only the US ones."
+                  customProperties:
+                    - property: "market"
+                      value: "US"
+                - name: "GermanSize"
+                  businessName: "Item German size"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(20)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "146"
+                  description: "DE market size description. Blank is acceptable — empty for adult styles, populated for childrenswear (D5). \nIs a mandatory field?  "
+                  logicalTypeOptions:
+                    maxLength: 20
+                  transformSourceObjects:
+                    - "product-sku-events.body.sizeCodes[].sizeDescription"
+                  transformLogic: "Find the isPrimary=true record in the 'sizeCodes' array. Truncate to 20 chars. Send blank if not defined.  The specification marks this 'a mandatory field'; the real file sends an empty <GermanSize /> for the adult style, so blank must be tolerated — see Open decisions D5."
+                  customProperties:
+                    - property: "requiresReview"
+                      value: "true"
+                    - property: "market"
+                      value: "DE"
+                - name: "MaterialComposition"
+                  businessName: "Item material composition"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(400)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "100% COTTON"
+                  description: "Newlines replaced with semicolons, double quotes stripped. Sent empty when absent."
+                  logicalTypeOptions:
+                    maxLength: 400
+                    pattern: "^[^\"\\n\\r]*$"
+                  transformSourceObjects:
+                    - "product-option-events.body.props[materialcomposition].value"
+                  transformLogic: |-
+                    props.x means props[name="x"].value.
+                    Use 'props[name="materialcomposition"].value' to get the value.
+                    Replace newline with ;. Remove double-quote characters. Truncate to 400 chars. Send blank if not defined.
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "HsCode"
+                  businessName: "Commodity code (Europe)"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(20)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "6204623190"
+                  description: "First numeric run only, matching ^[0-9]+; any delimited remainder is discarded. 6109902000,6109903000 becomes 6109902000. Sent empty when absent, logged."
+                  logicalTypeOptions:
+                    maxLength: 20
+                    pattern: "^$|^[0-9]+$"
+                  transformSourceObjects:
+                    - "product-option-events.body.props[hscode].value"
+                  transformLogic: |-
+                    props.x means props[name="x"].value.
+                    Use 'props[name="hscode"].value' to get the value.
+                    Extract the first numeric value before any delimiter and ignore the rest (match ^\d+). Truncate to 20 chars. Send blank if not defined. Example: 6109902000,6109903000 ⇒ 6109902000.
+                  customProperties:
+                    - property: "market"
+                      value: "UK"
+                - name: "HtsCodeUS"
+                  businessName: "Commodity code (US)"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(20)"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "6204.62.8018"
+                  description: |-
+                    First dotted numeric run only, matching ^[0-9][0-9.]*; the remainder is discarded. 6106.20.2010|6106.20.2016 becomes 6106.20.2010.
+                    Sent empty when absent, logged."
+                    Re-check if mandatory
+                  logicalTypeOptions:
+                    maxLength: 20
+                    pattern: "^$|^[0-9][0-9.]*$"
+                  transformSourceObjects:
+                    - "product-option-events.body.props[htscodeus].value"
+                  transformLogic: |-
+                    props.x means props[name="x"].value.
+                    Use 'props[name="htscodeus"].value' to get the value.
+                    Extract the first dotted numeric value before any delimiter and ignore the rest (match ^[.0-9]+). Truncate to 20 chars. Send blank if not defined. Example: 6106.20.2010|6106.20.2016 ⇒ 6106.20.2010.
+                  customProperties:
+                    - property: "market"
+                      value: "US"
+                    - property: "requiresReview"
+                      value: "true"
+                    - property: "added in the product-warehouse-in-is scope"
+                      value: "true"
+                - name: "LaunchYearWeek"
+                  businessName: "Launch year and week"
+                  logicalType: "string"
+                  physicalType: "VARCHAR(6)"
+                  required: false
+                  criticalDataElement: true
+                  examples:
+                    - "202713"
+                  description: "launchYear and launchWeek concatenated with no separator and no zero padding: 2026 and 5 gives 20265, 2026 and 15 gives 202615.\nAbsent drops the line. Derived from option-level fields, so the value repeats on every line.\nReformatting of Actual Launch Week is required - removing the “-W” from the value e.g. from Catalog value: 2028-W27, to 202827.\nIf no value in Product Catalog, exclude the entire PDU node e.g. all \nPDLs for that option. Since LaunchYearWeek is captured at Option level, not SKU level, its value cannot be missing for some sizes and present for others under the same option.\nExclusion must happen at the PDU level, not per individual PDL.  "
+                  logicalTypeOptions:
+                    pattern: "^[0-9]{5,6}$"
+                  transformSourceObjects:
+                    - "product-option-events.body.props[launchyear].value"
+                    - "product-option-events.body.props[launchweek].value"
+                  transformLogic: |-
+                    props.x means props[name="x"].value.
+                    Use 'props[name="launchyear"].value' and 'props[name="launchweek"].value' to get the values.
+                    Concatenate launchyear and launchweek with no separator, spacing or zero-padding: 2026, 5 ⇒ 20265; 2026, 15 ⇒ 202615.
+                    Two independent exclusion rules apply: (a) value not derivable ⇒ exclude the <PDL>,
+                    and the whole <PDU> if no <PDL>s remain; (b) launchyear < Today.Year − 1 ⇒ do not send the <PDU> at all, it is too old.
+                  customProperties:
+                    - property: "market"
+                      value: "US"
+                    - property: "added in the product-warehouse-in-is scope"
+                      value: "true"
+                - name: "Restocked?ShouldBeRestocked?Price-Topic-Releated-Property"
+                  businessName: "Flag, reflecting whether the product will be restocked"
+                  logicalType: "boolean"
+                  physicalType: "boolean"
+                  required: true
+                  criticalDataElement: false
+                  examples:
+                    - "false"
+                  description: "Each product record for the UK market must include a 'Mark down' flag, reflecting whether the product will be restocked. Context: Once a product is MD, it will never get a reorder of stock."
+                  transformSourceObjects:
+                    - "effective-price-changed.body.rrp"
+                    - "effective-price-changed.body.price"
+                  transformLogic: "Markdown flag set to “TRUE” when UK RRP > UK CSP. \nUse Price Status - PriceDomainService\nThe Markdown flag is UK-only.\nUsed for clearance products e.g. going to charity and/or sample sales."
+              name: "PDL"
+              transformLogic: "isActive = true ⇒ include the <PDL>; false ⇒ exclude it. A <PDU> left with no <PDL>s is not sent."
+              transformSourceObjects:
+                - "product-sku-events.body.isActive"
+              customProperties:
+                - property: "market"
+                  value: "UK"
+                - property: "added in the product-warehouse-in-is scope"
+                  value: "true"
+                - property: "requiresReview"
+                  value: "true"
+            required: true
+            unique: true
+team:
+  id: "warehouse_pdu_team"
+  name: "WAREHOUSE.PDU"
+  description: "Owners of the WAREHOUSE Product Data Update feed."
+  members:
+    - username: "data-team@example.com"
+      name: "Data Engineering Lead"
+      role: "Team lead"
+support:
+  - channel: "data-contracts"
+    url: "https://example.slack.com/archives/C01234567"
+    tool: "slack"
+    scope: "issues"
+    description: "The main communication channel"
+slaProperties:
+  - property: "frequency"
+    value: 3
+    unit: "files"
+    driver: "operational"
+  - property: "frequency"
+    value: 2
+    unit: "times per day"
+    driver: "operational"
+    element: "WarehousePdu.PDU"
+    schedule: "0 7,19 * * *"
+    scheduler: "cron"
+    description: "Every day at 7:00 and 19:00 GMT"
+  - property: "generalAvailability"
+    value: "Three identical XML files per run, one per destination warehouse."
+    driver: "operational"
+authoritativeDefinitions:
+  - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+    type: "businessDefinition"
+  - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+    type: "businessDefinition"
+  - url: "https://wiki.example.com/display/DATA/Product+Catalog"
+    type: "businessDefinition"
+  - url: "https://design.example.com/diagrams/warehouse-feed"
+    type: "implementation"
+  - type: ""
+    url: "https://wiki.example.com/display/DATA/Warehouse+Product+Requirements"
+    description: "Summary"
+tags:
+  - "warehouse"
+  - "pdu"
+  - "product-data"
+  - "warehouse"
+customProperties:
+  - property: "openDecisions"
+    value:
+      - id: "D1"
+        elements:
+          - "SegmentCode"
+          - "CategoryCode"
+        question: "Missing hierarchy code — substitute, or drop the record? The same for other props"
+        upstream: "The assignment table says exclude the whole PDU and log an error; the annotated JSON on the same page says send 00 or blank. Self-contradictory."
+        ar: "SegmentCode sends 00, CategoryCode sends blank. Both logged."
+        goldenFile: "Always populated; no evidence either way."
+        recommendation: "Substitute and log. Neither element is critical, so dropping a whole style over a missing hierarchy code is disproportionate."
+        owner: "Data Team"
+        status: "open"
