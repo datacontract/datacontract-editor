@@ -15,8 +15,6 @@ import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/use
 import {useInheritedDefinition} from "../../../hooks/useInheritedDefinition.js";
 import {resolveChildProperties, resolvePropertyTypeInfo} from "../../../utils/previewSchemaUtils.js";
 
-export { resolveChildProperties, resolvePropertyTypeInfo };
-
 // Memoized property row component
 const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 	const { t } = useTranslation();
@@ -45,7 +43,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 								<br/>
 							</>
 						) : null}
-						<span className="font-mono">{propertyName}
+						<span className="font-mono">{propertyName}{property.items != null && "[]"}
 							{property.physicalName && (
 								<Tooltip content={property.physicalName}>
 									<QuestionMarkCircleIcon className="size-3 ml-1 text-gray-400 hover:text-gray-500 cursor-pointer" />

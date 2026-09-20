@@ -39,7 +39,7 @@ describe('previewSchemaUtils - resolveChildProperties', () => {
     expect(children[2].name).toBe('price');
   });
 
-  it('prefers top-level properties over items.properties if both exist', () => {
+  it('renders both properties and items.properties when both exist', () => {
     const prop = {
       name: 'mixed',
       properties: [{ name: 'topLevel', logicalType: 'string' }],
@@ -49,8 +49,7 @@ describe('previewSchemaUtils - resolveChildProperties', () => {
     };
 
     const children = resolveChildProperties(prop);
-    expect(children).toHaveLength(1);
-    expect(children[0].name).toBe('topLevel');
+    expect(children.map((c) => c.name)).toEqual(['topLevel', 'nestedItem']);
   });
 
   it('returns null when properties and items.properties are empty or missing', () => {
@@ -79,9 +78,11 @@ describe('previewSchemaUtils - resolvePropertyTypeInfo', () => {
     expect(info.isLogicalTypeInherited).toBe(false);
   });
 
-  it('resolves type info from items for array properties when top-level is omitted', () => {
+  it('describes the item type for an array, even when the property says array', () => {
     const prop = {
       name: 'tags',
+      logicalType: 'array',
+      logicalTypeOptions: { minItems: 1 },
       items: {
         logicalType: 'string',
         physicalType: 'VARCHAR(20)',
@@ -92,24 +93,20 @@ describe('previewSchemaUtils - resolvePropertyTypeInfo', () => {
     const info = resolvePropertyTypeInfo(prop);
     expect(info.effectiveLogicalType).toBe('string');
     expect(info.physicalType).toBe('VARCHAR(20)');
-    expect(info.opts.maxLength).toBe(20);
+    expect(info.opts).toEqual({ maxLength: 20 });
     expect(info.isLogicalTypeInherited).toBe(false);
   });
 
-  it('merges logicalTypeOptions from property and items', () => {
+  it('resolves type info from items when the property has no type of its own', () => {
     const prop = {
-      name: 'data',
-      logicalType: 'array',
-      logicalTypeOptions: { minItems: 1 },
-      items: {
-        logicalTypeOptions: { maxLength: 100 },
-      },
+      name: 'codes',
+      items: { logicalType: 'integer' },
     };
 
     const info = resolvePropertyTypeInfo(prop);
-    expect(info.effectiveLogicalType).toBe('array');
-    expect(info.opts.minItems).toBe(1);
-    expect(info.opts.maxLength).toBe(100);
+    expect(info.effectiveLogicalType).toBe('integer');
+    expect(info.physicalType).toBeUndefined();
+    expect(info.opts).toEqual({});
   });
 
   it('inherits logicalType from semantic authoritative definition if not on property or items', () => {
@@ -124,5 +121,12 @@ describe('previewSchemaUtils - resolvePropertyTypeInfo', () => {
     const info = resolvePropertyTypeInfo(prop, propDefinition);
     expect(info.effectiveLogicalType).toBe('string');
     expect(info.isLogicalTypeInherited).toBe(true);
+  });
+
+  it('does not treat an item type as inherited from the semantic definition', () => {
+    const prop = { name: 'tags', items: { logicalType: 'string' } };
+    const info = resolvePropertyTypeInfo(prop, { logicalType: 'text' });
+    expect(info.effectiveLogicalType).toBe('string');
+    expect(info.isLogicalTypeInherited).toBe(false);
   });
 });
