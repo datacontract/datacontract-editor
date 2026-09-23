@@ -18,6 +18,24 @@ import {propertyLinkIdentity, propertyMatchesLink} from '../../browse/useContrac
 import {useBrowseDropIndicator} from '../../browse/browseDropContext.js';
 import {buildPropertyPath} from '../../../utils/schemaPathBuilder.js';
 
+// Examples column shows at most this many chips; the rest collapse into a "+n" with the
+// full list in the tooltip, so a property with many examples doesn't truncate mid-value.
+const MAX_EXAMPLE_CHIPS = 2;
+
+// ODCS allows any JSON value as an example; objects and arrays would otherwise render
+// as "[object Object]".
+const formatExample = (value) => {
+	if (value === null || value === undefined) return '';
+	if (typeof value === 'object') {
+		try {
+			return JSON.stringify(value);
+		} catch {
+			return String(value);
+		}
+	}
+	return String(value);
+};
+
 /**
  * Recursive component to render a property and its sub-properties
  * Handles inline editing, type selection, and nested structures
@@ -178,7 +196,7 @@ const PropertyRow = ({
 				onMouseLeave={() => setHoveredSchemaProperty(null)}
 			>
 				{/* Main row with name, type, description */}
-				<div className="flex items-center justify-between px-2 pr-2 py-1.5">
+				<div className="relative flex items-center px-2 py-1.5 bg-inherit">
 					<div className="flex items-center gap-1.5 flex-1 min-w-0">
 						{/* Logical Type Icon - also serves as drag handle when drag is enabled */}
 						<span
@@ -197,7 +215,7 @@ const PropertyRow = ({
 														})()}
                         </span>
 
-						{/* Property Name - fixed width for alignment */}
+						{/* Property Name - shared measured width for alignment (see useMeasuredColumns) */}
 						{editingPropertyName ? (
 							<input
 								type="text"
@@ -232,7 +250,8 @@ const PropertyRow = ({
 								}}
 								onClick={(e) => e.stopPropagation()}
 								ref={inputRef}
-								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 w-56 shrink-0"
+								className="bg-white px-1.5 py-0.5 text-sm font-medium text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500 shrink-0"
+								style={{width: 'var(--prop-name-w, 14rem)'}}
 								placeholder="property name"
 								autoFocus
 							/>
@@ -249,7 +268,8 @@ const PropertyRow = ({
 									: 'text-gray-400 italic';
 							return (
 								<span
-									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 w-56 shrink-0 truncate ${colorClass}`}
+									className={`cursor-pointer text-sm font-medium hover:text-indigo-600 hover:bg-indigo-50 px-1.5 py-0.5 rounded transition-colors border border-transparent hover:border-indigo-200 shrink-0 truncate ${colorClass}`}
+									style={{width: 'var(--prop-name-w, 14rem)'}}
 									onClick={(e) => {
 										e.stopPropagation();
 										onSelectProperty(currentPath, property);
@@ -258,13 +278,13 @@ const PropertyRow = ({
 									}}
 									title={property.name || (inheritedName ? `Inherited: ${inheritedName}` : 'Click to edit')}
 								>
-                                    {displayName}
-                                </span>
+									<span data-measure="name">{displayName}</span>
+								</span>
 							);
 						})()}
 
-						{/* Property Type - fixed width for alignment */}
-						<div className="w-28 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+						{/* Property Type - shared measured width for alignment */}
+						<div className="flex-shrink-0" style={{width: 'var(--prop-type-w, 7rem)'}} onClick={(e) => e.stopPropagation()}>
 							<TypeSelector
 								logicalType={property.logicalType}
 								onLogicalTypeChange={(value) => updateProperty(schemaIdx, currentPath, 'logicalType', value || undefined)}
@@ -289,9 +309,9 @@ const PropertyRow = ({
 							<PropertyIndicators property={property}/>
 						</div>
 
-						{/* Description preview — fall back to the inherited definition's description
-						    in blue when the property has none of its own, mirroring the type-from-
-						    definition affordance just above. */}
+						{/* Description preview — takes the remaining width; falls back to the inherited
+						    definition's description in blue when the property has none of its own,
+						    mirroring the type-from-definition affordance just above. */}
 						{property.description ? (
 							<span className="text-xs text-gray-400 truncate flex-1 min-w-0" title={property.description}>
                                 {property.description}
@@ -304,28 +324,60 @@ const PropertyRow = ({
 							<span className="flex-1 min-w-0"/>
 						)}
 
-						{/* Examples preview — own examples in gray, otherwise fall back to the
-						    inherited definition's examples in blue, mirroring description above. */}
+						{/* Examples preview — a fixed, left-aligned column after the description so the
+						    values line up across rows instead of ragging along the right edge. The slot
+						    is always reserved so it never shifts. It is hidden below @3xl, compact with
+						    a single chip up to @5xl (preview pane open), and full width above that.
+						    Own examples in gray, otherwise the inherited definition's in blue, mirroring
+						    the description above. Chips already read as sample values, so the "e.g."
+						    prefix lives only in the tooltip; no border keeps them quieter than the name. */}
 						{(() => {
 							const hasOwnExamples = property.examples && property.examples.length > 0;
 							const examples = hasOwnExamples ? property.examples : definition?.examples;
-							if (!examples || examples.length === 0) return null;
-							const text = `e.g. ${examples.join(', ')}`;
-							return hasOwnExamples ? (
-								<span className="text-xs text-gray-400 truncate text-right basis-52 min-w-0 shrink" title={text}>
-                                {text}
-                            </span>
-							) : (
-								<span className="text-xs text-blue-400 truncate text-right basis-52 min-w-0 shrink" title={`Inherited: ${text}`}>
-                                {text}
-                            </span>
+							if (!examples || examples.length === 0) {
+								return <span className="hidden @3xl:block basis-36 @5xl:basis-52 shrink-0"/>;
+							}
+							const labels = examples.map(formatExample);
+							const shown = labels.slice(0, MAX_EXAMPLE_CHIPS);
+							const overflow = labels.length - shown.length;
+							const text = `e.g. ${labels.join(', ')}`;
+							const chipClass = hasOwnExamples
+								? 'bg-gray-100 text-gray-500'
+								: 'bg-gray-100 text-blue-500';
+							const countClass = hasOwnExamples ? 'text-gray-400' : 'text-blue-400';
+							return (
+								<span
+									className="hidden @3xl:flex items-center gap-1 basis-36 @5xl:basis-52 min-w-0 shrink-0 overflow-hidden"
+									title={hasOwnExamples ? text : `Inherited: ${text}`}
+								>
+									{shown.map((label, i) => (
+										<span
+											key={i}
+											className={`font-mono text-[11px] leading-4 tabular-nums px-1 rounded truncate min-w-0 ${i > 0 ? 'hidden @5xl:block' : ''} ${chipClass}`}
+										>
+											{label}
+										</span>
+									))}
+									{/* The compact column shows one chip, so its overflow count differs. */}
+									{labels.length > 1 && (
+										<span className={`@5xl:hidden text-[11px] leading-4 shrink-0 ${countClass}`}>
+											+{labels.length - 1}
+										</span>
+									)}
+									{overflow > 0 && (
+										<span className={`hidden @5xl:inline text-[11px] leading-4 shrink-0 ${countClass}`}>
+											+{overflow}
+										</span>
+									)}
+								</span>
 							);
 						})()}
 					</div>
 
-					{/* Action Icons — fixed slot so the examples column ends on the same edge
-					    regardless of which actions a row offers */}
-					<div className="flex items-center justify-end gap-1 w-14 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+					{/* Action Icons — overlaid on the row's right edge on hover instead of reserving
+					    space in flow, so the description keeps the full width. bg-inherit picks up
+					    the row's hover/selection tint so the buttons cover the text underneath. */}
+					<div className="absolute inset-y-0 right-2 flex items-center gap-1 pl-3 bg-inherit opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
 						{isObject && (
 							<Tooltip content={t("schema.properties.addSubProperty")}>
 								<button

@@ -46,7 +46,7 @@ const ItemsRow = ({
                 onClick={handleSelect}
             >
                 {/* Main row for items node */}
-                <div className="flex items-center justify-between px-2 pr-2 py-2">
+                <div className="relative flex items-center px-2 py-2 bg-inherit">
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
                         {/* Logical Type Icon */}
                         {(() => {
@@ -60,14 +60,15 @@ const ItemsRow = ({
 
                         {/* Items label - showing parent property name with [] */}
                         <span
-                            className="px-1.5 py-0.5 text-sm text-gray-700 font-medium w-56 truncate flex-shrink-0"
+                            className="px-1.5 py-0.5 text-sm text-gray-700 font-medium truncate flex-shrink-0"
+                            style={{width: 'var(--prop-name-w, 14rem)'}}
                             title={`${parentPropertyName}[]`}
                         >
-                            {parentPropertyName}[]
+                            <span data-measure="name">{parentPropertyName}[]</span>
                         </span>
 
                         {/* Items Type - TypeSelector for logical and physical types */}
-                        <div className="w-28 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex-shrink-0" style={{width: 'var(--prop-type-w, 7rem)'}} onClick={(e) => e.stopPropagation()}>
                             <TypeSelector
                                 logicalType={items?.logicalType}
                                 onLogicalTypeChange={(value) => updateItems('logicalType', value || undefined)}
@@ -85,7 +86,7 @@ const ItemsRow = ({
                     </div>
 
                     {/* Action Icons */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-y-0 right-2 flex items-center gap-1 pl-3 bg-inherit opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
                         {isObject && (
                             <Tooltip content={t("schema.properties.addToItems")}>
                                 <button

@@ -57,7 +57,7 @@ const TypeSelector = ({
           >
             {/* Display type value */}
             <span className="min-w-0 truncate">
-              {displayType}
+              <span data-measure="type">{displayType}</span>
             </span>
 
             {/* Dropdown indicator - only visible on hover or when open */}

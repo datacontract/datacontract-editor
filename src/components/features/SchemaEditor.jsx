@@ -31,6 +31,7 @@ import {buildPropertyPath} from '../../utils/schemaPathBuilder.js';
 import SynonymsEditor from '../ui/SynonymsEditor.jsx';
 import ContextEditor from '../ui/ContextEditor.jsx';
 import { useSchemaProperty } from '../../hooks/useSchemaCapability.js';
+import useMeasuredColumns from './schema/useMeasuredColumns.js';
 
 const SchemaEditor = ({schemaIndex}) => {
 	const {t} = useTranslation();
@@ -162,6 +163,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
 	// Ref for properties container to detect outside clicks
 	const propertiesContainerRef = useRef(null);
+	useMeasuredColumns(propertiesContainerRef);
 	const drawerRef = useRef(null);
 
 	// Refs for auto-editing newly added properties (like diagram editor)
@@ -810,7 +812,9 @@ const SchemaEditor = ({schemaIndex}) => {
 												items={schema[schemaIndex].properties.map((_, idx) => `prop-${schemaIndex}-${idx}`)}
 												strategy={verticalListSortingStrategy}
 											>
-												<div className="rounded-b-md" ref={setPropertiesDropRef}>
+												{/* @container lets rows hide the examples column when the list is narrow
+										    (e.g. preview pane open) instead of crushing the description. */}
+										<div className="rounded-b-md @container" ref={setPropertiesDropRef}>
 													{schema[schemaIndex].properties.map((property, propIndex) => (
 														<PropertyRow
 															key={`prop-${propIndex}`}
