@@ -12,6 +12,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
+import OverrideInheritedButton from '../ui/OverrideInheritedButton.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {SparkleButton} from '../../ai/index.js';
@@ -496,6 +497,7 @@ const SchemaEditor = ({schemaIndex}) => {
 											tooltip={descriptionOverride?.description || t('schema.field.description.tooltip')}
 											placeholder={schemaDefinitionData?.description || descriptionOverride?.placeholder || t('schema.field.description.placeholder')}
 											placeholderClassName={schemaDefinitionData?.description && !schema[schemaIndex].description ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+											inheritedValue={schemaDefinitionData?.description}
 											minLength={descriptionOverride?.minLength}
 											maxLength={descriptionOverride?.maxLength}
 											rows={2}
@@ -537,6 +539,7 @@ const SchemaEditor = ({schemaIndex}) => {
 																tooltip={businessNameOverride?.description || t('schema.field.businessName.tooltip')}
 																placeholder={schemaDefinitionData?.businessName || businessNameOverride?.placeholder || t('schema.field.businessName.placeholder')}
 																placeholderClassName={schemaDefinitionData?.businessName && !schema[schemaIndex].businessName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+																inheritedValue={schemaDefinitionData?.businessName}
 																pattern={businessNameOverride?.pattern}
 																patternMessage={businessNameOverride?.patternMessage}
 																minLength={businessNameOverride?.minLength}
@@ -590,6 +593,7 @@ const SchemaEditor = ({schemaIndex}) => {
 																tooltip={physicalNameOverride?.description || t('schema.field.physicalName.tooltip')}
 																placeholder={schemaDefinitionData?.physicalName || physicalNameOverride?.placeholder || 'shipments_v1'}
 																placeholderClassName={schemaDefinitionData?.physicalName && !schema[schemaIndex].physicalName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+																inheritedValue={schemaDefinitionData?.physicalName}
 																pattern={physicalNameOverride?.pattern}
 																patternMessage={physicalNameOverride?.patternMessage}
 																minLength={physicalNameOverride?.minLength}
@@ -608,6 +612,7 @@ const SchemaEditor = ({schemaIndex}) => {
 																tooltip={logicalTypeOverride?.description || t('schema.field.logicalType.tooltip')}
 																placeholder={schemaDefinitionData?.logicalType || logicalTypeOverride?.placeholder || 'object'}
 																placeholderClassName={schemaDefinitionData?.logicalType && !schema[schemaIndex].logicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+																inheritedValue={schemaDefinitionData?.logicalType}
 																pattern={logicalTypeOverride?.pattern}
 																patternMessage={logicalTypeOverride?.patternMessage}
 																minLength={logicalTypeOverride?.minLength}
@@ -627,6 +632,14 @@ const SchemaEditor = ({schemaIndex}) => {
 																<Tooltip content={t('schema.field.dataGranularity.tooltip')}>
 																	<QuestionMarkCircleIcon/>
 																</Tooltip>
+																{schemaDefinitionData?.dataGranularityDescription && !schema[schemaIndex].dataGranularityDescription && (
+																	<span className="ml-auto">
+																		<OverrideInheritedButton
+																			inheritedValue={schemaDefinitionData?.dataGranularityDescription}
+																			onOverride={(value) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, value)}
+																		/>
+																	</span>
+																)}
 															</div>
 															<textarea
 																id={`schema-data-granularity-${schemaIndex}`}

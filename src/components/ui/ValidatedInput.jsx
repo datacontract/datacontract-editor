@@ -1,6 +1,7 @@
-import { forwardRef } from 'react';
+import { forwardRef, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
+import OverrideInheritedButton from './OverrideInheritedButton.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
 import useBufferedField from '../../hooks/useBufferedField.js';
 
@@ -30,6 +31,7 @@ const ValidatedInput = forwardRef(({
   validationKey,
   validationSection,
   skipInternalValidation = false,
+  inheritedValue,
   onBlur,
   ...props
 }, ref) => {
@@ -43,8 +45,25 @@ const ValidatedInput = forwardRef(({
     onBlur?.(e);
   };
 
+  // Keep a local handle on the input for focusing, while still honoring the forwarded ref
+  const inputRef = useRef(null);
+  const setInputRef = (el) => {
+    inputRef.current = el;
+    if (typeof ref === 'function') {
+      ref(el);
+    } else if (ref) {
+      ref.current = el;
+    }
+  };
+  const handleOverride = (inherited) => {
+    handleBufferedChange({ target: { value: inherited } });
+    flush();
+    inputRef.current?.focus();
+  };
+
   // Internal validation - check if required field is empty
-  const hasInternalError = !skipInternalValidation && required && (!displayValue || displayValue.toString().trim() === '');
+  const isEmpty = !displayValue || displayValue.toString().trim() === '';
+  const hasInternalError = !skipInternalValidation && required && isEmpty;
 
   // Pattern validation
   const hasPatternError = !skipInternalValidation && pattern && displayValue && typeof displayValue === 'string' && displayValue.trim() !== '' && (() => {
@@ -105,12 +124,17 @@ const ValidatedInput = forwardRef(({
 						<QuestionMarkCircleIcon />
           </Tooltip>
         )}
-        {required && (
-          <span className="ml-auto text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {isEmpty && (
+            <OverrideInheritedButton inheritedValue={inheritedValue} onOverride={handleOverride} />
+          )}
+          {required && (
+            <span className="text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
+          )}
+        </div>
       </div>
       <input
-        ref={ref}
+        ref={setInputRef}
         type="text"
         name={name}
         id={name}

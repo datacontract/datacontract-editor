@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
 import { getGroupedPhysicalTypes } from './physicalTypeMappings';
+import OverrideInheritedButton from '../OverrideInheritedButton.jsx';
 
 const ChevronDownIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -28,9 +29,11 @@ const PhysicalTypeCombobox = ({
   label = 'Physical Type',
   placeholder = 'e.g., VARCHAR(255)',
   placeholderClassName = 'placeholder:text-gray-400',
+  inheritedValue,
 }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const inputRef = useRef(null);
 
   // Get grouped physical types for the server, filtered by logical type
   const groupedTypes = useMemo(() => {
@@ -60,6 +63,11 @@ const PhysicalTypeCombobox = ({
     onChange(selectedValue);
   };
 
+  const handleOverride = (inherited) => {
+    onChange(inherited);
+    inputRef.current?.focus();
+  };
+
   const handleInputChange = (event) => {
     const inputValue = event.target.value;
     setQuery(inputValue);
@@ -76,12 +84,18 @@ const PhysicalTypeCombobox = ({
       className={className}
     >
       {label && (
-        <Combobox.Label className="block text-xs font-medium text-gray-700 mb-1">
-          {label}
-        </Combobox.Label>
+        <div className="flex items-center justify-between mb-1">
+          <Combobox.Label className="block text-xs font-medium text-gray-700">
+            {label}
+          </Combobox.Label>
+          {!value && !disabled && (
+            <OverrideInheritedButton inheritedValue={inheritedValue} onOverride={handleOverride} />
+          )}
+        </div>
       )}
       <div className="relative">
         <ComboboxInput
+          ref={inputRef}
           className={`w-full rounded-md border-0 bg-white py-1.5 pl-2 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 ${placeholderClassName} focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed`}
           onChange={handleInputChange}
           onBlur={() => setQuery('')}

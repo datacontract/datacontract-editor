@@ -795,7 +795,9 @@
     "maxValue": "Maximum value is {{max}}",
     "selectOption": "Select an option...",
     "typeToEnter": "Type to enter a value or select from options",
-    "noOptions": "No options available"
+    "noOptions": "No options available",
+    "overrideInherited": "Override",
+    "overrideInheritedTooltip": "Copy the inherited value into this field to edit it"
   },
   "quality": {
     "label": "Quality Rule",

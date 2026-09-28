@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
+import OverrideInheritedButton from './OverrideInheritedButton.jsx';
 import QuestionMarkCircleIcon from "./icons/QuestionMarkCircleIcon.jsx";
 import useBufferedField from '../../hooks/useBufferedField.js';
 
@@ -20,6 +22,7 @@ const ValidatedTextarea = ({
   minLength,
   maxLength,
   actions,
+  inheritedValue,
   className = '',
   placeholderClassName = 'placeholder:text-gray-400',
   onBlur,
@@ -41,6 +44,13 @@ const ValidatedTextarea = ({
   const handleBlur = (e) => {
     flush();
     onBlur?.(e);
+  };
+
+  const textareaRef = useRef(null);
+  const handleOverride = (inherited) => {
+    handleChange({ target: { value: inherited } });
+    flush();
+    textareaRef.current?.focus();
   };
 
   const strValue = displayValue || '';
@@ -77,6 +87,9 @@ const ValidatedTextarea = ({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {trimmed === '' && (
+            <OverrideInheritedButton inheritedValue={inheritedValue} onOverride={handleOverride} />
+          )}
           {actions}
           {required && (
             <span className="text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
@@ -84,6 +97,7 @@ const ValidatedTextarea = ({
         </div>
       </div>
       <textarea
+        ref={textareaRef}
         id={name}
         name={name}
         rows={rows}

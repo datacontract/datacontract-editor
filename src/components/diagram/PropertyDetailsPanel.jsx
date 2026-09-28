@@ -13,6 +13,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import EnumField from '../ui/EnumField.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
+import OverrideInheritedButton from '../ui/OverrideInheritedButton.jsx';
 import TagsInput from '../ui/TagsInput.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
 import SynonymsEditor from '../ui/SynonymsEditor.jsx';
@@ -331,6 +332,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   tooltip={businessNameOverride?.description}
                   placeholder={definitionData?.businessName || businessNameOverride?.placeholder || "Human-readable name"}
                   placeholderClassName={definitionData?.businessName && !property.businessName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                  inheritedValue={definitionData?.businessName}
                   pattern={businessNameOverride?.pattern}
                   patternMessage={businessNameOverride?.patternMessage}
                   minLength={businessNameOverride?.minLength}
@@ -350,6 +352,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   tooltip={physicalNameOverride?.description}
                   placeholder={definitionData?.physicalName || physicalNameOverride?.placeholder || "Actual database column name"}
                   placeholderClassName={definitionData?.physicalName && !property.physicalName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                  inheritedValue={definitionData?.physicalName}
                   pattern={physicalNameOverride?.pattern}
                   patternMessage={physicalNameOverride?.patternMessage}
                   minLength={physicalNameOverride?.minLength}
@@ -485,6 +488,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   label={physicalTypeOverride?.title || t('diagram.field.physicalType.label')}
                   placeholder={definitionData?.physicalType || physicalTypeOverride?.placeholder || "e.g., VARCHAR(255)"}
                   placeholderClassName={definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                  inheritedValue={definitionData?.physicalType}
                 />
               )}
               {renderCustomAfter('physicalType')}
@@ -500,6 +504,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     required={descriptionOverride?.required}
                     placeholder={definitionData?.description || descriptionOverride?.placeholder || t('diagram.field.description.placeholder')}
                     placeholderClassName={definitionData?.description && !property.description ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    inheritedValue={definitionData?.description}
                     minLength={descriptionOverride?.minLength}
                     maxLength={descriptionOverride?.maxLength}
                     actions={
@@ -538,6 +543,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     required={examplesOverride?.required}
                     placeholder={definitionData?.examples ? definitionData.examples.join('\n') : "example1\nexample2\nexample3"}
                     placeholderClassName={definitionData?.examples && !property.examples ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    inheritedValue={definitionData?.examples?.join('\n')}
                     minLength={examplesOverride?.minLength}
                     maxLength={examplesOverride?.maxLength}
                   />
@@ -713,7 +719,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {(property.logicalType === 'string') && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.format.label')}</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-gray-700">{t('diagram.field.format.label')}</label>
+                      {!property.logicalTypeOptions?.format && (
+                        <OverrideInheritedButton inheritedValue={definitionData?.logicalTypeOptions?.format} onOverride={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: value })} />
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
@@ -745,7 +756,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.pattern.label')}</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-gray-700">{t('diagram.field.pattern.label')}</label>
+                      {!property.logicalTypeOptions?.pattern && (
+                        <OverrideInheritedButton inheritedValue={definitionData?.pattern} onOverride={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, pattern: value })} />
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.pattern || ''}
@@ -854,7 +870,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {(property.logicalType === 'date' || property.logicalType === 'timestamp' || property.logicalType === 'time') && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.format.label')}</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-gray-700">{t('diagram.field.format.label')}</label>
+                      {!property.logicalTypeOptions?.format && (
+                        <OverrideInheritedButton inheritedValue={definitionData?.logicalTypeOptions?.format} onOverride={(value) => updateField('logicalTypeOptions', { ...property.logicalTypeOptions, format: value })} />
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={property.logicalTypeOptions?.format || ''}
@@ -1223,6 +1244,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     tooltip={classificationOverride?.description}
                     placeholder={definitionData?.classification || classificationOverride?.placeholder || "e.g., confidential, public, internal"}
                     placeholderClassName={definitionData?.classification && !property.classification ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    inheritedValue={definitionData?.classification}
                     pattern={classificationOverride?.pattern}
                     patternMessage={classificationOverride?.patternMessage}
                     minLength={classificationOverride?.minLength}
@@ -1271,6 +1293,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   tooltip={encryptedNameOverride?.description}
                   placeholder={definitionData?.encryptedName || encryptedNameOverride?.placeholder || "Encrypted field reference"}
                   placeholderClassName={definitionData?.encryptedName && !property.encryptedName ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                  inheritedValue={definitionData?.encryptedName}
                   pattern={encryptedNameOverride?.pattern}
                   patternMessage={encryptedNameOverride?.patternMessage}
                   minLength={encryptedNameOverride?.minLength}
@@ -1321,7 +1344,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Logic */}
               {!isTransformLogicHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.transformLogic.label')}</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.transformLogic.label')}</label>
+                    {!property.transformLogic && (
+                      <OverrideInheritedButton inheritedValue={definitionData?.transformLogic} onOverride={(value) => updateField('transformLogic', value)} />
+                    )}
+                  </div>
                   <textarea
                     value={property.transformLogic || ''}
                     onChange={(e) => updateField('transformLogic', e.target.value || undefined)}
@@ -1337,7 +1365,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Description */}
               {!isTransformDescriptionHidden && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('diagram.field.transformDescription.label')}</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.transformDescription.label')}</label>
+                    {!property.transformDescription && (
+                      <OverrideInheritedButton inheritedValue={definitionData?.transformDescription} onOverride={(value) => updateField('transformDescription', value)} />
+                    )}
+                  </div>
                   <textarea
                     value={property.transformDescription || ''}
                     onChange={(e) => updateField('transformDescription', e.target.value || undefined)}

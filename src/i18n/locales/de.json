@@ -795,7 +795,9 @@
     "maxValue": "Maximalwert ist {{max}}",
     "selectOption": "Option auswählen...",
     "typeToEnter": "Tippe, um einen Wert einzugeben, oder wähle aus den Optionen",
-    "noOptions": "Keine Optionen verfügbar"
+    "noOptions": "Keine Optionen verfügbar",
+    "overrideInherited": "Überschreiben",
+    "overrideInheritedTooltip": "Geerbten Wert in dieses Feld kopieren, um ihn anzupassen"
   },
   "quality": {
     "label": "Qualitätsregel",
