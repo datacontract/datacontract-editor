@@ -1,4 +1,4 @@
-import {useCallback, useMemo} from 'react';
+import {useCallback, useEffect, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import {useEditorStore} from '../store.js';
@@ -53,6 +53,21 @@ const Overview = () => {
 
 	// Get customization config for root level
 	const { customProperties: customPropertyConfigs, customSections } = useCustomization('root');
+
+	// Properties configured with `auto: true` show what the host derives for them when left empty.
+	// The host derives from the whole document (e.g. a contract's classification from its columns),
+	// so any edit can change the result: re-derive once the document has been still for a moment.
+	const yaml = useEditorStore((state) => state.yaml);
+	const refreshAutoValues = useEditorStore((state) => state.refreshAutoValues);
+	const hasAutoProperties = useMemo(
+		() => (customPropertyConfigs || []).some((p) => p.auto),
+		[customPropertyConfigs]
+	);
+	useEffect(() => {
+		if (!hasAutoProperties) return undefined;
+		const timer = setTimeout(() => refreshAutoValues(), 400);
+		return () => clearTimeout(timer);
+	}, [yaml, hasAutoProperties, refreshAutoValues]);
 
 	// Check hidden status for each standard property
 	const isApiVersionHidden = useIsPropertyHidden('root', 'apiVersion');

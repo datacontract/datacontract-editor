@@ -7,6 +7,7 @@ import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { isSafeKey } from './utils/safeProperty.js';
 import { createAuthoritativeDefinitionsSlice, initialAuthoritativeDefinitionsState } from './lib/authoritativeDefinitionsSlice.js';
+import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
@@ -417,6 +418,7 @@ export function defaultStoreConfig(set, get) {
 			ai: DEFAULT_AI_CONFIG,
 			semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl } for the semantic ontology tree API; when semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched on load
 			dataProducts: null, // { upstreamUrl, productsUrl, contractsBaseUrl } for the data products browse panel
+			autoValues: null, // { url } deriving the values of custom properties configured with `auto: true`
       managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
       allowUnmanagedTags: true,
 			customizations: null, // See CUSTOMIZATION.md for documentation
@@ -427,6 +429,7 @@ export function defaultStoreConfig(set, get) {
 		pendingAiChange: null, // { updatedYaml, summary, validationErrors, isValid }
 		lastAppliedAiChange: null, // { originalYaml, summary } - for unapply
 		...authoritativeDefinitionsSlice,
+		...createAutoValuesSlice(set, get),
 		...createBrowsePanelSlice(set),
 		...actions,
 	};
@@ -443,7 +446,7 @@ const defaultEditorStore = create()(
 		? persist(defaultStoreConfig, {
 			name: 'editor-store',
 			storage: storageConfig,
-			partialize: ({ authoritativeDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
+			partialize: ({ authoritativeDefinitions, autoValues, ...rest }) => rest, // eslint-disable-line no-unused-vars
 			merge: (persistedState, currentState) => {
 				// Deep merge editorConfig, ensuring empty strings don't override build-time defaults
 				const persistedAi = persistedState?.editorConfig?.ai || {};

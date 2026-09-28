@@ -155,11 +155,41 @@ dataContract:
         condition: "expression"         # Conditional display expression
         positionAfter: "description"    # Render inline after this property (standard or custom)
         hidden: true                    # Hide from form UI and preview (still editable in YAML editor)
+        auto: true                      # Empty means the host derives the value (select/multiselect, root level); or { hint }
 ```
 
 ### Hiding properties from the form UI
 
 Set `hidden: true` to keep a custom property out of the form-based editor and the preview/display view. The property still round-trips through the YAML untouched — Monaco YAML editing shows and edits it normally. Use this for fields managed externally (API/automation) that non-technical users should not see or edit. Mirrors the `hidden` semantics already supported on standard properties.
+
+### Auto values derived by the host
+
+Set `auto: true` on a root-level `select` or `multiselect` property whose empty value means "derive it", for example a contract-level classification that the host rolls up from the schema's columns. The field then shows an explicit **Auto** choice followed by one choice per enum option:
+
+- The Auto choice shows the values the host currently derives. Choosing it clears the property.
+- Picking an option sets the property explicitly, replacing what Auto would give.
+- `auto: { hint: "From the schema" }` replaces the default hint shown under "Auto".
+- When the host reports that the explicit value drops or weakens what Auto would give, a warning appears under the field.
+
+The derived values come from the `autoValues.url` init option (see CONFIGURATION.md). The editor POSTs the current document to it, debounced while the user edits:
+
+```
+POST {autoValues.url}
+{ "yaml": "<the current document>" }
+
+200
+{
+  "properties": {
+    "classification": {
+      "values": ["Restricted"],
+      "detail": "Restricted from ARTICLE_NAME",
+      "warning": "Public is less sensitive than the schema, which has Restricted on ARTICLE_NAME."
+    }
+  }
+}
+```
+
+`values` are shown on the Auto choice, `detail` as its tooltip, and `warning` under the field while an explicit value is set. The host computes the warning from the document it received, so the editor needs no knowledge of what the values mean. Without `autoValues.url` the Auto choice still works, it just shows no derived values.
 
 ### Positioning
 
@@ -209,6 +239,16 @@ enum:
 ```
 
 Note: `title` is also supported as an alias for `label` for backwards compatibility.
+
+On a property with `auto: true`, an option may also carry a `color` and an `icon`, used for its choice and for its badge on the Auto choice:
+
+```yaml
+enum:
+  - value: "Restricted"
+    label: "Restricted"
+    color: "red"          # gray, red, orange, amber, yellow, green, teal, blue, indigo, purple or pink
+    icon: "<svg ...>"     # SVG markup or an image URL, always rendered as an image
+```
 
 ### Conditional Display
 

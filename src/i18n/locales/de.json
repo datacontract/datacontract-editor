@@ -951,6 +951,14 @@
     "required": "Erforderlich",
     "select": "Auswählen…",
     "noOptions": "Keine Optionen verfügbar",
+    "auto": {
+      "label": "Auto",
+      "hint": "Automatisch abgeleitet",
+      "loading": "Wird geladen…",
+      "none": "Noch nichts abzuleiten",
+      "orPick": "Oder einen festen Wert setzen:",
+      "orPickMany": "Oder alle zutreffenden Werte wählen:"
+    },
     "boolean": {
       "notSet": "Nicht gesetzt",
       "false": "Falsch",

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useEditorStore } from '../../store.js';
 import ValidatedInput from './ValidatedInput';
 import { ValidatedCombobox } from './index';
 import TagsInput from './TagsInput.jsx';
@@ -7,6 +8,8 @@ import ObjectYamlEditor from './ObjectYamlEditor.jsx';
 import Tooltip from './Tooltip';
 import QuestionMarkCircleIcon from './icons/QuestionMarkCircleIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
+import SparklesIcon from './icons/SparklesIcon';
+import ExclamationCircleIcon from './icons/ExclamationCircleIcon';
 import { evaluateCondition } from '../../lib/conditionEvaluator';
 
 /**
@@ -292,6 +295,221 @@ const SelectField = ({ config, value, onChange, errors }) => {
       externalErrors={errors}
       skipInternalValidation
     />
+  );
+};
+
+// Badge palette for an enum option's `color`. Literal class strings, so Tailwind keeps them.
+const OPTION_BADGE_CLASSES = {
+  gray: 'bg-gray-50 text-gray-600 ring-gray-600/20',
+  red: 'bg-red-50 text-red-700 ring-red-600/20',
+  orange: 'bg-orange-50 text-orange-700 ring-orange-600/20',
+  amber: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+  yellow: 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
+  green: 'bg-green-50 text-green-700 ring-green-600/20',
+  teal: 'bg-teal-50 text-teal-700 ring-teal-600/20',
+  blue: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+  indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
+  purple: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+  pink: 'bg-pink-50 text-pink-700 ring-pink-600/20',
+};
+
+/**
+ * An enum option's `icon`: SVG markup or an image URL. Always rendered as an <img>, so markup that
+ * comes in through a customization cannot run script in the editor.
+ */
+const OptionIcon = ({ icon }) => {
+  if (!icon || typeof icon !== 'string') return null;
+  const trimmed = icon.trim();
+  let src = trimmed;
+  if (trimmed.startsWith('<')) {
+    // An SVG only renders as an image when it declares its namespace.
+    const svg = /^<svg(?![^>]*\sxmlns=)/.test(trimmed)
+      ? trimmed.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"')
+      : trimmed;
+    src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+  return <img src={src} alt="" aria-hidden="true" className="size-4 shrink-0" />;
+};
+
+const OptionBadge = ({ option, value }) => (
+  <span
+    className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
+      OPTION_BADGE_CLASSES[option?.color] || OPTION_BADGE_CLASSES.gray
+    }`}
+  >
+    <OptionIcon icon={option?.icon} />
+    {option?.name || value}
+  </span>
+);
+
+const choiceClassName = (pressed) =>
+  `inline-flex max-w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-gray-900 ring-inset transition-shadow ${
+    pressed ? 'bg-indigo-50/60 ring-2 ring-indigo-600' : 'bg-white ring-1 ring-gray-300 hover:ring-gray-400'
+  }`;
+
+/**
+ * A select or multiselect whose empty value means "Auto": the host derives the value from the rest
+ * of the document (customization `auto: true`, or `auto: { hint }`). Renders an Auto choice with the
+ * values the host currently derives (editorConfig.autoValues), one choice per enum option for an
+ * explicit value, and the host's warning about what that explicit value replaces. Choosing Auto
+ * clears the value. Enum options may carry a `color` and an `icon`, used for their choice and badge.
+ */
+const AutoValueField = ({ config, value, onChange, errors }) => {
+  const { t } = useTranslation();
+  const {
+    property,
+    title,
+    description,
+    required,
+    type,
+    auto,
+    enum: enumOptions,
+  } = config;
+  const multi = type === 'multiselect';
+  const hint = (auto && typeof auto === 'object' && auto.hint) || t('customProperty.auto.hint');
+
+  const derived = useEditorStore((state) => state.autoValues?.byProperty?.[property]);
+  const status = useEditorStore((state) => state.autoValues?.status);
+  const hasSource = useEditorStore((state) => !!state.editorConfig?.autoValues?.url);
+
+  const options = useMemo(() => {
+    if (!enumOptions) return [];
+    return enumOptions.map((item) => {
+      if (typeof item === 'string') {
+        return { id: item, name: item };
+      }
+      return {
+        id: item.value,
+        name: item.label || item.title || item.value,
+        color: item.color,
+        icon: item.icon,
+      };
+    });
+  }, [enumOptions]);
+
+  // The host names derived values as they are stored, which may differ in case from the option.
+  const optionFor = (v) =>
+    options.find((o) => o.id === v) ||
+    options.find((o) => String(o.id).toLowerCase() === String(v).toLowerCase());
+
+  const selectedValues = Array.isArray(value) ? value : (value ? [value] : []);
+  const isAuto = selectedValues.length === 0;
+  // A value written in YAML that is not an option stays visible (and selected) instead of vanishing.
+  const unknownValues = selectedValues.filter((v) => !options.some((o) => o.id === v));
+
+  const choose = (optValue) => {
+    if (!multi) {
+      onChange(optValue);
+      return;
+    }
+    const next = selectedValues.includes(optValue)
+      ? selectedValues.filter((v) => v !== optValue)
+      : [...selectedValues, optValue];
+    onChange(next.length > 0 ? next : undefined);
+  };
+
+  const derivedValues = derived?.values || [];
+  let derivedContent = null;
+  if (derivedValues.length > 0) {
+    derivedContent = (
+      <span className="flex flex-wrap gap-1">
+        {derivedValues.map((v) => (
+          <OptionBadge key={v} option={optionFor(v)} value={v} />
+        ))}
+      </span>
+    );
+  } else if (hasSource && (status === 'loading' || status === 'idle')) {
+    derivedContent = <span className="font-normal text-gray-400">{t('customProperty.auto.loading')}</span>;
+  } else if (hasSource && status === 'ready') {
+    derivedContent = <span className="font-normal text-gray-400">{t('customProperty.auto.none')}</span>;
+  }
+
+  // Where the derived values come from (e.g. which columns carry them) is the host's `detail`, shown
+  // as a tooltip on the whole choice: a Tooltip renders a <div>, which a <button> must not contain.
+  const autoChoice = (
+    <button
+      type="button"
+      aria-pressed={isAuto}
+      onClick={() => onChange(undefined)}
+      className={`${choiceClassName(isAuto)} gap-2`}
+    >
+      <SparklesIcon className="size-4 shrink-0 text-gray-400" aria-hidden="true" />
+      <span className="flex shrink-0 flex-col">
+        <span>{t('customProperty.auto.label')}</span>
+        <span className="text-[11px] font-normal leading-3 text-gray-500">{hint}</span>
+      </span>
+      {derivedContent}
+    </button>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 mb-1">
+        <label className="block text-xs font-medium leading-4 text-gray-900">
+          <FieldLabel title={title} property={property} />
+        </label>
+        {description && (
+          <Tooltip content={description}>
+            <QuestionMarkCircleIcon />
+          </Tooltip>
+        )}
+        {required && (
+          <span className="ml-auto text-xs leading-4 text-gray-500">
+            {t('customProperty.required')}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {derived?.detail ? (
+          <Tooltip content={derived.detail} className="inline-flex max-w-full">
+            {autoChoice}
+          </Tooltip>
+        ) : autoChoice}
+        <p className="basis-full text-xs leading-4 text-gray-500">
+          {multi ? t('customProperty.auto.orPickMany') : t('customProperty.auto.orPick')}
+        </p>
+        {options.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            aria-pressed={selectedValues.includes(opt.id)}
+            onClick={() => choose(opt.id)}
+            className={choiceClassName(selectedValues.includes(opt.id))}
+          >
+            <OptionIcon icon={opt.icon} />
+            {opt.name}
+          </button>
+        ))}
+        {unknownValues.map((v) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed="true"
+            onClick={() => choose(v)}
+            className={choiceClassName(true)}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
+
+      {errors?.map((err, i) => (
+        <p key={i} className="mt-1 text-xs text-red-600">
+          {err}
+        </p>
+      ))}
+
+      {!isAuto && derived?.warning && (
+        <div
+          role="status"
+          className="mt-2 flex gap-1.5 rounded-md bg-amber-50 px-2 py-1.5 text-xs leading-4 text-amber-800 ring-1 ring-inset ring-amber-600/20"
+        >
+          <ExclamationCircleIcon className="size-4 shrink-0 text-amber-500" aria-hidden="true" />
+          <span>{derived.warning}</span>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -667,6 +885,16 @@ const CustomPropertyField = ({
       );
 
     case 'select':
+      if (config.auto) {
+        return (
+          <AutoValueField
+            config={config}
+            value={value}
+            onChange={onChange}
+            errors={validationErrors}
+          />
+        );
+      }
       return (
         <SelectField
           config={config}
@@ -677,6 +905,16 @@ const CustomPropertyField = ({
       );
 
     case 'multiselect':
+      if (config.auto) {
+        return (
+          <AutoValueField
+            config={config}
+            value={value}
+            onChange={onChange}
+            errors={validationErrors}
+          />
+        );
+      }
       return (
         <MultiselectField
           config={config}

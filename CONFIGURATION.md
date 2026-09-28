@@ -179,6 +179,10 @@ init({
     productUriTemplate: '/dataproducts/{externalId}'           // canonical product URL for lineage URIs (defaults to productDetailsUrlTemplate)
   },
 
+  autoValues: {                      // Derived values for custom properties with `auto: true`
+    url: '/api/auto-values'          // POST { yaml } -> { properties: { <property>: { values, detail?, warning? } } }
+  },
+
   // Advanced
   persistence: 'none',              // 'localStorage', 'sessionStorage', or 'none' (default: 'none')
   basePath: null,                    // Base path for assets

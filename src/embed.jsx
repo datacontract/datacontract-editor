@@ -12,6 +12,7 @@ import i18n from './i18n/index.js'
 import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
 import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
+import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
@@ -111,6 +112,11 @@ const DEFAULT_CONFIG = {
   // products with contracts ([{externalId, name}]); each product's contracts
   // load lazily from `${contractsBaseUrl}/{externalId}/contracts`.
   dataProducts: null,
+
+  // Derived ("Auto") values for custom properties configured with `auto: true`: { url }.
+  // The editor POSTs { yaml } to url and expects
+  // { properties: { <property>: { values: [...], detail?, warning? } } }. See CUSTOMIZATION.md.
+  autoValues: null,
 
   managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
   allowUnmanagedTags: true,
@@ -407,6 +413,7 @@ function createConfiguredStore(config) {
 				titlePrefix: config.titlePrefix,
 				semantics: config.semantics,
 				dataProducts: config.dataProducts,
+				autoValues: config.autoValues,
         managedTags: config.managedTags,
         allowUnmanagedTags: config.allowUnmanagedTags,
 				dataProductsUsingContract: config.dataProductsUsingContract,
@@ -418,6 +425,7 @@ function createConfiguredStore(config) {
 				csrf: config.csrf,
 			},
 			...authoritativeDefinitionsSlice,
+			...createAutoValuesSlice(set, get),
 			...createBrowsePanelSlice(set),
 			...actions,
 		};
