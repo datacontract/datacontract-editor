@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     if: github.event.action != 'closed'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Build
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
     # Deploy only from main. Pull requests are built but never published to an
     # Azure preview environment.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v3
