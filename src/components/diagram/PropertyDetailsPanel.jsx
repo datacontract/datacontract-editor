@@ -27,6 +27,7 @@ import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from
 import {CustomContentAfter, CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
 import {isExternalUrl, toAbsoluteUrl} from '../../lib/urlUtils.js';
+import {isStandardSectionEmpty} from '../../lib/customContentAnchors.js';
 import {useDefinition} from '../../hooks/useDefinition.js';
 import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
 import {useActiveServerType} from '../../hooks/useActiveServerType.js';
@@ -108,6 +109,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   const partitionedOverride = useStandardPropertyOverride('schema.properties', 'partitioned');
   const criticalDataElementOverride = useStandardPropertyOverride('schema.properties', 'criticalDataElement');
   const transformSourceObjectsOverride = useStandardPropertyOverride('schema.properties', 'transformSourceObjects');
+  const transformLogicOverride = useStandardPropertyOverride('schema.properties', 'transformLogic');
+  const transformDescriptionOverride = useStandardPropertyOverride('schema.properties', 'transformDescription');
   const descriptionOverride = useStandardPropertyOverride('schema.properties', 'description');
   const examplesOverride = useStandardPropertyOverride('schema.properties', 'examples');
 
@@ -256,6 +259,13 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     return property.authoritativeDefinitions?.filter(d => !isSemanticAuthDef(d) && d.type !== 'definition');
   }, [property.authoritativeDefinitions, isSemanticsEnabled]);
 
+  const isTransformationsSectionEmpty = isStandardSectionEmpty(
+    [isTransformSourceObjectsHidden, isTransformLogicHidden, isTransformDescriptionHidden],
+    ['transformSourceObjects', 'transformLogic', 'transformDescription'],
+    customPropertyConfigs,
+    customSections,
+  );
+
   // Renders any custom properties anchored after the given standard field.
   // Scoped to properties only; custom sections anchor to section IDs via
   // renderCustomSectionsAfter instead.
@@ -369,6 +379,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   value={property.logicalType || ''}
                   onChange={(value) => updateField('logicalType', value || undefined)}
                   label={logicalTypeOverride?.title || t('diagram.field.logicalType.label')}
+                  placeholder={logicalTypeOverride?.placeholder}
+                  required={logicalTypeOverride?.required ?? false}
+                  tooltip={logicalTypeOverride?.description}
                   fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   valueFromDefinition={definitionData?.logicalType}
                 />
@@ -489,6 +502,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   placeholder={definitionData?.physicalType || physicalTypeOverride?.placeholder || "e.g., VARCHAR(255)"}
                   placeholderClassName={definitionData?.physicalType && !property.physicalType ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
                   inheritedValue={definitionData?.physicalType}
+                  required={physicalTypeOverride?.required ?? false}
+                  tooltip={physicalTypeOverride?.description}
                 />
               )}
               {renderCustomAfter('physicalType')}
@@ -1318,7 +1333,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
       </Disclosure>
       {renderCustomSectionsAfter('classificationAndSecurity')}
 
-      {/* Transformations Section */}
+      {/* Transformations Section — omitted once every field in it is hidden and nothing is anchored into it */}
+      {!isTransformationsSectionEmpty && (
       <Disclosure>
         {({ open }) => (
           <>
@@ -1344,20 +1360,21 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Logic */}
               {!isTransformLogicHidden && (
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.transformLogic.label')}</label>
-                    {!property.transformLogic && (
-                      <OverrideInheritedButton inheritedValue={definitionData?.transformLogic} onOverride={(value) => updateField('transformLogic', value)} />
-                    )}
-                  </div>
-                  <textarea
+                  <ValidatedTextarea
+                    name="property-transform-logic"
+                    label={transformLogicOverride?.title || t('diagram.field.transformLogic.label')}
                     value={property.transformLogic || ''}
                     onChange={(e) => updateField('transformLogic', e.target.value || undefined)}
+                    required={transformLogicOverride?.required ?? false}
+                    placeholder={definitionData?.transformLogic || transformLogicOverride?.placeholder || t('diagram.field.transformLogic.placeholder')}
+                    placeholderClassName={definitionData?.transformLogic && !property.transformLogic ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    inheritedValue={definitionData?.transformLogic}
+                    minLength={transformLogicOverride?.minLength}
+                    maxLength={transformLogicOverride?.maxLength}
                     rows={4}
-                    className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono ${definitionData?.transformLogic && !property.transformLogic ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.transformLogic || t('diagram.field.transformLogic.placeholder')}
+                    className="font-mono"
                   />
-                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.transformLogic.help')}</p>
+                  <p className="mt-1 text-xs text-gray-500">{transformLogicOverride?.description || t('diagram.field.transformLogic.help')}</p>
                 </div>
               )}
               {renderCustomAfter('transformLogic')}
@@ -1365,20 +1382,20 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Transform Description */}
               {!isTransformDescriptionHidden && (
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-gray-700">{t('diagram.field.transformDescription.label')}</label>
-                    {!property.transformDescription && (
-                      <OverrideInheritedButton inheritedValue={definitionData?.transformDescription} onOverride={(value) => updateField('transformDescription', value)} />
-                    )}
-                  </div>
-                  <textarea
+                  <ValidatedTextarea
+                    name="property-transform-description"
+                    label={transformDescriptionOverride?.title || t('diagram.field.transformDescription.label')}
                     value={property.transformDescription || ''}
                     onChange={(e) => updateField('transformDescription', e.target.value || undefined)}
+                    required={transformDescriptionOverride?.required ?? false}
+                    placeholder={definitionData?.transformDescription || transformDescriptionOverride?.placeholder || t('diagram.field.transformDescription.placeholder')}
+                    placeholderClassName={definitionData?.transformDescription && !property.transformDescription ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+                    inheritedValue={definitionData?.transformDescription}
+                    minLength={transformDescriptionOverride?.minLength}
+                    maxLength={transformDescriptionOverride?.maxLength}
                     rows={3}
-                    className={`w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${definitionData?.transformDescription && !property.transformDescription ? 'placeholder:text-blue-400' : ''}`}
-                    placeholder={definitionData?.transformDescription || t('diagram.field.transformDescription.placeholder')}
                   />
-                  <p className="mt-1 text-xs text-gray-500">{t('diagram.field.transformDescription.help')}</p>
+                  <p className="mt-1 text-xs text-gray-500">{transformDescriptionOverride?.description || t('diagram.field.transformDescription.help')}</p>
                 </div>
               )}
               {renderCustomAfter('transformDescription')}
@@ -1386,6 +1403,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           </>
         )}
       </Disclosure>
+      )}
       {renderCustomSectionsAfter('transformations')}
 
       {/* Data Quality Section */}

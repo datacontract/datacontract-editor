@@ -5,6 +5,8 @@ import { getLogicalTypeIcon, fallbackLogicalTypeOptions } from '../../features/s
 import { useEditorStore } from '../../../store.js';
 import { getSchemaEnumValues } from '../../../lib/schemaEnumExtractor.js';
 import { useDocumentSupportsSchemaVersion } from '../../../hooks/useSchemaCapability.js';
+import Tooltip from '../Tooltip.jsx';
+import QuestionMarkCircleIcon from '../icons/QuestionMarkCircleIcon.jsx';
 
 const ChevronDownIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -21,6 +23,9 @@ const CheckIcon = ({ className }) => (
 /**
  * LogicalTypeCombobox - Combobox for selecting logical types with icons
  * Allows custom input with "string" as default
+ *
+ * `required` marks the field and shows an error while neither an own value nor an inherited
+ * fallback is set; `tooltip` adds a help icon next to the label, like ValidatedInput.
  */
 const LogicalTypeCombobox = ({
   value,
@@ -29,6 +34,9 @@ const LogicalTypeCombobox = ({
   className = '',
   label = 'Logical Type',
   fallbackValue = null,
+  required = false,
+  tooltip,
+  placeholder,
 }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
@@ -77,6 +85,11 @@ const LogicalTypeCombobox = ({
 
   const IconComponent = getLogicalTypeIcon(effectiveValue)
 
+  const hasRequiredError = required && !effectiveValue;
+  const ringClass = hasRequiredError
+    ? 'ring-red-300 focus:ring-red-500'
+    : 'ring-gray-300 focus:ring-indigo-600';
+
   return (
     <Combobox
       as="div"
@@ -86,17 +99,28 @@ const LogicalTypeCombobox = ({
       className={className}
     >
       {label && (
-        <Combobox.Label className="block text-xs font-medium text-gray-700 mb-1">
-          {label}
-        </Combobox.Label>
+        <div className="flex items-center gap-1 mb-1">
+          <Combobox.Label className="block text-xs font-medium text-gray-700">
+            {label}
+          </Combobox.Label>
+          {tooltip && (
+            <Tooltip content={tooltip}>
+              <QuestionMarkCircleIcon />
+            </Tooltip>
+          )}
+          {required && (
+            <span className="ml-auto text-xs leading-4 text-gray-500">{t('input.requiredLabel')}</span>
+          )}
+        </div>
       )}
       <div className="relative">
         <ComboboxInput
-          className={`w-full rounded-md border-0 bg-white py-1.5 pl-2 pr-8 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${isFromDefinition ? 'text-blue-500' : 'text-gray-900'}`}
+          className={`w-full rounded-md border-0 bg-white py-1.5 pl-2 pr-8 shadow-sm ring-1 ring-inset ${ringClass} placeholder:text-gray-400 focus:ring-2 focus:ring-inset text-xs disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${isFromDefinition ? 'text-blue-500' : 'text-gray-900'}`}
           onChange={handleInputChange}
           onBlur={handleBlur}
           displayValue={(item) => item || ''}
-          placeholder={fallbackValue || 'Select type...'}
+          placeholder={fallbackValue || placeholder || 'Select type...'}
+          aria-invalid={hasRequiredError}
         />
         <ComboboxButton className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <ChevronDownIcon className="h-4 w-4 text-gray-400" />
@@ -158,6 +182,9 @@ const LogicalTypeCombobox = ({
           )}
         </ComboboxOptions>
       </div>
+      {hasRequiredError && (
+        <p className="mt-1 text-xs text-red-600">{t('input.required')}</p>
+      )}
     </Combobox>
   );
 };

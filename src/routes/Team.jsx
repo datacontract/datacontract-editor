@@ -9,6 +9,7 @@ import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
 import ValidatedInput from '../components/ui/ValidatedInput.jsx';
+import ValidatedTextarea from '../components/ui/ValidatedTextarea.jsx';
 import { ValidatedCombobox } from '../components/ui/index.js';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +32,7 @@ const Team = () => {
 
   // Get standard property overrides
   const nameOverride = useStandardPropertyOverride('team', 'name');
+  const descriptionOverride = useStandardPropertyOverride('team', 'description');
   const nameOptions = convertEnumToOptions(nameOverride?.enum);
 
   // Convert array format to object lookup for UI components
@@ -208,18 +210,18 @@ const Team = () => {
 
               {/* Team Description */}
               {!isDescriptionHidden && (
-                <div>
-                  <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
-                    {t('team.description.label')}
-                  </label>
-                  <textarea
-                    value={team?.description}
-                    onChange={(e) => updateTeamField('description', e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                    placeholder={t('team.description.placeholder')}
-                    rows={3}
-                  />
-                </div>
+                <ValidatedTextarea
+                  name="team-description"
+                  label={descriptionOverride?.title || t('team.description.label')}
+                  value={team?.description || ''}
+                  onChange={(e) => updateTeamField('description', e.target.value)}
+                  placeholder={descriptionOverride?.placeholder || t('team.description.placeholder')}
+                  required={descriptionOverride?.required}
+                  tooltip={descriptionOverride?.description}
+                  minLength={descriptionOverride?.minLength}
+                  maxLength={descriptionOverride?.maxLength}
+                  rows={3}
+                />
               )}
 
               {/* Team Tags */}

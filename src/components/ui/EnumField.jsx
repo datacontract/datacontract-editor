@@ -22,6 +22,8 @@ import LogicalTypeCombobox from './TypeSelector/LogicalTypeCombobox';
  * @param {string} [props.className] - Additional CSS classes
  * @param {Array<string>} [props.fallbackOptions] - Fallback enum values if schema not loaded or enum not found
  * @param {string} [props.valueFromDefinition] - Expected value from definition (to highlight in blue)
+ * @param {boolean} [props.required=false] - Mark the field as required (logicalType only)
+ * @param {string} [props.tooltip] - Help text shown next to the label (logicalType only)
  */
 const EnumField = ({
   propertyPath,
@@ -35,6 +37,8 @@ const EnumField = ({
   className = '',
   fallbackOptions = [],
   valueFromDefinition,
+  required = false,
+  tooltip,
   ...props
 }) => {
   const schemaData = useEditorStore((state) => state.schemaData);
@@ -48,8 +52,11 @@ const EnumField = ({
         onChange={onChange}
         disabled={disabled}
         label={label}
+        placeholder={placeholder}
         fallbackValue={valueFromDefinition}
         className={className}
+        required={required}
+        tooltip={tooltip}
       />
     );
   }
