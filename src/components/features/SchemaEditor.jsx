@@ -2,7 +2,6 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useEditorStore} from '../../store.js';
 import {isSafeKey} from '../../utils/safeProperty.js';
-import {Tooltip} from '../ui/index.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
 import TagsInput from '../ui/TagsInput.jsx';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
@@ -12,9 +11,7 @@ import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedTextarea from '../ui/ValidatedTextarea.jsx';
-import OverrideInheritedButton from '../ui/OverrideInheritedButton.jsx';
 import QualityEditor from '../ui/QualityEditor.jsx';
-import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import {SparkleButton} from '../../ai/index.js';
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/react';
 import PropertyRow from './schema/PropertyRow.jsx';
@@ -101,6 +98,7 @@ const SchemaEditor = ({schemaIndex}) => {
 	const descriptionOverride = useStandardPropertyOverride('schema', 'description');
 	const businessNameOverride = useStandardPropertyOverride('schema', 'businessName');
 	const logicalTypeOverride = useStandardPropertyOverride('schema', 'logicalType');
+	const dataGranularityDescriptionOverride = useStandardPropertyOverride('schema', 'dataGranularityDescription');
 
 	// Convert array format to object lookup for UI components
 	const customPropertiesLookup = useMemo(() => {
@@ -624,31 +622,19 @@ const SchemaEditor = ({schemaIndex}) => {
 													{/* Data Granularity Description Field */}
 													{!isDataGranularityDescriptionHidden && (
 														<div className="mt-4">
-															<div className="flex items-center gap-1 mb-1">
-																<label htmlFor={`schema-data-granularity-${schemaIndex}`}
-																			 className="block text-xs font-medium leading-4 text-gray-900">
-																	{t('schema.field.dataGranularity.label')}
-																</label>
-																<Tooltip content={t('schema.field.dataGranularity.tooltip')}>
-																	<QuestionMarkCircleIcon/>
-																</Tooltip>
-																{schemaDefinitionData?.dataGranularityDescription && !schema[schemaIndex].dataGranularityDescription && (
-																	<span className="ml-auto">
-																		<OverrideInheritedButton
-																			inheritedValue={schemaDefinitionData?.dataGranularityDescription}
-																			onOverride={(value) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, value)}
-																		/>
-																	</span>
-																)}
-															</div>
-															<textarea
-																id={`schema-data-granularity-${schemaIndex}`}
+															<ValidatedTextarea
 																name={`schema-data-granularity-${schemaIndex}`}
-																rows={2}
+																label={dataGranularityDescriptionOverride?.title || t('schema.field.dataGranularity.label')}
 																value={schema[schemaIndex].dataGranularityDescription || ''}
 																onChange={(e) => setValue(`schema[${schemaIndex}].dataGranularityDescription`, e.target.value)}
-																className={`mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 ${schemaDefinitionData?.dataGranularityDescription && !schema[schemaIndex].dataGranularityDescription ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'} focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4`}
-																placeholder={schemaDefinitionData?.dataGranularityDescription || "e.g., One record per customer per day"}
+																required={dataGranularityDescriptionOverride?.required ?? false}
+																tooltip={dataGranularityDescriptionOverride?.description || t('schema.field.dataGranularity.tooltip')}
+																placeholder={schemaDefinitionData?.dataGranularityDescription || dataGranularityDescriptionOverride?.placeholder || "e.g., One record per customer per day"}
+																placeholderClassName={schemaDefinitionData?.dataGranularityDescription && !schema[schemaIndex].dataGranularityDescription ? 'placeholder:text-blue-400' : 'placeholder:text-gray-400'}
+																inheritedValue={schemaDefinitionData?.dataGranularityDescription}
+																minLength={dataGranularityDescriptionOverride?.minLength}
+																maxLength={dataGranularityDescriptionOverride?.maxLength}
+																rows={2}
 															/>
 														</div>
 													)}

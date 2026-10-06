@@ -9,7 +9,7 @@ import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
-import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
+import {useCustomization, useHiddenCustomPropertyNames, useIsPropertyHidden} from "../../../hooks/useCustomization.js";
 
 // Memoized Team Member component
 const TeamMember = memo(({ teamMember }) => {
@@ -105,7 +105,9 @@ const TeamSection = () => {
 	const teamHiddenNames = useHiddenCustomPropertyNames('team');
 	const { customProperties: teamCustomPropertyConfigs } = useCustomization('team');
 	const teamConfigsByName = new Map((teamCustomPropertyConfigs || []).map((c) => [c.property, c]));
-	const hasData = team?.name || team?.description || teamMembers?.length > 0 || (team?.tags && team?.tags?.length > 0);
+	const isDescriptionHidden = useIsPropertyHidden('team', 'description');
+	const showDescription = !!team?.description && !isDescriptionHidden;
+	const hasData = team?.name || showDescription || teamMembers?.length > 0 || (team?.tags && team?.tags?.length > 0);
 
 	if (!hasData) return null;
 
@@ -149,7 +151,7 @@ const TeamSection = () => {
 							</div>
 						)}
 
-						{team.description && (
+						{showDescription && (
 							<div>
 								<dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('preview.team.descriptionLabel')}</dt>
 								<dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{team.description}</dd>

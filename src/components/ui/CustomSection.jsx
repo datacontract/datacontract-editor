@@ -3,6 +3,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import ChevronRightIcon from './icons/ChevronRightIcon';
 import CustomPropertyField from './CustomPropertyField';
 import { evaluateCondition } from '../../lib/conditionEvaluator';
+import { customPropertiesAnchoredAt } from '../../lib/customContentAnchors.js';
 
 /**
  * Renders a collapsible section containing custom properties
@@ -209,13 +210,7 @@ export const CustomContentAfter = ({
 	// positionAfter — the section wins.
 	const propertiesAfter = useMemo(() => {
 		if (only === 'sections') return [];
-		const groupedNames = new Set();
-		(customSections || []).forEach((s) => {
-			(s.customProperties || []).forEach((n) => groupedNames.add(n));
-		});
-		return (customProperties || []).filter(
-			(p) => p.positionAfter === anchor && !groupedNames.has(p.property)
-		);
+		return customPropertiesAnchoredAt(anchor, customProperties, customSections);
 	}, [customProperties, customSections, anchor, only]);
 
 	if (sectionsAfter.length === 0 && propertiesAfter.length === 0) {
