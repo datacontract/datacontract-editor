@@ -1,15 +1,21 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const inputClasses =
-  'block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4';
+  'block min-w-0 rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4';
+
+// Suggestions only: `locale` accepts any BCP 47 language tag.
+const COMMON_LOCALES = ['en', 'en-US', 'en-GB', 'de', 'de-DE', 'de-AT', 'de-CH', 'fr', 'fr-FR', 'es', 'es-ES', 'it', 'it-IT', 'nl', 'nl-NL', 'pt', 'pt-BR', 'ja', 'zh'];
 
 /**
  * Editor for an ODCS `synonyms` list (schema objects and properties, ODCS 3.2.0+).
- * Each entry is an object with a required `synonym`; other keys an entry already carries
- * (locale, source, …) are preserved untouched.
+ * Each entry is an object with a required `synonym`, an optional `locale`
+ * (BCP 47 tag) and an optional `description`; other keys an entry already carries
+ * (source, status, …) are preserved untouched.
  */
 const SynonymsEditor = ({ value = [], onChange }) => {
   const { t } = useTranslation();
+  const localeListId = useId();
   const entries = Array.isArray(value) ? value : [];
 
   const update = (index, field, fieldValue) => {
@@ -25,20 +31,33 @@ const SynonymsEditor = ({ value = [], onChange }) => {
 
   return (
     <div className="space-y-2">
+      <datalist id={localeListId}>
+        {COMMON_LOCALES.map((locale) => <option key={locale} value={locale} />)}
+      </datalist>
       {entries.map((entry, index) => (
         <div key={index} className="flex gap-2 items-start">
           <input
             type="text"
             value={entry?.synonym || ''}
             onChange={(e) => update(index, 'synonym', e.target.value)}
-            className={inputClasses}
+            className={`${inputClasses} w-full`}
             placeholder={t('synonyms.synonym.placeholder')}
+          />
+          <input
+            type="text"
+            value={entry?.locale || ''}
+            onChange={(e) => update(index, 'locale', e.target.value.trim())}
+            list={localeListId}
+            className={`${inputClasses} w-24 flex-shrink-0`}
+            placeholder={t('synonyms.locale.placeholder')}
+            title={t('synonyms.locale.title')}
+            aria-label={t('synonyms.locale.title')}
           />
           <input
             type="text"
             value={entry?.description || ''}
             onChange={(e) => update(index, 'description', e.target.value)}
-            className={inputClasses}
+            className={`${inputClasses} w-full`}
             placeholder={t('synonyms.description.placeholder')}
           />
           <button

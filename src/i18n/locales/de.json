@@ -1499,6 +1499,10 @@
     "synonym": {
       "placeholder": "Synonym"
     },
+    "locale": {
+      "placeholder": "Sprache",
+      "title": "Sprache (BCP-47-Sprachcode, z. B. en-US, de-DE). Leer lassen, wenn das Synonym nicht sprachspezifisch ist."
+    },
     "description": {
       "placeholder": "Beschreibung (optional)"
     }
