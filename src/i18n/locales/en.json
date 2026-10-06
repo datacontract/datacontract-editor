@@ -1499,6 +1499,10 @@
     "synonym": {
       "placeholder": "Synonym"
     },
+    "locale": {
+      "placeholder": "Locale",
+      "title": "Locale (BCP 47 language tag, e.g. en-US, de-DE). Leave empty if the synonym is not language-specific."
+    },
     "description": {
       "placeholder": "Description (optional)"
     }
