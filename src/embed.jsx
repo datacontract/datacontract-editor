@@ -24,6 +24,7 @@ import * as Yaml from "yaml";
 import { parseYaml, stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { createTestActions } from './services/testRunner.js';
+import { mergePersistedEmbedState } from './lib/embedPersistence.js';
 
 /**
  * Data Contract Editor - Embeddable Component
@@ -364,26 +365,9 @@ function createConfiguredStore(config) {
         // Deep-merge editorConfig on rehydrate (mirrors src/store.js). The default
         // shallow merge lets a stale persisted editorConfig replace the one just
         // built from init() config — which hides the AI assistant when it was
-        // enabled after the store was first persisted. init() config wins for `ai`
-        // (there is no in-app AI settings UI); user-editable `tests` values persist.
-        merge: (persistedState, currentState) => ({
-          ...currentState,
-          ...persistedState,
-          // a test cannot survive a reload, so never restore a running test
-          isTestRunning: false,
-          editorConfig: {
-            ...currentState.editorConfig,
-            ...persistedState?.editorConfig,
-            ai: {
-              ...persistedState?.editorConfig?.ai,
-              ...currentState.editorConfig?.ai,
-            },
-            tests: {
-              ...currentState.editorConfig?.tests,
-              ...persistedState?.editorConfig?.tests,
-            },
-          },
-        }),
+        // enabled after the store was first persisted. See embedPersistence.js.
+        merge: (persistedState, currentState) =>
+          mergePersistedEmbedState(persistedState, currentState, { builtInYaml: DEFAULT_CONFIG.yaml }),
       })
     );
   } else {
@@ -644,6 +628,7 @@ export { parseYaml };
  * - loadCustomizationYaml: fetch/parse a customization.yaml served next to the app.
  * - loadRuntimeConfig: fetch /config.json (Docker deployments) and fold in customization.yaml.
  * - buildEditorConfig: turn that runtime config into an init() config fragment.
+ * - buildDocumentConfig: the initial data contract and schemas of that runtime config, for init().
  * See CUSTOMIZATION.md and CONFIGURATION.md.
  */
-export { loadCustomizationYaml, loadRuntimeConfig, buildEditorConfig } from './config/runtimeConfig.js';
+export { loadCustomizationYaml, loadRuntimeConfig, buildEditorConfig, buildDocumentConfig } from './config/runtimeConfig.js';

@@ -50,6 +50,26 @@ docker run -p 4173:4173 \
 | `AI_AUTH_HEADER` | `bearer` | `bearer` or `api-key` (OpenAI only) |
 | `TESTS_SERVER_URL` | - | Data contract test server URL |
 | `CUSTOMIZATION_CONFIG` | - | Path (inside the container) to a `customization.yaml`, see [CUSTOMIZATION.md](CUSTOMIZATION.md) |
+| `SCHEMA_URL` | - | JSON Schema URL the data contract is validated against (instead of the built-in ODCS schemas) |
+| `INITIAL_YAML_FILE` | - | Path (inside the container) to a data contract YAML that new sessions start with |
+| `CONFIG_JSON` | - | Path (inside the container) to your own `config.json`; used as is, and the variables above that go into `config.json` are ignored |
+
+The initial data contract only replaces the built-in example: a browser session that already holds a contract keeps it on reload.
+
+```bash
+# Start with your own data contract, validated against your own schema
+docker run -p 4173:4173 \
+  -v ./acme-orders.odcs.yaml:/config/acme-orders.odcs.yaml \
+  -e INITIAL_YAML_FILE=/config/acme-orders.odcs.yaml \
+  -e SCHEMA_URL=https://example.org/schemas/acme-data-contract-schema.json \
+  datacontract-editor
+
+# Or bring a complete config.json (see the schema below)
+docker run -p 4173:4173 \
+  -v ./config.json:/config/config.json \
+  -e CONFIG_JSON=/config/config.json \
+  datacontract-editor
+```
 
 ### 2. Embed (JavaScript API)
 
@@ -254,9 +274,13 @@ For Docker deployments, the generated config.json follows this schema:
   "tests": {
     "enabled": true,
     "dataContractCliApiServerUrl": "https://api.datacontract.com"
-  }
+  },
+  "yaml": "apiVersion: v3.2.0\nkind: DataContract\nid: acme-orders\n...",
+  "schemaUrl": "https://example.org/schemas/acme-data-contract-schema.json"
 }
 ```
+
+`yaml` and the schema keys work as in the embed API: `yaml` is the data contract new sessions start with, and `odcsVersions` (or the single, deprecated `schemaUrl`) sets the JSON schemas the contract is validated against. Without `yaml` in `config.json`, a `data-contract.yaml` served next to the app is used (that is what `INITIAL_YAML_FILE` sets up).
 
 ## Examples
 

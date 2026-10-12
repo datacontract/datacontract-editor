@@ -7,7 +7,8 @@ import App from './App.jsx'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/index.js'
 import { createStorageBackend } from './config/storage.js'
-import { loadRuntimeConfig, buildEditorConfig } from './config/runtimeConfig.js'
+import { loadRuntimeConfig, buildEditorConfig, buildDocumentConfig } from './config/runtimeConfig.js'
+import { applyDocumentConfig } from './store.js'
 
 // Create the configured storage backend
 const storageBackendSlug = "standalone"
@@ -24,6 +25,7 @@ async function init() {
   // Load runtime config (from /config.json in Docker, or empty for hosted)
   const runtimeConfig = await loadRuntimeConfig();
   const editorConfig = buildEditorConfig(runtimeConfig);
+  applyDocumentConfig(buildDocumentConfig(runtimeConfig));
 
   // Standalone locale is resolved by i18next-browser-languagedetector (querystring →
   // localStorage → English fallback; the browser locale is intentionally not consulted),

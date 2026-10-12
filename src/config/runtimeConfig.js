@@ -1,4 +1,5 @@
 import { parse as parseYaml } from 'yaml';
+import { defaultOdcsVersionEntry, odcsVersionsFromConfig } from '../services/schemaRegistry.js';
 
 /**
  * Runtime Configuration Loader
@@ -34,7 +35,63 @@ export async function loadRuntimeConfig() {
     }
   }
 
+  // An initial data contract served next to the app (the Docker image's INITIAL_YAML_FILE)
+  // is used unless config.json already carries one.
+  if (!hasText(config.yaml)) {
+    const yaml = await loadInitialYaml();
+    if (yaml) {
+      config = { ...config, yaml };
+    }
+  }
+
   return config;
+}
+
+const hasText = (value) => typeof value === 'string' && value.trim() !== '';
+
+/**
+ * Fetch /data-contract.yaml, the initial data contract of a Docker deployment. Returns null
+ * when the file is missing, empty, or answered by the SPA fallback with index.html.
+ * @returns {Promise<string|null>}
+ */
+export async function loadInitialYaml() {
+  try {
+    const response = await fetch('/data-contract.yaml');
+    if (!response.ok) return null;
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) return null;
+    const text = await response.text();
+    return hasText(text) ? text : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The document settings of a runtime config: the initial data contract and the schemas it is
+ * validated against. Same keys as the embed API (`yaml`, `odcsVersions`, deprecated `schemaUrl`);
+ * keys the config leaves out are left out here too, so the built-in defaults stay in place.
+ * @param {object} runtimeConfig - Config from /config.json
+ * @returns {{ yaml?: string, odcsVersions?: object[], schemaUrl?: string }}
+ */
+export function buildDocumentConfig(runtimeConfig) {
+  const document = {};
+  if (hasText(runtimeConfig.yaml)) {
+    try {
+      parseYaml(runtimeConfig.yaml);
+      document.yaml = runtimeConfig.yaml;
+    } catch (e) {
+      // the editor cannot start from a contract it cannot parse; keep the built-in example
+      console.warn('Initial data contract ignored, it is not valid YAML:', e.message);
+    }
+  }
+  const configuresSchema = (Array.isArray(runtimeConfig.odcsVersions) && runtimeConfig.odcsVersions.length > 0)
+    || hasText(runtimeConfig.schemaUrl);
+  if (configuresSchema) {
+    document.odcsVersions = odcsVersionsFromConfig(runtimeConfig);
+    document.schemaUrl = defaultOdcsVersionEntry(document.odcsVersions).schema;
+  }
+  return document;
 }
 
 /**
