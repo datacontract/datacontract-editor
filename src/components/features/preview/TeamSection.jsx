@@ -200,6 +200,9 @@ const TeamSection = () => {
 														{showTechnicalName && (
 															<div className="mt-0.5 font-mono text-[10px] normal-case tracking-normal text-gray-400">{customProp.property}</div>
 														)}
+														{customProp.vendor && (
+															<div className="mt-0.5 text-[10px] normal-case tracking-normal text-gray-400">{t('preview.customProperties.vendor', { value: customProp.vendor })}</div>
+														)}
 													</dt>
 													<dd className="text-sm text-gray-900">
 														<PropertyValueRenderer value={customProp.value}/>

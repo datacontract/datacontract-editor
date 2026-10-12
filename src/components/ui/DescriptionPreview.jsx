@@ -140,6 +140,9 @@ const DescriptionPreview = () => {
                             </Tooltip>
                           )}
                         </div>
+                        {customProp.vendor && (
+                          <div className="text-[10px] text-gray-400">{t('preview.customProperties.vendor', { value: customProp.vendor })}</div>
+                        )}
                         <div className="text-sm text-gray-900">
                           <span className="whitespace-pre-wrap">
                             {typeof customProp.value === 'object' ? JSON.stringify(customProp.value) : String(customProp.value ?? '')}
