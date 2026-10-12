@@ -24,32 +24,8 @@ import { getLayoutedElements, getGridPosition, buildReferencedByName } from './l
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipDetailsDrawer from '../ui/RelationshipDetailsDrawer.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
+import { resolveReference, referencesProperty } from '../../lib/relationshipReferences.js';
 
-
-// Splits a "schemaName.propertyPath" reference by matching the longest schema name
-// in `schemaNames` that is a prefix of `reference` followed by '.'. ODCS schema
-// names may themselves contain dots (e.g. fully-qualified physical names like
-// "catalog.schema.table"), so splitting naively on the first '.' mis-resolves the
-// schema. Falls back to split-on-first-dot when no schema matches, to keep the
-// previous behavior for unknown references.
-const splitSchemaReference = (reference, schemaNames) => {
-  if (typeof reference !== 'string') return [undefined, undefined];
-  let longest = null;
-  for (const name of schemaNames) {
-    if (typeof name !== 'string') continue;
-    if ((reference === name || reference.startsWith(name + '.')) &&
-        (longest === null || name.length > longest.length)) {
-      longest = name;
-    }
-  }
-  if (longest !== null) {
-    const remainder = reference.length > longest.length ? reference.slice(longest.length + 1) : '';
-    return [longest, remainder];
-  }
-  const firstDot = reference.indexOf('.');
-  if (firstDot === -1) return [reference, ''];
-  return [reference.slice(0, firstDot), reference.slice(firstDot + 1)];
-};
 
 const PREVIEW_EDGE_STYLE = { stroke: '#d946ef', strokeWidth: 2.5 };
 
@@ -783,7 +759,7 @@ const DiagramViewInner = () => {
 
             // Check if this relationship already exists
             const relationshipExists = existingRelationships.some(
-              rel => rel.to === reference
+              rel => referencesProperty(rel?.to, parsedData.schema, targetSchemaIndex, targetPropIndex)
             );
 
             // Only add if it doesn't already exist
@@ -824,19 +800,16 @@ const DiagramViewInner = () => {
     const sourceProperty = sourceSchema?.properties?.[sourcePropIndex];
     const targetSchema = parsedData?.schema?.[targetSchemaIndex];
     const targetProperty = targetSchema?.properties?.[targetPropIndex];
-    if (!sourceProperty || !targetSchema?.name || !targetProperty?.name) return;
+    if (!sourceProperty || !targetSchema || !targetProperty) return;
 
-    const reference = `${targetSchema.name}.${targetProperty.name}`;
     const relationships = sourceProperty.relationships;
     if (!Array.isArray(relationships)) return;
 
-    // Find the relationship index whose `to` matches the edge's target
-    // (supports composite keys where `to` is an array of refs).
-    const relationshipIndex = relationships.findIndex((rel) => {
-      if (!rel) return false;
-      if (Array.isArray(rel.to)) return rel.to.includes(reference);
-      return rel.to === reference;
-    });
+    // Find the relationship whose `to` points at the edge's target, in either
+    // notation (supports composite keys where `to` is an array of refs).
+    const relationshipIndex = relationships.findIndex((rel) =>
+      rel != null && referencesProperty(rel.to, parsedData.schema, targetSchemaIndex, targetPropIndex)
+    );
     if (relationshipIndex === -1) return;
 
     setSelectedRelationship({
@@ -920,8 +893,6 @@ const DiagramViewInner = () => {
         const targetProperty = targetSchema?.properties?.[targetPropIndex];
 
         if (sourceSchema?.properties?.[sourcePropIndex] && targetSchema && targetProperty) {
-          // Build the reference string that we need to remove
-          const reference = `${targetSchema.name}.${targetProperty.name}`;
 
           updatedSchemas[sourceSchemaIndex] = {
             ...sourceSchema,
@@ -932,7 +903,7 @@ const DiagramViewInner = () => {
                 // Remove the relationship entry that matches this reference
                 if (updatedProp.relationships && Array.isArray(updatedProp.relationships)) {
                   updatedProp.relationships = updatedProp.relationships.filter(
-                    rel => rel.to !== reference
+                    rel => !referencesProperty(rel?.to, parsedData.schema, targetSchemaIndex, targetPropIndex)
                   );
 
                   // Remove the relationships array if it's now empty
@@ -1045,7 +1016,7 @@ const DiagramViewInner = () => {
     // Used by the keys-only collapse mode in SchemaNode (to keep target
     // handles) and by the layout (to size collapsed nodes correctly).
     const referencedByName = buildReferencedByName(parsedData.schema);
-    // Schema name list required by splitSchemaReference for edge-building below.
+    // Schema name list required by resolveReference for edge-building below.
     const schemaNames = Object.keys(referencedByName);
 
     // On first load, try localStorage positions, then fall back to Dagre.
@@ -1096,85 +1067,55 @@ const DiagramViewInner = () => {
           const relationships = sourceProp.relationships || [];
 
           relationships.forEach(relationship => {
-            const reference = relationship.to;
-            if (reference && typeof reference === 'string') {
-              // Parse reference: schemaName.propertyName (schema names may contain dots)
-              const [targetSchemaName, targetPropertyName] = splitSchemaReference(reference, schemaNames);
-
-              // Find target schema and property
-              const targetSchemaIndex = parsedData.schema.findIndex(
-                s => s != null && s.name === targetSchemaName
-              );
-
-              if (targetSchemaIndex !== -1) {
-                const targetSchema = parsedData.schema[targetSchemaIndex];
-                const targetPropIndex = targetSchema.properties?.findIndex(
-                  p => p != null && p.name === targetPropertyName
-                );
-
-                if (targetPropIndex !== -1) {
-                  // The property with the relationship is the source (left handle)
-                  // The referenced property is the target (right handle).
-                  // Self-references (source schema === target schema) use a
-                  // custom edge that routes orthogonally around the outside
-                  // of the node, matching standard ER/DB diagram conventions.
-                  const isSelfRef = sourceSchemaIndex === targetSchemaIndex;
-                  propertyEdges.push({
-                    id: `edge-${sourceSchemaIndex}-${sourcePropIndex}-${targetSchemaIndex}-${targetPropIndex}`,
-                    source: `schema-${sourceSchemaIndex}`,
-                    sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
-                    target: `schema-${targetSchemaIndex}`,
-                    targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
-                    type: isSelfRef ? 'selfReference' : 'propertyBezier',
-                    selectable: true,
-                    deletable: true,
-                    focusable: true,
-                    interactionWidth: 20,
-                    style: { stroke: '#b1b1b7', strokeWidth: 2 },
-                  });
-                }
-              }
+            // Shorthand (schemaName.propertyName) or fully qualified (schema/<id>/properties/<id>)
+            const target = resolveReference(relationship?.to, parsedData.schema, schemaNames);
+            if (target && target.propertyIndex !== -1) {
+              const { schemaIndex: targetSchemaIndex, propertyIndex: targetPropIndex } = target;
+              // The property with the relationship is the source (left handle)
+              // The referenced property is the target (right handle).
+              // Self-references (source schema === target schema) use a
+              // custom edge that routes orthogonally around the outside
+              // of the node, matching standard ER/DB diagram conventions.
+              const isSelfRef = sourceSchemaIndex === targetSchemaIndex;
+              propertyEdges.push({
+                id: `edge-${sourceSchemaIndex}-${sourcePropIndex}-${targetSchemaIndex}-${targetPropIndex}`,
+                source: `schema-${sourceSchemaIndex}`,
+                sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
+                target: `schema-${targetSchemaIndex}`,
+                targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
+                type: isSelfRef ? 'selfReference' : 'propertyBezier',
+                selectable: true,
+                deletable: true,
+                focusable: true,
+                interactionWidth: 20,
+                style: { stroke: '#b1b1b7', strokeWidth: 2 },
+              });
             }
           });
 
           // Backward compatibility: also check customProperties.references
           const legacyReference = sourceProp.customProperties?.references;
-          if (legacyReference && typeof legacyReference === 'string') {
-            // Parse reference: schemaName.propertyName (schema names may contain dots)
-            const [targetSchemaName, targetPropertyName] = splitSchemaReference(legacyReference, schemaNames);
+          const legacyTarget = resolveReference(legacyReference, parsedData.schema, schemaNames);
+          if (legacyTarget && legacyTarget.propertyIndex !== -1) {
+            const { schemaIndex: targetSchemaIndex, propertyIndex: targetPropIndex } = legacyTarget;
+            // Check if this edge already exists (to avoid duplicates)
+            const edgeId = `edge-${sourceSchemaIndex}-${sourcePropIndex}-${targetSchemaIndex}-${targetPropIndex}`;
+            const edgeExists = propertyEdges.some(edge => edge.id === edgeId);
 
-            // Find target schema and property
-            const targetSchemaIndex = parsedData.schema.findIndex(
-              s => s != null && s.name === targetSchemaName
-            );
-
-            if (targetSchemaIndex !== -1) {
-              const targetSchema = parsedData.schema[targetSchemaIndex];
-              const targetPropIndex = targetSchema.properties?.findIndex(
-                p => p != null && p.name === targetPropertyName
-              );
-
-              if (targetPropIndex !== -1) {
-                // Check if this edge already exists (to avoid duplicates)
-                const edgeId = `edge-${sourceSchemaIndex}-${sourcePropIndex}-${targetSchemaIndex}-${targetPropIndex}`;
-                const edgeExists = propertyEdges.some(edge => edge.id === edgeId);
-
-                if (!edgeExists) {
-                  propertyEdges.push({
-                    id: edgeId,
-                    source: `schema-${sourceSchemaIndex}`,
-                    sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
-                    target: `schema-${targetSchemaIndex}`,
-                    targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
-                    type: sourceSchemaIndex === targetSchemaIndex ? 'selfReference' : 'propertyBezier',
-                    selectable: true,
-                    deletable: true,
-                    focusable: true,
-                    interactionWidth: 20,
-                    style: { stroke: '#b1b1b7', strokeWidth: 2 },
-                  });
-                }
-              }
+            if (!edgeExists) {
+              propertyEdges.push({
+                id: edgeId,
+                source: `schema-${sourceSchemaIndex}`,
+                sourceHandle: `schema-${sourceSchemaIndex}-prop-${sourcePropIndex}-source`,
+                target: `schema-${targetSchemaIndex}`,
+                targetHandle: `schema-${targetSchemaIndex}-prop-${targetPropIndex}-target`,
+                type: sourceSchemaIndex === targetSchemaIndex ? 'selfReference' : 'propertyBezier',
+                selectable: true,
+                deletable: true,
+                focusable: true,
+                interactionWidth: 20,
+                style: { stroke: '#b1b1b7', strokeWidth: 2 },
+              });
             }
           }
         });
@@ -1199,32 +1140,12 @@ const DiagramViewInner = () => {
             const toRef = toArray[pairIdx];
             if (!fromRef || !toRef || typeof fromRef !== 'string' || typeof toRef !== 'string') continue;
 
-            // Parse "schemaName.propertyName" references (schema names may contain dots)
-            const [fromSchemaName, fromPropName] = splitSchemaReference(fromRef, schemaNames);
-            const [toSchemaName, toPropName] = splitSchemaReference(toRef, schemaNames);
-            if (!fromSchemaName || !fromPropName || !toSchemaName || !toPropName) continue;
-
-            // Resolve source (from) schema and property
-            const fromSchemaIndex = parsedData.schema.findIndex(
-              s => s != null && s.name === fromSchemaName
-            );
-            if (fromSchemaIndex === -1) continue;
-            const fromSchema = parsedData.schema[fromSchemaIndex];
-            const fromPropIndex = fromSchema.properties?.findIndex(
-              p => p != null && p.name === fromPropName
-            );
-            if (fromPropIndex == null || fromPropIndex === -1) continue;
-
-            // Resolve target (to) schema and property
-            const toSchemaIndex = parsedData.schema.findIndex(
-              s => s != null && s.name === toSchemaName
-            );
-            if (toSchemaIndex === -1) continue;
-            const toSchema = parsedData.schema[toSchemaIndex];
-            const toPropIndex = toSchema.properties?.findIndex(
-              p => p != null && p.name === toPropName
-            );
-            if (toPropIndex == null || toPropIndex === -1) continue;
+            // Shorthand (schemaName.propertyName) or fully qualified (schema/<id>/properties/<id>)
+            const from = resolveReference(fromRef, parsedData.schema, schemaNames);
+            const to = resolveReference(toRef, parsedData.schema, schemaNames);
+            if (!from || from.propertyIndex === -1 || !to || to.propertyIndex === -1) continue;
+            const { schemaIndex: fromSchemaIndex, propertyIndex: fromPropIndex } = from;
+            const { schemaIndex: toSchemaIndex, propertyIndex: toPropIndex } = to;
 
             // Check for duplicate with existing property-level edges
             const dupId = `edge-${fromSchemaIndex}-${fromPropIndex}-${toSchemaIndex}-${toPropIndex}`;

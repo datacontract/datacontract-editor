@@ -6,6 +6,7 @@ import CustomPropertiesEditor from './CustomPropertiesEditor.jsx';
 import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import { parseYaml } from '../../utils/yaml.js';
+import { isExternalReference, isFullyQualifiedReference, resolveReference } from '../../lib/relationshipReferences.js';
 
 /**
  * RelationshipEditor component for editing relationships between schemas/properties
@@ -25,44 +26,52 @@ const relationshipMatchesTo = (item, focusTo) => {
 };
 
 /**
- * Hook that returns schema.property suggestions parsed from the current
- * YAML. Shared by RelationshipEditor and the dedicated RelationshipDrawer.
+ * Hook that returns the `schema` array parsed from the current YAML.
  */
-export const useSchemaPropertySuggestions = () => {
+const useContractSchemas = () => {
   const yaml = useEditorStore((state) => state.yaml);
   return useMemo(() => {
     if (!yaml?.trim()) return [];
-
     try {
-      const parsed = parseYaml(yaml);
-      const schemas = parsed?.schema || [];
-      const suggestions = [];
-
-      schemas.forEach((schema) => {
-        if (!schema?.name) return;
-
-        // Add property-level suggestions only (schema.property format)
-        if (schema.properties && Array.isArray(schema.properties)) {
-          schema.properties.forEach((prop) => {
-            if (prop?.name) {
-              const fullPath = `${schema.name}.${prop.name}`;
-              suggestions.push({
-                id: fullPath,
-                name: fullPath,
-                label: fullPath,
-                schemaName: schema.name,
-                propertyName: prop.name
-              });
-            }
-          });
-        }
-      });
-
-      return suggestions;
+      const schemas = parseYaml(yaml)?.schema;
+      return Array.isArray(schemas) ? schemas : [];
     } catch {
       return [];
     }
   }, [yaml]);
+};
+
+/**
+ * Hook that returns schema.property suggestions parsed from the current
+ * YAML. Shared by RelationshipEditor and the dedicated RelationshipDrawer.
+ */
+export const useSchemaPropertySuggestions = () => {
+  const schemas = useContractSchemas();
+  return useMemo(() => {
+    const suggestions = [];
+
+    schemas.forEach((schema) => {
+      if (!schema?.name) return;
+
+      // Add property-level suggestions only (schema.property format)
+      if (schema.properties && Array.isArray(schema.properties)) {
+        schema.properties.forEach((prop) => {
+          if (prop?.name) {
+            const fullPath = `${schema.name}.${prop.name}`;
+            suggestions.push({
+              id: fullPath,
+              name: fullPath,
+              label: fullPath,
+              schemaName: schema.name,
+              propertyName: prop.name
+            });
+          }
+        });
+      }
+    });
+
+    return suggestions;
+  }, [schemas]);
 };
 
 const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['foreignKey'], showFrom = false, focusTo = null, focusNonce = null }) => {
@@ -148,10 +157,17 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
 
   const inputClasses = "w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs";
 
-  // Check if a path is valid (exists in schema.property suggestions)
+  const schemas = useContractSchemas();
+
+  // Check if a path is valid: a schema.property suggestion, or a fully qualified
+  // reference that resolves to a property (references into other contracts can't be checked)
   const isValidPath = (path) => {
     if (!path || path.trim() === '') return true; // Empty is valid (not yet filled)
-    return validPaths.includes(path);
+    if (validPaths.includes(path)) return true;
+    if (!isFullyQualifiedReference(path)) return false;
+    if (isExternalReference(path)) return true;
+    const target = resolveReference(path, schemas);
+    return target !== null && target.propertyIndex !== -1;
   };
 
   // Helper to check if from/to are arrays (composite key)
