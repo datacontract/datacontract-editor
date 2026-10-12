@@ -37,3 +37,7 @@ docs/api/
 # dev-only runtime config (served as /config.json in dev server only)
 dev-config.json
 docs/superpowers/
+
+# Test artifacts
+test-results/
+.preview-server.pid

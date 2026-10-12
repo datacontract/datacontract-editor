@@ -25,7 +25,8 @@
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
     "start": "npm run build && node bin/datacontract-editor.js",
-    "start:debug": "npm run build:debug && node bin/datacontract-editor.js"
+    "start:debug": "npm run build:debug && node bin/datacontract-editor.js",
+    "test:playwright": "npm run build && (node bin/datacontract-editor.js --port 9091 > /dev/null 2>&1 & echo $! > .preview-server.pid) && sleep 5 && playwright test; TEST_EXIT=$?; kill $(cat .preview-server.pid) 2>/dev/null || true; rm -f .preview-server.pid; exit $TEST_EXIT"
   },
   "engines": {
     "node": ">=22.22"
