@@ -1,0 +1,28 @@
+name: Update deployments
+
+# Daily: keep editor.datacontract.com and datacontract.com on the latest released editor.
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write # redeploy editor.datacontract.com
+
+jobs:
+  update-deployments:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Update outdated deployments
+        run: python3 .github/scripts/update_deployments.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # fine-grained token with contents and actions write on datacontract/datacontract
+          WEBSITE_TOKEN: ${{ secrets.DATACONTRACT_WEBSITE_TOKEN }}

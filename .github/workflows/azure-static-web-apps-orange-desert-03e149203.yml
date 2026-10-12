@@ -7,6 +7,8 @@ on:
       - '**'
   pull_request:
     types: [opened, synchronize, reopened]
+  # used by update-deployments.yml to redeploy an outdated site
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,7 +31,7 @@ jobs:
   build_and_deploy_job:
     # Deploy only from main. Pull requests are built but never published to an
     # Azure preview environment.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     name: Build and Deploy Job
     steps:

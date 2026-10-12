@@ -9,6 +9,22 @@ const require = createRequire(import.meta.url)
 const pkg = require('./package.json')
 const monacoVersion = pkg.dependencies['@monaco-editor/react'].replace(/[^\d.]/g, '')
 
+// Publishes the editor version as datacontract-editor-version.json, so the daily
+// deployment check can see which version editor.datacontract.com runs
+function versionFilePlugin() {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'datacontract-editor-version.json',
+        source: JSON.stringify({ version: pkg.version }) + '\n',
+      });
+    },
+  };
+}
+
 // Dev-only plugin to serve dev-config.json as /config.json
 function devConfigPlugin() {
   return {
@@ -33,6 +49,7 @@ export default defineConfig(({ mode }) => ({
     tailwindcss(),
     react(),
     mode === 'custom' && devConfigPlugin(),
+    versionFilePlugin(),
   ],
   // Use relative base for assets to support context paths
   base: './',
