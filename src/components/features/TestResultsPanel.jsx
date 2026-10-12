@@ -11,6 +11,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
   const runTest = useEditorStore((state) => state.runTest);
   const clearTestResults = useEditorStore((state) => state.clearTestResults);
   const isTestRunning = useEditorStore((state) => state.isTestRunning);
+  const cancelTest = useEditorStore((state) => state.cancelTest);
   const yaml = useEditorStore((state) => state.yaml);
 
   const editorConfig = useEditorStore((state) => state.editorConfig);
@@ -51,7 +52,9 @@ const TestResultsPanel = ({ onCheckClick }) => {
       await runTest(servers.length > 1 ? selectedServer : undefined);
     } catch (error) {
       // Error is already handled in the store
-      console.error('Test failed:', error);
+      if (error.name !== 'TestCancelledError') {
+        console.error('Test failed:', error);
+      }
     }
   };
 
@@ -374,13 +377,9 @@ const TestResultsPanel = ({ onCheckClick }) => {
                 />
               </div>
               <button
-                onClick={handleRunTest}
-                disabled={isTestRunning}
-                className={`inline-flex items-center justify-center rounded-r-md btn--primary border-l border-indigo-700 dark:border-indigo-600 ${
-                  isTestRunning
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
-                }`}
+                onClick={isTestRunning ? cancelTest : handleRunTest}
+                title={isTestRunning ? t('testResults.cancelTitle') : undefined}
+                className="inline-flex items-center justify-center rounded-r-md btn--primary border-l border-indigo-700 dark:border-indigo-600"
               >
                 {isTestRunning ? (
                   <>
@@ -401,13 +400,9 @@ const TestResultsPanel = ({ onCheckClick }) => {
             </span>
           ) : (
             <button
-              onClick={handleRunTest}
-              disabled={isTestRunning}
-              className={`w-full inline-flex items-center justify-center btn--primary ${
-                isTestRunning
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              }`}
+              onClick={isTestRunning ? cancelTest : handleRunTest}
+              title={isTestRunning ? t('testResults.cancelTitle') : undefined}
+              className="w-full inline-flex items-center justify-center btn--primary"
             >
               {isTestRunning ? (
                 <>
@@ -415,7 +410,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  {t('testResults.running')}
+                  {t('testResults.cancel')}
                 </>
               ) : (
                 <>
@@ -535,13 +530,9 @@ const TestResultsPanel = ({ onCheckClick }) => {
         )}
         <div className="flex gap-2 items-center">
           <button
-            onClick={handleRunTest}
-            disabled={isTestRunning}
-            className={`flex-1 inline-flex items-center justify-center btn--primary ${
-              isTestRunning
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
+            onClick={isTestRunning ? cancelTest : handleRunTest}
+            title={isTestRunning ? t('testResults.cancelTitle') : undefined}
+            className="flex-1 inline-flex items-center justify-center btn--primary"
           >
             {isTestRunning ? (
               <>
@@ -549,7 +540,7 @@ const TestResultsPanel = ({ onCheckClick }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {t('testResults.running')}
+                {t('testResults.cancel')}
               </>
             ) : (
               <>

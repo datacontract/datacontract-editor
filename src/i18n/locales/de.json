@@ -594,6 +594,8 @@
     "server": "Server",
     "serverLabel": "Server: {{server}}",
     "running": "Test läuft gerade...",
+    "cancel": "Abbrechen",
+    "cancelTitle": "Laufenden Test abbrechen",
     "runTest": "Test ausführen",
     "runVia": "Tests ausführen über:",
     "clear": "Leeren",

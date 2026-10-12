@@ -23,6 +23,7 @@ import './components/diagram/DiagramStyles.css'
 import * as Yaml from "yaml";
 import { parseYaml, stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { getStorageConfig } from './utils/persistence.js';
+import { createTestActions } from './services/testRunner.js';
 
 /**
  * Data Contract Editor - Embeddable Component
@@ -227,94 +228,8 @@ function createConfiguredStore(config) {
 				isPreviewVisible: state.isTestResultsVisible ? false : false,
 				isWarningsVisible: state.isTestResultsVisible ? false : false,
 			})),
-			runTest: async (server) => {
-				const { yaml, editorConfig } = get();
-				set({ isTestRunning: true });
-				try {
-					// Build the test endpoint URL - read from store state to pick up settings changes
-					const baseUrl = editorConfig?.tests?.dataContractCliApiServerUrl || config.tests?.dataContractCliApiServerUrl || '';
-					const testEndpoint = `${baseUrl}/test`;
-					const url = server
-						? `${testEndpoint}?server=${encodeURIComponent(server)}`
-						: testEndpoint;
-
-					// Build headers with optional API key
-					const headers = {
-						'Content-Type': 'text/plain',
-					};
-					if (editorConfig?.tests?.apiKey) {
-						headers['X-API-KEY'] = editorConfig.tests.apiKey;
-					}
-
-					const response = await fetch(url, {
-						method: 'POST',
-						headers,
-						body: yaml,
-					});
-
-					if (!response.ok) {
-						let errorMessage = `Server returned error: ${response.status} ${response.statusText}`;
-						try {
-							const errorData = await response.json();
-							if (errorData.message) {
-								errorMessage = errorData.message;
-							} else if (errorData.error) {
-								errorMessage = errorData.error;
-							}
-						} catch {
-							try {
-								const errorText = await response.text();
-								if (errorText) {
-									errorMessage = errorText;
-								}
-							} catch {
-								// Keep default error message
-							}
-						}
-						throw new Error(errorMessage);
-					}
-
-					const result = await response.json();
-					let success = false;
-					if (result.result) {
-						success = result.result === 'passed' || result.result === 'pass';
-					} else if (Array.isArray(result.checks)) {
-						const hasFailures = result.checks.some(check =>
-							check.result === 'failed' || check.result === 'fail' || check.result === false
-						);
-						success = !hasFailures;
-					}
-
-					const newResult = {
-						timestamp: new Date().toISOString(),
-						success: success,
-						data: result,
-					};
-
-					set({ testResults: [newResult], isTestRunning: false });
-					return newResult;
-				} catch (error) {
-					let errorMessage = error.message;
-					let isConnectionError = false;
-
-					if (error.name === 'TypeError' && error.message.includes('fetch')) {
-						errorMessage = 'Cannot connect to test server.';
-						isConnectionError = true;
-					} else if (error.message === 'Unexpected end of JSON input' || error.message.includes('JSON')) {
-						errorMessage = 'Test server returned an invalid response.';
-					}
-
-					const errorResult = {
-						timestamp: new Date().toISOString(),
-						success: false,
-						error: errorMessage,
-						isConnectionError: isConnectionError,
-					};
-
-					set({ testResults: [errorResult], isTestRunning: false });
-					throw error;
-				}
-			},
+			// read the URL from store state to pick up settings changes
+			...createTestActions(set, get, (editorConfig) => editorConfig?.tests?.dataContractCliApiServerUrl || config.tests?.dataContractCliApiServerUrl || ''),
 			clearTestResults: () => set({ testResults: [] }),
 			setMarkers: (markers) => set({ markers }),
 			setView: (view) => set({ currentView: view }),
@@ -445,7 +360,7 @@ function createConfiguredStore(config) {
       persist(storeConfig, {
         name: 'editor-store',
         storage: storageConfig,
-        partialize: ({ authoritativeDefinitions, ...rest }) => rest, // eslint-disable-line no-unused-vars
+        partialize: ({ authoritativeDefinitions, isTestRunning, ...rest }) => rest, // eslint-disable-line no-unused-vars
         // Deep-merge editorConfig on rehydrate (mirrors src/store.js). The default
         // shallow merge lets a stale persisted editorConfig replace the one just
         // built from init() config — which hides the AI assistant when it was
@@ -454,6 +369,8 @@ function createConfiguredStore(config) {
         merge: (persistedState, currentState) => ({
           ...currentState,
           ...persistedState,
+          // a test cannot survive a reload, so never restore a running test
+          isTestRunning: false,
           editorConfig: {
             ...currentState.editorConfig,
             ...persistedState?.editorConfig,
@@ -611,6 +528,13 @@ export function init(userConfig = {}) {
      */
     async runTest(server) {
       return globalEditorStore.getState().runTest(server);
+    },
+
+    /**
+     * Cancel the running test
+     */
+    cancelTest() {
+      globalEditorStore.getState().cancelTest();
     },
 
     /**

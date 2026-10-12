@@ -116,8 +116,11 @@ The `authHeader` field controls how the API key is sent. The special value `bear
 tests: {
   enabled: true,                    // Enable test runner
   dataContractCliApiServerUrl: 'https://api.datacontract.com',  // Test server URL
+  timeoutSeconds: 300,              // Give up on a test after this many seconds (default 300)
 }
 ```
+
+A running test can be cancelled at any time with the Cancel button, or with `editor.cancelTest()` when embedded.
 
 ### Full Embed Configuration
 
