@@ -424,6 +424,21 @@ useEditorStore.getState = () => {
  * Update the editor configuration
  * @param {Object} config - Configuration object to merge with existing config
  */
+/**
+ * Applies the document settings of the standalone runtime config (see buildDocumentConfig).
+ * The schemas always follow the config. The initial data contract only replaces the built-in
+ * example, so a session that already holds the user's own contract keeps it on reload.
+ */
+export const applyDocumentConfig = ({ yaml, odcsVersions, schemaUrl } = {}) => {
+	const store = overrideStore || defaultEditorStore;
+	if (odcsVersions) {
+		store.setState({ odcsVersions, schemaUrl });
+	}
+	if (yaml && store.getState().yaml === initialYaml) {
+		store.getState().loadYaml(yaml);
+	}
+};
+
 export const setEditorConfig = (config) => {
 	const store = overrideStore || defaultEditorStore;
 	const currentConfig = store.getState().editorConfig;
