@@ -3,10 +3,14 @@ import {useTranslation} from 'react-i18next';
 import supportIcons from '../../../assets/support-icons/supportIcons.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
+import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
+import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
 
 // Memoized Support Channel component
 const SupportChannel = memo(({ channel }) => {
 	const { t } = useTranslation();
+	const hiddenNames = useHiddenCustomPropertyNames('support');
+	const { customProperties: customPropertyConfigs } = useCustomization('support');
 	const getSupportIcon = (toolType) => {
 		if (!toolType) return null;
 		const type = toolType.toLowerCase();
@@ -70,6 +74,16 @@ const SupportChannel = memo(({ channel }) => {
 								   className="text-indigo-600 hover:text-indigo-500">
 									{t('preview.support.invitation')}
 								</a>
+							</dd>
+						</div>
+					</div>
+				)}
+				{Array.isArray(channel.customProperties) && channel.customProperties.length > 0 && (
+					<div className="flex items-center gap-x-4">
+						<div className="flex flex-col">
+							<dt className="text-sm font-medium text-gray-500">{t('preview.support.customProperties')}</dt>
+							<dd className="mt-1 flex flex-wrap gap-1">
+								<CustomPropertiesPreview properties={channel.customProperties} hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
 							</dd>
 						</div>
 					</div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 
 /**
@@ -15,6 +16,7 @@ import Tooltip from './Tooltip.jsx';
  * @param {Array} customPropertyConfigs - Customization configs for this level (resolves title and description per property)
  */
 const CustomPropertiesPreview = ({properties = [], pillClassName = "", hiddenPropertyNames, customPropertyConfigs}) => {
+	const { t } = useTranslation();
 	if (!properties) {
 		return null;
 	}
@@ -68,7 +70,7 @@ const CustomPropertiesPreview = ({properties = [], pillClassName = "", hiddenPro
 				const label = cfg?.title || prop.property;
 				const showTechnicalName = !!cfg?.title && cfg.title !== prop.property;
 				const description = cfg?.description || prop.description;
-				const hasTooltip = showTechnicalName || !!description;
+				const hasTooltip = showTechnicalName || !!description || !!prop.vendor;
 
 				const pill = (
 					<span
@@ -88,6 +90,7 @@ const CustomPropertiesPreview = ({properties = [], pillClassName = "", hiddenPro
 										<div className="font-mono text-gray-300">{prop.property}</div>
 									)}
 									{description && <div>{description}</div>}
+									{prop.vendor && <div className="text-gray-300">{t('preview.customProperties.vendor', { value: prop.vendor })}</div>}
 								</div>
 							}
 						>

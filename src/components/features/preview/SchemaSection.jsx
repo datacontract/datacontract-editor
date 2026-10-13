@@ -1,4 +1,4 @@
-import {Fragment, memo} from 'react';
+import {createElement, Fragment, memo} from 'react';
 import {useTranslation} from 'react-i18next';
 import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
@@ -13,7 +13,99 @@ import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
 import {useInheritedDefinition} from "../../../hooks/useInheritedDefinition.js";
-import {resolveChildProperties, resolvePropertyTypeInfo} from "../../../utils/previewSchemaUtils.js";
+import {
+	formatEnumValues,
+	formatRelationship,
+	formatSynonyms,
+	resolveChildProperties,
+	resolvePropertyTypeInfo,
+	resolveQualityCheckRows,
+	resolveTypeDetailRows,
+} from "../../../utils/previewSchemaUtils.js";
+
+const pillClassName = 'inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10';
+const deprecatedPillClassName = 'inline-flex items-center rounded-md bg-amber-50 px-1 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20';
+
+const formatCustomValue = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value));
+
+// A quality check as a pill; the tooltip lists its description and every configured field
+const QualityCheckPill = ({ qualityCheck }) => {
+	const { t } = useTranslation();
+	const rows = resolveQualityCheckRows(qualityCheck);
+	const tooltipContent = (
+		<div className="space-y-1">
+			{qualityCheck.description && <div>{qualityCheck.description}</div>}
+			{rows.map(({ key, value }) => (
+				<div key={key} className="text-gray-300 break-words">{t(`preview.schema.${key}`, { value })}</div>
+			))}
+		</div>
+	);
+	return (
+		<Tooltip content={tooltipContent}>
+			<span
+				className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
+				{createElement(getQualityCheckIcon(qualityCheck), { className: 'w-3 h-3' })}
+				{qualityCheck.name || t('preview.schema.qualityCheck')}
+			</span>
+		</Tooltip>
+	);
+};
+
+// A relationship as a pill: "type → target", custom properties in the tooltip
+const RelationshipPill = ({ relationship, showFrom = false }) => {
+	const { type, from, to } = formatRelationship(relationship);
+	if (!to) return null;
+	const customProperties = Array.isArray(relationship.customProperties) ? relationship.customProperties : [];
+	const pill = (
+		<span className={`${pillClassName} mr-1 mt-1 font-mono`}>
+			{showFrom && from ? `${from} → ${to}` : `→ ${to}`}
+			{type && <span className="ml-1 font-sans text-gray-500">({type})</span>}
+		</span>
+	);
+	if (customProperties.length === 0) return pill;
+	return (
+		<Tooltip content={
+			<div className="space-y-1">
+				{customProperties.map((customProperty, index) => (
+					<div key={index} className="text-gray-300 break-all">{customProperty.property}: {formatCustomValue(customProperty.value)}</div>
+				))}
+			</div>
+		}>
+			{pill}
+		</Tooltip>
+	);
+};
+
+// One line of values; per-entry details (description, source, status) in the tooltip
+const ValuesLine = ({ text, details, className = '' }) => {
+	if (details.length === 0) return <div className={className}>{text}</div>;
+	return (
+		<div className={className}>
+			<Tooltip content={
+				<div className="space-y-1">
+					{details.map((detail, index) => <div key={index} className="break-words">{detail}</div>)}
+				</div>
+			} className="inline cursor-help">
+				<span className="underline decoration-dotted decoration-gray-400 underline-offset-2">{text}</span>
+			</Tooltip>
+		</div>
+	);
+};
+
+const synonymDetails = (synonyms) => (Array.isArray(synonyms) ? synonyms : [])
+	.filter((entry) => entry && typeof entry === 'object' && entry.synonym && (entry.description || entry.source || entry.status))
+	.map((entry) => [entry.synonym, entry.status && `(${entry.status})`, entry.source, entry.description].filter(Boolean).join(' · '));
+
+const enumDetails = (values) => (Array.isArray(values) ? values : [])
+	.filter((entry) => entry && typeof entry === 'object' && entry.value !== undefined && entry.description)
+	.map((entry) => `${entry.value}: ${entry.description}`);
+
+const SynonymsLine = ({ synonyms, className = '' }) => {
+	const { t } = useTranslation();
+	const labels = formatSynonyms(synonyms);
+	if (labels.length === 0) return null;
+	return <ValuesLine text={t('preview.schema.synonyms', { value: labels.join(', ') })} details={synonymDetails(synonyms)} className={className} />;
+};
 
 // Memoized property row component
 const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
@@ -54,27 +146,10 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 				</td>
 				<td className="px-1 py-2 text-sm text-gray-500 w-fit">
 					{(() => {
-						const { effectiveLogicalType, isLogicalTypeInherited, physicalType, opts } = resolvePropertyTypeInfo(property, propDefinition);
+						const { effectiveLogicalType, isLogicalTypeInherited, physicalType } = resolvePropertyTypeInfo(property, propDefinition);
 
-						const rows = [];
-						if (physicalType) rows.push(t('preview.schema.physicalType', { value: physicalType }));
-						if (opts.minLength !== undefined) rows.push(t('preview.schema.minLength', { value: opts.minLength }));
-						if (opts.maxLength !== undefined) rows.push(t('preview.schema.maxLength', { value: opts.maxLength }));
-						if (opts.pattern) rows.push(t('preview.schema.pattern', { value: opts.pattern }));
-						if (opts.format) rows.push(t('preview.schema.format', { value: opts.format }));
-						if (opts.minimum !== undefined) rows.push(t('preview.schema.minimum', { value: opts.minimum }));
-						if (opts.exclusiveMinimum !== undefined) rows.push(t('preview.schema.exclusiveMinimum', { value: opts.exclusiveMinimum }));
-						if (opts.maximum !== undefined) rows.push(t('preview.schema.maximum', { value: opts.maximum }));
-						if (opts.exclusiveMaximum !== undefined) rows.push(t('preview.schema.exclusiveMaximum', { value: opts.exclusiveMaximum }));
-						if (opts.multipleOf !== undefined) rows.push(t('preview.schema.multipleOf', { value: opts.multipleOf }));
-						if (opts.minItems !== undefined) rows.push(t('preview.schema.minItems', { value: opts.minItems }));
-						if (opts.maxItems !== undefined) rows.push(t('preview.schema.maxItems', { value: opts.maxItems }));
-						if (opts.uniqueItems !== undefined) rows.push(t('preview.schema.uniqueItems', { value: opts.uniqueItems ? t('preview.schema.yes') : t('preview.schema.no') }));
-						if (opts.minProperties !== undefined) rows.push(t('preview.schema.minProperties', { value: opts.minProperties }));
-						if (opts.maxProperties !== undefined) rows.push(t('preview.schema.maxProperties', { value: opts.maxProperties }));
-						if (Array.isArray(opts.required) && opts.required.length > 0) rows.push(t('preview.schema.requiredList', { value: opts.required.join(', ') }));
-						if (opts.timezone !== undefined) rows.push(t('preview.schema.timezone', { value: opts.timezone ? t('preview.schema.yes') : t('preview.schema.no') }));
-						if (opts.defaultTimezone) rows.push(t('preview.schema.defaultTimezone', { value: opts.defaultTimezone }));
+						const rows = resolveTypeDetailRows(property, propDefinition).map(({ key, value }) =>
+							t(`preview.schema.${key}`, { value: typeof value === 'boolean' ? (value ? t('preview.schema.yes') : t('preview.schema.no')) : value }));
 						if (isLogicalTypeInherited) rows.push(t('preview.schema.inheritedFromSemantic'));
 
 						// Only show the tooltip when there's metadata beyond the logical type
@@ -149,7 +224,18 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						);
 					})()}
 
+					{formatEnumValues(property.enum).length > 0 && (
+						<ValuesLine
+							text={t('preview.schema.enumValues', { value: formatEnumValues(property.enum).join(', ') })}
+							details={enumDetails(property.enum)}
+							className="mt-1" />
+					)}
+					<SynonymsLine synonyms={property.synonyms} className="mt-1" />
+
 					<div className="mt-1 flex gap-x-1 items-center flex-wrap">
+						{property.deprecated && (
+							<span className={deprecatedPillClassName}>{t('preview.schema.deprecated')}</span>
+						)}
 						{property.primaryKey && (
 							<span
 								className="inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
@@ -186,15 +272,26 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 								{t('preview.schema.criticalDataElement')}
 							</span>
 						)}
+						{property.semanticType && (
+							<span className={pillClassName} title={t('preview.schema.semanticTypeLabel')}>
+								{t('preview.schema.semanticType', { value: property.semanticType })}
+							</span>
+						)}
 						{property.encryptedName && (
 							<span
 								className="inline-flex items-center rounded-md bg-purple-50 px-1 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
 								{property.encryptedName}
 							</span>
 						)}
-						{(property.transformLogic || property.transformDescription) && (
+						{(property.transformLogic || property.transformDescription || property.transformSourceObjects?.length > 0) && (
 							<Tooltip content={
 								<div className="space-y-1">
+									{Array.isArray(property.transformSourceObjects) && property.transformSourceObjects.length > 0 && (
+										<div>
+											<div className="text-gray-300 font-medium">{t('preview.schema.transformSourceObjects')}</div>
+											<div>{property.transformSourceObjects.join(', ')}</div>
+										</div>
+									)}
 									{property.transformLogic && (
 										<div>
 											<div className="text-gray-300 font-medium">{t('preview.schema.transformLogic')}</div>
@@ -216,35 +313,12 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 						)}
 						<CustomPropertiesPreview properties={property.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
             {property.tags && Array.isArray(property.tags) && <Tags tags={property.tags}/>}
-						{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => {
-							const QualityIcon = getQualityCheckIcon(qualityCheck);
-							const tooltipContent = (
-								<div className="space-y-1">
-									{qualityCheck.description && <div>{qualityCheck.description}</div>}
-									{qualityCheck.type && <div className="text-gray-300">{t('preview.schema.qualityType', { value: qualityCheck.type })}</div>}
-									{qualityCheck.dimension &&
-										<div className="text-gray-300">{t('preview.schema.qualityDimension', { value: qualityCheck.dimension })}</div>}
-									{qualityCheck.metric &&
-										<div className="text-gray-300">{t('preview.schema.qualityMetric', { value: qualityCheck.metric })}</div>}
-									{qualityCheck.mustBeGreaterThan !== undefined &&
-										<div className="text-gray-300">{t('preview.schema.mustBeGreaterThan', { value: qualityCheck.mustBeGreaterThan })}</div>}
-									{qualityCheck.mustBeLessThan !== undefined &&
-										<div className="text-gray-300">{t('preview.schema.mustBeLessThan', { value: qualityCheck.mustBeLessThan })}</div>}
-									{qualityCheck.mustBe !== undefined &&
-										<div className="text-gray-300">{t('preview.schema.mustBe', { value: qualityCheck.mustBe })}</div>}
-								</div>
-							);
-
-							return (
-								<Tooltip key={qIdx} content={tooltipContent}>
-									<span
-										className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
-										<QualityIcon className="w-3 h-3"/>
-										{qualityCheck.name || t('preview.schema.qualityCheck')}
-									</span>
-								</Tooltip>
-							);
-						})}
+						{Array.isArray(property.relationships) && property.relationships.map((relationship, rIdx) => (
+							<RelationshipPill key={rIdx} relationship={relationship} />
+						))}
+						{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => (
+							<QualityCheckPill key={qIdx} qualityCheck={qualityCheck} />
+						))}
 					</div>
 				</td>
 			</tr>
@@ -296,6 +370,16 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 										{schema.type}
 									</span>
 							)}
+							{schema.physicalType && schema.physicalType !== schema.type && (
+								<span
+									className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+									title={t('preview.schema.physicalType', { value: schema.physicalType })}>
+										{schema.physicalType}
+									</span>
+							)}
+							{schema.deprecated && (
+								<span className={`${deprecatedPillClassName} ml-1 px-2`}>{t('preview.schema.deprecated')}</span>
+							)}
 							{schema.description ? (
 								<div className="text-sm font-normal text-gray-500">{schema.description}</div>
 							) : schemaDefinition?.description ? (
@@ -303,35 +387,30 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							) : (
 								<div className="text-sm font-normal text-gray-400">{t('preview.schema.noDescription')}</div>
 							)}
+							{schema.dataGranularityDescription && (
+								<div className="text-sm font-normal text-gray-500">{t('preview.schema.granularity', { value: schema.dataGranularityDescription })}</div>
+							)}
+							<SynonymsLine synonyms={schema.synonyms} className="text-sm font-normal text-gray-500" />
+							{Array.isArray(schema.authoritativeDefinitions) && schema.authoritativeDefinitions.length > 0 && (
+								<div className="mt-1 font-normal">
+									<AuthoritativeDefinitionsPreview definitions={schema.authoritativeDefinitions} />
+								</div>
+							)}
 							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
               {schema && schema.tags && schema.tags.length > 0 && <Tags tags={schema.tags}/>}
+							{Array.isArray(schema.relationships) && schema.relationships.length > 0 && (
+								<div className="mt-1 font-normal flex flex-wrap items-center">
+									{schema.relationships.map((relationship, idx) => (
+										<RelationshipPill key={idx} relationship={relationship} showFrom />
+									))}
+								</div>
+							)}
 							<ContextDisclosure context={schema?.context} />
 							{schema && schema.quality && schema.quality.length > 0 && (
 								<div className="mt-2">
-									{schema.quality.map((qualityCheck, idx) => {
-										const QualityIcon = getQualityCheckIcon(qualityCheck);
-										const tooltipContent = (
-											<div className="space-y-1">
-												{qualityCheck.description && <div>{qualityCheck.description}</div>}
-												{qualityCheck.type &&
-													<div className="text-gray-300">{t('preview.schema.qualityType', { value: qualityCheck.type })}</div>}
-												{qualityCheck.dimension &&
-													<div className="text-gray-300">{t('preview.schema.qualityDimension', { value: qualityCheck.dimension })}</div>}
-												{qualityCheck.metric &&
-													<div className="text-gray-300">{t('preview.schema.qualityMetric', { value: qualityCheck.metric })}</div>}
-											</div>
-										);
-
-										return (
-											<Tooltip key={idx} content={tooltipContent}>
-													<span
-														className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
-														<QualityIcon className="w-3 h-3"/>
-														{qualityCheck.name || t('preview.schema.qualityCheck')}
-													</span>
-											</Tooltip>
-										);
-									})}
+									{schema.quality.map((qualityCheck, idx) => (
+										<QualityCheckPill key={idx} qualityCheck={qualityCheck} />
+									))}
 								</div>
 							)}
 						</th>

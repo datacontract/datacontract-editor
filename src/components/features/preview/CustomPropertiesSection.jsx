@@ -58,6 +58,9 @@ const CustomPropertiesSection = () => {
 										{showTechnicalName && (
 											<div className="mt-0.5 font-mono text-xs font-normal text-gray-500">{property.property}</div>
 										)}
+										{property.vendor && (
+											<div className="mt-0.5 text-xs font-normal text-gray-500">{t('preview.customProperties.vendor', { value: property.vendor })}</div>
+										)}
 									</dt>
 									<dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
 										<PropertyValueRenderer value={property.value}/>

@@ -2,6 +2,8 @@ import { memo } from 'react';
 import {useTranslation} from 'react-i18next';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
+import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
+import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 
 // Memoized SLA Item component
 const SlaItem = memo(({ sla }) => {
@@ -65,11 +67,39 @@ const SlaItem = memo(({ sla }) => {
 						</div>
 					</div>
 				)}
+				{sla.valueExt !== undefined && sla.valueExt !== null && (
+					<div className="flex items-center gap-x-4">
+						<div className="flex flex-col">
+							<dt className="text-sm font-medium text-gray-500">{t('preview.sla.valueExt')}</dt>
+							<dd className="mt-1 text-sm text-gray-900">{sla.valueExt}</dd>
+						</div>
+					</div>
+				)}
 				{sla.description && (
 					<div className="flex items-center gap-x-4">
 						<div className="flex flex-col">
 							<dt className="text-sm font-medium text-gray-500">{t('preview.sla.description')}</dt>
 							<dd className="mt-1 text-sm text-gray-900">{sla.description}</dd>
+						</div>
+					</div>
+				)}
+				{Array.isArray(sla.customProperties) && sla.customProperties.length > 0 && (
+					<div className="flex items-center gap-x-4">
+						<div className="flex flex-col">
+							<dt className="text-sm font-medium text-gray-500">{t('preview.sla.customProperties')}</dt>
+							<dd className="mt-1 flex flex-wrap gap-1">
+								<CustomPropertiesPreview properties={sla.customProperties}/>
+							</dd>
+						</div>
+					</div>
+				)}
+				{Array.isArray(sla.authoritativeDefinitions) && sla.authoritativeDefinitions.length > 0 && (
+					<div className="flex items-center gap-x-4">
+						<div className="flex flex-col">
+							<dt className="text-sm font-medium text-gray-500">{t('preview.sla.authoritativeDefinitions')}</dt>
+							<dd className="mt-1">
+								<AuthoritativeDefinitionsPreview definitions={sla.authoritativeDefinitions}/>
+							</dd>
 						</div>
 					</div>
 				)}

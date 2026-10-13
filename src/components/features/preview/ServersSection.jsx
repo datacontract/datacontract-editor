@@ -7,6 +7,9 @@ import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
 import {useEditorStore} from "../../../store.js";
 import {useShallow} from "zustand/react/shallow";
 import {useCustomization, useHiddenCustomPropertyNames} from "../../../hooks/useCustomization.js";
+import {getAdditionalServerFields, humanizeFieldName} from "../../../utils/previewServerUtils.js";
+
+const formatCustomValue = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value));
 
 // Memoized Server Item component
 const ServerItem = memo(({ server }) => {
@@ -33,6 +36,21 @@ const ServerItem = memo(({ server }) => {
 					</div>
 				)}
 				<div className="flex-1">
+					{(server.server || server.environment || server.description) && (
+						<div className="mb-2">
+							<div className="flex flex-wrap items-center gap-2">
+								{server.server && <h3 className="text-sm font-semibold text-gray-900">{server.server}</h3>}
+								{server.environment && (
+									<span
+										className="inline-flex items-center rounded-md bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+										title={t('preview.servers.environment')}>
+										{server.environment}
+									</span>
+								)}
+							</div>
+							{server.description && <p className="mt-1 text-sm text-gray-500">{server.description}</p>}
+						</div>
+					)}
 					<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
 						{server.type && (
 							<div className="flex flex-col">
@@ -172,6 +190,12 @@ const ServerItem = memo(({ server }) => {
 								<dd className="mt-1 text-sm text-gray-900">{server.regionName}</dd>
 							</div>
 						)}
+						{getAdditionalServerFields(server).map(({ key, value }) => (
+							<div key={key} className="flex flex-col">
+								<dt className="text-sm font-medium text-gray-500">{t(`preview.servers.${key}`, { defaultValue: humanizeFieldName(key) })}</dt>
+								<dd className="mt-1 text-sm text-gray-900">{value}</dd>
+							</div>
+						))}
 						{server.customProperties && (
 							Array.isArray(server.customProperties) ? server.customProperties.length > 0 :
 							typeof server.customProperties === 'object' && Object.keys(server.customProperties).length > 0
@@ -201,6 +225,9 @@ const ServerItem = memo(({ server }) => {
 											</div>
 											{showTechnicalName && (
 												<div className="mt-0.5 font-mono text-[10px] normal-case tracking-normal text-gray-400">{customProperty.property}</div>
+											)}
+											{customProperty.vendor && (
+												<div className="mt-0.5 text-[10px] normal-case tracking-normal text-gray-400">{t('preview.customProperties.vendor', { value: customProperty.vendor })}</div>
 											)}
 										</dt>
 										<dd className="mt-1 text-sm text-gray-900">
@@ -233,6 +260,13 @@ const ServerItem = memo(({ server }) => {
 													<div className="text-gray-300">{t('preview.servers.roleFirstLevelApprovers', { approvers: role.firstLevelApprovers })}</div>}
 												{role.secondLevelApprovers &&
 													<div className="text-gray-300">{t('preview.servers.roleSecondLevelApprovers', { approvers: role.secondLevelApprovers })}</div>}
+												{Array.isArray(role.customProperties) && role.customProperties.map((customProperty, cpIndex) => (
+													<div key={cpIndex} className="text-gray-300 break-all">
+														{customProperty.property}: {formatCustomValue(customProperty.value)}
+														{customProperty.description && <span className="text-gray-400"> · {customProperty.description}</span>}
+														{customProperty.vendor && <span className="text-gray-400"> · {customProperty.vendor}</span>}
+													</div>
+												))}
 											</div>
 										);
 										const displayName = role.role || `Role ${roleIndex + 1}`;

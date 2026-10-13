@@ -1267,7 +1267,8 @@
       "access": "Access",
       "firstLevelApprovers": "First Level Approvers",
       "secondLevelApprovers": "Second Level Approvers",
-      "customProperties": "Custom Properties"
+      "customProperties": "Custom Properties",
+      "roleDescription": "Description"
     },
     "schema": {
       "heading": "Schema",
@@ -1311,7 +1312,42 @@
       "mustBeGreaterThan": "Must be > {{value}}",
       "mustBeLessThan": "Must be < {{value}}",
       "mustBe": "Must be {{value}}",
-      "qualityCheck": "Quality Check"
+      "qualityCheck": "Quality Check",
+      "dimensions": "Dimensions: {{value}}",
+      "elementType": "Element Type: {{value}}",
+      "distanceMetric": "Distance Metric: {{value}}",
+      "normalized": "Normalized: {{value}}",
+      "embeddingModel": "Embedding Model: {{value}}",
+      "embeddingModelVersion": "Embedding Model Version: {{value}}",
+      "itemsDescription": "Items: {{value}}",
+      "mapKeyType": "Key Type: {{value}}",
+      "mapKeyDescription": "Key: {{value}}",
+      "mapValueType": "Value Type: {{value}}",
+      "mapValueDescription": "Value: {{value}}",
+      "qualityRule": "Rule: {{value}}",
+      "qualityArguments": "Arguments: {{value}}",
+      "qualityQuery": "Query: {{value}}",
+      "qualityEngine": "Engine: {{value}}",
+      "qualityImplementation": "Implementation: {{value}}",
+      "qualitySeverity": "Severity: {{value}}",
+      "qualityBusinessImpact": "Business Impact: {{value}}",
+      "qualityMethod": "Method: {{value}}",
+      "qualitySchedule": "Schedule: {{value}}",
+      "qualityScheduler": "Scheduler: {{value}}",
+      "qualityUnit": "Unit: {{value}}",
+      "qualityTags": "Tags: {{value}}",
+      "mustNotBe": "Must not be {{value}}",
+      "mustBeGreaterOrEqualTo": "Must be >= {{value}}",
+      "mustBeLessOrEqualTo": "Must be <= {{value}}",
+      "mustBeBetween": "Must be between {{value}}",
+      "mustNotBeBetween": "Must not be between {{value}}",
+      "enumValues": "Allowed values: {{value}}",
+      "synonyms": "Synonyms: {{value}}",
+      "deprecated": "deprecated",
+      "semanticType": "semantic type: {{value}}",
+      "semanticTypeLabel": "Semantic type",
+      "transformSourceObjects": "Source Objects:",
+      "granularity": "Granularity: {{value}}"
     },
     "servers": {
       "heading": "Servers",
@@ -1342,7 +1378,8 @@
       "roles": "Roles",
       "roleAccess": "Access: {{access}}",
       "roleFirstLevelApprovers": "1st Approvers: {{approvers}}",
-      "roleSecondLevelApprovers": "2nd Approvers: {{approvers}}"
+      "roleSecondLevelApprovers": "2nd Approvers: {{approvers}}",
+      "environment": "Environment"
     },
     "sla": {
       "heading": "Service-Level Agreement (SLA)",
@@ -1354,7 +1391,10 @@
       "driver": "Driver",
       "scheduler": "Scheduler",
       "schedule": "Schedule",
-      "description": "Description"
+      "description": "Description",
+      "valueExt": "Extended Value",
+      "customProperties": "Custom Properties",
+      "authoritativeDefinitions": "Authoritative Definitions"
     },
     "support": {
       "heading": "Support & Communication Channels",
@@ -1364,7 +1404,8 @@
       "scope": "Scope",
       "description": "Description",
       "invitationUrl": "Invitation URL",
-      "invitation": "Invitation"
+      "invitation": "Invitation",
+      "customProperties": "Custom Properties"
     },
     "team": {
       "heading": "Team",
@@ -1380,7 +1421,8 @@
     },
     "customProperties": {
       "heading": "Custom Properties",
-      "description": "This section covers other properties you may find in a data contract."
+      "description": "This section covers other properties you may find in a data contract.",
+      "vendor": "Vendor: {{value}}"
     },
     "contractHeader": {
       "noData": "no data yet"

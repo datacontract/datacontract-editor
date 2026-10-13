@@ -1267,7 +1267,8 @@
       "access": "Zugriff",
       "firstLevelApprovers": "Genehmiger erste Ebene",
       "secondLevelApprovers": "Genehmiger zweite Ebene",
-      "customProperties": "Benutzerdefinierte Eigenschaften"
+      "customProperties": "Benutzerdefinierte Eigenschaften",
+      "roleDescription": "Beschreibung"
     },
     "schema": {
       "heading": "Schema",
@@ -1311,7 +1312,42 @@
       "mustBeGreaterThan": "Muss > {{value}} sein",
       "mustBeLessThan": "Muss < {{value}} sein",
       "mustBe": "Muss {{value}} sein",
-      "qualityCheck": "Qualitätsprüfung"
+      "qualityCheck": "Qualitätsprüfung",
+      "dimensions": "Dimensionen: {{value}}",
+      "elementType": "Elementtyp: {{value}}",
+      "distanceMetric": "Distanzmetrik: {{value}}",
+      "normalized": "Normalisiert: {{value}}",
+      "embeddingModel": "Embedding-Modell: {{value}}",
+      "embeddingModelVersion": "Embedding-Modell-Version: {{value}}",
+      "itemsDescription": "Einträge: {{value}}",
+      "mapKeyType": "Schlüsseltyp: {{value}}",
+      "mapKeyDescription": "Schlüssel: {{value}}",
+      "mapValueType": "Werttyp: {{value}}",
+      "mapValueDescription": "Wert: {{value}}",
+      "qualityRule": "Regel: {{value}}",
+      "qualityArguments": "Argumente: {{value}}",
+      "qualityQuery": "Abfrage: {{value}}",
+      "qualityEngine": "Engine: {{value}}",
+      "qualityImplementation": "Implementierung: {{value}}",
+      "qualitySeverity": "Schweregrad: {{value}}",
+      "qualityBusinessImpact": "Geschäftliche Auswirkung: {{value}}",
+      "qualityMethod": "Methode: {{value}}",
+      "qualitySchedule": "Zeitplan: {{value}}",
+      "qualityScheduler": "Scheduler: {{value}}",
+      "qualityUnit": "Einheit: {{value}}",
+      "qualityTags": "Tags: {{value}}",
+      "mustNotBe": "Darf nicht {{value}} sein",
+      "mustBeGreaterOrEqualTo": "Muss >= {{value}} sein",
+      "mustBeLessOrEqualTo": "Muss <= {{value}} sein",
+      "mustBeBetween": "Muss zwischen {{value}} liegen",
+      "mustNotBeBetween": "Darf nicht zwischen {{value}} liegen",
+      "enumValues": "Erlaubte Werte: {{value}}",
+      "synonyms": "Synonyme: {{value}}",
+      "deprecated": "veraltet",
+      "semanticType": "semantischer Typ: {{value}}",
+      "semanticTypeLabel": "Semantischer Typ",
+      "transformSourceObjects": "Quellobjekte:",
+      "granularity": "Granularität: {{value}}"
     },
     "servers": {
       "heading": "Server",
@@ -1342,7 +1378,8 @@
       "roles": "Rollen",
       "roleAccess": "Zugriff: {{access}}",
       "roleFirstLevelApprovers": "Genehmiger 1. Ebene: {{approvers}}",
-      "roleSecondLevelApprovers": "Genehmiger 2. Ebene: {{approvers}}"
+      "roleSecondLevelApprovers": "Genehmiger 2. Ebene: {{approvers}}",
+      "environment": "Umgebung"
     },
     "sla": {
       "heading": "Service Level Agreement (SLA)",
@@ -1354,7 +1391,10 @@
       "driver": "Treiber",
       "scheduler": "Scheduler",
       "schedule": "Zeitplan",
-      "description": "Beschreibung"
+      "description": "Beschreibung",
+      "valueExt": "Erweiterter Wert",
+      "customProperties": "Benutzerdefinierte Eigenschaften",
+      "authoritativeDefinitions": "Maßgebliche Definitionen"
     },
     "support": {
       "heading": "Support- & Kommunikationskanäle",
@@ -1364,7 +1404,8 @@
       "scope": "Scope",
       "description": "Beschreibung",
       "invitationUrl": "Einladungs-URL",
-      "invitation": "Einladung"
+      "invitation": "Einladung",
+      "customProperties": "Benutzerdefinierte Eigenschaften"
     },
     "team": {
       "heading": "Team",
@@ -1380,7 +1421,8 @@
     },
     "customProperties": {
       "heading": "Benutzerdefinierte Eigenschaften",
-      "description": "Dieser Abschnitt behandelt weitere Eigenschaften, die du in einem Data Contract finden kannst."
+      "description": "Dieser Abschnitt behandelt weitere Eigenschaften, die du in einem Data Contract finden kannst.",
+      "vendor": "Anbieter: {{value}}"
     },
     "contractHeader": {
       "noData": "noch keine Daten"
