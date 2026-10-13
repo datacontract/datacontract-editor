@@ -1168,7 +1168,7 @@ const DiagramViewInner = () => {
               interactionWidth: 20,
               className: 'schema-level-edge',
               data: {},
-              style: { stroke: '#b1b1b7', strokeWidth: 2, strokeDasharray: '5,5' },
+              style: { stroke: '#b1b1b7', strokeWidth: 2 },
             });
           }
         });
