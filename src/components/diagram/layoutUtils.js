@@ -1,30 +1,5 @@
 import dagre from 'dagre';
-
-/**
- * Splits a "schemaName.propertyPath" reference by matching the longest schema
- * name that is a prefix of `reference` followed by '.'. ODCS schema names can
- * themselves contain dots (fully-qualified physical names), so splitting on
- * the first '.' mis-resolves the schema. Falls back to split-on-first-dot
- * when no schema matches.
- */
-const splitSchemaReference = (reference, schemaNames) => {
-  if (typeof reference !== 'string') return [undefined, undefined];
-  let longest = null;
-  for (const name of schemaNames) {
-    if (typeof name !== 'string') continue;
-    if ((reference === name || reference.startsWith(name + '.')) &&
-        (longest === null || name.length > longest.length)) {
-      longest = name;
-    }
-  }
-  if (longest !== null) {
-    const remainder = reference.length > longest.length ? reference.slice(longest.length + 1) : '';
-    return [longest, remainder];
-  }
-  const firstDot = reference.indexOf('.');
-  if (firstDot === -1) return [reference, ''];
-  return [reference.slice(0, firstDot), reference.slice(firstDot + 1)];
-};
+import { resolveReference } from '../../lib/relationshipReferences.js';
 
 /**
  * Build a map of { schemaName: Set<propertyName> } of properties that are
@@ -46,9 +21,12 @@ export const buildReferencedByName = (schemas) => {
     s?.properties?.forEach((p) => {
       (p?.relationships || []).forEach((rel) => {
         if (typeof rel?.to !== 'string') return;
-        const [targetSchema, targetProp] = splitSchemaReference(rel.to, schemaNames);
-        if (targetSchema && targetProp && result[targetSchema]) {
-          result[targetSchema].add(targetProp);
+        const target = resolveReference(rel.to, schemas, schemaNames);
+        if (!target || target.propertyIndex === -1) return;
+        const targetSchema = schemas[target.schemaIndex];
+        const targetProp = targetSchema.properties[target.propertyIndex];
+        if (result[targetSchema.name] && targetProp?.name) {
+          result[targetSchema.name].add(targetProp.name);
         }
       });
     });
@@ -211,22 +189,17 @@ export const getLayoutedElements = (schemas, { collapseState = {}, referencedByN
       const relationships = prop?.relationships || [];
 
       relationships.forEach(relationship => {
-        const reference = relationship.to;
-        if (reference && typeof reference === 'string') {
-          const [targetSchemaName] = splitSchemaReference(reference, schemaNames);
-          const targetIndex = schemas.findIndex(s => s?.name === targetSchemaName);
-          if (targetIndex !== -1) {
-            dagreGraph.setEdge(`schema-${targetIndex}`, `schema-${sourceIndex}`);
-          }
+        const target = resolveReference(relationship?.to, schemas, schemaNames);
+        if (target) {
+          dagreGraph.setEdge(`schema-${target.schemaIndex}`, `schema-${sourceIndex}`);
         }
       });
 
       // Backward compatibility: customProperties.references
       if (prop?.customProperties?.references) {
-        const [targetSchemaName] = splitSchemaReference(prop.customProperties.references, schemaNames);
-        const targetIndex = schemas.findIndex(s => s?.name === targetSchemaName);
-        if (targetIndex !== -1) {
-          dagreGraph.setEdge(`schema-${targetIndex}`, `schema-${sourceIndex}`);
+        const target = resolveReference(prop.customProperties.references, schemas, schemaNames);
+        if (target) {
+          dagreGraph.setEdge(`schema-${target.schemaIndex}`, `schema-${sourceIndex}`);
         }
       }
     });
