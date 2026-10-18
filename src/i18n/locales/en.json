@@ -11,7 +11,8 @@
     "sla": "SLA",
     "customProperties": "Custom Properties",
     "footer": {
-      "documentation": "Documentation"
+      "documentation": "Documentation",
+      "createdBy": "Created by Entropy Data"
     },
     "context": "Context"
   },
@@ -1425,7 +1426,8 @@
       "vendor": "Vendor: {{value}}"
     },
     "contractHeader": {
-      "noData": "no data yet"
+      "noData": "no data yet",
+      "noTeam": "No Team"
     }
   },
   "app": {

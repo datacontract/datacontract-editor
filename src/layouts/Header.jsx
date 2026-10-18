@@ -20,6 +20,8 @@ const HamburgerIcon = () => (
 const LANGUAGES = [
 	{ code: 'en', label: 'English' },
 	{ code: 'de', label: 'Deutsch' },
+	{ code: 'sv', label: 'Svenska' },
+	{ code: 'fr', label: 'Français' },
 ];
 
 const Header = () => {

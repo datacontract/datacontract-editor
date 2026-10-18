@@ -99,7 +99,7 @@ const DEFAULT_CONFIG = {
   onCancel: null,      // () => void - only for EMBEDDED mode
   onDelete: null,      // () => void - only for EMBEDDED mode
   showDelete: true,    // boolean - show Delete button in EMBEDDED mode (default: true)
-  saveLabel: 'Save',   // string - custom label for Save button in EMBEDDED mode
+  saveLabel: null,     // string - custom label for Save button in EMBEDDED mode (default: localized "Save")
 	titlePrefix: null,
 
   // Semantic ontology tree browser (the tree may also include business definitions)

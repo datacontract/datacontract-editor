@@ -1,0 +1,1569 @@
+{
+  "nav": {
+    "fundamentals": "Grunder",
+    "termsOfUse": "Användningsvillkor",
+    "schemas": "Scheman",
+    "servers": "Servrar",
+    "team": "Team",
+    "support": "Support",
+    "roles": "Roller",
+    "pricing": "Prissättning",
+    "sla": "SLA",
+    "customProperties": "Anpassade egenskaper",
+    "footer": {
+      "documentation": "Dokumentation",
+      "createdBy": "Skapad av Entropy Data"
+    },
+    "context": "Kontext"
+  },
+  "overview": {
+    "section": {
+      "fundamentals": "Grunder",
+      "fundamentalsDescription": "Grundläggande metadata som identifierar Data Contract, inklusive namn, version, status och organisatorisk kontext."
+    },
+    "apiVersion": {
+      "label": "ODCS-version (apiVersion)",
+      "placeholder": "Välj en ODCS-version...",
+      "tooltip": "Version av Open Data Contract Standard som detta kontrakt är skrivet i (apiVersion). Endast den aktuella och nyare versioner kan väljas; en uppgradering migrerar dokumentet där standarden har ändrat form och lämnar kontraktets egen version orörd.",
+      "behind": "Din organisation har konfigurerat ODCS {{target}} som standard.",
+      "migrate": "Migrera till {{target}}",
+      "confirm": {
+        "title": "Migrera till ODCS {{target}}",
+        "why": "Detta kontrakt deklarerar ODCS {{current}}, medan {{target}} är den version som din organisation använder. Fält som standarden lade till i {{target}} är dolda tills kontraktet deklarerar den versionen.",
+        "whatOnlyVersion": "Migreringen sätter apiVersion till {{target}}. Denna version kräver inga strukturella ändringar, så inget annat i dokumentet ändras.",
+        "whatWithSteps": "Migreringen sätter apiVersion till {{target}} och genomför de strukturella ändringar som versionen kräver:",
+        "steps": {
+          "teamMembers": "Den enkla teamlistan blir team-objektet med en medlemslista."
+        },
+        "note": "Kontraktets egen version och dess innehåll förblir orörda; om övergången till den nya standardversionen motiverar en ny kontraktsversion avgör du själv. Du kan ångra migreringen som vilken annan redigering som helst.",
+        "migrate": "Migrera",
+        "dismiss": "Inte nu"
+      },
+      "sectionLocked": "Kräver en nyare ODCS-version. Uppgradera via ODCS-versionen under Grunder."
+    },
+    "name": {
+      "label": "Namn",
+      "placeholder": "Ange dokumentnamn",
+      "tooltip": "Namnet på Data Contract"
+    },
+    "version": {
+      "label": "Version",
+      "tooltip": "Versionsnummer enligt semantisk versionshantering"
+    },
+    "id": {
+      "label": "ID",
+      "tooltip": "Unik identifierare för detta Data Contract",
+      "usedByDataProducts": "Detta ID kan inte ändras så länge det används av Data Products: {{products}}."
+    },
+    "status": {
+      "label": "Status",
+      "placeholder": "Välj en status...",
+      "tooltip": "Aktuell status för Data Contract",
+      "options": {
+        "draft": "utkast",
+        "proposed": "föreslagen",
+        "inDevelopment": "under utveckling",
+        "active": "aktiv",
+        "deprecated": "utfasad",
+        "retired": "avvecklad"
+      }
+    },
+    "tenant": {
+      "label": "Tenant",
+      "tooltip": "Tenant eller organisation som detta kontrakt tillhör"
+    },
+    "domain": {
+      "label": "Domain",
+      "placeholder": "Välj en Domain...",
+      "tooltip": "Affärsdomän eller kategori för detta Data Contract"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Lägg till en Tag...",
+      "tooltip": "Kategorisera ditt Data Contract med Tags"
+    }
+  },
+  "termsOfUse": {
+    "heading": "Användningsvillkor",
+    "description": "Övergripande beskrivning av datasetet, inklusive syfte, riktlinjer för användning och begränsningar.",
+    "purpose": {
+      "label": "Syfte",
+      "tooltip": "Avsett syfte för den tillhandahållna datan",
+      "placeholder": "Beskriv syftet med detta Data Contract..."
+    },
+    "usage": {
+      "label": "Användning",
+      "tooltip": "Hur denna data ska användas",
+      "placeholder": "Beskriv hur denna data ska användas..."
+    },
+    "limitations": {
+      "label": "Begränsningar",
+      "tooltip": "Tekniska, regulatoriska och juridiska begränsningar för användning av datan",
+      "placeholder": "Beskriv eventuella begränsningar eller restriktioner..."
+    }
+  },
+  "header": {
+    "view": {
+      "diagram": "Diagram",
+      "form": "Formulär",
+      "yaml": "YAML"
+    },
+    "toolbar": {
+      "preview": "Förhandsvisning",
+      "validation": "Validering",
+      "tests": "Tester"
+    },
+    "action": {
+      "save": "Spara",
+      "cancel": "Avbryt",
+      "delete": "Ta bort",
+      "new": "Ny",
+      "loadExample": "Ladda exempel",
+      "open": "Öppna"
+    },
+    "confirm": {
+      "delete": "Är du säker på att du vill ta bort detta Data Contract? Åtgärden kan inte ångras."
+    },
+    "menu": {
+      "open": "Öppna meny"
+    },
+    "status": {
+      "valid": "Giltigt",
+      "testsPassed": "Testerna lyckades",
+      "testsFailed": "Testerna misslyckades"
+    },
+    "cannotSave": {
+      "title": "Kan inte spara",
+      "description": "YAML innehåller syntaxfel och kan inte sparas. Åtgärda felen i YAML-vyn först."
+    },
+    "language": {
+      "label": "Språk"
+    }
+  },
+  "team": {
+    "heading": "Team",
+    "section": {
+      "description": "Teaminformation och medlemmar."
+    },
+    "name": {
+      "label": "Teamnamn",
+      "placeholder": "Välj ett Team..."
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Beskrivning av teamet..."
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Lägg till en Tag..."
+    },
+    "addMember": "+ Lägg till teammedlem"
+  },
+  "support": {
+    "heading": "Support",
+    "section": {
+      "description": "Kommunikationskanaler för hjälp med datasetet."
+    },
+    "channel": {
+      "label": "Kanal"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "removeChannel": "Ta bort kanal",
+    "tool": {
+      "label": "Verktyg",
+      "tooltip": "Plattformstyp (email, slack, teams, discord, ticket, googlechat, other)",
+      "placeholder": "Välj ett verktyg..."
+    },
+    "scope": {
+      "label": "Omfattning",
+      "tooltip": "Användningskontext (interactive, announcements, issues, notifications)",
+      "placeholder": "Välj en omfattning..."
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Kanaldetaljer för användare..."
+    },
+    "invitationUrl": {
+      "label": "Inbjudningslänk"
+    },
+    "addChannel": "+ Lägg till supportkanal"
+  },
+  "pricing": {
+    "heading": "Prissättning",
+    "description": "Definiera kostnadsstrukturen för prenumeration på dataåtkomst.",
+    "priceAmount": {
+      "label": "Pris",
+      "tooltip": "Prenumerationspris per enhet"
+    },
+    "currency": {
+      "label": "Valuta",
+      "tooltip": "Valutakod (t.ex. USD, EUR)"
+    },
+    "priceUnit": {
+      "label": "Prisenhet",
+      "tooltip": "Måttenhet (t.ex. megabyte, gigabyte)"
+    }
+  },
+  "roles": {
+    "heading": "Roller",
+    "description": "En lista över roller som ger användare åtkomst till datasetet."
+  },
+  "customProperties": {
+    "heading": "Anpassade egenskaper",
+    "description": "En lista över nyckel/värde-par för anpassade egenskaper. Namn bör skrivas i camel case."
+  },
+  "sla": {
+    "heading": "Servicenivåavtal",
+    "description": "Åtaganden om prestanda och tillgänglighet med tillhörande tillämpningsparametrar.",
+    "property": {
+      "label": "Egenskap",
+      "tooltip": "Identifierare för SLA-mått"
+    },
+    "value": {
+      "label": "Värde",
+      "tooltip": "Målvärde för åtagandet"
+    },
+    "remove": "Ta bort SLA",
+    "unit": {
+      "label": "Enhet",
+      "tooltip": "Måttstandard (ISO-format: d/day/days, y/yr/years)"
+    },
+    "element": {
+      "label": "Element",
+      "tooltip": "Målkomponent(er) i schemat"
+    },
+    "driver": {
+      "label": "Drivkraft",
+      "tooltip": "Prioritetsklassificering",
+      "placeholder": "Välj drivkraft..."
+    },
+    "scheduler": {
+      "label": "Schemaläggare",
+      "tooltip": "Namn på schemaläggaren (t.ex. cron eller valfritt verktyg som din organisation stöder)"
+    },
+    "schedule": {
+      "label": "Schema",
+      "tooltip": "Konfiguration för schemaläggningsverktyget (t.ex. 0 20 * * * för cron)"
+    },
+    "descriptionField": {
+      "label": "Beskrivning",
+      "tooltip": "Förklaring i klartext",
+      "placeholder": "Förklaring i klartext..."
+    },
+    "add": "+ Lägg till SLA",
+    "customPropertiesField": {
+      "label": "Anpassade egenskaper"
+    },
+    "authoritativeDefinitionsField": {
+      "label": "Auktoritativa definitioner"
+    }
+  },
+  "ai": {
+    "fab": {
+      "title": "AI-assistent"
+    },
+    "sidebar": {
+      "resize": "Dra för att ändra storlek",
+      "newConversation": "Ny konversation",
+      "closePanel": "Stäng panel"
+    },
+    "assistant": {
+      "title": "Data Contract-assistent"
+    },
+    "status": {
+      "generating": "Genererar...",
+      "thinking": "Tänker...",
+      "callingTool": "Anropar {{tool}}...",
+      "callingTools": "Anropar {{count}} verktyg..."
+    },
+    "suggestion": {
+      "undo": "Ångra AI-förslag",
+      "suggestField": "Föreslå {{field}} med AI"
+    },
+    "error": {
+      "notConfiguredInline": "AI är inte konfigurerad. Ange endpoint och apiKey i AI-konfigurationen."
+    },
+    "toolCall": {
+      "defaultSummary": "AI föreslog ändringar",
+      "contractUpdate": "Kontraktsuppdatering",
+      "undo": "Ångra"
+    },
+    "notConfigured": {
+      "title": "AI-assistenten är inte konfigurerad",
+      "anthropicHint": "Konfigurera en Anthropic API-endpoint.",
+      "openaiHint": "Konfigurera en OpenAI-kompatibel endpoint."
+    },
+    "empty": {
+      "description": "Ställ frågor om ditt Data Contract eller be om ändringar."
+    },
+    "input": {
+      "placeholder": "Fråga om ditt Data Contract...",
+      "loading": "Laddar..."
+    },
+    "prompts": {
+      "guideMe": "Guida mig",
+      "createFromExample": "Skapa ett Data Contract för denna exempeldata: ",
+      "addProperty": "Lägg till en egenskap business_timestamp",
+      "generateQualityRules": "Generera kvalitetsregler",
+      "findAndFixIssues": "Hitta och åtgärda problem"
+    },
+    "diff": {
+      "title": "Granska AI-ändringar",
+      "validYaml": "Giltig YAML",
+      "errorCount_one": "{{count}} fel",
+      "errorCount_other": "{{count}} fel",
+      "warningCount_one": "{{count}} varning",
+      "warningCount_other": "{{count}} varningar",
+      "showDetails": "Visa detaljer",
+      "hideDetails": "Dölj detaljer",
+      "editHint": "Redigera högra sidan direkt för att justera ändringarna",
+      "cancel": "Avbryt",
+      "applyChanges": "Tillämpa ändringar"
+    }
+  },
+  "diagram": {
+    "clickToEdit": "Klicka för att redigera",
+    "confirmDeleteProperty": "Är du säker på att du vill ta bort den här egenskapen?",
+    "layingOut": "Ordnar layout…",
+    "noTypeConstraints": "Inga typspecifika begränsningar finns för {{type}}.",
+    "thisType": "den här typen",
+    "controls": {
+      "zoomIn": "Zooma in",
+      "zoomOut": "Zooma ut",
+      "fitView": "Anpassa vy",
+      "showHelp": "Visa hjälp",
+      "hideHelp": "Dölj hjälp",
+      "autoLayout": "Automatisk layout",
+      "autoLayoutHint": "Ordna tabeller automatiskt så att de inte överlappar.",
+      "addSchema": "Lägg till schema",
+      "addSchemaHint": "Skapa en ny tom tabell i detta kontrakt.",
+      "close": "Stäng"
+    },
+    "collapse": {
+      "showAll": "Visa alla egenskaper",
+      "showAllShort": "Visa alla",
+      "showAllHint": "Fäll ut alla tabeller för att visa alla deras kolumner.",
+      "keysOnly": "Visa endast nycklar",
+      "keysOnlyHint": "Fäll ihop alla tabeller till enbart rader med primär- och främmande nycklar.",
+      "hiddenCount": "+{{count}} dolda"
+    },
+    "help": {
+      "title": "Snabba tips:",
+      "editNames": "Klicka på schema- eller egenskapsnamn för att redigera",
+      "clickDetails": "Klicka på egenskaper för att se detaljer i sidopanelen",
+      "dragLink": "Dra från en bubbla på en egenskap till en bubbla på en annan för att länka dem",
+      "dragReposition": "Dra noder för att flytta dem, eller använd automatisk layout för att ordna dem automatiskt",
+      "collapse": "Fäll ihop en tabell till enbart nycklar med listikonen i dess rubrik, eller fäll ihop alla tabeller med knappen i verktygsfältet",
+      "zoom": "Använd mushjulet för att zooma",
+      "shortcutsPrefix": "Tryck",
+      "shortcutsFit": "för att anpassa vyn,",
+      "shortcutsLayout": "för automatisk layout"
+    },
+    "coach": {
+      "title": "Rita en relation",
+      "body": "Håll muspekaren över en egenskapsrad för att visa dess anslutningspunkter och dra sedan från en egenskap till en annan för att länka dem (t.ex. en främmande nyckel till kolumnen den refererar till).",
+      "dismiss": "Stäng",
+      "dismissAria": "Stäng tipset"
+    },
+    "invalidYaml": {
+      "title": "Ogiltig YAML",
+      "description": "Åtgärda YAML-felen för att se diagrammet"
+    },
+    "empty": {
+      "title": "Inga scheman",
+      "description": "Kom igång genom att skapa ditt första schema."
+    },
+    "edge": {
+      "schemaLevel": "Relation på schemanivå: kan endast redigeras i formulärredigeraren"
+    },
+    "schema": {
+      "addProperty": "Lägg till egenskap",
+      "moreOptions": "Fler alternativ",
+      "delete": "Ta bort schema",
+      "unnamed": "Namnlöst schema",
+      "noProperties": "Inga egenskaper definierade"
+    },
+    "handle": {
+      "source": "Dra härifrån till en egenskap i en annan tabell för att skapa en relation",
+      "target": "Släpp en relation här"
+    },
+    "property": {
+      "namePlaceholder": "egenskapsnamn",
+      "unnamed": "namnlös egenskap",
+      "unnamedShort": "namnlös",
+      "dragToReorder": "Dra för att ändra ordning",
+      "addNested": "Lägg till kapslad egenskap",
+      "delete": "Ta bort",
+      "deleteProperty": "Ta bort egenskap"
+    },
+    "propertyDetails": {
+      "title": "Redigera egenskap",
+      "pin": "Klicka för att hålla panelen öppen",
+      "unpin": "Klicka för att släppa panelen"
+    },
+    "section": {
+      "metadata": "Metadata",
+      "semantics": "Semantik",
+      "logicalTypeOptions": "Alternativ för logisk typ",
+      "constraints": "Begränsningar",
+      "classificationSecurity": "Klassificering och säkerhet",
+      "transformations": "Transformationer",
+      "dataQuality": "Datakvalitet",
+      "authoritativeDefinitions": "Auktoritativa definitioner",
+      "relationships": "Relationer",
+      "customProperties": "Anpassade egenskaper",
+      "enumValues": "Tillåtna värden",
+      "synonyms": "Synonymer"
+    },
+    "semantics": {
+      "semanticConcept": "Semantiskt begrepp",
+      "businessDefinition": "Affärsdefinition",
+      "showDetails": "Visa detaljer",
+      "loading": "Laddar element...",
+      "loadError": "Det gick inte att ladda elementet.",
+      "loadErrorHint": "Se konsolen för detaljer.",
+      "sharedProperty": "delad egenskap",
+      "owner": "Owner",
+      "remove": "Ta bort",
+      "findDefinition": "Hitta element"
+    },
+    "field": {
+      "propertyName": {
+        "label": "Egenskapsnamn"
+      },
+      "businessName": {
+        "label": "Affärsnamn"
+      },
+      "physicalName": {
+        "label": "Fysiskt namn"
+      },
+      "logicalType": {
+        "label": "Logisk typ"
+      },
+      "physicalType": {
+        "label": "Fysisk typ"
+      },
+      "arrayItemType": {
+        "label": "Typ för arrayelement",
+        "placeholder": "Välj elementtyp..."
+      },
+      "description": {
+        "label": "Beskrivning",
+        "placeholder": "Beskriv denna egenskap..."
+      },
+      "examples": {
+        "label": "Exempel",
+        "help": "Ett exempel per rad (allt innehåll bevaras)"
+      },
+      "format": {
+        "label": "Format",
+        "placeholderString": "t.ex. email, uri, uuid",
+        "placeholderInteger": "Välj heltalsformat...",
+        "placeholderNumber": "Välj talformat...",
+        "placeholderDate": "t.ex. yyyy-MM-dd, ISO 8601",
+        "dateHelp": "JDK DateTimeFormatter-mönster"
+      },
+      "minLength": {
+        "label": "Minsta längd"
+      },
+      "maxLength": {
+        "label": "Största längd"
+      },
+      "pattern": {
+        "label": "Mönster (Regex)",
+        "placeholder": "Reguljärt uttryck"
+      },
+      "minimum": {
+        "label": "Minimum",
+        "datePlaceholder": "Tidigaste tillåtna värde"
+      },
+      "maximum": {
+        "label": "Maximum",
+        "datePlaceholder": "Senaste tillåtna värde"
+      },
+      "exclusiveMinimum": {
+        "label": "Exklusivt minimum"
+      },
+      "exclusiveMaximum": {
+        "label": "Exklusivt maximum"
+      },
+      "multipleOf": {
+        "label": "Multipel av",
+        "placeholder": "Värdet måste vara en multipel av detta tal"
+      },
+      "minItems": {
+        "label": "Minsta antal element"
+      },
+      "maxItems": {
+        "label": "Största antal element"
+      },
+      "uniqueItems": {
+        "label": "Unika element"
+      },
+      "required": {
+        "label": "Obligatorisk"
+      },
+      "unique": {
+        "label": "Unik"
+      },
+      "primaryKey": {
+        "label": "Primärnyckel"
+      },
+      "partitioned": {
+        "label": "Partitionerad"
+      },
+      "primaryKeyPosition": {
+        "label": "Position i primärnyckel",
+        "help": "Ordningsposition i sammansatt primärnyckel (börjar på 1, eller -1 för enkel nyckel)"
+      },
+      "partitionKeyPosition": {
+        "label": "Position i partitionsnyckel",
+        "help": "Ordningsposition i partitionshierarkin (börjar på 1, eller -1 för enkel partition)"
+      },
+      "classification": {
+        "label": "Klassificering"
+      },
+      "criticalDataElement": {
+        "label": "Kritiskt dataelement"
+      },
+      "encryptedName": {
+        "label": "Krypterat namn"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Lägg till en Tag..."
+      },
+      "transformSourceObjects": {
+        "label": "Källobjekt för transformation",
+        "help": "Lista över källtabeller/-objekt som används i transformationer"
+      },
+      "transformLogic": {
+        "label": "Transformationslogik",
+        "placeholder": "SQL eller transformationskod...",
+        "help": "Teknisk implementation av transformationen (SQL m.m.)"
+      },
+      "transformDescription": {
+        "label": "Beskrivning av transformation",
+        "placeholder": "Affärsvänlig förklaring av transformationen...",
+        "help": "Icke-teknisk beskrivning av hur fältet härleds"
+      },
+      "semanticType": {
+        "label": "Semantisk typ"
+      },
+      "deprecated": {
+        "label": "Utfasad"
+      },
+      "mapKeyType": {
+        "label": "Typ för map-nyckel"
+      },
+      "mapValueType": {
+        "label": "Typ för map-värde"
+      },
+      "vectorDimensions": {
+        "label": "Dimensioner"
+      },
+      "vectorElementType": {
+        "label": "Elementtyp"
+      },
+      "vectorDistanceMetric": {
+        "label": "Avståndsmått"
+      },
+      "vectorEmbeddingModel": {
+        "label": "Embedding-modell"
+      },
+      "vectorNormalized": {
+        "label": "Normaliserad"
+      }
+    },
+    "option": {
+      "notSet": "Inte angiven",
+      "notSetSemantic": "Inte angiven (semantik: {{value}})",
+      "false": "Falskt",
+      "true": "Sant",
+      "select": "Välj..."
+    }
+  },
+  "testResults": {
+    "title": "Tester för Data Contract",
+    "passed": "Godkänd",
+    "failed": "Misslyckades",
+    "failedTests": "Misslyckade tester",
+    "allPassed": "Alla tester godkändes",
+    "selectServer": "Välj server",
+    "server": "Server",
+    "serverLabel": "Server: {{server}}",
+    "running": "Ett test körs just nu...",
+    "cancel": "Avbryt",
+    "cancelTitle": "Avbryt det pågående testet",
+    "runTest": "Kör test",
+    "runVia": "Kör tester via:",
+    "clear": "Rensa",
+    "clearTitle": "Rensa testresultat",
+    "showHelp": "Visa hjälp",
+    "hideHelp": "Dölj hjälp",
+    "errorLabel": "Fel:",
+    "logs": "Loggar",
+    "noData": "Inga testdata tillgängliga",
+    "empty": {
+      "title": "Inga testresultat ännu",
+      "subtitle": "Klicka på knappen Kör test ovan för att testa ditt Data Contract."
+    },
+    "help": {
+      "title": "Hjälp",
+      "hide": "Dölj hjälp",
+      "cliTitle": "Så startar du Data Contract CLI",
+      "runIntro": "För att köra",
+      "runIntroSuffix": "API-servern använder du följande kommando:",
+      "apiRunsAt": "API:t körs på",
+      "moreInfo": "Mer information finns på"
+    }
+  },
+  "warnings": {
+    "empty": {
+      "title": "Inga problem hittades",
+      "subtitle": "Din YAML är giltig utan fel eller varningar."
+    },
+    "problems": "Problem ({{count}})",
+    "lineColumn": "Rad {{line}}, kolumn {{column}}",
+    "apiVersion": {
+      "document": "Dokument {{version}}",
+      "schema": "Schemastandard {{version}}"
+    }
+  },
+  "rolesList": {
+    "accessRoles": "Åtkomstroller",
+    "addRole": "+ Lägg till roll",
+    "remove": "Ta bort",
+    "role": {
+      "label": "Roll",
+      "tooltip": "Namn på IAM-roll"
+    },
+    "access": {
+      "label": "Åtkomst",
+      "tooltip": "Typ av åtkomst som IAM-rollen ger (t.ex. read eller write)"
+    },
+    "description": {
+      "label": "Beskrivning",
+      "tooltip": "Förklaring av behörighetsomfånget",
+      "placeholder": "Förklaring av behörighetsomfånget..."
+    },
+    "firstLevelApprovers": {
+      "label": "Godkännare, första nivån",
+      "tooltip": "Primär godkännandeinstans"
+    },
+    "secondLevelApprovers": {
+      "label": "Godkännare, andra nivån",
+      "tooltip": "Sekundär godkännandeinstans"
+    }
+  },
+  "teamMember": {
+    "title": "Teammedlem",
+    "remove": "Ta bort medlem",
+    "username": {
+      "label": "Användarnamn"
+    },
+    "name": {
+      "label": "Fullständigt namn"
+    },
+    "role": {
+      "label": "Roll",
+      "placeholder": "t.ex. owner, data steward"
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Beskrivning av teammedlemmen..."
+    },
+    "dateIn": {
+      "label": "Startdatum"
+    },
+    "dateOut": {
+      "label": "Slutdatum"
+    },
+    "replacedBy": {
+      "label": "Ersatt av"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Lägg till en Tag..."
+    }
+  },
+  "settings": {
+    "title": "Inställningar",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "current": "Aktuell:",
+    "apiServerUrl": {
+      "label": "URL till API-server för Data Contract CLI",
+      "help": "Bas-URL:en för API-servern för Data Contract CLI. Lämna tomt för att använda standardvärdet."
+    },
+    "apiKey": {
+      "placeholder": "Ange din API-nyckel",
+      "help": "Valfri API-nyckel för autentisering mot API-servern för Data Contract CLI."
+    }
+  },
+  "fileSelect": {
+    "title": "Välj en fil",
+    "loading": "Laddar filer...",
+    "empty": "Inga filer hittades",
+    "cancel": "Avbryt",
+    "open": "Öppna"
+  },
+  "browsePanel": {
+    "semantics": {
+      "title": "Semantik"
+    },
+    "dataProducts": {
+      "title": "Data Products",
+      "empty": "Inga Data Products hittades",
+      "upstream": "Uppströms",
+      "all": "Alla Data Products",
+      "noContracts": "Inga Data Contracts"
+    },
+    "kind": {
+      "product": "Data Product",
+      "contract": "Output Port",
+      "schema": "Tabell",
+      "property": "Egenskap"
+    },
+    "semanticKind": {
+      "namespace": "Namnrymd",
+      "group": "Grupp",
+      "entity": "Begrepp",
+      "property": "Egenskap",
+      "shared_property": "Delad egenskap",
+      "metric": "Mätvärde"
+    },
+    "openDetails": "Öppna detaljsida",
+    "tooltip": {
+      "dataContract": "Data Contract",
+      "id": "ID",
+      "version": "Version",
+      "type": "Typ",
+      "physicalName": "Fysiskt namn",
+      "required": "Obligatorisk",
+      "yes": "ja",
+      "classification": "Klassificering",
+      "examples": "Exempel",
+      "businessName": "Affärsnamn"
+    },
+    "linkedTo": "Länkad i Data Contract: {{properties}}",
+    "search": "Sök...",
+    "loading": "Laddar...",
+    "empty": "Inga element hittades",
+    "noMatches": "Inga matchande element",
+    "dragToSchemaHint": "Dra till ett schema för att lägga till, eller till en egenskap för att länka",
+    "formHint": "Dra element till schemat för att lägga till dem, eller till en egenskap för att länka dem.",
+    "openSchemaHint": "Öppna ett schema för att lägga till egenskaper",
+    "expand": "Visa webbläsare",
+    "collapse": "Fäll ihop panel",
+    "close": "Stäng panel"
+  },
+  "definitionSelect": {
+    "title": "Hitta element",
+    "subtitle": "Bläddra bland semantiska element och affärsdefinitioner",
+    "close": "Stäng",
+    "search": "Sök...",
+    "conceptCount_one": "{{count}} begrepp",
+    "conceptCount_other": "{{count}} begrepp",
+    "propertyCount_one": "{{count}} egenskap",
+    "propertyCount_other": "{{count}} egenskaper",
+    "loading": "Laddar element...",
+    "noMatches": "Inga matchande element",
+    "empty": "Inga element hittades",
+    "cancel": "Avbryt",
+    "select": "Välj"
+  },
+  "descriptionPreview": {
+    "termsOfUse": "Användningsvillkor",
+    "subtitle": "Övergripande beskrivning av datasetet, inklusive syfte, riktlinjer för användning och begränsningar",
+    "purpose": "Syfte",
+    "usage": "Användning",
+    "limitations": "Begränsningar",
+    "customProperties": "Anpassade egenskaper",
+    "showMore": "Visa mer...",
+    "showLess": "Visa mindre"
+  },
+  "toast": {
+    "close": "Stäng avisering"
+  },
+  "input": {
+    "required": "Detta fält är obligatoriskt",
+    "requiredLabel": "Obligatorisk",
+    "patternMismatch": "Värdet måste matcha mönstret: {{pattern}}",
+    "minLength": "Minsta längd är {{min}} (just nu {{current}})",
+    "maxLength": "Största längd är {{max}} (just nu {{current}})",
+    "minValue": "Minsta värde är {{min}}",
+    "maxValue": "Största värde är {{max}}",
+    "selectOption": "Välj ett alternativ...",
+    "typeToEnter": "Skriv för att ange ett värde eller välj bland alternativen",
+    "noOptions": "Inga alternativ tillgängliga",
+    "overrideInherited": "Åsidosätt",
+    "overrideInheritedTooltip": "Kopiera det ärvda värdet till detta fält för att redigera det"
+  },
+  "quality": {
+    "label": "Kvalitetsregel",
+    "add": "Lägg till",
+    "empty": "Inga kvalitetsregler definierade",
+    "remove": "Ta bort regel",
+    "select": "Välj...",
+    "summary": {
+      "metric": "Mått",
+      "dimension": "Dimension",
+      "new": "Ny regel"
+    },
+    "operator": {
+      "label": "Operator",
+      "placeholder": "Välj operator...",
+      "mustBe": "Måste vara (=)",
+      "mustNotBe": "Får inte vara (≠)",
+      "mustBeGreaterThan": "Måste vara större än (>)",
+      "mustBeGreaterOrEqualTo": "Måste vara större än eller lika med (≥)",
+      "mustBeLessThan": "Måste vara mindre än (<)",
+      "mustBeLessOrEqualTo": "Måste vara mindre än eller lika med (≤)"
+    },
+    "type": {
+      "label": "Typ",
+      "text": "Text",
+      "library": "Bibliotek (mått)",
+      "sql": "SQL",
+      "custom": "Anpassad"
+    },
+    "name": {
+      "label": "Namn",
+      "placeholder": "Regelidentifierare"
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Förklaring av kontrollen i klartext"
+    },
+    "metric": {
+      "label": "Mått",
+      "placeholder": "Välj mått..."
+    },
+    "missingValues": {
+      "label": "Saknade värden (ett per rad)",
+      "help": "Värden som räknas som saknade utöver null"
+    },
+    "validValues": {
+      "label": "Giltiga värden (ett per rad)",
+      "orPattern": "ELLER mönster",
+      "help": "Lista över godtagbara värden"
+    },
+    "pattern": {
+      "validValuesOr": "Giltiga värden ELLER",
+      "label": "Mönster (Regex)",
+      "help": "Reguljärt uttryck för validering"
+    },
+    "properties": {
+      "label": "Egenskaper (en per rad)",
+      "help": "Kolumnnamn att kontrollera för dubblettkombinationer"
+    },
+    "sqlQuery": {
+      "label": "SQL-fråga",
+      "hint": "Tips: Använd {{object}} och {{property}} som platshållare"
+    },
+    "engine": {
+      "label": "Motor",
+      "placeholder": "t.ex. soda, greatExpectations, montecarlo"
+    },
+    "implementation": {
+      "label": "Implementation",
+      "placeholder": "Leverantörsspecifikt konfigurationsblock"
+    },
+    "value": {
+      "label": "Värde",
+      "placeholder": "Ange numeriskt värde",
+      "placeholderDisabled": "Välj operator först"
+    },
+    "unit": {
+      "label": "Enhet",
+      "default": "Standard (rader)"
+    },
+    "additionalDetails": "Ytterligare detaljer",
+    "dimension": {
+      "label": "Dimension"
+    },
+    "severity": {
+      "label": "Allvarlighetsgrad",
+      "placeholder": "t.ex. critical, warning"
+    },
+    "businessImpact": {
+      "label": "Affärspåverkan",
+      "placeholder": "Konsekvenser om regeln bryts"
+    },
+    "scheduler": {
+      "label": "Schemaläggare",
+      "placeholder": "t.ex. cron"
+    },
+    "schedule": {
+      "label": "Schema"
+    }
+  },
+  "relationship": {
+    "heading": "Relationer",
+    "add": "Lägg till",
+    "title": "Relation",
+    "composite": "sammansatt",
+    "new": "Ny relation",
+    "type": {
+      "label": "Typ"
+    },
+    "select": "Välj...",
+    "remove": "Ta bort",
+    "from": "Från",
+    "to": "Till",
+    "removePair": "Ta bort par",
+    "addPair": "Lägg till kolumnpar (sammansatt nyckel)",
+    "drawer": {
+      "propertyFallback": "egenskap",
+      "resize": "Dra för att ändra storlek",
+      "editOn": "Redigera relation på",
+      "close": "Stäng panel"
+    }
+  },
+  "customProperty": {
+    "heading": "Anpassade egenskaper",
+    "add": "Lägg till",
+    "title": "Anpassad egenskap",
+    "new": "Ny egenskap",
+    "remove": "Ta bort",
+    "property": {
+      "label": "Egenskap"
+    },
+    "value": {
+      "label": "Värde",
+      "placeholder": "Ange värde..."
+    },
+    "arrayItemType": "Elementtyp",
+    "typeChangeWarning": {
+      "message": "Om typen ändras till {{type}} rensas det nuvarande värdet.",
+      "confirm": "Ändra ändå",
+      "cancel": "Avbryt"
+    },
+    "yaml": {
+      "invalid": "Ogiltig YAML: {{message}}",
+      "expectedObject": "Värdet måste vara ett YAML-objekt",
+      "expectedArray": "Värdet måste vara en YAML-lista"
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Valfri beskrivning..."
+    },
+    "required": "Obligatorisk",
+    "select": "Välj...",
+    "noOptions": "Inga alternativ tillgängliga",
+    "auto": {
+      "label": "Auto",
+      "hint": "Härleds automatiskt",
+      "loading": "Laddar…",
+      "none": "Inget att härleda ännu",
+      "orPick": "Eller ange ett fast värde:",
+      "orPickMany": "Eller välj alla värden som gäller:"
+    },
+    "boolean": {
+      "notSet": "Inte angiven",
+      "false": "Falskt",
+      "true": "Sant"
+    },
+    "validation": {
+      "required": "Detta fält är obligatoriskt",
+      "pattern": "Värdet måste matcha mönstret: {{pattern}}",
+      "minLength": "Minsta längd är {{count}}",
+      "maxLength": "Största längd är {{count}}",
+      "minimum": "Minsta värde är {{value}}",
+      "maximum": "Största värde är {{value}}",
+      "minItems": "Minst {{count}} element krävs",
+      "maxItems": "Högst {{count}} element tillåts"
+    },
+    "propertyDrawer": {
+      "resize": "Dra för att ändra storlek",
+      "edit": "Redigera egenskap",
+      "editNamed": "Redigera egenskap: {{name}}",
+      "close": "Stäng panel"
+    },
+    "vendor": {
+      "label": "Leverantör",
+      "placeholder": "t.ex. entropy-data"
+    }
+  },
+  "authDef": {
+    "heading": "Auktoritativa definitioner",
+    "add": "Lägg till",
+    "title": "Auktoritativ definition",
+    "new": "Ny definition",
+    "remove": "Ta bort",
+    "type": {
+      "label": "Typ",
+      "placeholder": "t.ex. businessDefinition"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Beskriv den auktoritativa definitionen..."
+    }
+  },
+  "tags": {
+    "label": "Tags",
+    "placeholder": "Lägg till en Tag...",
+    "add": "Lägg till",
+    "remove": "Ta bort",
+    "removeTag": "Ta bort {{tag}}",
+    "unmanaged": "Denna Tag är ohanterad.",
+    "alreadyExists": "Tag '{{tag}}' finns redan",
+    "addTag": "Lägg till Tag '{{tag}}'",
+    "managedOnly": "Enligt organisationens inställningar är endast hanterade Tags tillåtna."
+  },
+  "enum": {
+    "selectOrType": "Välj eller skriv...",
+    "select": "Välj..."
+  },
+  "keyValue": {
+    "add": "Lägg till",
+    "remove": "Ta bort",
+    "select": "Välj..."
+  },
+  "arrayInput": {
+    "placeholder": "Lägg till element...",
+    "add": "Lägg till",
+    "remove": "Ta bort"
+  },
+  "schemas": {
+    "heading": "Scheman",
+    "description": "Datamodeller som beskriver strukturen, fälten och typerna för dataseten i detta kontrakt.",
+    "add": "Lägg till schema",
+    "empty": {
+      "title": "Inga scheman",
+      "description": "Kom igång genom att skapa ett nytt schema.",
+      "add": "Nytt schema"
+    },
+    "item": {
+      "fallbackName": "Schema {{index}}",
+      "name": "Namn:",
+      "type": "Typ:",
+      "properties": "Egenskaper:"
+    }
+  },
+  "schema": {
+    "untitled": "Namnlöst schema",
+    "description": "Definiera strukturen och egenskaperna för detta schema, inklusive fälttyper, begränsningar och metadata.",
+    "confirm": {
+      "remove": "Är du säker på att du vill ta bort detta schema?",
+      "deleteProperty": "Är du säker på att du vill ta bort den här egenskapen?"
+    },
+    "remove": "Ta bort schema",
+    "field": {
+      "name": {
+        "label": "Namn",
+        "tooltip": "Tekniskt namn på schemat (obligatoriskt)"
+      },
+      "description": {
+        "label": "Beskrivning",
+        "tooltip": "Beskrivning av vad detta schema innehåller",
+        "placeholder": "Beskriv schemat...",
+        "aiPlaceholder": "Beskrivning av vad detta schema/denna tabell innehåller och dess syfte"
+      },
+      "businessName": {
+        "label": "Affärsnamn",
+        "tooltip": "Användarvänligt namn på schemat",
+        "placeholder": "Läsbart namn"
+      },
+      "physicalType": {
+        "label": "Fysisk typ",
+        "tooltip": "Schemats fysiska typ (table, view m.m.)"
+      },
+      "physicalName": {
+        "label": "Fysiskt namn",
+        "tooltip": "Fysiskt namn i databasen/lagringen"
+      },
+      "logicalType": {
+        "label": "Logisk typ",
+        "tooltip": "Schemats logiska typ (object, array m.m.)"
+      },
+      "dataGranularity": {
+        "label": "Beskrivning av datagranularitet",
+        "tooltip": "Beskriv den detaljnivå som en post representerar"
+      },
+      "tags": {
+        "label": "Tags",
+        "tooltip": "Tags för att kategorisera och organisera scheman",
+        "placeholder": "Lägg till en Tag..."
+      },
+      "deprecated": {
+        "label": "Utfasad"
+      },
+      "synonyms": {
+        "label": "Synonymer"
+      },
+      "context": {
+        "label": "Kontext"
+      }
+    },
+    "advancedMetadata": "Avancerad metadata",
+    "properties": {
+      "heading": "Egenskaper",
+      "addFromSemantics": "Lägg till från semantik",
+      "addProperty": "Lägg till egenskap",
+      "empty": "Inga egenskaper definierade",
+      "addSubProperty": "Lägg till underegenskap",
+      "addToItems": "Lägg till egenskap i element",
+      "dragToReorder": "Dra för att ändra ordning"
+    },
+    "notFound": {
+      "title": "Schemat hittades inte på index {{index}}.",
+      "description": "Det kan ha tagits bort."
+    },
+    "indicator": {
+      "primaryKey": "Primärnyckel",
+      "required": "Obligatorisk",
+      "classification": "Klassificering: {{classification}}",
+      "qualityRules": "{{count}} kvalitetsregel/-regler",
+      "relationships": "{{count}} relation(er)"
+    }
+  },
+  "server": {
+    "heading": "Server",
+    "description": "Anslutningsuppgifter och konfiguration för den datakälla eller plattform som tillhandahåller detta Data Contract.",
+    "fallbackName": "Server {{number}}",
+    "remove": "Ta bort server",
+    "confirm": {
+      "remove": "Är du säker på att du vill ta bort den här servern?"
+    },
+    "notFound": {
+      "title": "Servern hittades inte på index {{index}}.",
+      "description": "Den kan ha tagits bort."
+    },
+    "field": {
+      "required": "Obligatorisk",
+      "server": {
+        "label": "Server"
+      },
+      "environment": {
+        "label": "Miljö",
+        "placeholder": "Välj miljö...",
+        "tooltip": "Driftsättningssteg (prod, preprod, dev, uat)"
+      },
+      "description": {
+        "label": "Beskrivning",
+        "placeholder": "Beskriv denna server...",
+        "tooltip": "Serverdetaljer"
+      },
+      "type": {
+        "label": "Typ",
+        "placeholder": "Välj servertyp...",
+        "tooltip": "Plattformskategori (api, athena, bigquery, snowflake, postgres m.fl.)"
+      },
+      "account": {
+        "label": "Konto"
+      },
+      "catalog": {
+        "label": "Katalog"
+      },
+      "database": {
+        "label": "Databas"
+      },
+      "dataset": {
+        "label": "Dataset"
+      },
+      "delimiter": {
+        "label": "Avgränsare"
+      },
+      "endpointUrl": {
+        "label": "Endpoint-URL"
+      },
+      "format": {
+        "label": "Format"
+      },
+      "host": {
+        "label": "Värd"
+      },
+      "location": {
+        "label": "Plats"
+      },
+      "path": {
+        "label": "Sökväg"
+      },
+      "port": {
+        "label": "Port"
+      },
+      "project": {
+        "label": "Projekt"
+      },
+      "region": {
+        "label": "Region"
+      },
+      "regionName": {
+        "label": "Regionnamn"
+      },
+      "schema": {
+        "label": "Schema"
+      },
+      "serviceName": {
+        "label": "Tjänstenamn"
+      },
+      "stagingDir": {
+        "label": "Staging-katalog"
+      },
+      "stream": {
+        "label": "Ström"
+      },
+      "warehouse": {
+        "label": "Warehouse"
+      }
+    }
+  },
+  "servers": {
+    "heading": "Servrar",
+    "description": "Anslutningsendpoints och plattformskonfigurationer för åtkomst till Data Products.",
+    "add": "Lägg till server",
+    "empty": {
+      "title": "Inga servrar",
+      "description": "Kom igång genom att skapa en ny server.",
+      "add": "Ny server"
+    },
+    "card": {
+      "fallbackName": "Server {{number}}",
+      "type": "Typ:",
+      "environment": "Miljö:"
+    }
+  },
+  "common": {
+    "dragToResize": "Dra för att ändra storlek"
+  },
+  "preview": {
+    "context": {
+      "heading": "Kontext",
+      "description": "Vägledning för konsumenter och AI-agenter",
+      "instructions": "Instruktioner",
+      "verifiedStatements": "Verifierade påståenden",
+      "constraints": "Begränsningar"
+    },
+    "fundamentals": {
+      "heading": "Grunder",
+      "description": "Information om Data Contract",
+      "name": "Namn",
+      "version": "Version",
+      "id": "ID",
+      "status": "Status",
+      "tenant": "Tenant",
+      "domain": "Domain",
+      "dataProduct": "Data Product",
+      "contractCreated": "Kontrakt skapat",
+      "tags": "Tags"
+    },
+    "pricing": {
+      "heading": "Pris",
+      "description": "Det här avsnittet gäller prissättning när du fakturerar din kund för användningen av detta Data Product.",
+      "priceAmount": "Pris",
+      "priceCurrency": "Prisvaluta",
+      "priceUnit": "Prisenhet"
+    },
+    "roles": {
+      "heading": "Roller",
+      "description": "Roller som en konsument kan behöva för att få åtkomst till datasetet, beroende på vilken typ av åtkomst som behövs",
+      "role": "Roll",
+      "access": "Åtkomst",
+      "firstLevelApprovers": "Godkännare, första nivån",
+      "secondLevelApprovers": "Godkännare, andra nivån",
+      "customProperties": "Anpassade egenskaper",
+      "roleDescription": "Beskrivning"
+    },
+    "schema": {
+      "heading": "Schema",
+      "description": "Schemat stöder både en affärsmässig representation och en fysisk implementation",
+      "inheritedFromSemantic": "Ärvt från semantiskt begrepp",
+      "noDescription": "Ingen beskrivning",
+      "example": "Exempel:",
+      "examples": "Exempel:",
+      "primaryKey": "primaryKey",
+      "required": "required",
+      "unique": "unique",
+      "partitioned": "partitioned",
+      "criticalDataElement": "kritiskt dataelement",
+      "transformation": "transformation",
+      "transformLogic": "Transformationslogik:",
+      "transformDescription": "Beskrivning:",
+      "format": "Format: {{value}}",
+      "minLength": "Minsta längd: {{value}}",
+      "maxLength": "Största längd: {{value}}",
+      "pattern": "Mönster: {{value}}",
+      "minimum": "Minimum: {{value}}",
+      "maximum": "Maximum: {{value}}",
+      "exclusiveMinimum": "Exklusivt minimum: {{value}}",
+      "exclusiveMaximum": "Exklusivt maximum: {{value}}",
+      "multipleOf": "Multipel av: {{value}}",
+      "minItems": "Minsta antal element: {{value}}",
+      "maxItems": "Största antal element: {{value}}",
+      "uniqueItems": "Unika element: {{value}}",
+      "minProperties": "Minsta antal egenskaper: {{value}}",
+      "maxProperties": "Största antal egenskaper: {{value}}",
+      "requiredList": "Obligatoriska: {{value}}",
+      "timezone": "Tidszon: {{value}}",
+      "defaultTimezone": "Standardtidszon: {{value}}",
+      "logicalType": "Logisk typ: {{value}}",
+      "physicalType": "Fysisk typ: {{value}}",
+      "yes": "Ja",
+      "no": "Nej",
+      "qualityType": "Typ: {{value}}",
+      "qualityDimension": "Dimension: {{value}}",
+      "qualityMetric": "Mått: {{value}}",
+      "mustBeGreaterThan": "Måste vara > {{value}}",
+      "mustBeLessThan": "Måste vara < {{value}}",
+      "mustBe": "Måste vara {{value}}",
+      "qualityCheck": "Kvalitetskontroll",
+      "dimensions": "Dimensioner: {{value}}",
+      "elementType": "Elementtyp: {{value}}",
+      "distanceMetric": "Avståndsmått: {{value}}",
+      "normalized": "Normaliserad: {{value}}",
+      "embeddingModel": "Embedding-modell: {{value}}",
+      "embeddingModelVersion": "Version av embedding-modell: {{value}}",
+      "itemsDescription": "Element: {{value}}",
+      "mapKeyType": "Nyckeltyp: {{value}}",
+      "mapKeyDescription": "Nyckel: {{value}}",
+      "mapValueType": "Värdetyp: {{value}}",
+      "mapValueDescription": "Värde: {{value}}",
+      "qualityRule": "Regel: {{value}}",
+      "qualityArguments": "Argument: {{value}}",
+      "qualityQuery": "Fråga: {{value}}",
+      "qualityEngine": "Motor: {{value}}",
+      "qualityImplementation": "Implementation: {{value}}",
+      "qualitySeverity": "Allvarlighetsgrad: {{value}}",
+      "qualityBusinessImpact": "Affärspåverkan: {{value}}",
+      "qualityMethod": "Metod: {{value}}",
+      "qualitySchedule": "Schema: {{value}}",
+      "qualityScheduler": "Schemaläggare: {{value}}",
+      "qualityUnit": "Enhet: {{value}}",
+      "qualityTags": "Tags: {{value}}",
+      "mustNotBe": "Får inte vara {{value}}",
+      "mustBeGreaterOrEqualTo": "Måste vara >= {{value}}",
+      "mustBeLessOrEqualTo": "Måste vara <= {{value}}",
+      "mustBeBetween": "Måste ligga mellan {{value}}",
+      "mustNotBeBetween": "Får inte ligga mellan {{value}}",
+      "enumValues": "Tillåtna värden: {{value}}",
+      "synonyms": "Synonymer: {{value}}",
+      "deprecated": "utfasad",
+      "semanticType": "semantisk typ: {{value}}",
+      "semanticTypeLabel": "Semantisk typ",
+      "transformSourceObjects": "Källobjekt:",
+      "granularity": "Granularitet: {{value}}"
+    },
+    "servers": {
+      "heading": "Servrar",
+      "description": "Det här avsnittet beskriver anslutningsuppgifter till fysiska dataset och infrastruktur",
+      "type": "Typ",
+      "project": "Projekt",
+      "dataset": "Dataset",
+      "endpoint": "Endpoint",
+      "location": "Plats",
+      "path": "Sökväg",
+      "account": "Konto",
+      "catalog": "Katalog",
+      "database": "Databas",
+      "schema": "Schema",
+      "table": "Tabell",
+      "view": "Vy",
+      "host": "Värd",
+      "port": "Port",
+      "topic": "Topic",
+      "format": "Format",
+      "delimiter": "Avgränsare",
+      "stagingDir": "Staging-katalog",
+      "stream": "Ström",
+      "serviceName": "Tjänstenamn",
+      "warehouse": "Warehouse",
+      "region": "Region",
+      "regionName": "Regionnamn",
+      "roles": "Roller",
+      "roleAccess": "Åtkomst: {{access}}",
+      "roleFirstLevelApprovers": "Godkännare, nivå 1: {{approvers}}",
+      "roleSecondLevelApprovers": "Godkännare, nivå 2: {{approvers}}",
+      "environment": "Miljö"
+    },
+    "sla": {
+      "heading": "Servicenivåavtal (SLA)",
+      "sectionDescription": "Det här avsnittet beskriver servicenivåavtalen (SLA).",
+      "property": "Egenskap",
+      "value": "Värde",
+      "unit": "Enhet",
+      "element": "Element",
+      "driver": "Drivkraft",
+      "scheduler": "Schemaläggare",
+      "schedule": "Schema",
+      "description": "Beskrivning",
+      "valueExt": "Utökat värde",
+      "customProperties": "Anpassade egenskaper",
+      "authoritativeDefinitions": "Auktoritativa definitioner"
+    },
+    "support": {
+      "heading": "Support- och kommunikationskanaler",
+      "sectionDescription": "Support- och kommunikationskanaler hjälper konsumenter att få hjälp med sin användning av Data Contract",
+      "tool": "Verktyg",
+      "channel": "Kanal",
+      "scope": "Omfattning",
+      "description": "Beskrivning",
+      "invitationUrl": "Inbjudningslänk",
+      "invitation": "Inbjudan",
+      "customProperties": "Anpassade egenskaper"
+    },
+    "team": {
+      "heading": "Team",
+      "description": "Det här avsnittet listar teaminformation och medlemmar",
+      "teamName": "Teamnamn",
+      "descriptionLabel": "Beskrivning",
+      "tags": "Tags",
+      "customProperties": "Anpassade egenskaper",
+      "members": "Medlemmar",
+      "dateIn": "Från: {{date}}",
+      "dateOut": "Till: {{date}}",
+      "replacedBy": "Ersatt av: {{username}}"
+    },
+    "customProperties": {
+      "heading": "Anpassade egenskaper",
+      "description": "Det här avsnittet beskriver andra egenskaper som du kan hitta i ett Data Contract.",
+      "vendor": "Leverantör: {{value}}"
+    },
+    "contractHeader": {
+      "noData": "inga data ännu",
+      "noTeam": "Inget Team"
+    }
+  },
+  "app": {
+    "error": {
+      "title": "Applikationsfel",
+      "description": "Data Contract Editor stötte på ett kritiskt fel och kan inte fortsätta.",
+      "errorLabel": "Fel: ",
+      "unknown": "Okänt fel",
+      "tryAgain": "Försök igen",
+      "reload": "Ladda om applikationen",
+      "loadShareFailed": "Det gick inte att ladda det delade Data Contract. Länken kan vara ogiltig."
+    }
+  },
+  "code": {
+    "schemaError": "Schemafel:",
+    "noChanges": {
+      "title": "Inga ändringar",
+      "description": "Ditt kontrakt matchar den senast sparade versionen."
+    },
+    "diff": {
+      "edit": "Redigera",
+      "split": "Delad",
+      "unified": "Enhetlig"
+    }
+  },
+  "errorBoundary": {
+    "title": "Något gick fel",
+    "unexpected": "Ett oväntat fel inträffade",
+    "stackTrace": "Stackspårning",
+    "tryAgain": "Försök igen",
+    "form": {
+      "title": "Formulärfel",
+      "description": "Formuläret {{pageName}} stötte på ett fel och kunde inte visas.",
+      "errorLabel": "Fel:",
+      "unknownError": "Okänt formulärfel",
+      "whatYouCanDo": "Vad du kan göra:",
+      "suggestion1": "Växla till YAML-vyn för att redigera ditt Data Contract direkt",
+      "suggestion2": "Kontrollera att din YAML-struktur är giltig",
+      "suggestion3": "Försök gå till en annan formulärsida",
+      "suggestion4": "Din data är säker, YAML har bevarats",
+      "retry": "Försök med formuläret igen",
+      "editYaml": "Redigera YAML direkt",
+      "developerDetails": "Utvecklardetaljer"
+    },
+    "diagram": {
+      "title": "Fel vid rendering av diagram",
+      "description": "Diagramvyn stötte på ett fel och kunde inte visas.",
+      "errorLabel": "Fel:",
+      "unknownError": "Okänt renderingsfel",
+      "suggestions": "Förslag:",
+      "suggestion1": "Försök använda formulärvyn eller YAML-redigeraren i stället",
+      "suggestion2": "Kontrollera att dina schemadefinitioner är giltiga",
+      "suggestion3": "Kontrollera att egenskapsrelationerna har rätt format",
+      "retry": "Försök med diagrammet igen",
+      "switchToForm": "Växla till formulär",
+      "switchToYaml": "Växla till YAML",
+      "developerDetails": "Utvecklardetaljer"
+    },
+    "preview": {
+      "title": "Förhandsvisningsfel",
+      "description": "Förhandsvisningen kunde inte renderas. Det händer oftast när YAML innehåller oväntade datastrukturer.",
+      "errorLabel": "Fel:",
+      "unknownError": "Okänt fel",
+      "suggestions": "Förslag:",
+      "suggestion1": "Kontrollera om din YAML-syntax innehåller fel",
+      "suggestion2": "Kontrollera att strukturen i Data Contract matchar ODCS-schemat",
+      "suggestion3": "Försök redigera YAML direkt för att åtgärda problemet",
+      "retry": "Försök med förhandsvisningen igen",
+      "developerDetails": "Utvecklardetaljer"
+    }
+  },
+  "yaml": {
+    "parseError": {
+      "title": "YAML-tolkningsfel",
+      "description": "YAML innehåller syntaxfel och kan inte tolkas. Formuläret är otillgängligt tills felen har åtgärdats.",
+      "goToYaml": "Gå till YAML-vyn"
+    }
+  },
+  "typeSelector": {
+    "use": "Använd:",
+    "customValueHint": "Skriv för att ange ett eget värde"
+  },
+  "context": {
+    "heading": "Kontext",
+    "description": "Vägledning för AI-agenter och konsumenter som arbetar med detta Data Contract (ODCS 3.2.0)."
+  },
+  "contextEditor": {
+    "instructions": {
+      "label": "Instruktioner",
+      "placeholder": "Hur denna data ska användas, joinas och tolkas…"
+    },
+    "statements": {
+      "label": "Verifierade påståenden",
+      "help": "Frågor som denna data tillförlitligt kan besvara, eventuellt med det verifierade svaret.",
+      "question": {
+        "placeholder": "Fråga"
+      },
+      "answer": {
+        "placeholder": "Verifierat svar (valfritt)"
+      },
+      "add": "+ Lägg till påstående",
+      "remove": "Ta bort påstående"
+    },
+    "constraints": {
+      "label": "Begränsningar",
+      "help": "Regler som konsumenter och agenter måste följa när de använder denna data.",
+      "placeholder": "Begränsning",
+      "add": "+ Lägg till begränsning",
+      "remove": "Ta bort begränsning"
+    }
+  },
+  "synonyms": {
+    "add": "+ Lägg till synonym",
+    "remove": "Ta bort synonym",
+    "synonym": {
+      "placeholder": "Synonym"
+    },
+    "locale": {
+      "placeholder": "Språkversion",
+      "title": "Språkversion (BCP 47-språktagg, t.ex. en-US, de-DE). Lämna tomt om synonymen inte är språkspecifik."
+    },
+    "description": {
+      "placeholder": "Beskrivning (valfritt)"
+    }
+  },
+  "enumValues": {
+    "add": "+ Lägg till värde",
+    "remove": "Ta bort värde",
+    "value": {
+      "placeholder": "Värde"
+    },
+    "label": {
+      "placeholder": "Etikett (valfritt)"
+    },
+    "description": {
+      "placeholder": "Beskrivning (valfritt)"
+    }
+  }
+}

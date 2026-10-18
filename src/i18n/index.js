@@ -3,6 +3,8 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import en from './locales/en.json';
 import de from './locales/de.json';
+import sv from './locales/sv.json';
+import fr from './locales/fr.json';
 
 /**
  * Scoped i18next instance for the Data Contract Editor.
@@ -25,7 +27,7 @@ import de from './locales/de.json';
  *  - `fallbackLng: 'en'` + `supportedLngs` + `load: 'languageOnly'` mean a regional tag
  *    like `de-DE` resolves to `de` and anything unsupported degrades to English.
  *
- * Add a new language by dropping a `locales/<lang>.json` next to en/de, importing it
+ * Add a new language by dropping a `locales/<lang>.json` next to en/de/sv/fr, importing it
  * into `resources`, and adding the tag to `supportedLngs` (and the switcher's LANGUAGES list).
  */
 const i18n = i18next.createInstance();
@@ -37,11 +39,13 @@ i18n
     resources: {
       en: { translation: en },
       de: { translation: de },
+      sv: { translation: sv },
+      fr: { translation: fr },
     },
     // No `lng`: the detector resolves it (standalone); the host overrides via
     // changeLanguage() when embedded.
     fallbackLng: 'en',
-    supportedLngs: ['en', 'de'],
+    supportedLngs: ['en', 'de', 'sv', 'fr'],
     load: 'languageOnly', // map de-DE -> de
     detection: {
       order: ['querystring', 'localStorage'], // no 'navigator': never auto-detect browser locale

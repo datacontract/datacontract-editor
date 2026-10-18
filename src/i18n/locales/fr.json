@@ -1,0 +1,1569 @@
+{
+  "nav": {
+    "fundamentals": "Fondamentaux",
+    "termsOfUse": "Conditions d’utilisation",
+    "schemas": "Schémas",
+    "servers": "Serveurs",
+    "team": "Team",
+    "support": "Support",
+    "roles": "Rôles",
+    "pricing": "Tarification",
+    "sla": "SLA",
+    "customProperties": "Propriétés personnalisées",
+    "footer": {
+      "documentation": "Documentation",
+      "createdBy": "Créé par Entropy Data"
+    },
+    "context": "Contexte"
+  },
+  "overview": {
+    "section": {
+      "fundamentals": "Fondamentaux",
+      "fundamentalsDescription": "Métadonnées essentielles identifiant le Data Contract, notamment le nom, la version, le statut et le contexte organisationnel."
+    },
+    "apiVersion": {
+      "label": "Version ODCS (apiVersion)",
+      "placeholder": "Sélectionner une version ODCS...",
+      "tooltip": "Version de l’Open Data Contract Standard dans laquelle ce Data Contract est rédigé (apiVersion). Seules la version actuelle et les versions plus récentes peuvent être choisies ; la mise à niveau migre le document là où la structure du standard a changé et laisse intacte la version propre du Data Contract.",
+      "behind": "Votre organisation a configuré ODCS {{target}} par défaut.",
+      "migrate": "Migrer vers {{target}}",
+      "confirm": {
+        "title": "Migrer vers ODCS {{target}}",
+        "why": "Ce Data Contract déclare ODCS {{current}}, alors que votre organisation utilise la version {{target}}. Les champs ajoutés par le standard dans {{target}} restent masqués tant que le Data Contract ne déclare pas cette version.",
+        "whatOnlyVersion": "La migration définit apiVersion sur {{target}}. Cette version ne nécessite aucune modification structurelle, rien d’autre n’est donc modifié dans le document.",
+        "whatWithSteps": "La migration définit apiVersion sur {{target}} et applique les modifications structurelles requises par cette version :",
+        "steps": {
+          "teamMembers": "La simple liste du Team devient l’objet team avec une liste de membres."
+        },
+        "note": "La version propre du Data Contract et son contenu restent inchangés ; c’est à vous de décider si l’adoption de la nouvelle version du standard justifie une nouvelle version du Data Contract. Vous pouvez annuler la migration comme toute autre modification.",
+        "migrate": "Migrer",
+        "dismiss": "Pas maintenant"
+      },
+      "sectionLocked": "Nécessite une version ODCS plus récente. Mettez à niveau via la version ODCS sous Fondamentaux."
+    },
+    "name": {
+      "label": "Nom",
+      "placeholder": "Saisir le nom du document",
+      "tooltip": "Le nom du Data Contract"
+    },
+    "version": {
+      "label": "Version",
+      "tooltip": "Numéro de version selon le versionnage sémantique"
+    },
+    "id": {
+      "label": "ID",
+      "tooltip": "Identifiant unique de ce Data Contract",
+      "usedByDataProducts": "Cet ID ne peut pas être modifié tant qu’il est utilisé par des Data Products : {{products}}."
+    },
+    "status": {
+      "label": "Statut",
+      "placeholder": "Sélectionner un statut...",
+      "tooltip": "Statut actuel du Data Contract",
+      "options": {
+        "draft": "brouillon",
+        "proposed": "proposé",
+        "inDevelopment": "en développement",
+        "active": "actif",
+        "deprecated": "obsolète",
+        "retired": "retiré"
+      }
+    },
+    "tenant": {
+      "label": "Tenant",
+      "tooltip": "Tenant ou organisation auquel appartient ce Data Contract"
+    },
+    "domain": {
+      "label": "Domain",
+      "placeholder": "Sélectionner un Domain...",
+      "tooltip": "Domain métier ou catégorie de ce Data Contract"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Ajouter un tag...",
+      "tooltip": "Catégorisez votre Data Contract avec des tags"
+    }
+  },
+  "termsOfUse": {
+    "heading": "Conditions d’utilisation",
+    "description": "Description générale du jeu de données, y compris sa finalité, les consignes d’utilisation et les limitations.",
+    "purpose": {
+      "label": "Finalité",
+      "tooltip": "Finalité prévue des données fournies",
+      "placeholder": "Décrivez la finalité de ce Data Contract..."
+    },
+    "usage": {
+      "label": "Utilisation",
+      "tooltip": "Comment ces données doivent être utilisées",
+      "placeholder": "Décrivez comment utiliser ces données..."
+    },
+    "limitations": {
+      "label": "Limitations",
+      "tooltip": "Limitations techniques, de conformité et juridiques relatives à l’utilisation des données",
+      "placeholder": "Décrivez les éventuelles limitations ou contraintes..."
+    }
+  },
+  "header": {
+    "view": {
+      "diagram": "Diagramme",
+      "form": "Formulaire",
+      "yaml": "YAML"
+    },
+    "toolbar": {
+      "preview": "Aperçu",
+      "validation": "Validation",
+      "tests": "Tests"
+    },
+    "action": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "new": "Nouveau",
+      "loadExample": "Charger un exemple",
+      "open": "Ouvrir"
+    },
+    "confirm": {
+      "delete": "Voulez-vous vraiment supprimer ce Data Contract ? Cette action est irréversible."
+    },
+    "menu": {
+      "open": "Ouvrir le menu"
+    },
+    "status": {
+      "valid": "Valide",
+      "testsPassed": "Tests réussis",
+      "testsFailed": "Tests échoués"
+    },
+    "cannotSave": {
+      "title": "Enregistrement impossible",
+      "description": "Le YAML contient des erreurs de syntaxe et ne peut pas être enregistré. Veuillez d’abord corriger les erreurs dans la vue YAML."
+    },
+    "language": {
+      "label": "Langue"
+    }
+  },
+  "team": {
+    "heading": "Team",
+    "section": {
+      "description": "Informations et membres du Team."
+    },
+    "name": {
+      "label": "Nom du Team",
+      "placeholder": "Sélectionner un Team..."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description du Team..."
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Ajouter un tag..."
+    },
+    "addMember": "+ Ajouter un membre"
+  },
+  "support": {
+    "heading": "Support",
+    "section": {
+      "description": "Canaux de communication pour l’assistance sur le jeu de données."
+    },
+    "channel": {
+      "label": "Canal"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "removeChannel": "Supprimer le canal",
+    "tool": {
+      "label": "Outil",
+      "tooltip": "Type de plateforme (email, slack, teams, discord, ticket, googlechat, other)",
+      "placeholder": "Sélectionner un outil..."
+    },
+    "scope": {
+      "label": "Scope",
+      "tooltip": "Contexte d’utilisation (interactive, announcements, issues, notifications)",
+      "placeholder": "Sélectionner un scope..."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Détails du canal pour les utilisateurs..."
+    },
+    "invitationUrl": {
+      "label": "URL d’invitation"
+    },
+    "addChannel": "+ Ajouter un canal de support"
+  },
+  "pricing": {
+    "heading": "Tarification",
+    "description": "Définissez la structure de coûts de l’abonnement pour l’accès aux données.",
+    "priceAmount": {
+      "label": "Montant du prix",
+      "tooltip": "Prix de l’abonnement par unité"
+    },
+    "currency": {
+      "label": "Devise",
+      "tooltip": "Code de devise (par ex. USD, EUR)"
+    },
+    "priceUnit": {
+      "label": "Unité de prix",
+      "tooltip": "Unité de mesure (par ex. mégaoctet, gigaoctet)"
+    }
+  },
+  "roles": {
+    "heading": "Rôles",
+    "description": "Liste de rôles qui donnent aux utilisateurs l’accès au jeu de données."
+  },
+  "customProperties": {
+    "heading": "Propriétés personnalisées",
+    "description": "Liste de paires clé/valeur pour les propriétés personnalisées. Les noms doivent être en camel case."
+  },
+  "sla": {
+    "heading": "Service Level Agreement",
+    "description": "Engagements de performance et de disponibilité avec paramètres d’application.",
+    "property": {
+      "label": "Propriété",
+      "tooltip": "Identifiant de la métrique SLA"
+    },
+    "value": {
+      "label": "Valeur",
+      "tooltip": "Valeur cible de l’engagement"
+    },
+    "remove": "Supprimer le SLA",
+    "unit": {
+      "label": "Unité",
+      "tooltip": "Norme de mesure (format ISO : d/day/days, y/yr/years)"
+    },
+    "element": {
+      "label": "Élément",
+      "tooltip": "Composant(s) de schéma cible(s)"
+    },
+    "driver": {
+      "label": "Driver",
+      "tooltip": "Classification de priorité",
+      "placeholder": "Sélectionner un driver..."
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "tooltip": "Nom du scheduler (par ex. cron ou tout outil pris en charge par votre organisation)"
+    },
+    "schedule": {
+      "label": "Planification",
+      "tooltip": "Configuration de l’outil de planification (par ex. 0 20 * * * pour cron)"
+    },
+    "descriptionField": {
+      "label": "Description",
+      "tooltip": "Explication lisible par un humain",
+      "placeholder": "Explication lisible par un humain..."
+    },
+    "add": "+ Ajouter un SLA",
+    "customPropertiesField": {
+      "label": "Custom Properties"
+    },
+    "authoritativeDefinitionsField": {
+      "label": "Définitions de référence"
+    }
+  },
+  "ai": {
+    "fab": {
+      "title": "Assistant IA"
+    },
+    "sidebar": {
+      "resize": "Faire glisser pour redimensionner",
+      "newConversation": "Nouvelle conversation",
+      "closePanel": "Fermer le panneau"
+    },
+    "assistant": {
+      "title": "Assistant Data Contract"
+    },
+    "status": {
+      "generating": "Génération...",
+      "thinking": "Réflexion...",
+      "callingTool": "Appel de {{tool}}...",
+      "callingTools": "Appel de {{count}} outils..."
+    },
+    "suggestion": {
+      "undo": "Annuler la suggestion de l’IA",
+      "suggestField": "Suggérer {{field}} avec l’IA"
+    },
+    "error": {
+      "notConfiguredInline": "IA non configurée. Veuillez définir endpoint et apiKey dans la configuration de l’IA."
+    },
+    "toolCall": {
+      "defaultSummary": "Modifications suggérées par l’IA",
+      "contractUpdate": "Mise à jour du Data Contract",
+      "undo": "Annuler"
+    },
+    "notConfigured": {
+      "title": "Assistant IA non configuré",
+      "anthropicHint": "Configurez un endpoint d’API Anthropic.",
+      "openaiHint": "Configurez un endpoint compatible OpenAI."
+    },
+    "empty": {
+      "description": "Posez des questions sur votre Data Contract ou demandez des modifications."
+    },
+    "input": {
+      "placeholder": "Posez une question sur votre Data Contract...",
+      "loading": "Chargement..."
+    },
+    "prompts": {
+      "guideMe": "Guidez-moi",
+      "createFromExample": "Crée un Data Contract pour ces données d’exemple : ",
+      "addProperty": "Ajoute une propriété business_timestamp",
+      "generateQualityRules": "Génère des règles de qualité",
+      "findAndFixIssues": "Trouve et corrige les problèmes"
+    },
+    "diff": {
+      "title": "Vérifier les modifications de l’IA",
+      "validYaml": "YAML valide",
+      "errorCount_one": "{{count}} erreur",
+      "errorCount_other": "{{count}} erreurs",
+      "warningCount_one": "{{count}} avertissement",
+      "warningCount_other": "{{count}} avertissements",
+      "showDetails": "Afficher les détails",
+      "hideDetails": "Masquer les détails",
+      "editHint": "Modifiez directement le côté droit pour ajuster les modifications",
+      "cancel": "Annuler",
+      "applyChanges": "Appliquer les modifications"
+    }
+  },
+  "diagram": {
+    "clickToEdit": "Cliquer pour modifier",
+    "confirmDeleteProperty": "Voulez-vous vraiment supprimer cette propriété ?",
+    "layingOut": "Disposition en cours…",
+    "noTypeConstraints": "Aucune contrainte spécifique au type disponible pour {{type}}.",
+    "thisType": "ce type",
+    "controls": {
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "fitView": "Ajuster la vue",
+      "showHelp": "Afficher l’aide",
+      "hideHelp": "Masquer l’aide",
+      "autoLayout": "Disposition automatique",
+      "autoLayoutHint": "Disposer les tables automatiquement pour qu’elles ne se chevauchent pas.",
+      "addSchema": "Ajouter un schéma",
+      "addSchemaHint": "Créer une nouvelle table vide dans ce Data Contract.",
+      "close": "Fermer"
+    },
+    "collapse": {
+      "showAll": "Afficher toutes les propriétés",
+      "showAllShort": "Tout afficher",
+      "showAllHint": "Développer chaque table pour afficher toutes ses colonnes.",
+      "keysOnly": "Clés uniquement",
+      "keysOnlyHint": "Réduire chaque table à ses seules lignes de clés primaires et étrangères.",
+      "hiddenCount": "+{{count}} masquées"
+    },
+    "help": {
+      "title": "Astuces :",
+      "editNames": "Cliquez sur les noms de schémas ou de propriétés pour les modifier",
+      "clickDetails": "Cliquez sur les propriétés pour voir les détails dans le panneau",
+      "dragLink": "Faites glisser d’une bulle d’une propriété vers une bulle d’une autre pour les relier",
+      "dragReposition": "Faites glisser les nœuds pour les repositionner, ou utilisez la disposition automatique pour les organiser",
+      "collapse": "Réduisez une table à ses clés avec l’icône de liste dans son en-tête, ou réduisez toutes les tables avec le bouton de la barre d’outils",
+      "zoom": "Utilisez la molette de la souris pour zoomer",
+      "shortcutsPrefix": "Appuyez sur",
+      "shortcutsFit": "pour ajuster la vue,",
+      "shortcutsLayout": "pour la disposition automatique"
+    },
+    "coach": {
+      "title": "Tracer une relation",
+      "body": "Survolez une ligne de propriété pour afficher ses points de connexion, puis faites glisser d’une propriété vers une autre pour les relier (par ex. une clé étrangère vers la colonne qu’elle référence).",
+      "dismiss": "Fermer",
+      "dismissAria": "Fermer l’astuce"
+    },
+    "invalidYaml": {
+      "title": "YAML invalide",
+      "description": "Corrigez les erreurs YAML pour afficher le diagramme"
+    },
+    "empty": {
+      "title": "Aucun schéma",
+      "description": "Commencez par créer votre premier schéma."
+    },
+    "edge": {
+      "schemaLevel": "Relation au niveau du schéma — modifiable uniquement dans l’éditeur de formulaire"
+    },
+    "schema": {
+      "addProperty": "Ajouter une propriété",
+      "moreOptions": "Plus d’options",
+      "delete": "Supprimer le schéma",
+      "unnamed": "Schéma sans nom",
+      "noProperties": "Aucune propriété définie"
+    },
+    "handle": {
+      "source": "Faites glisser d’ici vers une propriété d’une autre table pour créer une relation",
+      "target": "Déposez une relation ici"
+    },
+    "property": {
+      "namePlaceholder": "nom de la propriété",
+      "unnamed": "propriété sans nom",
+      "unnamedShort": "sans nom",
+      "dragToReorder": "Faire glisser pour réordonner",
+      "addNested": "Ajouter une propriété imbriquée",
+      "delete": "Supprimer",
+      "deleteProperty": "Supprimer la propriété"
+    },
+    "propertyDetails": {
+      "title": "Modifier la propriété",
+      "pin": "Cliquer pour épingler le panneau",
+      "unpin": "Cliquer pour désépingler"
+    },
+    "section": {
+      "metadata": "Métadonnées",
+      "semantics": "Semantics",
+      "logicalTypeOptions": "Options du type logique",
+      "constraints": "Contraintes",
+      "classificationSecurity": "Classification et sécurité",
+      "transformations": "Transformations",
+      "dataQuality": "Qualité des données",
+      "authoritativeDefinitions": "Définitions de référence",
+      "relationships": "Relations",
+      "customProperties": "Propriétés personnalisées",
+      "enumValues": "Valeurs autorisées",
+      "synonyms": "Synonymes"
+    },
+    "semantics": {
+      "semanticConcept": "Semantic Concept",
+      "businessDefinition": "Business Definition",
+      "showDetails": "Afficher les détails",
+      "loading": "Chargement de l’élément...",
+      "loadError": "Impossible de charger cet élément.",
+      "loadErrorHint": "Consultez la console pour plus de détails.",
+      "sharedProperty": "propriété partagée",
+      "owner": "Owner",
+      "remove": "Retirer",
+      "findDefinition": "Trouver un élément"
+    },
+    "field": {
+      "propertyName": {
+        "label": "Nom de la propriété"
+      },
+      "businessName": {
+        "label": "Nom métier"
+      },
+      "physicalName": {
+        "label": "Nom physique"
+      },
+      "logicalType": {
+        "label": "Type logique"
+      },
+      "physicalType": {
+        "label": "Type physique"
+      },
+      "arrayItemType": {
+        "label": "Type des éléments du tableau",
+        "placeholder": "Sélectionner le type d’élément..."
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Décrivez cette propriété..."
+      },
+      "examples": {
+        "label": "Exemples",
+        "help": "Un exemple par ligne (tout le contenu est conservé)"
+      },
+      "format": {
+        "label": "Format",
+        "placeholderString": "par ex. email, uri, uuid",
+        "placeholderInteger": "Sélectionner un format d’entier...",
+        "placeholderNumber": "Sélectionner un format de nombre...",
+        "placeholderDate": "par ex. yyyy-MM-dd, ISO 8601",
+        "dateHelp": "Motif JDK DateTimeFormatter"
+      },
+      "minLength": {
+        "label": "Longueur min."
+      },
+      "maxLength": {
+        "label": "Longueur max."
+      },
+      "pattern": {
+        "label": "Motif (regex)",
+        "placeholder": "Expression régulière"
+      },
+      "minimum": {
+        "label": "Minimum",
+        "datePlaceholder": "Valeur la plus ancienne autorisée"
+      },
+      "maximum": {
+        "label": "Maximum",
+        "datePlaceholder": "Valeur la plus récente autorisée"
+      },
+      "exclusiveMinimum": {
+        "label": "Minimum exclusif"
+      },
+      "exclusiveMaximum": {
+        "label": "Maximum exclusif"
+      },
+      "multipleOf": {
+        "label": "Multiple de",
+        "placeholder": "La valeur doit être un multiple de ce nombre"
+      },
+      "minItems": {
+        "label": "Éléments min."
+      },
+      "maxItems": {
+        "label": "Éléments max."
+      },
+      "uniqueItems": {
+        "label": "Éléments uniques"
+      },
+      "required": {
+        "label": "Obligatoire"
+      },
+      "unique": {
+        "label": "Unique"
+      },
+      "primaryKey": {
+        "label": "Primary Key"
+      },
+      "partitioned": {
+        "label": "Partitionné"
+      },
+      "primaryKeyPosition": {
+        "label": "Position dans la Primary Key",
+        "help": "Position ordinale dans la Primary Key composite (commence à 1, ou -1 pour une clé simple)"
+      },
+      "partitionKeyPosition": {
+        "label": "Position dans la clé de partition",
+        "help": "Position ordinale dans la hiérarchie de partitions (commence à 1, ou -1 pour une partition unique)"
+      },
+      "classification": {
+        "label": "Classification"
+      },
+      "criticalDataElement": {
+        "label": "Élément de données critique"
+      },
+      "encryptedName": {
+        "label": "Nom chiffré"
+      },
+      "tags": {
+        "label": "Tags",
+        "placeholder": "Ajouter un tag..."
+      },
+      "transformSourceObjects": {
+        "label": "Objets sources de la transformation",
+        "help": "Liste des tables/objets sources utilisés dans les transformations"
+      },
+      "transformLogic": {
+        "label": "Logique de transformation",
+        "placeholder": "SQL ou code de transformation...",
+        "help": "Implémentation technique de la transformation (SQL, etc.)"
+      },
+      "transformDescription": {
+        "label": "Description de la transformation",
+        "placeholder": "Explication métier de la transformation...",
+        "help": "Description non technique de la façon dont le champ est dérivé"
+      },
+      "semanticType": {
+        "label": "Type sémantique"
+      },
+      "deprecated": {
+        "label": "Obsolète"
+      },
+      "mapKeyType": {
+        "label": "Type de clé de la map"
+      },
+      "mapValueType": {
+        "label": "Type de valeur de la map"
+      },
+      "vectorDimensions": {
+        "label": "Dimensions"
+      },
+      "vectorElementType": {
+        "label": "Type d’élément"
+      },
+      "vectorDistanceMetric": {
+        "label": "Métrique de distance"
+      },
+      "vectorEmbeddingModel": {
+        "label": "Modèle d’embedding"
+      },
+      "vectorNormalized": {
+        "label": "Normalisé"
+      }
+    },
+    "option": {
+      "notSet": "Non défini",
+      "notSetSemantic": "Non défini (sémantique : {{value}})",
+      "false": "Faux",
+      "true": "Vrai",
+      "select": "Sélectionner..."
+    }
+  },
+  "testResults": {
+    "title": "Data Contract Tests",
+    "passed": "Réussi",
+    "failed": "Échoué",
+    "failedTests": "Tests échoués",
+    "allPassed": "Tous les tests ont réussi",
+    "selectServer": "Sélectionner un serveur",
+    "server": "Serveur",
+    "serverLabel": "Serveur : {{server}}",
+    "running": "Test en cours d’exécution...",
+    "cancel": "Annuler",
+    "cancelTitle": "Annuler le test en cours",
+    "runTest": "Lancer le test",
+    "runVia": "Lancer les tests via :",
+    "clear": "Effacer",
+    "clearTitle": "Effacer les résultats de test",
+    "showHelp": "Afficher l’aide",
+    "hideHelp": "Masquer l’aide",
+    "errorLabel": "Erreur :",
+    "logs": "Logs",
+    "noData": "Aucune donnée de test disponible",
+    "empty": {
+      "title": "Aucun résultat de test pour le moment",
+      "subtitle": "Cliquez sur le bouton « Lancer le test » ci-dessus pour tester votre Data Contract."
+    },
+    "help": {
+      "title": "Aide",
+      "hide": "Masquer l’aide",
+      "cliTitle": "Comment démarrer la Data Contract CLI",
+      "runIntro": "Pour exécuter le serveur d’API",
+      "runIntroSuffix": ", utilisez la commande suivante :",
+      "apiRunsAt": "L’API est disponible à l’adresse",
+      "moreInfo": "Pour plus d’informations, consultez"
+    }
+  },
+  "warnings": {
+    "empty": {
+      "title": "Aucun problème trouvé",
+      "subtitle": "Votre YAML est valide, sans erreur ni avertissement."
+    },
+    "problems": "Problèmes ({{count}})",
+    "lineColumn": "Ligne {{line}}, colonne {{column}}",
+    "apiVersion": {
+      "document": "Document {{version}}",
+      "schema": "Valeur par défaut du schéma {{version}}"
+    }
+  },
+  "rolesList": {
+    "accessRoles": "Rôles d’accès",
+    "addRole": "+ Ajouter un rôle",
+    "remove": "Retirer",
+    "role": {
+      "label": "Rôle",
+      "tooltip": "Nom du rôle IAM"
+    },
+    "access": {
+      "label": "Accès",
+      "tooltip": "Type d’accès fourni par le rôle IAM (par ex. read ou write)"
+    },
+    "description": {
+      "label": "Description",
+      "tooltip": "Explication de la portée des autorisations",
+      "placeholder": "Explication de la portée des autorisations..."
+    },
+    "firstLevelApprovers": {
+      "label": "Approbateurs de premier niveau",
+      "tooltip": "Autorité d’approbation principale"
+    },
+    "secondLevelApprovers": {
+      "label": "Approbateurs de second niveau",
+      "tooltip": "Autorité d’approbation secondaire"
+    }
+  },
+  "teamMember": {
+    "title": "Membre du Team",
+    "remove": "Retirer le membre",
+    "username": {
+      "label": "Nom d’utilisateur"
+    },
+    "name": {
+      "label": "Nom complet"
+    },
+    "role": {
+      "label": "Rôle",
+      "placeholder": "par ex. owner, data steward"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description du membre du Team..."
+    },
+    "dateIn": {
+      "label": "Date d’entrée"
+    },
+    "dateOut": {
+      "label": "Date de sortie"
+    },
+    "replacedBy": {
+      "label": "Remplacé par"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Ajouter un tag..."
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "current": "Actuel :",
+    "apiServerUrl": {
+      "label": "URL du serveur d’API de la Data Contract CLI",
+      "help": "URL de base du serveur d’API de la Data Contract CLI. Laissez vide pour utiliser la valeur par défaut."
+    },
+    "apiKey": {
+      "placeholder": "Saisissez votre clé API",
+      "help": "Clé API facultative pour l’authentification auprès du serveur d’API de la Data Contract CLI."
+    }
+  },
+  "fileSelect": {
+    "title": "Sélectionner un fichier",
+    "loading": "Chargement des fichiers...",
+    "empty": "Aucun fichier trouvé",
+    "cancel": "Annuler",
+    "open": "Ouvrir"
+  },
+  "browsePanel": {
+    "semantics": {
+      "title": "Sémantique"
+    },
+    "dataProducts": {
+      "title": "Data Products",
+      "empty": "Aucun Data Product trouvé",
+      "upstream": "Upstream",
+      "all": "Tous les Data Products",
+      "noContracts": "Aucun Data Contract"
+    },
+    "kind": {
+      "product": "Data Product",
+      "contract": "Output Port",
+      "schema": "Table",
+      "property": "Propriété"
+    },
+    "semanticKind": {
+      "namespace": "Espace de noms",
+      "group": "Groupe",
+      "entity": "Concept",
+      "property": "Propriété",
+      "shared_property": "Propriété partagée",
+      "metric": "Métrique"
+    },
+    "openDetails": "Ouvrir la page de détails",
+    "tooltip": {
+      "dataContract": "Data Contract",
+      "id": "ID",
+      "version": "Version",
+      "type": "Type",
+      "physicalName": "Nom physique",
+      "required": "Obligatoire",
+      "yes": "oui",
+      "classification": "Classification",
+      "examples": "Exemples",
+      "businessName": "Nom métier"
+    },
+    "linkedTo": "Lié dans le Data Contract : {{properties}}",
+    "search": "Rechercher...",
+    "loading": "Chargement...",
+    "empty": "Aucun élément trouvé",
+    "noMatches": "Aucun élément correspondant",
+    "dragToSchemaHint": "Faites glisser sur un schéma pour l’ajouter, ou sur une propriété pour la lier",
+    "formHint": "Faites glisser des éléments dans le schéma pour les ajouter, ou sur une propriété pour la lier.",
+    "openSchemaHint": "Ouvrez un schéma pour ajouter des propriétés",
+    "expand": "Afficher le navigateur",
+    "collapse": "Réduire le panneau",
+    "close": "Fermer le panneau"
+  },
+  "definitionSelect": {
+    "title": "Trouver un élément",
+    "subtitle": "Parcourir les éléments sémantiques et les Business Definitions",
+    "close": "Fermer",
+    "search": "Rechercher...",
+    "conceptCount_one": "{{count}} concept",
+    "conceptCount_other": "{{count}} concepts",
+    "propertyCount_one": "{{count}} propriété",
+    "propertyCount_other": "{{count}} propriétés",
+    "loading": "Chargement des éléments...",
+    "noMatches": "Aucun élément correspondant",
+    "empty": "Aucun élément trouvé",
+    "cancel": "Annuler",
+    "select": "Sélectionner"
+  },
+  "descriptionPreview": {
+    "termsOfUse": "Conditions d’utilisation",
+    "subtitle": "Description générale du jeu de données, y compris sa finalité, les consignes d’utilisation et les limitations",
+    "purpose": "Finalité",
+    "usage": "Utilisation",
+    "limitations": "Limitations",
+    "customProperties": "Propriétés personnalisées",
+    "showMore": "Afficher plus...",
+    "showLess": "Afficher moins"
+  },
+  "toast": {
+    "close": "Fermer la notification"
+  },
+  "input": {
+    "required": "Ce champ est obligatoire",
+    "requiredLabel": "Obligatoire",
+    "patternMismatch": "La valeur doit correspondre au motif : {{pattern}}",
+    "minLength": "La longueur minimale est de {{min}} (actuellement {{current}})",
+    "maxLength": "La longueur maximale est de {{max}} (actuellement {{current}})",
+    "minValue": "La valeur minimale est {{min}}",
+    "maxValue": "La valeur maximale est {{max}}",
+    "selectOption": "Sélectionner une option...",
+    "typeToEnter": "Saisissez une valeur ou sélectionnez une option",
+    "noOptions": "Aucune option disponible",
+    "overrideInherited": "Remplacer",
+    "overrideInheritedTooltip": "Copier la valeur héritée dans ce champ pour la modifier"
+  },
+  "quality": {
+    "label": "Règle de qualité",
+    "add": "Ajouter",
+    "empty": "Aucune règle de qualité définie",
+    "remove": "Supprimer la règle",
+    "select": "Sélectionner…",
+    "summary": {
+      "metric": "Métrique",
+      "dimension": "Dimension",
+      "new": "Nouvelle règle"
+    },
+    "operator": {
+      "label": "Opérateur",
+      "placeholder": "Sélectionner un opérateur…",
+      "mustBe": "Doit être (=)",
+      "mustNotBe": "Ne doit pas être (≠)",
+      "mustBeGreaterThan": "Doit être supérieur à (>)",
+      "mustBeGreaterOrEqualTo": "Doit être supérieur ou égal à (≥)",
+      "mustBeLessThan": "Doit être inférieur à (<)",
+      "mustBeLessOrEqualTo": "Doit être inférieur ou égal à (≤)"
+    },
+    "type": {
+      "label": "Type",
+      "text": "Texte",
+      "library": "Library (métrique)",
+      "sql": "SQL",
+      "custom": "Personnalisé"
+    },
+    "name": {
+      "label": "Nom",
+      "placeholder": "Identifiant de la règle"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Explication lisible du contrôle"
+    },
+    "metric": {
+      "label": "Métrique",
+      "placeholder": "Sélectionner une métrique…"
+    },
+    "missingValues": {
+      "label": "Valeurs manquantes (une par ligne)",
+      "help": "Valeurs considérées comme manquantes en plus de null"
+    },
+    "validValues": {
+      "label": "Valeurs valides (une par ligne)",
+      "orPattern": "OU motif",
+      "help": "Liste des valeurs acceptées"
+    },
+    "pattern": {
+      "validValuesOr": "Valeurs valides OU",
+      "label": "Motif (regex)",
+      "help": "Expression régulière pour la validation"
+    },
+    "properties": {
+      "label": "Propriétés (une par ligne)",
+      "help": "Noms de colonnes à contrôler pour détecter les combinaisons en double"
+    },
+    "sqlQuery": {
+      "label": "Requête SQL",
+      "hint": "Astuce : utilisez {{object}} et {{property}} comme espaces réservés"
+    },
+    "engine": {
+      "label": "Moteur",
+      "placeholder": "par ex. soda, greatExpectations, montecarlo"
+    },
+    "implementation": {
+      "label": "Implémentation",
+      "placeholder": "Bloc de configuration spécifique au fournisseur"
+    },
+    "value": {
+      "label": "Valeur",
+      "placeholder": "Saisir une valeur numérique",
+      "placeholderDisabled": "Sélectionnez d’abord un opérateur"
+    },
+    "unit": {
+      "label": "Unité",
+      "default": "Par défaut (lignes)"
+    },
+    "additionalDetails": "Détails supplémentaires",
+    "dimension": {
+      "label": "Dimension"
+    },
+    "severity": {
+      "label": "Gravité",
+      "placeholder": "par ex. critical, warning"
+    },
+    "businessImpact": {
+      "label": "Impact métier",
+      "placeholder": "Conséquences d’un échec de la règle"
+    },
+    "scheduler": {
+      "label": "Scheduler",
+      "placeholder": "par ex. cron"
+    },
+    "schedule": {
+      "label": "Planification"
+    }
+  },
+  "relationship": {
+    "heading": "Relations",
+    "add": "Ajouter",
+    "title": "Relation",
+    "composite": "composite",
+    "new": "Nouvelle relation",
+    "type": {
+      "label": "Type"
+    },
+    "select": "Sélectionner…",
+    "remove": "Retirer",
+    "from": "De",
+    "to": "Vers",
+    "removePair": "Retirer la paire",
+    "addPair": "Ajouter une paire de colonnes (clé composite)",
+    "drawer": {
+      "propertyFallback": "propriété",
+      "resize": "Faire glisser pour redimensionner",
+      "editOn": "Modifier la relation de",
+      "close": "Fermer le panneau"
+    }
+  },
+  "customProperty": {
+    "heading": "Propriétés personnalisées",
+    "add": "Ajouter",
+    "title": "Propriété personnalisée",
+    "new": "Nouvelle propriété",
+    "remove": "Retirer",
+    "property": {
+      "label": "Propriété"
+    },
+    "value": {
+      "label": "Valeur",
+      "placeholder": "Saisir une valeur…"
+    },
+    "arrayItemType": "Type d’élément",
+    "typeChangeWarning": {
+      "message": "Changer le type en {{type}} effacera la valeur actuelle.",
+      "confirm": "Changer quand même",
+      "cancel": "Annuler"
+    },
+    "yaml": {
+      "invalid": "YAML invalide : {{message}}",
+      "expectedObject": "La valeur doit être un objet YAML",
+      "expectedArray": "La valeur doit être une liste YAML"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description facultative…"
+    },
+    "required": "Obligatoire",
+    "select": "Sélectionner…",
+    "noOptions": "Aucune option disponible",
+    "auto": {
+      "label": "Auto",
+      "hint": "Dérivé automatiquement",
+      "loading": "Chargement…",
+      "none": "Rien à dériver pour le moment",
+      "orPick": "Ou définir une valeur fixe :",
+      "orPickMany": "Ou choisir toutes les valeurs applicables :"
+    },
+    "boolean": {
+      "notSet": "Non défini",
+      "false": "Faux",
+      "true": "Vrai"
+    },
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "pattern": "La valeur doit correspondre au motif : {{pattern}}",
+      "minLength": "La longueur minimale est de {{count}}",
+      "maxLength": "La longueur maximale est de {{count}}",
+      "minimum": "La valeur minimale est {{value}}",
+      "maximum": "La valeur maximale est {{value}}",
+      "minItems": "Au moins {{count}} éléments requis",
+      "maxItems": "Au maximum {{count}} éléments autorisés"
+    },
+    "propertyDrawer": {
+      "resize": "Faire glisser pour redimensionner",
+      "edit": "Modifier la propriété",
+      "editNamed": "Modifier la propriété : {{name}}",
+      "close": "Fermer le panneau"
+    },
+    "vendor": {
+      "label": "Fournisseur",
+      "placeholder": "par ex. entropy-data"
+    }
+  },
+  "authDef": {
+    "heading": "Définitions de référence",
+    "add": "Ajouter",
+    "title": "Définition de référence",
+    "new": "Nouvelle définition",
+    "remove": "Retirer",
+    "type": {
+      "label": "Type",
+      "placeholder": "par ex. businessDefinition"
+    },
+    "url": {
+      "label": "URL"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Décrivez la définition de référence…"
+    }
+  },
+  "tags": {
+    "label": "Tags",
+    "placeholder": "Ajouter un tag…",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "removeTag": "Retirer {{tag}}",
+    "unmanaged": "Ce tag n’est pas géré.",
+    "alreadyExists": "Le tag « {{tag}} » existe déjà",
+    "addTag": "Ajouter le tag « {{tag}} »",
+    "managedOnly": "Selon les paramètres de l’organisation, seuls les tags gérés sont autorisés."
+  },
+  "enum": {
+    "selectOrType": "Sélectionner ou saisir…",
+    "select": "Sélectionner…"
+  },
+  "keyValue": {
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "select": "Sélectionner…"
+  },
+  "arrayInput": {
+    "placeholder": "Ajouter un élément…",
+    "add": "Ajouter",
+    "remove": "Retirer"
+  },
+  "schemas": {
+    "heading": "Schémas",
+    "description": "Modèles de données décrivant la structure, les champs et les types des jeux de données de ce Data Contract.",
+    "add": "Ajouter un schéma",
+    "empty": {
+      "title": "Aucun schéma",
+      "description": "Commencez par créer un nouveau schéma.",
+      "add": "Nouveau schéma"
+    },
+    "item": {
+      "fallbackName": "Schéma {{index}}",
+      "name": "Nom :",
+      "type": "Type :",
+      "properties": "Propriétés :"
+    }
+  },
+  "schema": {
+    "untitled": "Schéma sans titre",
+    "description": "Définissez la structure et les propriétés de ce schéma, y compris les types de champs, les contraintes et les métadonnées.",
+    "confirm": {
+      "remove": "Voulez-vous vraiment retirer ce schéma ?",
+      "deleteProperty": "Voulez-vous vraiment supprimer cette propriété ?"
+    },
+    "remove": "Retirer le schéma",
+    "field": {
+      "name": {
+        "label": "Nom",
+        "tooltip": "Nom technique du schéma (obligatoire)"
+      },
+      "description": {
+        "label": "Description",
+        "tooltip": "Description du contenu de ce schéma",
+        "placeholder": "Décrivez le schéma...",
+        "aiPlaceholder": "Description du contenu et de la finalité de ce schéma/cette table"
+      },
+      "businessName": {
+        "label": "Nom métier",
+        "tooltip": "Nom lisible du schéma",
+        "placeholder": "Nom lisible"
+      },
+      "physicalType": {
+        "label": "Type physique",
+        "tooltip": "Type physique du schéma (table, view, etc.)"
+      },
+      "physicalName": {
+        "label": "Nom physique",
+        "tooltip": "Nom physique dans la base de données/le stockage"
+      },
+      "logicalType": {
+        "label": "Type logique",
+        "tooltip": "Type logique du schéma (object, array, etc.)"
+      },
+      "dataGranularity": {
+        "label": "Description de la granularité des données",
+        "tooltip": "Décrivez le niveau de détail représenté par un enregistrement"
+      },
+      "tags": {
+        "label": "Tags",
+        "tooltip": "Tags pour catégoriser et organiser les schémas",
+        "placeholder": "Ajouter un tag..."
+      },
+      "deprecated": {
+        "label": "Obsolète"
+      },
+      "synonyms": {
+        "label": "Synonymes"
+      },
+      "context": {
+        "label": "Contexte"
+      }
+    },
+    "advancedMetadata": "Métadonnées avancées",
+    "properties": {
+      "heading": "Propriétés",
+      "addFromSemantics": "Ajouter depuis Semantics",
+      "addProperty": "Ajouter une propriété",
+      "empty": "Aucune propriété définie",
+      "addSubProperty": "Ajouter une sous-propriété",
+      "addToItems": "Ajouter une propriété aux items",
+      "dragToReorder": "Faire glisser pour réordonner"
+    },
+    "notFound": {
+      "title": "Aucun schéma trouvé à l’index {{index}}.",
+      "description": "Il a peut-être été supprimé."
+    },
+    "indicator": {
+      "primaryKey": "Primary Key",
+      "required": "Obligatoire",
+      "classification": "Classification : {{classification}}",
+      "qualityRules": "{{count}} règle(s) de qualité",
+      "relationships": "{{count}} relation(s)"
+    }
+  },
+  "server": {
+    "heading": "Serveur",
+    "description": "Détails de connexion et configuration de la source de données ou de la plateforme qui fournit ce Data Contract.",
+    "fallbackName": "Serveur {{number}}",
+    "remove": "Retirer le serveur",
+    "confirm": {
+      "remove": "Voulez-vous vraiment retirer ce serveur ?"
+    },
+    "notFound": {
+      "title": "Aucun serveur trouvé à l’index {{index}}.",
+      "description": "Il a peut-être été supprimé."
+    },
+    "field": {
+      "required": "Obligatoire",
+      "server": {
+        "label": "Serveur"
+      },
+      "environment": {
+        "label": "Environnement",
+        "placeholder": "Sélectionner un environnement...",
+        "tooltip": "Étape de déploiement (prod, preprod, dev, uat)"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Décrivez ce serveur...",
+        "tooltip": "Détails du serveur"
+      },
+      "type": {
+        "label": "Type",
+        "placeholder": "Sélectionner un type de serveur...",
+        "tooltip": "Catégorie de plateforme (api, athena, bigquery, snowflake, postgres, etc.)"
+      },
+      "account": {
+        "label": "Account"
+      },
+      "catalog": {
+        "label": "Catalog"
+      },
+      "database": {
+        "label": "Database"
+      },
+      "dataset": {
+        "label": "Dataset"
+      },
+      "delimiter": {
+        "label": "Délimiteur"
+      },
+      "endpointUrl": {
+        "label": "URL de l’endpoint"
+      },
+      "format": {
+        "label": "Format"
+      },
+      "host": {
+        "label": "Hôte"
+      },
+      "location": {
+        "label": "Emplacement"
+      },
+      "path": {
+        "label": "Chemin"
+      },
+      "port": {
+        "label": "Port"
+      },
+      "project": {
+        "label": "Projet"
+      },
+      "region": {
+        "label": "Région"
+      },
+      "regionName": {
+        "label": "Nom de la région"
+      },
+      "schema": {
+        "label": "Schéma"
+      },
+      "serviceName": {
+        "label": "Nom du service"
+      },
+      "stagingDir": {
+        "label": "Répertoire de staging"
+      },
+      "stream": {
+        "label": "Stream"
+      },
+      "warehouse": {
+        "label": "Warehouse"
+      }
+    }
+  },
+  "servers": {
+    "heading": "Serveurs",
+    "description": "Endpoints de connexion et configurations de plateforme pour accéder aux Data Products.",
+    "add": "Ajouter un serveur",
+    "empty": {
+      "title": "Aucun serveur",
+      "description": "Commencez par créer un nouveau serveur.",
+      "add": "Nouveau serveur"
+    },
+    "card": {
+      "fallbackName": "Serveur {{number}}",
+      "type": "Type :",
+      "environment": "Environnement :"
+    }
+  },
+  "common": {
+    "dragToResize": "Faire glisser pour redimensionner"
+  },
+  "preview": {
+    "context": {
+      "heading": "Contexte",
+      "description": "Conseils pour les consommateurs et les agents IA",
+      "instructions": "Instructions",
+      "verifiedStatements": "Déclarations vérifiées",
+      "constraints": "Contraintes"
+    },
+    "fundamentals": {
+      "heading": "Fondamentaux",
+      "description": "Informations sur le Data Contract",
+      "name": "Nom",
+      "version": "Version",
+      "id": "ID",
+      "status": "Statut",
+      "tenant": "Tenant",
+      "domain": "Domain",
+      "dataProduct": "Data Product",
+      "contractCreated": "Data Contract créé",
+      "tags": "Tags"
+    },
+    "pricing": {
+      "heading": "Prix",
+      "description": "Cette section couvre la tarification lorsque vous facturez à votre client l’utilisation de ce Data Product.",
+      "priceAmount": "Montant du prix",
+      "priceCurrency": "Devise du prix",
+      "priceUnit": "Unité de prix"
+    },
+    "roles": {
+      "heading": "Rôles",
+      "description": "Rôles dont un consommateur peut avoir besoin pour accéder au jeu de données, selon le type d’accès requis",
+      "role": "Rôle",
+      "access": "Accès",
+      "firstLevelApprovers": "Approbateurs de premier niveau",
+      "secondLevelApprovers": "Approbateurs de second niveau",
+      "customProperties": "Propriétés personnalisées",
+      "roleDescription": "Description"
+    },
+    "schema": {
+      "heading": "Schéma",
+      "description": "Le schéma prend en charge à la fois une représentation métier et une implémentation physique",
+      "inheritedFromSemantic": "Hérité du Semantic Concept",
+      "noDescription": "Aucune description",
+      "example": "Exemple :",
+      "examples": "Exemples :",
+      "primaryKey": "primaryKey",
+      "required": "obligatoire",
+      "unique": "unique",
+      "partitioned": "partitionné",
+      "criticalDataElement": "élément de données critique",
+      "transformation": "transformation",
+      "transformLogic": "Logique de transformation :",
+      "transformDescription": "Description :",
+      "format": "Format : {{value}}",
+      "minLength": "Longueur min. : {{value}}",
+      "maxLength": "Longueur max. : {{value}}",
+      "pattern": "Motif : {{value}}",
+      "minimum": "Minimum : {{value}}",
+      "maximum": "Maximum : {{value}}",
+      "exclusiveMinimum": "Minimum exclusif : {{value}}",
+      "exclusiveMaximum": "Maximum exclusif : {{value}}",
+      "multipleOf": "Multiple de : {{value}}",
+      "minItems": "Éléments min. : {{value}}",
+      "maxItems": "Éléments max. : {{value}}",
+      "uniqueItems": "Éléments uniques : {{value}}",
+      "minProperties": "Propriétés min. : {{value}}",
+      "maxProperties": "Propriétés max. : {{value}}",
+      "requiredList": "Obligatoire : {{value}}",
+      "timezone": "Fuseau horaire : {{value}}",
+      "defaultTimezone": "Fuseau horaire par défaut : {{value}}",
+      "logicalType": "Type logique : {{value}}",
+      "physicalType": "Type physique : {{value}}",
+      "yes": "Oui",
+      "no": "Non",
+      "qualityType": "Type : {{value}}",
+      "qualityDimension": "Dimension : {{value}}",
+      "qualityMetric": "Métrique : {{value}}",
+      "mustBeGreaterThan": "Doit être > {{value}}",
+      "mustBeLessThan": "Doit être < {{value}}",
+      "mustBe": "Doit être {{value}}",
+      "qualityCheck": "Contrôle de qualité",
+      "dimensions": "Dimensions : {{value}}",
+      "elementType": "Type d’élément : {{value}}",
+      "distanceMetric": "Métrique de distance : {{value}}",
+      "normalized": "Normalisé : {{value}}",
+      "embeddingModel": "Modèle d’embedding : {{value}}",
+      "embeddingModelVersion": "Version du modèle d’embedding : {{value}}",
+      "itemsDescription": "Éléments : {{value}}",
+      "mapKeyType": "Type de clé : {{value}}",
+      "mapKeyDescription": "Clé : {{value}}",
+      "mapValueType": "Type de valeur : {{value}}",
+      "mapValueDescription": "Valeur : {{value}}",
+      "qualityRule": "Règle : {{value}}",
+      "qualityArguments": "Arguments : {{value}}",
+      "qualityQuery": "Requête : {{value}}",
+      "qualityEngine": "Moteur : {{value}}",
+      "qualityImplementation": "Implémentation : {{value}}",
+      "qualitySeverity": "Gravité : {{value}}",
+      "qualityBusinessImpact": "Impact métier : {{value}}",
+      "qualityMethod": "Méthode : {{value}}",
+      "qualitySchedule": "Planification : {{value}}",
+      "qualityScheduler": "Scheduler : {{value}}",
+      "qualityUnit": "Unité : {{value}}",
+      "qualityTags": "Tags : {{value}}",
+      "mustNotBe": "Ne doit pas être {{value}}",
+      "mustBeGreaterOrEqualTo": "Doit être >= {{value}}",
+      "mustBeLessOrEqualTo": "Doit être <= {{value}}",
+      "mustBeBetween": "Doit être compris entre {{value}}",
+      "mustNotBeBetween": "Ne doit pas être compris entre {{value}}",
+      "enumValues": "Valeurs autorisées : {{value}}",
+      "synonyms": "Synonymes : {{value}}",
+      "deprecated": "obsolète",
+      "semanticType": "type sémantique : {{value}}",
+      "semanticTypeLabel": "Type sémantique",
+      "transformSourceObjects": "Objets sources :",
+      "granularity": "Granularité : {{value}}"
+    },
+    "servers": {
+      "heading": "Serveurs",
+      "description": "Cette section couvre les détails de connexion aux jeux de données physiques et à l’infrastructure",
+      "type": "Type",
+      "project": "Projet",
+      "dataset": "Dataset",
+      "endpoint": "Endpoint",
+      "location": "Emplacement",
+      "path": "Chemin",
+      "account": "Account",
+      "catalog": "Catalogue",
+      "database": "Base de données",
+      "schema": "Schéma",
+      "table": "Table",
+      "view": "Vue",
+      "host": "Hôte",
+      "port": "Port",
+      "topic": "Topic",
+      "format": "Format",
+      "delimiter": "Délimiteur",
+      "stagingDir": "Répertoire de staging",
+      "stream": "Stream",
+      "serviceName": "Nom du service",
+      "warehouse": "Warehouse",
+      "region": "Région",
+      "regionName": "Nom de la région",
+      "roles": "Rôles",
+      "roleAccess": "Accès : {{access}}",
+      "roleFirstLevelApprovers": "Approbateurs 1er niveau : {{approvers}}",
+      "roleSecondLevelApprovers": "Approbateurs 2e niveau : {{approvers}}",
+      "environment": "Environnement"
+    },
+    "sla": {
+      "heading": "Service Level Agreement (SLA)",
+      "sectionDescription": "Cette section décrit les Service Level Agreements (SLA).",
+      "property": "Propriété",
+      "value": "Valeur",
+      "unit": "Unité",
+      "element": "Élément(s)",
+      "driver": "Driver",
+      "scheduler": "Scheduler",
+      "schedule": "Planification",
+      "description": "Description",
+      "valueExt": "Valeur étendue",
+      "customProperties": "Propriétés personnalisées",
+      "authoritativeDefinitions": "Définitions de référence"
+    },
+    "support": {
+      "heading": "Support et canaux de communication",
+      "sectionDescription": "Les canaux de support et de communication aident les consommateurs à obtenir de l’aide concernant l’utilisation du Data Contract",
+      "tool": "Outil",
+      "channel": "Canal",
+      "scope": "Scope",
+      "description": "Description",
+      "invitationUrl": "URL d’invitation",
+      "invitation": "Invitation",
+      "customProperties": "Propriétés personnalisées"
+    },
+    "team": {
+      "heading": "Team",
+      "description": "Cette section présente les informations et les membres du Team",
+      "teamName": "Nom du Team",
+      "descriptionLabel": "Description",
+      "tags": "Tags",
+      "customProperties": "Propriétés personnalisées",
+      "members": "Membres",
+      "dateIn": "Entrée : {{date}}",
+      "dateOut": "Sortie : {{date}}",
+      "replacedBy": "Remplacé par : {{username}}"
+    },
+    "customProperties": {
+      "heading": "Propriétés personnalisées",
+      "description": "Cette section couvre d’autres propriétés que vous pouvez trouver dans un Data Contract.",
+      "vendor": "Fournisseur : {{value}}"
+    },
+    "contractHeader": {
+      "noData": "pas encore de données",
+      "noTeam": "Aucun Team"
+    }
+  },
+  "app": {
+    "error": {
+      "title": "Erreur de l’application",
+      "description": "Le Data Contract Editor a rencontré une erreur critique et ne peut pas continuer.",
+      "errorLabel": "Erreur : ",
+      "unknown": "Erreur inconnue",
+      "tryAgain": "Réessayer",
+      "reload": "Recharger l’application",
+      "loadShareFailed": "Impossible de charger le Data Contract partagé. Le lien est peut-être invalide."
+    }
+  },
+  "code": {
+    "schemaError": "Erreur de schéma :",
+    "noChanges": {
+      "title": "Aucune modification",
+      "description": "Votre Data Contract correspond à la dernière version enregistrée."
+    },
+    "diff": {
+      "edit": "Modifier",
+      "split": "Côte à côte",
+      "unified": "Unifié"
+    }
+  },
+  "errorBoundary": {
+    "title": "Une erreur s’est produite",
+    "unexpected": "Une erreur inattendue s’est produite",
+    "stackTrace": "Stack trace",
+    "tryAgain": "Réessayer",
+    "form": {
+      "title": "Erreur de formulaire",
+      "description": "Le formulaire {{pageName}} a rencontré une erreur et n’a pas pu être affiché.",
+      "errorLabel": "Erreur :",
+      "unknownError": "Erreur de formulaire inconnue",
+      "whatYouCanDo": "Ce que vous pouvez faire :",
+      "suggestion1": "Passez à la vue YAML pour modifier directement votre Data Contract",
+      "suggestion2": "Vérifiez que la structure de votre YAML est valide",
+      "suggestion3": "Essayez d’accéder à une autre page du formulaire",
+      "suggestion4": "Vos données sont en sécurité : le YAML a été conservé",
+      "retry": "Recharger le formulaire",
+      "editYaml": "Modifier le YAML directement",
+      "developerDetails": "Détails pour les développeurs"
+    },
+    "diagram": {
+      "title": "Erreur de rendu du diagramme",
+      "description": "La vue diagramme a rencontré une erreur et n’a pas pu être affichée.",
+      "errorLabel": "Erreur :",
+      "unknownError": "Erreur de rendu inconnue",
+      "suggestions": "Suggestions :",
+      "suggestion1": "Essayez plutôt la vue formulaire ou l’éditeur YAML",
+      "suggestion2": "Vérifiez que vos définitions de schéma sont valides",
+      "suggestion3": "Vérifiez que les relations entre propriétés sont correctement formatées",
+      "retry": "Recharger le diagramme",
+      "switchToForm": "Passer au formulaire",
+      "switchToYaml": "Passer au YAML",
+      "developerDetails": "Détails pour les développeurs"
+    },
+    "preview": {
+      "title": "Erreur d’aperçu",
+      "description": "L’aperçu n’a pas pu être affiché. Cela se produit généralement lorsque le YAML contient des structures de données inattendues.",
+      "errorLabel": "Erreur :",
+      "unknownError": "Erreur inconnue",
+      "suggestions": "Suggestions :",
+      "suggestion1": "Vérifiez la syntaxe de votre YAML",
+      "suggestion2": "Vérifiez que la structure du Data Contract correspond au schéma ODCS",
+      "suggestion3": "Essayez de modifier le YAML directement pour corriger le problème",
+      "retry": "Recharger l’aperçu",
+      "developerDetails": "Détails pour les développeurs"
+    }
+  },
+  "yaml": {
+    "parseError": {
+      "title": "Erreur d’analyse YAML",
+      "description": "Le YAML contient des erreurs de syntaxe et ne peut pas être analysé. Le formulaire est indisponible tant que les erreurs ne sont pas corrigées.",
+      "goToYaml": "Aller à la vue YAML"
+    }
+  },
+  "typeSelector": {
+    "use": "Utiliser :",
+    "customValueHint": "Saisissez une valeur personnalisée"
+  },
+  "context": {
+    "heading": "Contexte",
+    "description": "Conseils pour les agents IA et les consommateurs qui utilisent ce Data Contract (ODCS 3.2.0)."
+  },
+  "contextEditor": {
+    "instructions": {
+      "label": "Instructions",
+      "placeholder": "Comment ces données doivent être utilisées, jointes et interprétées…"
+    },
+    "statements": {
+      "label": "Déclarations vérifiées",
+      "help": "Questions auxquelles ces données peuvent répondre de façon fiable, éventuellement avec la réponse vérifiée.",
+      "question": {
+        "placeholder": "Question"
+      },
+      "answer": {
+        "placeholder": "Réponse vérifiée (facultatif)"
+      },
+      "add": "+ Ajouter une déclaration",
+      "remove": "Retirer la déclaration"
+    },
+    "constraints": {
+      "label": "Contraintes",
+      "help": "Règles que les consommateurs et les agents doivent respecter lors de l’utilisation de ces données.",
+      "placeholder": "Contrainte",
+      "add": "+ Ajouter une contrainte",
+      "remove": "Retirer la contrainte"
+    }
+  },
+  "synonyms": {
+    "add": "+ Ajouter un synonyme",
+    "remove": "Retirer le synonyme",
+    "synonym": {
+      "placeholder": "Synonyme"
+    },
+    "locale": {
+      "placeholder": "Langue",
+      "title": "Langue (balise de langue BCP 47, par ex. en-US, de-DE). Laissez vide si le synonyme n’est pas propre à une langue."
+    },
+    "description": {
+      "placeholder": "Description (facultatif)"
+    }
+  },
+  "enumValues": {
+    "add": "+ Ajouter une valeur",
+    "remove": "Retirer la valeur",
+    "value": {
+      "placeholder": "Valeur"
+    },
+    "label": {
+      "placeholder": "Libellé (facultatif)"
+    },
+    "description": {
+      "placeholder": "Description (facultatif)"
+    }
+  }
+}
