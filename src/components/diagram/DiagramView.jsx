@@ -1355,7 +1355,7 @@ const DiagramViewInner = () => {
         });
       });
 
-    // Build edges from schema-level relationships (dotted, non-interactive)
+    // Build edges from schema-level relationships (non-interactive)
     parsedData.schema.forEach((sourceSchema, sourceSchemaIndex) => {
         if (sourceSchema == null) return;
         const schemaRelationships = sourceSchema.relationships || [];

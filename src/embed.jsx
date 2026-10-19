@@ -13,6 +13,7 @@ import { LocalFileStorageBackend } from './services/LocalFileStorageBackend.js'
 import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPath, extractParseErrorMessage, extractParseErrorPos} from './store.js'
 import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
 import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
+import { viewSwitch } from './lib/viewSwitch.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/index.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
@@ -239,7 +240,7 @@ function createConfiguredStore(config) {
 			...createTestActions(set, get, (editorConfig) => editorConfig?.tests?.dataContractCliApiServerUrl || config.tests?.dataContractCliApiServerUrl || ''),
 			clearTestResults: () => set({ testResults: [] }),
 			setMarkers: (markers) => set({ markers }),
-			setView: (view) => set({ currentView: view }),
+			setView: (view) => set((state) => viewSwitch(state, view)),
 			setSelectedDiagramSchemaIndex: (index) => set({ selectedDiagramSchemaIndex: index }),
 			setSchemaInfo: (schemaUrl, schemaData) => set({ schemaUrl, schemaData }),
 			loadFromFile: async () => {
@@ -301,9 +302,11 @@ function createConfiguredStore(config) {
 			yamlParts: Yaml.parse(config.yaml),
 			baselineYaml: config.yaml, // Set initial YAML as baseline for diff view
 			isDirty: false,
-			isPreviewVisible: true,
+			// the diagram takes the full width, so a diagram start keeps the preview for later
+			isPreviewVisible: config.initialView !== 'diagram',
 			isWarningsVisible: false,
 			isTestResultsVisible: false,
+			rightPaneBeforeDiagram: config.initialView === 'diagram' ? 'preview' : null, // right pane hidden on entering the diagram, restored on leaving it
 			isTestRunning: false,
 			isMobileSidebarOpen: false,
 			isAiPanelOpen: false,

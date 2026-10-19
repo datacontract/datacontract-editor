@@ -10,6 +10,7 @@ import { createAuthoritativeDefinitionsSlice, initialAuthoritativeDefinitionsSta
 import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 import { createTestActions } from './services/testRunner.js';
+import { viewSwitch } from './lib/viewSwitch.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -213,7 +214,7 @@ export function defaultStoreConfig(set, get) {
 			}
 		},
 		clearLastAppliedAiChange: () => set({ lastAppliedAiChange: null }),
-		setView: (view) => set({currentView: view}),
+		setView: (view) => set((state) => viewSwitch(state, view)),
 		setSelectedDiagramSchemaIndex: (index) => set({selectedDiagramSchemaIndex: index}),
 		setSchemaInfo: (schemaUrl, schemaData) => set({schemaUrl, schemaData}),
 		loadFromFile: async (filename = null) => {
@@ -293,6 +294,7 @@ export function defaultStoreConfig(set, get) {
 		isPreviewVisible: true,
 		isWarningsVisible: false,
 		isTestResultsVisible: false,
+		rightPaneBeforeDiagram: null, // right pane hidden on entering the diagram, restored on leaving it
 		isTestRunning: false,
 		testResults: [],
 		markers: [],

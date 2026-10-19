@@ -33,7 +33,7 @@
   stroke-width: 2px !important;
 }
 
-/* Schema-level relationship edges — dotted, non-interactive */
+/* Schema-level relationship edges — non-interactive */
 .react-flow__edge.schema-level-edge .react-flow__edge-path {
   cursor: default;
 }
