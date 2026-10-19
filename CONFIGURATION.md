@@ -201,6 +201,11 @@ init({
     contractDetailsUrlTemplate: '/datacontracts/{externalId}', // "open details" target of tree contracts/schemas/properties
     productUriTemplate: '/dataproducts/{externalId}'           // canonical product URL for lineage URIs (defaults to productDetailsUrlTemplate)
   },
+  assets: {                          // Assets browse panel (tables available on the contract's servers)
+    url: '/api/server-assets',       // POST { servers } -> [{ server, type, assets: [{ externalId, name, type,
+                                     //   description, iconUrl, physicalName, properties: [...] }] }]
+    assetDetailsUrlTemplate: '/assets/{externalId}'            // "open details" target of tree assets
+  },
 
   autoValues: {                      // Derived values for custom properties with `auto: true`
     url: '/api/auto-values'          // POST { yaml } -> { properties: { <property>: { values, detail?, warning? } } }

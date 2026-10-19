@@ -14,7 +14,7 @@ import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPat
 import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
 import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
-import { registerTool, unregisterTool, clearTools } from './ai/aiService.js'
+import { registerTool, unregisterTool, clearTools } from './ai/index.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
 import './index.css'
@@ -114,6 +114,12 @@ const DEFAULT_CONFIG = {
   // products with contracts ([{externalId, name}]); each product's contracts
   // load lazily from `${contractsBaseUrl}/{externalId}/contracts`.
   dataProducts: null,
+
+  // Assets browse panel: { url, assetDetailsUrlTemplate }. The editor POSTs
+  // { servers } (the servers of the current document) to url and expects
+  // [{ server, type, assets: [{ externalId, name, type, description, iconUrl,
+  // physicalName, properties: [...] }] }], one entry per posted server.
+  assets: null,
 
   // Derived ("Auto") values for custom properties configured with `auto: true`: { url }.
   // The editor POSTs { yaml } to url and expects
@@ -329,6 +335,7 @@ function createConfiguredStore(config) {
 				titlePrefix: config.titlePrefix,
 				semantics: config.semantics,
 				dataProducts: config.dataProducts,
+				assets: config.assets,
 				autoValues: config.autoValues,
         managedTags: config.managedTags,
         allowUnmanagedTags: config.allowUnmanagedTags,

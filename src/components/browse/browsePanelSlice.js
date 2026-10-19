@@ -1,5 +1,5 @@
 /**
- * Store slice for the browse panel (semantics / upstream data products,
+ * Store slice for the browse panel (semantics / upstream data products / assets,
  * opened via the edge tab next to the section nav). Mixed into both the
  * standalone and embedded stores — keep it registered in src/store.js AND
  * src/embed.jsx.
@@ -8,7 +8,7 @@ export function createBrowsePanelSlice(set) {
   let insertToken = 0;
   return {
     isBrowsePanelOpen: false,
-    browsePanelTab: 'semantics', // 'semantics' | 'dataProducts'
+    browsePanelTab: 'semantics', // 'semantics' | 'dataProducts' | 'assets'
     // Last property inserted from the panel ({schemaIndex, index, token}).
     // The matching PropertyRow scrolls itself into view and flashes, so the
     // insert is visible even when the list end is below the fold.

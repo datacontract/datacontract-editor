@@ -750,11 +750,19 @@
       "all": "Alla Data Products",
       "noContracts": "Inga Data Contracts"
     },
+    "assets": {
+      "title": "Assets",
+      "noServers": "Lägg till en server för att se de assets som finns på den",
+      "noAssets": "Inga assets hittades på den här servern",
+      "error": "Assets kunde inte laddas"
+    },
     "kind": {
       "product": "Data Product",
       "contract": "Output Port",
       "schema": "Tabell",
-      "property": "Egenskap"
+      "property": "Egenskap",
+      "server": "Server",
+      "asset": "Asset"
     },
     "semanticKind": {
       "namespace": "Namnrymd",
@@ -775,7 +783,8 @@
       "yes": "ja",
       "classification": "Klassificering",
       "examples": "Exempel",
-      "businessName": "Affärsnamn"
+      "businessName": "Affärsnamn",
+      "qualifiedName": "Kvalificerat namn"
     },
     "linkedTo": "Länkad i Data Contract: {{properties}}",
     "search": "Sök...",
