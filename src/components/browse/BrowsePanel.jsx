@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import SemanticsBrowsePanel from './SemanticsBrowsePanel.jsx';
 import DataProductsBrowsePanel from './DataProductsBrowsePanel.jsx';
+import AssetsBrowsePanel from './AssetsBrowsePanel.jsx';
 import { useBrowseVisible } from './useBrowseVisible.js';
 import { useCurrentSchemaIndex } from './useCurrentSchemaIndex.js';
 import { PanelHint } from './browsePanelParts.jsx';
@@ -19,7 +20,7 @@ const XIcon = ({ className }) => (
 
 /**
  * Resizable panel next to the edge tab with one internal tab per configured
- * browse source (semantics / upstream data products). With a single source
+ * browse source (semantics / upstream data products / server assets). With a single source
  * configured the tab bar collapses to a plain title.
  *
  * The data-browse-panel attribute is load-bearing: SchemaEditor's
@@ -76,6 +77,7 @@ export default function BrowsePanel() {
   const sources = [];
   if (editorConfig?.semantics?.baseUrl) sources.push('semantics');
   if (editorConfig?.dataProducts?.upstreamUrl || editorConfig?.dataProducts?.productsUrl) sources.push('dataProducts');
+  if (editorConfig?.assets?.url) sources.push('assets');
 
   if (!isVisible || !isOpen || sources.length === 0) return null;
 
@@ -119,6 +121,7 @@ export default function BrowsePanel() {
         <div className="flex-1 overflow-hidden min-h-0">
           {activeTab === 'semantics' && <SemanticsBrowsePanel />}
           {activeTab === 'dataProducts' && <DataProductsBrowsePanel />}
+          {activeTab === 'assets' && <AssetsBrowsePanel />}
         </div>
 
         {/* Usage hint, pinned at the bottom of the panel */}

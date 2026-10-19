@@ -123,6 +123,7 @@ export function defaultStoreConfig(set, get) {
 				const yamlParts = Yaml.parse(newYaml);
 				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
 				get().collectAndFetchAuthoritativeDefinitions();
+        // eslint-disable-next-line no-unused-vars
 			} catch(e) {
 				// NOOP
 			}
@@ -318,6 +319,7 @@ export function defaultStoreConfig(set, get) {
 			ai: DEFAULT_AI_CONFIG,
 			semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl } for the semantic ontology tree API; when semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched on load
 			dataProducts: null, // { upstreamUrl, productsUrl, contractsBaseUrl } for the data products browse panel
+			assets: null, // { url, assetDetailsUrlTemplate } for the assets browse panel
 			autoValues: null, // { url } deriving the values of custom properties configured with `auto: true`
       managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
       allowUnmanagedTags: true,

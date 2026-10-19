@@ -143,6 +143,8 @@ function buildTransformDescription(origin, propertyName) {
 export function buildPropertyFromBrowseDrag(data) {
   if (data?.kind === 'semantics') return buildPropertyFromSemanticNode(data.node);
   if (data?.kind === 'dataProduct') return buildPropertyFromContractProperty(data.property, data.origin);
+  // A column of the contract's own server: the physical column itself, so no lineage
+  if (data?.kind === 'asset') return buildPropertyFromContractProperty(data.property);
   return null;
 }
 
@@ -152,7 +154,9 @@ export function buildPropertyFromBrowseDrag(data) {
  *    semantic/definition link but keeping other kinds (same behavior as the
  *    property drawer's definition select),
  *  - upstream data product property: record the transform lineage fields and
- *    carry the upstream's semantic links only when the target has none.
+ *    carry the upstream's semantic links only when the target has none,
+ *  - asset column: map the property onto the column, i.e. set its
+ *    physicalName, and its physicalType when it has none yet.
  * @returns {boolean} whether a link was applied
  */
 export function linkPropertyFromBrowseDrag(getValue, setValue, schemaIndex, index, data) {
@@ -184,6 +188,17 @@ export function linkPropertyFromBrowseDrag(getValue, setValue, schemaIndex, inde
         ...(property.authoritativeDefinitions || []),
         ...upstreamSemanticDefs.map((d) => ({ type: d.type, url: d.url })),
       ];
+    }
+    setValue(path, updated);
+    return true;
+  }
+
+  if (data?.kind === 'asset') {
+    const column = data.property;
+    if (!column?.name) return false;
+    const updated = { ...property, physicalName: column.name };
+    if (!property.physicalType && column.physicalType) {
+      updated.physicalType = column.physicalType;
     }
     setValue(path, updated);
     return true;

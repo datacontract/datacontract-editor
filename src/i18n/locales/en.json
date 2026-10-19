@@ -750,11 +750,19 @@
       "all": "All data products",
       "noContracts": "No data contracts"
     },
+    "assets": {
+      "title": "Assets",
+      "noServers": "Add a server to see the assets available on it",
+      "noAssets": "No assets found on this server",
+      "error": "Assets could not be loaded"
+    },
     "kind": {
       "product": "Data Product",
       "contract": "Output Port",
       "schema": "Table",
-      "property": "Property"
+      "property": "Property",
+      "server": "Server",
+      "asset": "Asset"
     },
     "semanticKind": {
       "namespace": "Namespace",
@@ -775,7 +783,8 @@
       "yes": "yes",
       "classification": "Classification",
       "examples": "Examples",
-      "businessName": "Business name"
+      "businessName": "Business name",
+      "qualifiedName": "Qualified name"
     },
     "linkedTo": "Linked in data contract: {{properties}}",
     "search": "Search...",
