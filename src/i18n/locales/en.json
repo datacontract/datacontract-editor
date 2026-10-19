@@ -326,6 +326,10 @@
   "diagram": {
     "clickToEdit": "Click to edit",
     "confirmDeleteProperty": "Are you sure you want to delete this property?",
+    "confirmDeleteSchema": "Are you sure you want to delete the schema \"{{name}}\"?",
+    "confirmDeleteSchemas": "Are you sure you want to delete {{count}} schemas?",
+    "confirmDeleteRelationship_one": "Are you sure you want to delete this relationship?",
+    "confirmDeleteRelationship_other": "Are you sure you want to delete {{count}} relationships?",
     "layingOut": "Laying out…",
     "noTypeConstraints": "No type-specific constraints available for {{type}}.",
     "thisType": "this type",
@@ -351,10 +355,12 @@
     },
     "help": {
       "title": "Quick Tips:",
-      "editNames": "Click on schema or property names to edit",
+      "editNames": "Click a name to select it, then click it again to rename it",
       "clickDetails": "Click on properties to see details in drawer",
       "dragLink": "Drag from a bubble on one property to a bubble on another to link them",
       "dragReposition": "Drag nodes to reposition, or use Auto Layout to arrange them automatically",
+      "reorder": "Drag a property by its type icon to change the order of fields",
+      "deselect": "Press Esc or click an empty spot on the canvas to deselect",
       "collapse": "Collapse a table to keys-only with the list icon in its header, or collapse all tables with the toolbar button",
       "zoom": "Use mouse wheel to zoom",
       "shortcutsPrefix": "Press",
@@ -376,14 +382,28 @@
       "description": "Get started by creating your first schema."
     },
     "edge": {
-      "schemaLevel": "Schema-level relationship — only editable in the form editor"
+      "schemaLevel": "Schema-level relationship — only editable in the form editor",
+      "grouped_one": "{{count}} relationship — click to show each one",
+      "grouped_other": "{{count}} relationships — click to show each one",
+      "cardinality": {
+        "one": "1 — each row references exactly one row (foreign key is unique and required)",
+        "zeroOrOne": "? — each row references zero or one row (foreign key is unique, not required)",
+        "many": "n — many rows can reference the same row (foreign key is not unique)"
+      }
     },
     "schema": {
       "addProperty": "Add property",
       "moreOptions": "More options",
       "delete": "Delete Schema",
       "unnamed": "Unnamed Schema",
-      "noProperties": "No properties defined"
+      "noProperties": "No properties defined",
+      "kind": {
+        "fact": "Fact",
+        "factHint": "Fact table (fct_): holds measures of business events",
+        "dimension": "Dimension",
+        "dimensionHint": "Dimension table (dim_): holds descriptive attributes to slice facts by"
+      },
+      "selectToRename": "Click to select the table, then click the name again to rename it"
     },
     "handle": {
       "source": "Drag from here to a property on another table to create a relationship",
@@ -396,7 +416,8 @@
       "dragToReorder": "Drag to reorder",
       "addNested": "Add nested property",
       "delete": "Delete",
-      "deleteProperty": "Delete Property"
+      "deleteProperty": "Delete Property",
+      "selectToRename": "Click to select the property, then click the name again to rename it"
     },
     "propertyDetails": {
       "title": "Edit Property",
@@ -583,6 +604,14 @@
       "false": "False",
       "true": "True",
       "select": "Select..."
+    },
+    "selection": {
+      "table_one": "Table selected",
+      "table_other": "{{count}} tables selected",
+      "relationship_one": "Relationship selected",
+      "relationship_other": "{{count}} relationships selected",
+      "delete": "to delete",
+      "deselect": "or click empty canvas to deselect"
     }
   },
   "testResults": {
@@ -914,6 +943,7 @@
     "remove": "Remove",
     "from": "From",
     "to": "To",
+    "targetNotFound": "Target not found: no property with this reference exists in this contract yet.",
     "removePair": "Remove pair",
     "addPair": "Add column pair (composite key)",
     "drawer": {

@@ -32,6 +32,25 @@ import {useDefinition} from '../../hooks/useDefinition.js';
 import PhysicalTypeCombobox from '../ui/TypeSelector/PhysicalTypeCombobox.jsx';
 import {useActiveServerType} from '../../hooks/useActiveServerType.js';
 
+// Number of values that are actually set: non-empty strings/arrays/objects,
+// numbers, and `true` (a `false` flag is the default and doesn't count).
+const countFilled = (values) => values.filter((v) => {
+  if (v == null || v === false || v === '') return false;
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === 'object') return Object.values(v).some((x) => x != null && x !== '');
+  return true;
+}).length;
+
+// Section header label with a badge showing how many fields are filled
+const SectionLabel = ({ label, count }) => (
+  <span className="flex items-center gap-1.5">
+    <span>{label}</span>
+    {count > 0 && (
+      <span className="rounded-full bg-indigo-100 px-1.5 text-[10px] font-semibold leading-4 text-indigo-700">{count}</span>
+    )}
+  </span>
+);
+
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo }) => {
   const { t } = useTranslation();
   const relationshipsSectionRef = useRef(null);
@@ -258,6 +277,22 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     if (!isSemanticsEnabled) return property.authoritativeDefinitions;
     return property.authoritativeDefinitions?.filter(d => !isSemanticAuthDef(d) && d.type !== 'definition');
   }, [property.authoritativeDefinitions, isSemanticsEnabled]);
+
+  // Filled-field counts shown as badges on the collapsed section headers
+  const logicalTypeOptions = property.logicalTypeOptions || {};
+  const sectionCounts = {
+    semantics: semanticDefinition ? 1 : 0,
+    logicalTypeOptions: countFilled(Object.values(logicalTypeOptions)),
+    constraints: countFilled([property.required, property.unique, property.primaryKey, property.partitioned, property.deprecated]),
+    enumValues: countFilled(property.enum || []),
+    synonyms: countFilled(property.synonyms || []),
+    classificationSecurity: countFilled([property.classification, property.criticalDataElement, property.encryptedName, property.tags]),
+    transformations: countFilled([property.transformDescription, property.transformLogic, property.transformSourceObjects]),
+    dataQuality: property.quality?.length || 0,
+    authoritativeDefinitions: filteredAuthoritativeDefinitions?.length || 0,
+    relationships: property.relationships?.length || 0,
+    customProperties: property.customProperties?.length || 0,
+  };
 
   const isTransformationsSectionEmpty = isStandardSectionEmpty(
     [isTransformSourceObjectsHidden, isTransformLogicHidden, isTransformDescriptionHidden],
@@ -579,7 +614,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>{t('diagram.section.semantics')}</span>
+                <SectionLabel label={t('diagram.section.semantics')} count={sectionCounts.semantics} />
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
@@ -724,7 +759,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.logicalTypeOptions')}</span>
+              <SectionLabel label={t('diagram.section.logicalTypeOptions')} count={sectionCounts.logicalTypeOptions} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -990,7 +1025,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.constraints')}</span>
+              <SectionLabel label={t('diagram.section.constraints')} count={sectionCounts.constraints} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1179,7 +1214,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>{t('diagram.section.enumValues')}</span>
+                <SectionLabel label={t('diagram.section.enumValues')} count={sectionCounts.enumValues} />
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
@@ -1198,7 +1233,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>{t('diagram.section.synonyms')}</span>
+                <SectionLabel label={t('diagram.section.synonyms')} count={sectionCounts.synonyms} />
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
@@ -1216,7 +1251,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.classificationSecurity')}</span>
+              <SectionLabel label={t('diagram.section.classificationSecurity')} count={sectionCounts.classificationSecurity} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1339,7 +1374,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.transformations')}</span>
+              <SectionLabel label={t('diagram.section.transformations')} count={sectionCounts.transformations} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1411,7 +1446,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.dataQuality')}</span>
+              <SectionLabel label={t('diagram.section.dataQuality')} count={sectionCounts.dataQuality} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1433,7 +1468,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.authoritativeDefinitions')}</span>
+              <SectionLabel label={t('diagram.section.authoritativeDefinitions')} count={sectionCounts.authoritativeDefinitions} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1466,7 +1501,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-                <span>{t('diagram.section.relationships')}</span>
+                <SectionLabel label={t('diagram.section.relationships')} count={sectionCounts.relationships} />
                 <ChevronRightIcon
                   className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
                 />
@@ -1519,7 +1554,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <span>{t('diagram.section.customProperties')}</span>
+              <SectionLabel label={t('diagram.section.customProperties')} count={sectionCounts.customProperties} />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />

@@ -18,6 +18,36 @@ import { useBrowseDropIndicator } from '../browse/browseDropContext.js';
 import { useInsertFlash } from '../browse/useInsertFlash.js';
 import { propertyLinkIdentity, propertyMatchesLink } from '../browse/useContractLinks.js';
 import { useEditorStore } from '../../store.js';
+import { getTableKind } from './tableKind.js';
+
+// Accent color, icon and label per dimensional-modeling table kind:
+// warm amber + sigma (measures) for facts, cool sky + axes for dimensions.
+const TABLE_KIND_STYLES = {
+  fact: {
+    accent: 'bg-amber-500',
+    icon: 'text-amber-600',
+    pill: 'bg-amber-100 text-amber-800',
+  },
+  dimension: {
+    accent: 'bg-sky-500',
+    icon: 'text-sky-600',
+    pill: 'bg-sky-100 text-sky-800',
+  },
+};
+
+const FactTableIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12.5 3h-9l5 5-5 5h9" />
+  </svg>
+);
+
+const DimensionTableIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 2v11h11" />
+    <path d="M3 13l5-5" />
+    <path d="M1.5 3.5L3 2l1.5 1.5M12.5 11.5L14 13l-1.5 1.5" />
+  </svg>
+);
 
 // Disable layout animation to prevent visual glitch on drop
 const animateLayoutChanges = () => false;
@@ -62,8 +92,11 @@ const SortablePropertyRow = ({ id: propId, schemaIndex, index, property, childre
   const isLogicalTypeFromDefinition = !property?.logicalType && !!inheritedLogicalType;
   const effectiveLogicalType = property?.logicalType || inheritedLogicalType;
 
+  // dnd-kit measures in screen pixels, but the row lives inside the zoomed
+  // React Flow viewport — scale the offset back so the row follows the cursor.
+  const zoom = useStore((s) => s.transform[2]) || 1;
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform && { ...transform, x: transform.x / zoom, y: transform.y / zoom }),
     transition: isDragging ? transition : 'none', // Only animate while dragging
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 1000 : 'auto',
@@ -91,7 +124,7 @@ const SortablePropertyRow = ({ id: propId, schemaIndex, index, property, childre
   );
 };
 
-const SchemaNode = ({ data, id }) => {
+const SchemaNode = ({ data, id, selected }) => {
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   // Current canvas zoom. Used to keep the connection-handle "grab target"
@@ -102,6 +135,10 @@ const SchemaNode = ({ data, id }) => {
   const [editedSchemaName, setEditedSchemaName] = useState('');
   const [editingPropertyIndex, setEditingPropertyIndex] = useState(null);
   const [editedPropertyName, setEditedPropertyName] = useState('');
+  // Width of the name area being edited. The input takes exactly this width
+  // (size=1 keeps its intrinsic width from pushing), so switching to edit
+  // mode never resizes the table.
+  const [editNameWidth, setEditNameWidth] = useState(undefined);
   const [editingNestedProperty, setEditingNestedProperty] = useState(null); // { parentIndex, nestedIndex, field: 'name' }
   const [editedNestedValue, setEditedNestedValue] = useState('');
   const [showMenu, setShowMenu] = useState(false);
@@ -116,6 +153,8 @@ const SchemaNode = ({ data, id }) => {
   const propertyRowsRef = useRef([]);
   const propertyHoverTimeoutRef = useRef(null);
   const openPropertyDetails = data.openPropertyDetails;
+  const tableKind = getTableKind(data.schema.name);
+  const kindStyle = tableKind ? TABLE_KIND_STYLES[tableKind] : null;
 
   // Drop target for the browse panel (semantics / upstream data products):
   // registered with the app-level EditorDndProvider. The rows are droppable
@@ -182,6 +221,7 @@ const SchemaNode = ({ data, id }) => {
       // A new property was added, start editing it
       const newPropertyIndex = currentPropertyCount - 1;
       const newPropertyName = data.schema.properties?.[newPropertyIndex]?.name || '';
+      setEditNameWidth(undefined);
       setEditingPropertyIndex(newPropertyIndex);
       setEditedPropertyName(newPropertyName);
       shouldEditNextProperty.current = false;
@@ -234,7 +274,11 @@ const SchemaNode = ({ data, id }) => {
     data.onDeleteSchema(id);
   };
 
-  const handleStartEditSchemaName = () => {
+  const handleStartEditSchemaName = (e) => {
+    // The first click selects the table (handled by React Flow); only a click
+    // on the name of an already selected table starts renaming it.
+    if (!selected) return;
+    setEditNameWidth(e?.currentTarget?.offsetWidth);
     setEditedSchemaName(data.schema.name || '');
     setIsEditingSchemaName(true);
   };
@@ -249,7 +293,8 @@ const SchemaNode = ({ data, id }) => {
     setIsEditingSchemaName(false);
   };
 
-  const handleStartEditPropertyName = (index, currentName) => {
+  const handleStartEditPropertyName = (index, currentName, width) => {
+    setEditNameWidth(width);
     setEditingPropertyIndex(index);
     setEditedPropertyName(currentName || '');
   };
@@ -394,7 +439,10 @@ const SchemaNode = ({ data, id }) => {
   return (
     <div
       ref={setBrowseDropRef}
-      className={`min-w-[250px] group/node dce-schema-node ${isBrowseDropOver ? 'rounded ring-2 ring-indigo-500 ring-offset-2' : ''}`}
+      className={`min-w-[250px] group/node dce-schema-node ${
+        isBrowseDropOver ? 'rounded ring-2 ring-indigo-500 ring-offset-2'
+          : selected ? 'rounded ring-2 ring-fuchsia-500' : ''
+      }`}
       style={{ '--dce-handle-hover-scale': Math.min(4, Math.max(1.6, 1.4 / Math.max(zoom || 1, 0.1))) }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -442,17 +490,23 @@ const SchemaNode = ({ data, id }) => {
       </NodeToolbar>
 
       {/* Accent Bar */}
-      <div className="h-1.5 rounded-t bg-fuchsia-700"></div>
+      <div className={`h-1.5 rounded-t ${kindStyle?.accent || 'bg-fuchsia-700'}`}></div>
 
       {/* Schema Container with Border */}
       <div className="border-[3px] rounded-b border-solid border-[#E9EEF4]">
         {/* Schema Header */}
         <div className="flex items-center bg-[#E9EEF4] px-2 py-1.5">
-          {/* Table Icon */}
-          <span className="mr-1.5 flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#000">
-              <path d="M1.930848 1.960304C1.164656 2.0890560000000002 0.5672480000000001 2.720784 0.481104 3.493344C0.45718400000000003 3.707872 0.45718400000000003 12.292128000000002 0.481104 12.506656000000001C0.556416 13.182064 1.023328 13.757952 1.67112 13.9744C1.955984 14.069584 1.5522719999999999 14.063872 8 14.063872C14.428111999999999 14.063872 14.025120000000001 14.069504 14.32 13.975567999999999C14.967136 13.769408 15.44312 13.186208 15.518896000000002 12.506656000000001C15.542816 12.292128000000002 15.542816 3.707872 15.518896000000002 3.493344C15.432112 2.714992 14.832336 2.0853919999999997 14.058 1.959808C13.930848000000001 1.939184 13.146432 1.936336 7.984 1.937712C3.166448 1.938992 2.03256 1.9432159999999998 1.930848 1.960304M1.981696 2.981056C1.74744 3.060912 1.557504 3.262384 1.4968320000000002 3.4953600000000002C1.475616 3.576832 1.472 3.742864 1.472 4.6353599999999995L1.472 5.68 8 5.68L14.528 5.68 14.528 4.6353599999999995C14.528 3.742864 14.524384 3.576832 14.503168 3.4953600000000002C14.441392 3.258128 14.239951999999999 3.0488000000000004 14.002992 2.975616C13.901808 2.944368 13.832176 2.944 7.99432 2.9444160000000004L2.088 2.944832 1.981696 2.981056M1.472 8.064L1.472 9.44 3.3120000000000003 9.44L5.152 9.44 5.152 8.064L5.152 6.688 3.3120000000000003 6.688L1.472 6.688 1.472 8.064M6.16 8.064L6.16 9.44 8 9.44L9.84 9.44 9.84 8.064L9.84 6.688 8 6.688L6.16 6.688 6.16 8.064M10.848 8.064L10.848 9.44 12.688 9.44L14.528 9.44 14.528 8.064L14.528 6.688 12.688 6.688L10.848 6.688 10.848 8.064M1.472 11.420639999999999C1.472 12.262528 1.47568 12.423440000000001 1.4968320000000002 12.50464C1.558608 12.741871999999999 1.760048 12.951200000000002 1.9970080000000001 13.024384C2.09592 13.054943999999999 2.1507359999999998 13.056000000000001 3.62568 13.056000000000001L5.152 13.056000000000001 5.152 11.744L5.152 10.432 3.3120000000000003 10.432L1.472 10.432 1.472 11.420639999999999M6.16 11.744L6.16 13.056000000000001 8 13.056000000000001L9.84 13.056000000000001 9.84 11.744L9.84 10.432 8 10.432L6.16 10.432 6.16 11.744M10.848 11.744L10.848 13.056000000000001 12.374319999999999 13.056000000000001C13.849264 13.056000000000001 13.90408 13.054943999999999 14.002992 13.024384C14.239951999999999 12.951200000000002 14.441392 12.741871999999999 14.503168 12.50464C14.52432 12.423440000000001 14.528 12.262528 14.528 11.420639999999999L14.528 10.432 12.688 10.432L10.848 10.432 10.848 11.744" fillRule="evenodd"/>
-            </svg>
+          {/* Table Icon (fact / dimension tables get their own icon) */}
+          <span className="mr-1.5 flex-shrink-0" title={tableKind ? t(`diagram.schema.kind.${tableKind}Hint`) : undefined}>
+            {tableKind === 'fact' ? (
+              <FactTableIcon className={`h-4 w-4 ${kindStyle.icon}`} />
+            ) : tableKind === 'dimension' ? (
+              <DimensionTableIcon className={`h-4 w-4 ${kindStyle.icon}`} />
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#000">
+                <path d="M1.930848 1.960304C1.164656 2.0890560000000002 0.5672480000000001 2.720784 0.481104 3.493344C0.45718400000000003 3.707872 0.45718400000000003 12.292128000000002 0.481104 12.506656000000001C0.556416 13.182064 1.023328 13.757952 1.67112 13.9744C1.955984 14.069584 1.5522719999999999 14.063872 8 14.063872C14.428111999999999 14.063872 14.025120000000001 14.069504 14.32 13.975567999999999C14.967136 13.769408 15.44312 13.186208 15.518896000000002 12.506656000000001C15.542816 12.292128000000002 15.542816 3.707872 15.518896000000002 3.493344C15.432112 2.714992 14.832336 2.0853919999999997 14.058 1.959808C13.930848000000001 1.939184 13.146432 1.936336 7.984 1.937712C3.166448 1.938992 2.03256 1.9432159999999998 1.930848 1.960304M1.981696 2.981056C1.74744 3.060912 1.557504 3.262384 1.4968320000000002 3.4953600000000002C1.475616 3.576832 1.472 3.742864 1.472 4.6353599999999995L1.472 5.68 8 5.68L14.528 5.68 14.528 4.6353599999999995C14.528 3.742864 14.524384 3.576832 14.503168 3.4953600000000002C14.441392 3.258128 14.239951999999999 3.0488000000000004 14.002992 2.975616C13.901808 2.944368 13.832176 2.944 7.99432 2.9444160000000004L2.088 2.944832 1.981696 2.981056M1.472 8.064L1.472 9.44 3.3120000000000003 9.44L5.152 9.44 5.152 8.064L5.152 6.688 3.3120000000000003 6.688L1.472 6.688 1.472 8.064M6.16 8.064L6.16 9.44 8 9.44L9.84 9.44 9.84 8.064L9.84 6.688 8 6.688L6.16 6.688 6.16 8.064M10.848 8.064L10.848 9.44 12.688 9.44L14.528 9.44 14.528 8.064L14.528 6.688 12.688 6.688L10.848 6.688 10.848 8.064M1.472 11.420639999999999C1.472 12.262528 1.47568 12.423440000000001 1.4968320000000002 12.50464C1.558608 12.741871999999999 1.760048 12.951200000000002 1.9970080000000001 13.024384C2.09592 13.054943999999999 2.1507359999999998 13.056000000000001 3.62568 13.056000000000001L5.152 13.056000000000001 5.152 11.744L5.152 10.432 3.3120000000000003 10.432L1.472 10.432 1.472 11.420639999999999M6.16 11.744L6.16 13.056000000000001 8 13.056000000000001L9.84 13.056000000000001 9.84 11.744L9.84 10.432 8 10.432L6.16 10.432 6.16 11.744M10.848 11.744L10.848 13.056000000000001 12.374319999999999 13.056000000000001C13.849264 13.056000000000001 13.90408 13.054943999999999 14.002992 13.024384C14.239951999999999 12.951200000000002 14.441392 12.741871999999999 14.503168 12.50464C14.52432 12.423440000000001 14.528 12.262528 14.528 11.420639999999999L14.528 10.432 12.688 10.432L10.848 10.432 10.848 11.744" fillRule="evenodd"/>
+              </svg>
+            )}
           </span>
           {isEditingSchemaName ? (
             <input
@@ -468,15 +522,25 @@ const SchemaNode = ({ data, id }) => {
                 }
               }}
               className="flex-1 px-2 py-1 text-sm bg-white text-gray-900 rounded border-2 border-indigo-300 focus:outline-none focus:border-indigo-400"
+              style={{ width: editNameWidth, minWidth: editNameWidth }}
+              size={1}
               autoFocus
             />
           ) : (
             <div
-              className="cursor-pointer hover:opacity-80 flex-1 min-w-0 flex items-center gap-1.5"
+              className={`flex-1 min-w-0 flex items-center gap-1.5 ${selected ? 'cursor-text hover:opacity-80' : ''}`}
               onClick={handleStartEditSchemaName}
-              title={t('diagram.clickToEdit')}
+              title={selected ? t('diagram.clickToEdit') : t('diagram.schema.selectToRename')}
             >
               <span className="font-bold text-md truncate">{data.schema.name || t('diagram.schema.unnamed')}</span>
+              {tableKind && (
+                <span
+                  className={`flex-shrink-0 rounded px-1.5 text-[10px] font-semibold uppercase leading-4 tracking-wide ${kindStyle.pill}`}
+                  title={t(`diagram.schema.kind.${tableKind}Hint`)}
+                >
+                  {t(`diagram.schema.kind.${tableKind}`)}
+                </span>
+              )}
               {data.schema.authoritativeDefinitions?.some((d) => isSemanticAuthDef(d)) && (
                 <SemanticIcon className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
               )}
@@ -572,7 +636,7 @@ const SchemaNode = ({ data, id }) => {
                 style={{ right: -1 }}
                 title={t('diagram.handle.target')}
               />
-              <div className="flex justify-between items-center">
+              <div className="dce-prop-name-row flex justify-between items-center">
                 {/* Left side: Name and icons */}
                 <div className="flex items-center flex-1 min-w-0">
                   {editingPropertyIndex === index ? (
@@ -594,6 +658,8 @@ const SchemaNode = ({ data, id }) => {
                         }
                       }}
                       className="flex-1 px-2 py-1 text-sm bg-white text-gray-900 rounded border border-indigo-300 focus:outline-none focus:border-indigo-500"
+                      style={{ width: editNameWidth, minWidth: editNameWidth }}
+                      size={editNameWidth ? 1 : undefined}
                       placeholder={t('diagram.property.namePlaceholder')}
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
@@ -615,12 +681,19 @@ const SchemaNode = ({ data, id }) => {
                         })()}
                       </span>
                       <span
-                        className={`text-sm font-medium truncate cursor-pointer hover:text-indigo-600 ${
+                        className={`text-sm font-medium truncate ${isPropertyDetailsOpen ? 'cursor-text hover:text-indigo-600' : 'cursor-pointer'} ${
                           !prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? 'text-gray-400 italic' : 'text-gray-900'
                         }`}
                         onClick={(e) => {
+                          // The first click selects the property (the row's click
+                          // handler opens its details); clicking the name of the
+                          // selected property starts renaming it.
+                          if (!isPropertyDetailsOpen) return;
                           e.stopPropagation();
-                          handleStartEditPropertyName(index, prop.name);
+                          // The type selector on the right is hidden while editing,
+                          // so the input takes the whole row width (minus its gap)
+                          const row = e.currentTarget.closest('.dce-prop-name-row');
+                          handleStartEditPropertyName(index, prop.name, row ? row.offsetWidth - 8 : undefined);
                           // Also show property details sidebar
                           const node = getNode(id);
                           if (node) {
@@ -630,7 +703,7 @@ const SchemaNode = ({ data, id }) => {
                             data.onShowPropertyDetails?.(id, index, node.position, propertyOffset, 'click');
                           }
                         }}
-                        title={t('diagram.clickToEdit')}
+                        title={isPropertyDetailsOpen ? t('diagram.clickToEdit') : t('diagram.property.selectToRename')}
                       >
                         {!prop.name || (typeof prop.name === 'string' && prop.name.trim() === '') ? t('diagram.property.unnamed') : prop.name}
                       </span>
@@ -797,15 +870,17 @@ const SchemaNode = ({ data, id }) => {
                             />
                           ) : (
                             <span
-                              className={`text-gray-600 truncate cursor-pointer hover:text-indigo-600 ${
+                              className={`text-gray-600 truncate ${isItemPropertyDetailsOpen ? 'cursor-text hover:text-indigo-600' : 'cursor-pointer'} ${
                                 !itemProp.name || (typeof itemProp.name === 'string' && itemProp.name.trim() === '') ? 'italic text-gray-400' : ''
                               }`}
                               onClick={(e) => {
+                                // First click selects (row opens details), then rename
+                                if (!isItemPropertyDetailsOpen) return;
                                 e.stopPropagation();
                                 setEditingNestedProperty({ parentIndex: index, nestedIndex: `items-${itemPropIndex}`, field: 'name' });
                                 setEditedNestedValue(itemProp.name || '');
                               }}
-                              title={t('diagram.clickToEdit')}
+                              title={isItemPropertyDetailsOpen ? t('diagram.clickToEdit') : t('diagram.property.selectToRename')}
                             >
                               {itemProp.name || t('diagram.property.unnamedShort')}
                             </span>
@@ -949,14 +1024,16 @@ const SchemaNode = ({ data, id }) => {
                         />
                       ) : (
                         <span
-                          className={`text-gray-600 truncate cursor-pointer hover:text-indigo-600 ${
+                          className={`text-gray-600 truncate ${isNestedPropertyDetailsOpen ? 'cursor-text hover:text-indigo-600' : 'cursor-pointer'} ${
                             !nestedProp.name || (typeof nestedProp.name === 'string' && nestedProp.name.trim() === '') ? 'italic text-gray-400' : ''
                           }`}
                           onClick={(e) => {
+                            // First click selects (row opens details), then rename
+                            if (!isNestedPropertyDetailsOpen) return;
                             e.stopPropagation();
                             handleStartEditNestedProperty(index, nestedIndex, 'name', nestedProp.name);
                           }}
-                          title={t('diagram.clickToEdit')}
+                          title={isNestedPropertyDetailsOpen ? t('diagram.clickToEdit') : t('diagram.property.selectToRename')}
                         >
                           {nestedProp.name || t('diagram.property.unnamedShort')}
                         </span>

@@ -326,6 +326,10 @@
   "diagram": {
     "clickToEdit": "Cliquer pour modifier",
     "confirmDeleteProperty": "Voulez-vous vraiment supprimer cette propriété ?",
+    "confirmDeleteSchema": "Voulez-vous vraiment supprimer le schéma « {{name}} » ?",
+    "confirmDeleteSchemas": "Voulez-vous vraiment supprimer {{count}} schémas ?",
+    "confirmDeleteRelationship_one": "Voulez-vous vraiment supprimer cette relation ?",
+    "confirmDeleteRelationship_other": "Voulez-vous vraiment supprimer {{count}} relations ?",
     "layingOut": "Disposition en cours…",
     "noTypeConstraints": "Aucune contrainte spécifique au type disponible pour {{type}}.",
     "thisType": "ce type",
@@ -351,10 +355,12 @@
     },
     "help": {
       "title": "Astuces :",
-      "editNames": "Cliquez sur les noms de schémas ou de propriétés pour les modifier",
+      "editNames": "Cliquez sur un nom pour le sélectionner, puis cliquez à nouveau dessus pour le renommer",
       "clickDetails": "Cliquez sur les propriétés pour voir les détails dans le panneau",
       "dragLink": "Faites glisser d’une bulle d’une propriété vers une bulle d’une autre pour les relier",
       "dragReposition": "Faites glisser les nœuds pour les repositionner, ou utilisez la disposition automatique pour les organiser",
+      "reorder": "Faites glisser une propriété par son icône de type pour changer l’ordre des champs",
+      "deselect": "Appuyez sur Échap ou cliquez sur une zone vide pour désélectionner",
       "collapse": "Réduisez une table à ses clés avec l’icône de liste dans son en-tête, ou réduisez toutes les tables avec le bouton de la barre d’outils",
       "zoom": "Utilisez la molette de la souris pour zoomer",
       "shortcutsPrefix": "Appuyez sur",
@@ -376,14 +382,28 @@
       "description": "Commencez par créer votre premier schéma."
     },
     "edge": {
-      "schemaLevel": "Relation au niveau du schéma — modifiable uniquement dans l’éditeur de formulaire"
+      "schemaLevel": "Relation au niveau du schéma — modifiable uniquement dans l’éditeur de formulaire",
+      "grouped_one": "{{count}} relation — cliquez pour afficher chacune",
+      "grouped_other": "{{count}} relations — cliquez pour afficher chacune",
+      "cardinality": {
+        "one": "1 — chaque ligne référence exactement une ligne (clé étrangère unique et obligatoire)",
+        "zeroOrOne": "? — chaque ligne référence zéro ou une ligne (clé étrangère unique, non obligatoire)",
+        "many": "n — plusieurs lignes peuvent référencer la même ligne (clé étrangère non unique)"
+      }
     },
     "schema": {
       "addProperty": "Ajouter une propriété",
       "moreOptions": "Plus d’options",
       "delete": "Supprimer le schéma",
       "unnamed": "Schéma sans nom",
-      "noProperties": "Aucune propriété définie"
+      "noProperties": "Aucune propriété définie",
+      "kind": {
+        "fact": "Fait",
+        "factHint": "Table de faits (fct_) : contient les mesures des événements métier",
+        "dimension": "Dimension",
+        "dimensionHint": "Table de dimension (dim_) : contient les attributs descriptifs pour analyser les faits"
+      },
+      "selectToRename": "Cliquez pour sélectionner la table, puis cliquez à nouveau sur le nom pour la renommer"
     },
     "handle": {
       "source": "Faites glisser d’ici vers une propriété d’une autre table pour créer une relation",
@@ -396,7 +416,8 @@
       "dragToReorder": "Faire glisser pour réordonner",
       "addNested": "Ajouter une propriété imbriquée",
       "delete": "Supprimer",
-      "deleteProperty": "Supprimer la propriété"
+      "deleteProperty": "Supprimer la propriété",
+      "selectToRename": "Cliquez pour sélectionner la propriété, puis cliquez à nouveau sur le nom pour la renommer"
     },
     "propertyDetails": {
       "title": "Modifier la propriété",
@@ -583,6 +604,14 @@
       "false": "Faux",
       "true": "Vrai",
       "select": "Sélectionner..."
+    },
+    "selection": {
+      "table_one": "Table sélectionnée",
+      "table_other": "{{count}} tables sélectionnées",
+      "relationship_one": "Relation sélectionnée",
+      "relationship_other": "{{count}} relations sélectionnées",
+      "delete": "pour supprimer",
+      "deselect": "ou clic sur une zone vide pour désélectionner"
     }
   },
   "testResults": {
@@ -914,6 +943,7 @@
     "remove": "Retirer",
     "from": "De",
     "to": "Vers",
+    "targetNotFound": "Cible introuvable : aucune propriété avec cette référence n’existe encore dans ce Data Contract.",
     "removePair": "Retirer la paire",
     "addPair": "Ajouter une paire de colonnes (clé composite)",
     "drawer": {

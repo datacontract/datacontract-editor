@@ -370,6 +370,9 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
                   </div>
                 </div>
               ))}
+              {toArray.some((to) => !isValidPath(to)) && (
+                <p className="text-xs text-red-600">{t('relationship.targetNotFound')}</p>
+              )}
               <button
                 type="button"
                 onClick={addPair}
@@ -379,17 +382,22 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
               </button>
             </div>
           ) : (
-            <Combobox
-              label={<span className="text-xs font-medium text-gray-700">{t('relationship.to')}</span>}
-              options={schemaPropertySuggestions}
-              value={item.to || ''}
-              onChange={(val) => onUpdate(index, 'to', val)}
-              placeholder="schema.property"
-              acceptAnyInput={true}
-              filterKey="name"
-              displayValue={(opt) => opt?.name || opt || ''}
-              hasError={!isValidPath(item.to)}
-            />
+            <div>
+              <Combobox
+                label={<span className="text-xs font-medium text-gray-700">{t('relationship.to')}</span>}
+                options={schemaPropertySuggestions}
+                value={item.to || ''}
+                onChange={(val) => onUpdate(index, 'to', val)}
+                placeholder="schema.property"
+                acceptAnyInput={true}
+                filterKey="name"
+                displayValue={(opt) => opt?.name || opt || ''}
+                hasError={!isValidPath(item.to)}
+              />
+              {!isValidPath(item.to) && (
+                <p className="mt-1 text-xs text-red-600">{t('relationship.targetNotFound')}</p>
+              )}
+            </div>
           )}
 
           {/* Custom properties */}

@@ -326,6 +326,10 @@
   "diagram": {
     "clickToEdit": "Klicka för att redigera",
     "confirmDeleteProperty": "Är du säker på att du vill ta bort den här egenskapen?",
+    "confirmDeleteSchema": "Är du säker på att du vill ta bort schemat \"{{name}}\"?",
+    "confirmDeleteSchemas": "Är du säker på att du vill ta bort {{count}} scheman?",
+    "confirmDeleteRelationship_one": "Är du säker på att du vill ta bort den här relationen?",
+    "confirmDeleteRelationship_other": "Är du säker på att du vill ta bort {{count}} relationer?",
     "layingOut": "Ordnar layout…",
     "noTypeConstraints": "Inga typspecifika begränsningar finns för {{type}}.",
     "thisType": "den här typen",
@@ -351,10 +355,12 @@
     },
     "help": {
       "title": "Snabba tips:",
-      "editNames": "Klicka på schema- eller egenskapsnamn för att redigera",
+      "editNames": "Klicka på ett namn för att markera det och klicka sedan på det igen för att byta namn",
       "clickDetails": "Klicka på egenskaper för att se detaljer i sidopanelen",
       "dragLink": "Dra från en bubbla på en egenskap till en bubbla på en annan för att länka dem",
       "dragReposition": "Dra noder för att flytta dem, eller använd automatisk layout för att ordna dem automatiskt",
+      "reorder": "Dra en egenskap i dess typikon för att ändra ordningen på fälten",
+      "deselect": "Tryck på Esc eller klicka på en tom yta för att avmarkera",
       "collapse": "Fäll ihop en tabell till enbart nycklar med listikonen i dess rubrik, eller fäll ihop alla tabeller med knappen i verktygsfältet",
       "zoom": "Använd mushjulet för att zooma",
       "shortcutsPrefix": "Tryck",
@@ -376,14 +382,28 @@
       "description": "Kom igång genom att skapa ditt första schema."
     },
     "edge": {
-      "schemaLevel": "Relation på schemanivå: kan endast redigeras i formulärredigeraren"
+      "schemaLevel": "Relation på schemanivå: kan endast redigeras i formulärredigeraren",
+      "grouped_one": "{{count}} relation: klicka för att visa var och en",
+      "grouped_other": "{{count}} relationer: klicka för att visa var och en",
+      "cardinality": {
+        "one": "1: varje rad refererar till exakt en rad (främmande nyckel är unik och obligatorisk)",
+        "zeroOrOne": "?: varje rad refererar till noll eller en rad (främmande nyckel är unik, inte obligatorisk)",
+        "many": "n: många rader kan referera till samma rad (främmande nyckel är inte unik)"
+      }
     },
     "schema": {
       "addProperty": "Lägg till egenskap",
       "moreOptions": "Fler alternativ",
       "delete": "Ta bort schema",
       "unnamed": "Namnlöst schema",
-      "noProperties": "Inga egenskaper definierade"
+      "noProperties": "Inga egenskaper definierade",
+      "kind": {
+        "fact": "Fakta",
+        "factHint": "Faktatabell (fct_): innehåller mått för affärshändelser",
+        "dimension": "Dimension",
+        "dimensionHint": "Dimensionstabell (dim_): innehåller beskrivande attribut för att analysera fakta"
+      },
+      "selectToRename": "Klicka för att markera tabellen och klicka sedan på namnet igen för att byta namn"
     },
     "handle": {
       "source": "Dra härifrån till en egenskap i en annan tabell för att skapa en relation",
@@ -396,7 +416,8 @@
       "dragToReorder": "Dra för att ändra ordning",
       "addNested": "Lägg till kapslad egenskap",
       "delete": "Ta bort",
-      "deleteProperty": "Ta bort egenskap"
+      "deleteProperty": "Ta bort egenskap",
+      "selectToRename": "Klicka för att markera egenskapen och klicka sedan på namnet igen för att byta namn"
     },
     "propertyDetails": {
       "title": "Redigera egenskap",
@@ -583,6 +604,14 @@
       "false": "Falskt",
       "true": "Sant",
       "select": "Välj..."
+    },
+    "selection": {
+      "table_one": "Tabell markerad",
+      "table_other": "{{count}} tabeller markerade",
+      "relationship_one": "Relation markerad",
+      "relationship_other": "{{count}} relationer markerade",
+      "delete": "för att ta bort",
+      "deselect": "eller klicka på en tom yta för att avmarkera"
     }
   },
   "testResults": {
@@ -914,6 +943,7 @@
     "remove": "Ta bort",
     "from": "Från",
     "to": "Till",
+    "targetNotFound": "Målet hittades inte: det finns ännu ingen egenskap med denna referens i kontraktet.",
     "removePair": "Ta bort par",
     "addPair": "Lägg till kolumnpar (sammansatt nyckel)",
     "drawer": {

@@ -326,6 +326,10 @@
   "diagram": {
     "clickToEdit": "Zum Bearbeiten klicken",
     "confirmDeleteProperty": "Möchtest du diese Eigenschaft wirklich löschen?",
+    "confirmDeleteSchema": "Möchtest du das Schema \"{{name}}\" wirklich löschen?",
+    "confirmDeleteSchemas": "Möchtest du wirklich {{count}} Schemas löschen?",
+    "confirmDeleteRelationship_one": "Möchtest du diese Beziehung wirklich löschen?",
+    "confirmDeleteRelationship_other": "Möchtest du wirklich {{count}} Beziehungen löschen?",
     "layingOut": "Wird angeordnet…",
     "noTypeConstraints": "Für {{type}} sind keine typspezifischen Einschränkungen verfügbar.",
     "thisType": "diesen Typ",
@@ -351,10 +355,12 @@
     },
     "help": {
       "title": "Schnelltipps:",
-      "editNames": "Klicke auf Schema- oder Eigenschaftsnamen, um sie zu bearbeiten",
+      "editNames": "Klicke auf einen Namen, um ihn auszuwählen, und klicke erneut darauf, um ihn umzubenennen",
       "clickDetails": "Klicke auf Eigenschaften, um Details im Bereich anzuzeigen",
       "dragLink": "Ziehe von einem Punkt an einer Eigenschaft zu einem Punkt an einer anderen, um sie zu verbinden",
       "dragReposition": "Ziehe Knoten, um sie neu zu positionieren, oder nutze das automatische Layout",
+      "reorder": "Ziehe eine Eigenschaft an ihrem Typ-Symbol, um die Reihenfolge der Felder zu ändern",
+      "deselect": "Drücke Esc oder klicke auf eine freie Stelle, um die Auswahl aufzuheben",
       "collapse": "Klappe eine Tabelle mit dem Listensymbol in der Kopfzeile auf nur Schlüssel zusammen oder alle Tabellen mit dem Symbolleisten-Button",
       "zoom": "Nutze das Mausrad zum Zoomen",
       "shortcutsPrefix": "Drücke",
@@ -376,14 +382,28 @@
       "description": "Lege los, indem du dein erstes Schema erstellst."
     },
     "edge": {
-      "schemaLevel": "Beziehung auf Schemaebene — nur im Formular-Editor bearbeitbar"
+      "schemaLevel": "Beziehung auf Schemaebene — nur im Formular-Editor bearbeitbar",
+      "grouped_one": "{{count}} Beziehung — klicken, um jede einzeln anzuzeigen",
+      "grouped_other": "{{count}} Beziehungen — klicken, um jede einzeln anzuzeigen",
+      "cardinality": {
+        "one": "1 — jede Zeile verweist auf genau eine Zeile (Fremdschlüssel ist eindeutig und Pflicht)",
+        "zeroOrOne": "? — jede Zeile verweist auf keine oder eine Zeile (Fremdschlüssel ist eindeutig, aber optional)",
+        "many": "n — viele Zeilen können auf dieselbe Zeile verweisen (Fremdschlüssel ist nicht eindeutig)"
+      }
     },
     "schema": {
       "addProperty": "Eigenschaft hinzufügen",
       "moreOptions": "Weitere Optionen",
       "delete": "Schema löschen",
       "unnamed": "Unbenanntes Schema",
-      "noProperties": "Keine Eigenschaften definiert"
+      "noProperties": "Keine Eigenschaften definiert",
+      "kind": {
+        "fact": "Fakt",
+        "factHint": "Faktentabelle (fct_): enthält Kennzahlen zu Geschäftsereignissen",
+        "dimension": "Dimension",
+        "dimensionHint": "Dimensionstabelle (dim_): enthält beschreibende Attribute zum Auswerten der Fakten"
+      },
+      "selectToRename": "Klicke, um die Tabelle auszuwählen, dann klicke erneut auf den Namen, um sie umzubenennen"
     },
     "handle": {
       "source": "Ziehe von hier zu einer Eigenschaft einer anderen Tabelle, um eine Beziehung zu erstellen",
@@ -396,7 +416,8 @@
       "dragToReorder": "Zum Umsortieren ziehen",
       "addNested": "Verschachtelte Eigenschaft hinzufügen",
       "delete": "Löschen",
-      "deleteProperty": "Eigenschaft löschen"
+      "deleteProperty": "Eigenschaft löschen",
+      "selectToRename": "Klicke, um die Eigenschaft auszuwählen, dann klicke erneut auf den Namen, um sie umzubenennen"
     },
     "propertyDetails": {
       "title": "Eigenschaft bearbeiten",
@@ -583,6 +604,14 @@
       "false": "Falsch",
       "true": "Wahr",
       "select": "Auswählen..."
+    },
+    "selection": {
+      "table_one": "Tabelle ausgewählt",
+      "table_other": "{{count}} Tabellen ausgewählt",
+      "relationship_one": "Beziehung ausgewählt",
+      "relationship_other": "{{count}} Beziehungen ausgewählt",
+      "delete": "zum Löschen",
+      "deselect": "oder Klick auf freie Fläche zum Abwählen"
     }
   },
   "testResults": {
@@ -914,6 +943,7 @@
     "remove": "Entfernen",
     "from": "Von",
     "to": "Nach",
+    "targetNotFound": "Ziel nicht gefunden: In diesem Data Contract gibt es noch keine Eigenschaft mit dieser Referenz.",
     "removePair": "Paar entfernen",
     "addPair": "Spaltenpaar hinzufügen (zusammengesetzter Schlüssel)",
     "drawer": {

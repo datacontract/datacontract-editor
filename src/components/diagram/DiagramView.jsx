@@ -10,6 +10,7 @@ import {
   Panel,
   ReactFlowProvider,
   BaseEdge,
+  EdgeLabelRenderer,
   getBezierPath,
   useInternalNode,
 } from '@xyflow/react';
@@ -25,9 +26,17 @@ import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipDetailsDrawer from '../ui/RelationshipDetailsDrawer.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
 import { resolveReference, referencesProperty } from '../../lib/relationshipReferences.js';
+import { groupEdges } from './edgeGrouping.js';
+import { getCardinality } from './cardinality.js';
 
 
 const PREVIEW_EDGE_STYLE = { stroke: '#d946ef', strokeWidth: 2.5 };
+// Edges of a selected table are raised above the others (hover uses 1000)
+const HIGHLIGHTED_EDGE_Z_INDEX = 500;
+// Labels (count badges, cardinalities) of highlighted edges stay in front of them.
+// React Flow adds another 1000 to edges connected to a selected table, so a
+// raised edge can reach ~2000 (hovered + connected).
+const EDGE_LABEL_Z_INDEX = 5000;
 
 // Forward-declared: ConnectionLinePreview needs SelfReferenceEdge, which
 // is defined below. The component is only used at render time so a
@@ -80,13 +89,34 @@ const ConnectionLinePreview = ({ fromX, fromY, toX, toY, fromPosition, toPositio
   );
 };
 
-const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }) => {
+const CARDINALITY_TOOLTIP_KEYS = { '1': 'one', '?': 'zeroOrOne', n: 'many' };
+
+// Cardinality ('1', '?' or 'n') drawn just outside the foreign-key row, above
+// the edge, like in the Entropy Data visualizer.
+const CardinalityLabel = ({ x, y, value, highlighted }) => {
+  const { t } = useTranslation();
+  if (!value) return null;
+  return (
+    <EdgeLabelRenderer>
+      <div
+        className={`nodrag nopan absolute text-xs font-bold leading-none cursor-help ${highlighted ? 'text-fuchsia-500' : 'text-gray-400'}`}
+        style={{ transform: `translate(-100%, -100%) translate(${x - 6}px, ${y - 2}px)`, pointerEvents: 'all', zIndex: highlighted ? EDGE_LABEL_Z_INDEX : undefined }}
+        title={t(`diagram.edge.cardinality.${CARDINALITY_TOOLTIP_KEYS[value]}`)}
+      >
+        {value}
+      </div>
+    </EdgeLabelRenderer>
+  );
+};
+
+const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, data }) => {
   const { t } = useTranslation();
   const [edgePath] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   return (
     <>
       <BaseEdge id={id} path={edgePath} style={style} />
       <title>{t('diagram.edge.schemaLevel')}</title>
+      <CardinalityLabel x={sourceX} y={sourceY} value={data?.cardinality} highlighted={data?.highlighted} />
     </>
   );
 };
@@ -96,7 +126,7 @@ const SchemaRelationshipEdge = ({ id, sourceX, sourceY, targetX, targetY, source
 // A plain bezier/smoothstep would slice straight across the table; instead
 // route an orthogonal "bracket" loop that hugs the outside of the node, like
 // standard ER/DB diagram tools (DataGrip, DBeaver, MySQL Workbench).
-const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, style, markerEnd, interactionWidth }) => {
+const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, style, markerEnd, interactionWidth, data }) => {
   const node = useInternalNode(source);
 
   // Fallback to a bezier if measurements aren't ready yet.
@@ -136,13 +166,16 @@ const SelfReferenceEdge = ({ id, source, sourceX, sourceY, targetX, targetY, sty
   const path = `M ${adjSourceX} ${sourceY} L ${leftX} ${sourceY} L ${leftX} ${loopY} L ${rightX} ${loopY} L ${rightX} ${targetY} L ${adjTargetX} ${targetY}`;
 
   return (
-    <BaseEdge
-      id={id}
-      path={path}
-      style={{ ...style, strokeLinejoin: 'round', strokeLinecap: 'round', fill: 'none' }}
-      markerEnd={markerEnd}
-      interactionWidth={interactionWidth}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        path={path}
+        style={{ ...style, strokeLinejoin: 'round', strokeLinecap: 'round', fill: 'none' }}
+        markerEnd={markerEnd}
+        interactionWidth={interactionWidth}
+      />
+      <CardinalityLabel x={adjSourceX} y={sourceY} value={data?.cardinality} highlighted={data?.highlighted} />
+    </>
   );
 };
 
@@ -158,7 +191,7 @@ _SelfReferenceEdge = SelfReferenceEdge;
 // measurement timing. The anchoring uses useInternalNode so the edge
 // stays in sync with the node's actual position and width at render
 // time, not a snapshot cached by React Flow's handle bounds.
-const PropertyBezierEdge = ({ id, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, markerEnd, markerStart, interactionWidth, label, labelStyle, labelBgStyle, labelShowBg, labelBgPadding, labelBgBorderRadius }) => {
+const PropertyBezierEdge = ({ id, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, markerEnd, markerStart, interactionWidth, label, labelStyle, labelBgStyle, labelShowBg, labelBgPadding, labelBgBorderRadius, data }) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
   // source handle is Position.Left → anchor at source node's LEFT edge
@@ -176,20 +209,103 @@ const PropertyBezierEdge = ({ id, source, target, sourceX, sourceY, targetX, tar
     targetPosition,
   });
   return (
-    <BaseEdge
-      id={id}
-      path={edgePath}
-      style={style}
-      markerEnd={markerEnd}
-      markerStart={markerStart}
-      interactionWidth={interactionWidth}
-      label={label}
-      labelStyle={labelStyle}
-      labelBgStyle={labelBgStyle}
-      labelShowBg={labelShowBg}
-      labelBgPadding={labelBgPadding}
-      labelBgBorderRadius={labelBgBorderRadius}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        style={style}
+        markerEnd={markerEnd}
+        markerStart={markerStart}
+        interactionWidth={interactionWidth}
+        label={label}
+        labelStyle={labelStyle}
+        labelBgStyle={labelBgStyle}
+        labelShowBg={labelShowBg}
+        labelBgPadding={labelBgPadding}
+        labelBgBorderRadius={labelBgBorderRadius}
+      />
+      <CardinalityLabel x={adjSourceX} y={sourceY} value={data?.cardinality} highlighted={data?.highlighted} />
+    </>
+  );
+};
+
+// Absolute Y of the center of each of the given handles on a node.
+const getHandleCenterYs = (node, handleType, handleIds) => {
+  const bounds = node?.internals?.handleBounds?.[handleType] || [];
+  const ys = [];
+  handleIds.forEach((handleId) => {
+    const h = bounds.find((b) => b.id === handleId);
+    if (h) ys.push(node.internals.positionAbsolute.y + h.y + h.height / 2);
+  });
+  return [...new Set(ys)];
+};
+
+const average = (values, fallback) => (values.length ? values.reduce((a, b) => a + b, 0) / values.length : fallback);
+
+// Bundled edge for several relationships between the same two tables. A short
+// "fan" stub connects each involved property row to the bundle, so the rows
+// stay visible while only one line crosses the canvas. A count badge sits on
+// the line; clicking the edge or the badge expands it into individual edges.
+const GROUP_FAN = 24;
+const GroupedRelationshipEdge = ({ id, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, interactionWidth, data }) => {
+  const { t } = useTranslation();
+  const sourceNode = useInternalNode(source);
+  const targetNode = useInternalNode(target);
+  const members = data?.members || [];
+
+  const srcX = sourceNode ? sourceNode.internals.positionAbsolute.x : sourceX;
+  const tgtX = targetNode ? targetNode.internals.positionAbsolute.x + (targetNode.measured?.width ?? 0) : targetX;
+  const srcYs = getHandleCenterYs(sourceNode, 'source', members.map((m) => m.sourceHandle));
+  const tgtYs = getHandleCenterYs(targetNode, 'target', members.map((m) => m.targetHandle));
+  const srcMidY = average(srcYs, sourceY);
+  const tgtMidY = average(tgtYs, targetY);
+
+  const bundleSrcX = srcX - GROUP_FAN;
+  const bundleTgtX = tgtX + GROUP_FAN;
+  const [bundlePath, labelX, labelY] = getBezierPath({
+    sourceX: bundleSrcX,
+    sourceY: srcMidY,
+    sourcePosition,
+    targetX: bundleTgtX,
+    targetY: tgtMidY,
+    targetPosition,
+  });
+  const half = GROUP_FAN / 2;
+  const srcFans = srcYs.map((y) => `M ${srcX} ${y} C ${srcX - half} ${y} ${srcX - half} ${srcMidY} ${bundleSrcX} ${srcMidY}`);
+  const tgtFans = tgtYs.map((y) => `M ${bundleTgtX} ${tgtMidY} C ${tgtX + half} ${tgtMidY} ${tgtX + half} ${y} ${tgtX} ${y}`);
+  const path = [...srcFans, bundlePath, ...tgtFans].join(' ');
+  const count = members.length;
+  // One cardinality label per foreign-key row (rows can repeat in composite keys)
+  const cardinalityLabels = new Map();
+  members.forEach((m) => {
+    const [y] = getHandleCenterYs(sourceNode, 'source', [m.sourceHandle]);
+    if (y != null && m.cardinality && !cardinalityLabels.has(y)) cardinalityLabels.set(y, m.cardinality);
+  });
+
+  return (
+    <>
+      <BaseEdge id={id} path={path} style={{ ...style, fill: 'none' }} interactionWidth={interactionWidth} />
+      <title>{t('diagram.edge.grouped', { count })}</title>
+      <EdgeLabelRenderer>
+        <button
+          type="button"
+          className={`nodrag nopan absolute rounded-full bg-white border px-1.5 text-[10px] font-semibold leading-4 shadow-sm hover:border-fuchsia-500 hover:text-fuchsia-700 cursor-pointer ${
+            data?.highlighted ? 'border-fuchsia-500 text-fuchsia-700' : 'border-gray-300 text-gray-600'
+          }`}
+          style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`, pointerEvents: 'all', zIndex: data?.highlighted ? EDGE_LABEL_Z_INDEX : undefined }}
+          title={t('diagram.edge.grouped', { count })}
+          onClick={(e) => {
+            e.stopPropagation();
+            data?.onExpand?.(data.groupKey);
+          }}
+        >
+          {count}
+        </button>
+      </EdgeLabelRenderer>
+      {[...cardinalityLabels].map(([y, value]) => (
+        <CardinalityLabel key={y} x={srcX} y={y} value={value} highlighted={data?.highlighted} />
+      ))}
+    </>
   );
 };
 
@@ -197,6 +313,7 @@ const edgeTypes = {
   schemaRelationship: SchemaRelationshipEdge,
   selfReference: SelfReferenceEdge,
   propertyBezier: PropertyBezierEdge,
+  groupedRelationship: GroupedRelationshipEdge,
 };
 
 const defaultEdgeOptions = {
@@ -304,6 +421,13 @@ const DiagramViewInner = () => {
 
   // Per-schema collapse state: 'full' | 'keys' | 'header'. Keyed by schema name.
   const [collapseState, setCollapseState] = useState({});
+
+  // Relationships between the same two tables are bundled into one edge.
+  // Clicking a bundle expands it until the user clicks the pane.
+  const [expandedEdgeGroups, setExpandedEdgeGroups] = useState(() => new Set());
+  const handleExpandEdgeGroup = useCallback((groupKey) => {
+    setExpandedEdgeGroups((prev) => new Set(prev).add(groupKey));
+  }, []);
 
   // Parse schemas from YAML
   const parsedData = useMemo(() => {
@@ -684,6 +808,8 @@ const DiagramViewInner = () => {
     const handleKeyDown = (event) => {
       // Only handle if a property is selected (not nested)
       if (!selectedProperty || selectedProperty.nestedIndex != null) return;
+      // A selected relationship edge is deleted via onBeforeDelete instead
+      if (selectedRelationship) return;
 
       // Check if we're inside an input/textarea - don't delete if typing
       const activeElement = document.activeElement;
@@ -711,7 +837,7 @@ const DiagramViewInner = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedProperty, handleDeleteProperty, t]);
+  }, [selectedProperty, selectedRelationship, handleDeleteProperty, t]);
 
   // Validate connections: only allow left (source) to right (target)
   const isValidConnection = useCallback((connection) => {
@@ -786,6 +912,11 @@ const DiagramViewInner = () => {
   // array by matching on the "schemaName.propertyName" reference (handles
   // composite-key arrays where `to` is a list).
   const onEdgeClick = useCallback((_event, edge) => {
+    // A bundled edge expands into its individual, clickable relationships.
+    if (edge?.type === 'groupedRelationship') {
+      handleExpandEdgeGroup(edge.data?.groupKey);
+      return;
+    }
     // Only property-level relationships are editable from the drawer.
     // Schema-level edges use the 'schemaRelationship' edge type.
     if (edge?.type === 'schemaRelationship') return;
@@ -841,19 +972,26 @@ const DiagramViewInner = () => {
         height: maxY - minY,
       });
     }
-  }, [parsedData, reactFlowInstance, ensureRectVisibleForDrawer]);
+  }, [parsedData, reactFlowInstance, ensureRectVisibleForDrawer, handleExpandEdgeGroup]);
 
-  // Close the relationship drawer automatically as soon as the corresponding
-  // edge is no longer selected (user clicked the pane, another edge, or a
-  // node). React Flow fires onSelectionChange whenever the selection set
-  // changes, which gives us a clean trigger for this without polling.
-  const onSelectionChange = useCallback(({ edges: selectedEdges }) => {
-    setSelectedRelationship((current) => {
-      if (!current) return current;
-      const stillSelected = selectedEdges?.some((e) => e.id === current.edgeId);
-      return stillSelected ? current : null;
-    });
-  }, []);
+  // The relationship drawer is closed explicitly (pane click, table click,
+  // Esc, delete) rather than by edge selection: editing the relationship's
+  // target rebuilds its edge under a new id — or removes it while the target
+  // cannot be resolved yet — and the drawer must stay open meanwhile.
+  // This is the edge that currently represents the open relationship.
+  const selectedRelationshipEdgeId = useMemo(() => {
+    if (!selectedRelationship || !parsedData?.schema) return null;
+    const match = selectedRelationship.sourcePropertyPath?.match(/^schema\[(\d+)\]\.properties\[(\d+)\]$/);
+    if (!match) return null;
+    const [, sourceSchemaIndex, sourcePropIndex] = match;
+    const relationship = parsedData.schema[sourceSchemaIndex]?.properties?.[sourcePropIndex]
+      ?.relationships?.[selectedRelationship.relationshipIndex];
+    const to = Array.isArray(relationship?.to) ? relationship.to[0] : relationship?.to;
+    const schemaNames = Object.keys(buildReferencedByName(parsedData.schema));
+    const target = resolveReference(to, parsedData.schema, schemaNames);
+    if (!target || target.propertyIndex === -1) return null;
+    return `edge-${sourceSchemaIndex}-${sourcePropIndex}-${target.schemaIndex}-${target.propertyIndex}`;
+  }, [selectedRelationship, parsedData]);
 
   const handleCloseRelationshipDrawer = useCallback(() => {
     setSelectedRelationship(null);
@@ -869,14 +1007,12 @@ const DiagramViewInner = () => {
   }, [setEdges]);
 
   const onEdgeMouseLeave = useCallback((_event, edge) => {
-    setEdges((eds) => eds.map((e) => (e.id === edge.id ? { ...e, zIndex: undefined } : e)));
+    setEdges((eds) => eds.map((e) => (e.id === edge.id ? { ...e, zIndex: e.data?.highlighted ? HIGHLIGHTED_EDGE_Z_INDEX : undefined } : e)));
   }, [setEdges]);
 
-  // Handle edge deletion
-  const onEdgesDelete = useCallback((edgesToDelete) => {
-    if (!parsedData?.schema) return;
-
-    const updatedSchemas = [...parsedData.schema];
+  // Remove the relationships behind the given edges from `updatedSchemas`
+  // (mutates the array). Returns whether anything changed.
+  const removeEdgeRelationships = useCallback((updatedSchemas, edgesToDelete) => {
     let hasChanges = false;
 
     edgesToDelete.forEach(edge => {
@@ -922,10 +1058,47 @@ const DiagramViewInner = () => {
       }
     });
 
-    if (hasChanges) {
-      updateSchemas(updatedSchemas);
+    return hasChanges;
+  }, [parsedData]);
+
+  // Delete/Backspace on selected edges or tables: ask first, then apply the
+  // deletion to the YAML ourselves. Always resolves to false so React Flow
+  // never removes elements from its local state only — the diagram is
+  // rebuilt from the updated YAML instead.
+  const onBeforeDelete = useCallback(async ({ nodes: nodesToDelete, edges: edgesToDelete }) => {
+    if (!parsedData?.schema) return false;
+    // React Flow also passes the edges connected to a deleted table — only
+    // edges the user actually selected count as relationship deletions.
+    const relationshipEdges = edgesToDelete.filter((e) => e.selected && /^edge-\d+-\d+-\d+-\d+$/.test(e.id));
+
+    // Selected relationships take precedence over the table they touch
+    if (relationshipEdges.length > 0) {
+      if (!window.confirm(t('diagram.confirmDeleteRelationship', { count: relationshipEdges.length }))) return false;
+      const updatedSchemas = [...parsedData.schema];
+      if (removeEdgeRelationships(updatedSchemas, relationshipEdges)) {
+        updateSchemas(updatedSchemas);
+      }
+      setSelectedRelationship(null);
+      return false;
     }
-  }, [parsedData, updateSchemas]);
+
+    // A selected property is deleted by the property shortcut handler instead
+    if (selectedProperty) return false;
+
+    const schemaIndices = nodesToDelete
+      .map((n) => parseInt(String(n.id).replace('schema-', ''), 10))
+      .filter((i) => !Number.isNaN(i) && parsedData.schema[i])
+      .sort((a, b) => b - a);
+    if (schemaIndices.length === 0) return false;
+    const message = schemaIndices.length === 1
+      ? t('diagram.confirmDeleteSchema', { name: parsedData.schema[schemaIndices[0]]?.name || t('diagram.schema.unnamed') })
+      : t('diagram.confirmDeleteSchemas', { count: schemaIndices.length });
+    if (!window.confirm(message)) return false;
+    const updatedSchemas = [...parsedData.schema];
+    schemaIndices.forEach((i) => updatedSchemas.splice(i, 1));
+    updateSchemas(updatedSchemas);
+    return false;
+  }, [parsedData, selectedProperty, removeEdgeRelationships, updateSchemas, t]);
 
   // Auto-layout function (updates node positions without saving to YAML).
   // For large diagrams (200+ nodes) Dagre is synchronous and blocks the
@@ -979,7 +1152,17 @@ const DiagramViewInner = () => {
     handleAutoLayout();
   }, [collapseState, handleAutoLayout]);
 
-  // Global diagram shortcuts: F = fit view, L = auto layout.
+  // Clear the selection (tables and relationships), close the drawers and
+  // regroup expanded relationship bundles — same as clicking the empty canvas.
+  const handleDeselectAll = useCallback(() => {
+    setNodes((nds) => (nds.some((n) => n.selected) ? nds.map((n) => (n.selected ? { ...n, selected: false } : n)) : nds));
+    setEdges((eds) => (eds.some((e) => e.selected) ? eds.map((e) => (e.selected ? { ...e, selected: false } : e)) : eds));
+    setSelectedProperty(null);
+    setSelectedRelationship(null);
+    setExpandedEdgeGroups((prev) => (prev.size ? new Set() : prev));
+  }, [setNodes, setEdges]);
+
+  // Global diagram shortcuts: F = fit view, L = auto layout, Esc = deselect.
   // Only fire when the diagram view is active and user isn't typing.
   useEffect(() => {
     if (currentView !== 'diagram') return;
@@ -997,17 +1180,18 @@ const DiagramViewInner = () => {
       } else if (event.key === 'l' || event.key === 'L') {
         event.preventDefault();
         handleAutoLayout();
+      } else if (event.key === 'Escape') {
+        handleDeselectAll();
       }
     };
     document.addEventListener('keydown', handleShortcut);
     return () => document.removeEventListener('keydown', handleShortcut);
-  }, [currentView, reactFlowInstance, handleAutoLayout]);
+  }, [currentView, reactFlowInstance, handleAutoLayout, handleDeselectAll]);
 
   // Convert schemas to nodes and edges
   useEffect(() => {
     if (!parsedData?.schema || !Array.isArray(parsedData.schema)) {
       setNodes([]);
-      setEdges([]);
       hasInitialLayout.current = false;
       return;
     }
@@ -1016,8 +1200,6 @@ const DiagramViewInner = () => {
     // Used by the keys-only collapse mode in SchemaNode (to keep target
     // handles) and by the layout (to size collapsed nodes correctly).
     const referencedByName = buildReferencedByName(parsedData.schema);
-    // Schema name list required by resolveReference for edge-building below.
-    const schemaNames = Object.keys(referencedByName);
 
     // On first load, try localStorage positions, then fall back to Dagre.
     const savedPositions = !hasInitialLayout.current
@@ -1057,6 +1239,53 @@ const DiagramViewInner = () => {
       };
       });
 
+    // Preserve existing node positions — only new nodes get layout-computed positions
+    setNodes(currentNodes => {
+      // Build position map from current nodes keyed by schema name
+      const posMap = {};
+      currentNodes.forEach(n => {
+        if (n.data?.schema?.name) {
+          posMap[n.data.schema.name] = n.position;
+        }
+      });
+
+      // Initial load: no existing nodes, use saved/dagre positions directly
+      if (currentNodes.length === 0) {
+        hasInitialLayout.current = true;
+        saveDiagramPositions(contractId, schemaNodes);
+        return schemaNodes;
+      }
+
+      const result = schemaNodes.map(sn => {
+        const name = sn.data?.schema?.name;
+        if (name && posMap[name]) {
+          return { ...sn, position: posMap[name] };
+        }
+        // New node: place to the right of existing nodes, vertically centered
+        let maxRight = -Infinity;
+        let minY = Infinity;
+        let maxBottom = -Infinity;
+        currentNodes.forEach(n => {
+          const right = n.position.x + (n.measured?.width || 300);
+          if (right > maxRight) maxRight = right;
+          if (n.position.y < minY) minY = n.position.y;
+          const bottom = n.position.y + (n.measured?.height || 200);
+          if (bottom > maxBottom) maxBottom = bottom;
+        });
+        const centerY = (minY + maxBottom) / 2;
+        return { ...sn, position: { x: maxRight + 80, y: centerY } };
+      });
+      saveDiagramPositions(contractId, result);
+      return result;
+    });
+  }, [parsedData, contractId, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, collapseState, handleToggleCollapse, updateSchemas, setNodes]);
+
+  // All relationship edges as built from the YAML, before grouping
+  const relationshipEdges = useMemo(() => {
+    if (!parsedData?.schema || !Array.isArray(parsedData.schema)) return [];
+    // Schema name list required by resolveReference
+    const schemaNames = Object.keys(buildReferencedByName(parsedData.schema));
+
     // Build edges from property relationships
     const propertyEdges = [];
     parsedData.schema
@@ -1077,6 +1306,7 @@ const DiagramViewInner = () => {
               // custom edge that routes orthogonally around the outside
               // of the node, matching standard ER/DB diagram conventions.
               const isSelfRef = sourceSchemaIndex === targetSchemaIndex;
+              const targetProp = parsedData.schema[targetSchemaIndex]?.properties?.[targetPropIndex];
               propertyEdges.push({
                 id: `edge-${sourceSchemaIndex}-${sourcePropIndex}-${targetSchemaIndex}-${targetPropIndex}`,
                 source: `schema-${sourceSchemaIndex}`,
@@ -1089,6 +1319,7 @@ const DiagramViewInner = () => {
                 focusable: true,
                 interactionWidth: 20,
                 style: { stroke: '#b1b1b7', strokeWidth: 2 },
+                data: { cardinality: getCardinality(sourceProp, targetProp) },
               });
             }
           });
@@ -1115,6 +1346,9 @@ const DiagramViewInner = () => {
                 focusable: true,
                 interactionWidth: 20,
                 style: { stroke: '#b1b1b7', strokeWidth: 2 },
+                data: {
+                  cardinality: getCardinality(sourceProp, parsedData.schema[targetSchemaIndex]?.properties?.[targetPropIndex]),
+                },
               });
             }
           }
@@ -1167,54 +1401,54 @@ const DiagramViewInner = () => {
               focusable: false,
               interactionWidth: 20,
               className: 'schema-level-edge',
-              data: {},
+              data: {
+                cardinality: getCardinality(
+                  parsedData.schema[fromSchemaIndex]?.properties?.[fromPropIndex],
+                  parsedData.schema[toSchemaIndex]?.properties?.[toPropIndex],
+                ),
+              },
               style: { stroke: '#b1b1b7', strokeWidth: 2 },
             });
           }
         });
       });
 
-    // Preserve existing node positions — only new nodes get layout-computed positions
-    setNodes(currentNodes => {
-      // Build position map from current nodes keyed by schema name
-      const posMap = {};
-      currentNodes.forEach(n => {
-        if (n.data?.schema?.name) {
-          posMap[n.data.schema.name] = n.position;
-        }
-      });
+    return propertyEdges;
+  }, [parsedData]);
 
-      // Initial load: no existing nodes, use saved/dagre positions directly
-      if (currentNodes.length === 0) {
-        hasInitialLayout.current = true;
-        saveDiagramPositions(contractId, schemaNodes);
-        return schemaNodes;
-      }
+  // Ids of the selected tables, as a stable string so dragging a node (which
+  // changes `nodes` but not the selection) does not rebuild the edges.
+  const selectedNodeIdsKey = useMemo(
+    () => nodes.filter((n) => n.selected).map((n) => n.id).join('|'),
+    [nodes]
+  );
 
-      const result = schemaNodes.map(sn => {
-        const name = sn.data?.schema?.name;
-        if (name && posMap[name]) {
-          return { ...sn, position: posMap[name] };
-        }
-        // New node: place to the right of existing nodes, vertically centered
-        let maxRight = -Infinity;
-        let minY = Infinity;
-        let maxBottom = -Infinity;
-        currentNodes.forEach(n => {
-          const right = n.position.x + (n.measured?.width || 300);
-          if (right > maxRight) maxRight = right;
-          if (n.position.y < minY) minY = n.position.y;
-          const bottom = n.position.y + (n.measured?.height || 200);
-          if (bottom > maxBottom) maxBottom = bottom;
-        });
-        const centerY = (minY + maxBottom) / 2;
-        return { ...sn, position: { x: maxRight + 80, y: centerY } };
-      });
-      saveDiagramPositions(contractId, result);
-      return result;
-    });
-    setEdges(propertyEdges);
-  }, [parsedData, contractId, handleAddProperty, handleAddNestedProperty, handleDeleteProperty, handleReorderProperty, handleUpdateSchema, handleDeleteSchema, handleShowPropertyDetails, selectedProperty, collapseState, handleToggleCollapse, updateSchemas, setNodes, setEdges]);
+  // Render the relationship edges, bundling those between the same tables.
+  // Edges touching a selected table are highlighted and drawn on top.
+  useEffect(() => {
+    const selectedIds = new Set(selectedNodeIdsKey ? selectedNodeIdsKey.split('|') : []);
+    // The edge of the relationship open in the drawer stays selected (also
+    // after its id changed) and is never hidden inside a bundle.
+    const openEdge = relationshipEdges.find((e) => e.id === selectedRelationshipEdgeId);
+    const expandedGroups = openEdge
+      ? new Set(expandedEdgeGroups).add(`${openEdge.source}->${openEdge.target}`)
+      : expandedEdgeGroups;
+    const grouped = groupEdges(relationshipEdges, { expandedGroups });
+    setEdges(grouped.map((e) => {
+      const highlighted = selectedIds.has(e.source) || selectedIds.has(e.target);
+      const data = { ...e.data, highlighted };
+      if (e.type === 'groupedRelationship') data.onExpand = handleExpandEdgeGroup;
+      const selected = e.id === selectedRelationshipEdgeId;
+      if (!highlighted) return { ...e, data, selected };
+      return {
+        ...e,
+        data,
+        selected,
+        zIndex: HIGHLIGHTED_EDGE_Z_INDEX,
+        className: [e.className, 'dce-edge-highlighted'].filter(Boolean).join(' '),
+      };
+    }));
+  }, [relationshipEdges, expandedEdgeGroups, handleExpandEdgeGroup, selectedNodeIdsKey, selectedRelationshipEdgeId, setEdges]);
 
   // Fit view after initial auto-layout
   useEffect(() => {
@@ -1326,8 +1560,8 @@ const DiagramViewInner = () => {
         onEdgeClick={onEdgeClick}
         onEdgeMouseEnter={onEdgeMouseEnter}
         onEdgeMouseLeave={onEdgeMouseLeave}
-        onEdgesDelete={onEdgesDelete}
-        onSelectionChange={onSelectionChange}
+        onBeforeDelete={onBeforeDelete}
+        onNodeClick={() => setSelectedRelationship(null)}
         elevateEdgesOnSelect={true}
         onConnect={(c) => { setConnectingFrom(null); onConnect(c); dismissCoach(); }}
         onConnectStart={(_e, { handleType }) => setConnectingFrom(handleType || null)}
@@ -1347,6 +1581,8 @@ const DiagramViewInner = () => {
             return;
           }
           handleCloseDrawer();
+          setSelectedRelationship(null);
+          setExpandedEdgeGroups((prev) => (prev.size ? new Set() : prev));
         }}
         fitView
         fitViewOptions={{
@@ -1444,6 +1680,8 @@ const DiagramViewInner = () => {
                 <li>{t('diagram.help.clickDetails')}</li>
                 <li>{t('diagram.help.dragLink')}</li>
                 <li>{t('diagram.help.dragReposition')}</li>
+                <li>{t('diagram.help.reorder')}</li>
+                <li>{t('diagram.help.deselect')}</li>
                 <li>{t('diagram.help.collapse')}</li>
                 <li>{t('diagram.help.zoom')}</li>
                 <li>{t('diagram.help.shortcutsPrefix')} <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">F</kbd> {t('diagram.help.shortcutsFit')}, <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">L</kbd> {t('diagram.help.shortcutsLayout')}</li>
@@ -1464,6 +1702,33 @@ const DiagramViewInner = () => {
             </div>
           </Panel>
         )}
+
+        {/* Selection hint: what is selected and how to delete / deselect it */}
+        {(() => {
+          const selectedTables = nodes.filter((n) => n.selected).length;
+          const selectedRelationships = edges.filter((e) => e.selected).length;
+          if (!selectedTables && !selectedRelationships) return null;
+          return (
+            <Panel position="bottom-center" className="pointer-events-none">
+              <div className="bg-white/95 border border-gray-200 rounded-md shadow-sm px-3 py-1.5 text-xs text-gray-600 flex items-center gap-2 whitespace-nowrap">
+                <span className="inline-block w-2 h-2 rounded-full bg-fuchsia-500" />
+                <span className="font-medium text-gray-900">
+                  {selectedRelationships
+                    ? t('diagram.selection.relationship', { count: selectedRelationships })
+                    : t('diagram.selection.table', { count: selectedTables })}
+                </span>
+                <span className="text-gray-300">·</span>
+                <span>
+                  <kbd className="px-1 rounded bg-gray-100 border border-gray-300 text-[10px]">⌫</kbd> {t('diagram.selection.delete')}
+                </span>
+                <span className="text-gray-300">·</span>
+                <span>
+                  <kbd className="px-1 rounded bg-gray-100 border border-gray-300 text-[10px]">Esc</kbd> {t('diagram.selection.deselect')}
+                </span>
+              </div>
+            </Panel>
+          );
+        })()}
 
         {/* First-use coach mark: teach users how to draw relationships */}
         {!coachDismissed &&

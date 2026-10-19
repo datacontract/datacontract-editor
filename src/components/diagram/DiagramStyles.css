@@ -4,6 +4,12 @@
   stroke-width: 3px !important;
 }
 
+/* Edges leading to and from a selected table use the same highlight */
+.react-flow__edge.dce-edge-highlighted .react-flow__edge-path {
+  stroke: #d946ef !important; /* fuchsia-500 */
+  stroke-width: 2.5px !important;
+}
+
 /* Increase hit area for edge selection */
 .react-flow__edge-path {
   cursor: pointer;
