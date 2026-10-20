@@ -116,10 +116,14 @@ const DEFAULT_CONFIG = {
   // load lazily from `${contractsBaseUrl}/{externalId}/contracts`.
   dataProducts: null,
 
-  // Assets browse panel: { url, assetDetailsUrlTemplate }. The editor POSTs
-  // { servers } (the servers of the current document) to url and expects
+  // Assets browse panel: { url, catalogUrl, assetDetailsUrlTemplate }. While the
+  // document has servers, the editor POSTs { servers } to url and expects
   // [{ server, type, assets: [{ externalId, name, type, description, iconUrl,
   // physicalName, properties: [...] }] }], one entry per posted server.
+  // Without servers, it browses the whole catalog with GETs to catalogUrl:
+  // no parameter for the top level of the asset tree, ?parent=<externalId> for
+  // the children of an asset, ?query=<text> (3+ characters) to search. Each
+  // returns { assets: [{ ...as above, hasChildren }], truncated }.
   assets: null,
 
   // Derived ("Auto") values for custom properties configured with `auto: true`: { url }.

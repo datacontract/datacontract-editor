@@ -754,7 +754,10 @@
       "title": "Assets",
       "noServers": "Ajoutez un serveur pour voir les assets disponibles",
       "noAssets": "Aucun asset trouvé sur ce serveur",
-      "error": "Les assets n’ont pas pu être chargés"
+      "error": "Les assets n’ont pas pu être chargés",
+      "minQuery": "Saisissez au moins 3 caractères pour rechercher",
+      "truncated": "D’autres assets existent. Recherchez celui dont vous avez besoin.",
+      "noCatalogAssets": "Aucun asset trouvé"
     },
     "kind": {
       "product": "Data Product",

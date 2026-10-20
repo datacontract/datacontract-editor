@@ -1,8 +1,8 @@
-import { createElement, useEffect, useMemo, useRef, useState } from 'react';
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDraggable } from '@dnd-kit/core';
 import { useEditorStore } from '../../store.js';
-import { fetchServerAssets } from '../../lib/serverAssetsApi.js';
+import { fetchCatalogAssets, fetchServerAssets } from '../../lib/serverAssetsApi.js';
 import { EmptyState, LoadingSpinner } from './semanticTree.jsx';
 import { collectExpandableIds, filterTree } from './semanticTreeUtils.js';
 import { BrowseSearchInput, OpenDetailsButton, TableIcon, TreeChevron } from './browsePanelParts.jsx';
@@ -13,6 +13,8 @@ import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 
 // Server edits arrive per keystroke; wait for a pause before asking the host again.
 const REFRESH_DELAY_MS = 400;
+// Shorter searches match too much of the catalog to be worth a request.
+const MIN_QUERY_LENGTH = 3;
 
 function NodeIcon({ node }) {
   if (node.kind === 'server') {
@@ -33,13 +35,8 @@ function NodeIcon({ node }) {
 
 const infoNode = (id, name) => ({ externalId: id, name, kind: 'info' });
 
-/**
- * Normalize the host response into generic tree nodes (server > asset >
- * property), reusing the semanticTree field names so filterTree and
- * collectExpandableIds work unchanged.
- */
-function buildServerNodes(entries, assetDetailsUrlTemplate, t) {
-  const propertyNode = (prop, id, detailsUrl) => ({
+function propertyNode(prop, id, detailsUrl) {
+  return {
     externalId: id,
     name: prop.name || 'unnamed',
     description: prop.description,
@@ -51,8 +48,15 @@ function buildServerNodes(entries, assetDetailsUrlTemplate, t) {
       ...(prop.properties || []),
       ...(prop.items?.properties || []),
     ].map((child, i) => propertyNode(child, `${id}-p${i}`, detailsUrl)),
-  });
+  };
+}
 
+/**
+ * Normalize the host response into generic tree nodes (server > asset >
+ * property), reusing the semanticTree field names so filterTree and
+ * collectExpandableIds work unchanged.
+ */
+function buildServerNodes(entries, assetDetailsUrlTemplate, t) {
   return (entries || []).map((entry, si) => {
     const serverId = `server-${si}`;
     const assets = (entry.assets || []).map((asset, ai) => {
@@ -80,22 +84,35 @@ function buildServerNodes(entries, assetDetailsUrlTemplate, t) {
 }
 
 /**
- * Browse panel content for the assets available on the servers of the edited
- * contract: one section per server, listing the tables the host finds at the
- * server's location, with their columns. The servers of the current document
- * are posted, so the list follows unsaved server edits. Column nodes are
- * dragged into the edited schema (or onto a property to set its physical
- * name and type).
+ * Browse panel content for assets, with their columns to drag into the edited
+ * schema (or onto a property to set its physical name and type). A contract
+ * with servers sees the assets on those servers; a contract without servers
+ * browses the whole catalog, when the host offers it.
  */
 export default function AssetsBrowsePanel() {
-  const { t } = useTranslation();
   const editorConfig = useEditorStore((state) => state.editorConfig);
   const servers = useEditorStore((state) => state.yamlParts?.servers);
 
   const url = editorConfig?.assets?.url;
+  const catalogUrl = editorConfig?.assets?.catalogUrl;
   const assetDetailsUrlTemplate = editorConfig?.assets?.assetDetailsUrlTemplate;
 
   const serverList = Array.isArray(servers) ? servers.filter((s) => s && typeof s === 'object') : [];
+
+  if (serverList.length === 0 && catalogUrl) {
+    return <CatalogAssets url={catalogUrl} assetDetailsUrlTemplate={assetDetailsUrlTemplate} />;
+  }
+  return <ServerAssets url={url} assetDetailsUrlTemplate={assetDetailsUrlTemplate} serverList={serverList} />;
+}
+
+/**
+ * The assets available on the servers of the edited contract: one section per
+ * server, listing the tables the host finds at the server's location. The
+ * servers of the current document are posted, so the list follows unsaved
+ * server edits.
+ */
+function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
+  const { t } = useTranslation();
   // Stable key: yamlParts is re-parsed on every edit, also when the servers did not change.
   const serversKey = JSON.stringify(serverList);
 
@@ -174,6 +191,121 @@ export default function AssetsBrowsePanel() {
             node={node}
             depth={0}
             expandedNodes={effectiveExpandedNodes}
+            toggleNode={toggleNode}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The whole asset catalog, for a contract without servers. It never loads all
+ * assets: without a search it shows the top level of the asset tree and loads
+ * an asset's children when it is expanded; a search of at least
+ * MIN_QUERY_LENGTH characters asks the host for the matching assets. The host
+ * caps every slice and says when it left assets out.
+ */
+function CatalogAssets({ url, assetDetailsUrlTemplate }) {
+  const { t } = useTranslation();
+  const [treeFilter, setTreeFilter] = useState('');
+  // Loaded slices of the catalog: 'top', 'parent:<externalId>' and 'query:<text>'.
+  const [slices, setSlices] = useState({});
+  const [expandedNodes, setExpandedNodes] = useState(() => new Set());
+  const requested = useRef(new Set());
+
+  const query = treeFilter.trim();
+  const rootKey = !query ? 'top' : query.length >= MIN_QUERY_LENGTH ? `query:${query}` : null;
+
+  const loadSlice = useCallback(async (key, params) => {
+    if (requested.current.has(key)) return;
+    requested.current.add(key);
+    setSlices((prev) => ({ ...prev, [key]: { status: 'loading' } }));
+    try {
+      const result = await fetchCatalogAssets(url, params);
+      setSlices((prev) => ({ ...prev, [key]: { status: 'ready', ...result } }));
+    } catch (error) {
+      console.error('Error fetching catalog assets:', error);
+      // Forget the failed request, so collapsing and expanding again retries it.
+      requested.current.delete(key);
+      setSlices((prev) => ({ ...prev, [key]: { status: 'error' } }));
+    }
+  }, [url]);
+
+  useEffect(() => {
+    if (!rootKey) return undefined;
+    const isTop = rootKey === 'top';
+    // A search waits for a pause in typing; the top level loads right away.
+    const timer = setTimeout(
+      () => loadSlice(rootKey, isTop ? {} : { query }),
+      isTop ? 0 : REFRESH_DELAY_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [rootKey, query, loadSlice]);
+
+  const nodes = useMemo(() => {
+    const sliceNodes = (slice, path) => {
+      if (!slice || slice.status === 'loading') return [infoNode(`${path}-loading`, t('browsePanel.loading'))];
+      if (slice.status === 'error') return [infoNode(`${path}-error`, t('browsePanel.assets.error'))];
+      if (slice.assets.length === 0) return [infoNode(`${path}-empty`, t('browsePanel.assets.noCatalogAssets'))];
+      return [
+        ...slice.assets.map((asset) => assetNode(asset, path)),
+        ...(slice.truncated ? [infoNode(`${path}-truncated`, t('browsePanel.assets.truncated'))] : []),
+      ];
+    };
+    // Ids follow the path through the tree, so an asset found twice keeps two expansion states.
+    const assetNode = (asset, path) => {
+      const id = `${path}/${asset.externalId}`;
+      const detailsUrl = resolveDetailsUrl(assetDetailsUrlTemplate, asset.externalId);
+      return {
+        externalId: id,
+        name: asset.name || asset.externalId || 'unnamed',
+        description: asset.description,
+        kind: 'asset',
+        iconUrl: asset.iconUrl,
+        meta: { externalId: asset.externalId, type: asset.type, qualifiedName: asset.qualifiedName, physicalName: asset.physicalName },
+        detailsUrl,
+        lazyParent: asset.hasChildren ? asset.externalId : null,
+        children: asset.hasChildren
+          ? sliceNodes(slices[`parent:${asset.externalId}`], id)
+          : (asset.properties || []).map((prop, pi) => propertyNode(prop, `${id}-${pi}`, detailsUrl)),
+      };
+    };
+    const rootSlice = rootKey ? slices[rootKey] : null;
+    if (rootSlice?.status !== 'ready') return [];
+    return sliceNodes(rootSlice, rootKey);
+  }, [slices, rootKey, assetDetailsUrlTemplate, t]);
+
+  const toggleNode = (node) => {
+    const expanding = !expandedNodes.has(node.externalId);
+    setExpandedNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(node.externalId)) next.delete(node.externalId); else next.add(node.externalId);
+      return next;
+    });
+    if (expanding && node.lazyParent) {
+      loadSlice(`parent:${node.lazyParent}`, { parent: node.lazyParent });
+    }
+  };
+
+  const rootSlice = rootKey ? slices[rootKey] : null;
+  let message = null;
+  if (!rootKey) message = t('browsePanel.assets.minQuery');
+  else if (rootSlice?.status === 'error') message = t('browsePanel.assets.error');
+  const isLoading = rootKey && !message && rootSlice?.status !== 'ready';
+
+  return (
+    <div className="h-full flex flex-col">
+      <BrowseSearchInput value={treeFilter} onChange={setTreeFilter} placeholder={t('browsePanel.search')} />
+      <div className="flex-1 overflow-y-auto px-2 py-1">
+        {message && <EmptyState text={message} />}
+        {isLoading && <LoadingSpinner text={t('browsePanel.loading')} />}
+        {!message && !isLoading && nodes.map((node) => (
+          <AssetTreeNode
+            key={node.externalId}
+            node={node}
+            depth={0}
+            expandedNodes={expandedNodes}
             toggleNode={toggleNode}
           />
         ))}

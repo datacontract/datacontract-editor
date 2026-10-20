@@ -754,7 +754,10 @@
       "title": "Assets",
       "noServers": "Füge einen Server hinzu, um die darauf verfügbaren Assets zu sehen",
       "noAssets": "Keine Assets auf diesem Server gefunden",
-      "error": "Assets konnten nicht geladen werden"
+      "error": "Assets konnten nicht geladen werden",
+      "minQuery": "Gib mindestens 3 Zeichen ein, um zu suchen",
+      "truncated": "Es gibt weitere Assets. Suche nach dem Asset, das du brauchst.",
+      "noCatalogAssets": "Keine Assets gefunden"
     },
     "kind": {
       "product": "Datenprodukt",

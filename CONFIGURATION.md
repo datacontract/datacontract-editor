@@ -201,9 +201,11 @@ init({
     contractDetailsUrlTemplate: '/datacontracts/{externalId}', // "open details" target of tree contracts/schemas/properties
     productUriTemplate: '/dataproducts/{externalId}'           // canonical product URL for lineage URIs (defaults to productDetailsUrlTemplate)
   },
-  assets: {                          // Assets browse panel (tables available on the contract's servers)
-    url: '/api/server-assets',       // POST { servers } -> [{ server, type, assets: [{ externalId, name, type,
-                                     //   description, iconUrl, physicalName, properties: [...] }] }]
+  assets: {                          // Assets browse panel
+    url: '/api/server-assets',       // With servers: POST { servers } -> [{ server, type, assets: [{ externalId, name,
+                                     //   type, description, iconUrl, physicalName, properties: [...] }] }]
+    catalogUrl: '/api/assets',       // Without servers: GET (top level), ?parent=<externalId> (children) or
+                                     //   ?query=<text> (search, 3+ characters) -> { assets: [{ ..., hasChildren }], truncated }
     assetDetailsUrlTemplate: '/assets/{externalId}'            // "open details" target of tree assets
   },
 

@@ -754,7 +754,10 @@
       "title": "Assets",
       "noServers": "Lägg till en server för att se de assets som finns på den",
       "noAssets": "Inga assets hittades på den här servern",
-      "error": "Assets kunde inte laddas"
+      "error": "Assets kunde inte laddas",
+      "minQuery": "Skriv minst 3 tecken för att söka",
+      "truncated": "Det finns fler assets. Sök efter den du behöver.",
+      "noCatalogAssets": "Inga assets hittades"
     },
     "kind": {
       "product": "Data Product",
