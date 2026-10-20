@@ -126,9 +126,9 @@ const DEFAULT_CONFIG = {
   // returns { assets: [{ ...as above, hasChildren }], truncated }.
   // A server reported with complete: false (its location does not point at one
   // schema yet) browses catalogUrl?serverType=<type> instead, then expands by parent.
-  // serversUrl feeds the server typeahead: GET ?query=<text>&serverType=<type>
+  // serversUrl feeds the server typeahead: GET ?query=<text>
   // returns [{ assetExternalId, name, qualifiedName, assetType, iconUrl, server }],
-  // and picking one fills the server's type, location and assetId custom property.
+  // and picking one fills the server's type and location (never an assetId).
   assets: null,
 
   // Derived ("Auto") values for custom properties configured with `auto: true`: { url }.

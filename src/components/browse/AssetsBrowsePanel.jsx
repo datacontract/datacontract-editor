@@ -154,7 +154,10 @@ function buildServerNodes(entries, slices, assetDetailsUrlTemplate, t) {
       name: entry.server || entry.type || 'unnamed',
       kind: 'server',
       meta: { type: entry.type },
-      children: assets.length > 0 ? assets : [infoNode(`${serverId}-empty`, t('browsePanel.assets.noAssets'))],
+      children: assets.length === 0
+        ? [infoNode(`${serverId}-empty`, t('browsePanel.assets.noAssets'))]
+        // The host caps the tables per server; say so instead of implying the list is complete.
+        : [...assets, ...(entry.truncated ? [infoNode(`${serverId}-truncated`, t('browsePanel.assets.serverTruncated', { count: assets.length }))] : [])],
     };
   });
 }

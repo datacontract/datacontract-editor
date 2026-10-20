@@ -205,11 +205,13 @@ init({
     url: '/api/server-assets',       // With servers: POST { servers } -> [{ server, type, complete, assets: [{ externalId,
                                      //   name, type, description, iconUrl, physicalName, properties: [...] }] }]
                                      //   complete: false marks a server whose location is incomplete
+                                     //   truncated: true tells that the server has more tables than listed
     catalogUrl: '/api/assets',       // Without servers: GET (top level), ?parent=<externalId> (children) or
                                      //   ?query=<text> (search, 3+ characters) -> { assets: [{ ..., hasChildren }], truncated }
                                      //   An incomplete server browses it with ?serverType=<type> (top level only)
-    serversUrl: '/api/asset-servers', // Server typeahead: GET ?query=<text>&serverType=<type> -> [{ assetExternalId,
+    serversUrl: '/api/asset-servers', // Server typeahead: GET ?query=<text> -> [{ assetExternalId,
                                      //   name, qualifiedName, assetType, iconUrl, server: { type, ...location, customProperties } }]
+                                     //   Picking one fills the server's type and location; an assetId is never filled in
     assetDetailsUrlTemplate: '/assets/{externalId}'            // "open details" target of tree assets
   },
 

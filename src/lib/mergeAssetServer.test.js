@@ -8,7 +8,7 @@ const suggested = {
   database: 'SHOP',
   schema: 'SALES',
   host: null,
-  customProperties: [{ property: 'assetId', value: 'shop-sales' }],
+  customProperties: [{ property: 'assetId', value: 'shop-sales' }, { property: 'type', value: 'snowflake_schema' }],
 };
 
 describe('mergeAssetServer', () => {
@@ -19,7 +19,7 @@ describe('mergeAssetServer', () => {
       description: 'Main warehouse',
       type: 'postgres',
       host: 'db.example.com',
-      customProperties: [{ property: 'owner', value: 'sales' }, { property: 'assetId', value: 'old' }],
+      customProperties: [{ property: 'owner', value: 'sales' }],
     };
 
     expect(mergeAssetServer(current, suggested)).toEqual({
@@ -30,11 +30,17 @@ describe('mergeAssetServer', () => {
       account: 'acme',
       database: 'SHOP',
       schema: 'SALES',
-      customProperties: [{ property: 'owner', value: 'sales' }, { property: 'assetId', value: 'shop-sales' }],
+      customProperties: [{ property: 'owner', value: 'sales' }, { property: 'type', value: 'snowflake_schema' }],
     });
   });
 
   it('names an unnamed server after the suggestion', () => {
     expect(mergeAssetServer({ type: 'snowflake' }, suggested).server).toBe('default');
+  });
+
+  it('never fills in an assetId', () => {
+    const merged = mergeAssetServer({ server: 'production' }, suggested);
+
+    expect(merged.customProperties).toEqual([{ property: 'type', value: 'snowflake_schema' }]);
   });
 });

@@ -1,9 +1,10 @@
 /**
  * Fill a server from an asset catalog suggestion. The suggestion's type,
- * location fields and custom properties (the assetId) replace the
- * type-specific fields, as a type change does. The name, environment,
- * description, roles and other custom properties stay; an unnamed server
- * takes the suggestion's name.
+ * location fields and custom properties replace the type-specific fields, as
+ * a type change does. The name, environment, description, roles and other
+ * custom properties stay; an unnamed server takes the suggestion's name.
+ * An assetId custom property is never filled in, also when a host sends one:
+ * the server describes a location, and the host finds its assets by it.
  *
  * @param {Object} current - The server being edited
  * @param {Object} suggested - The suggestion's server
@@ -18,7 +19,7 @@ export function mergeAssetServer(current, suggested) {
     customProperties: suggestedCustomProperties,
     ...location
   } = suggested || {};
-  const suggestedProperties = suggestedCustomProperties || [];
+  const suggestedProperties = (suggestedCustomProperties || []).filter((p) => p?.property !== 'assetId');
   const currentProperties = Array.isArray(current?.customProperties) ? current.customProperties : [];
   const customProperties = [
     ...currentProperties.filter((item) => !suggestedProperties.some((p) => p.property === item?.property)),

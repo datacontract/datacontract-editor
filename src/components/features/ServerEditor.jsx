@@ -344,7 +344,6 @@ const ServerEditor = ({ serverIndex }) => {
                   {assetServersUrl && showAssetTypeahead && (
                     <AssetServerTypeahead
                       url={assetServersUrl}
-                      serverType={servers[serverIndex].type}
                       onSelect={applyAssetServer}
                       onClose={closeAssetTypeahead}
                     />

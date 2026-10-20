@@ -8,27 +8,29 @@ const SEARCH_DELAY_MS = 250;
 
 /**
  * Typeahead over the servers available through the host's asset catalog: one
- * suggestion per schema, dataset or database, searched as the user types and
- * limited to the server's type once it has one. It is a search overlay shown
- * on demand (the button next to the server name), positioned against the
- * nearest relative ancestor: it focuses itself when mounted, and calls
- * `onClose` after a pick, on Escape and on a click outside of it. Picking a suggestion hands its server (type,
- * location fields and the assetId custom property) to `onSelect`.
+ * suggestion per schema, dataset or database, searched as the user types. It
+ * searches all server types: it sits next to the server name, above the type
+ * field, so picking a suggestion is how the type usually gets set. It is a
+ * search overlay shown on demand (the button next to the server name),
+ * positioned against the nearest relative ancestor: it focuses itself when
+ * mounted, and calls `onClose` after a pick, on Escape and on a click outside
+ * of it. Picking a suggestion hands its server (type, location fields) to
+ * `onSelect`.
  */
-export default function AssetServerTypeahead({ url, serverType, onSelect, onClose }) {
+export default function AssetServerTypeahead({ url, onSelect, onClose }) {
   const { t } = useTranslation();
   const containerRef = useRef(null);
   const [query, setQuery] = useState('');
   // key: the search the suggestions belong to, so stale responses are recognizable
   const [result, setResult] = useState({ key: null, status: 'idle', suggestions: [] });
 
-  const searchKey = `${serverType || ''}|${query.trim()}`;
+  const searchKey = query.trim();
 
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const suggestions = await fetchAssetServers(url, { query: query.trim(), serverType }, controller.signal);
+        const suggestions = await fetchAssetServers(url, { query: searchKey }, controller.signal);
         setResult({ key: searchKey, status: 'ready', suggestions });
       } catch (error) {
         if (error.name === 'AbortError') return;
@@ -40,7 +42,7 @@ export default function AssetServerTypeahead({ url, serverType, onSelect, onClos
       clearTimeout(timer);
       controller.abort();
     };
-  }, [url, serverType, query, searchKey]);
+  }, [url, searchKey]);
 
   // A click outside the panel closes it.
   useEffect(() => {

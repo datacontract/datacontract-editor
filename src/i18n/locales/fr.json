@@ -762,6 +762,7 @@
       "error": "Les assets n’ont pas pu être chargés",
       "minQuery": "Saisissez au moins 3 caractères pour rechercher",
       "truncated": "D’autres assets existent. Recherchez celui dont vous avez besoin.",
+      "serverTruncated": "Seules les {{count}} premières tables sont affichées",
       "noCatalogAssets": "Aucun asset trouvé",
       "incomplete": "Tous les assets {{type}} sont affichés car l’emplacement du serveur est incomplet",
       "noType": "Définissez le type de serveur pour voir ses assets"
@@ -1191,7 +1192,7 @@
     },
     "fromAssets": {
       "open": "Remplir depuis le catalogue d’assets",
-      "tooltip": "Recherchez un schéma, un dataset ou une base de données dans le catalogue d’assets. La sélection remplit le type et l’emplacement du serveur et le relie à cet asset.",
+      "tooltip": "Recherchez un schéma, un dataset ou une base de données dans le catalogue d’assets. La sélection remplit le type et l’emplacement du serveur.",
       "label": "Remplir depuis le catalogue d’assets",
       "placeholder": "Rechercher des schémas, datasets et bases de données...",
       "loading": "Recherche...",
