@@ -762,7 +762,9 @@
       "error": "Assets konnten nicht geladen werden",
       "minQuery": "Gib mindestens 3 Zeichen ein, um zu suchen",
       "truncated": "Es gibt weitere Assets. Suche nach dem Asset, das du brauchst.",
-      "noCatalogAssets": "Keine Assets gefunden"
+      "noCatalogAssets": "Keine Assets gefunden",
+      "incomplete": "Alle {{type}}-Assets werden angezeigt, weil der Server-Standort unvollständig ist",
+      "noType": "Lege den Servertyp fest, um seine Assets zu sehen"
     },
     "kind": {
       "product": "Datenprodukt",
@@ -1186,6 +1188,15 @@
     "notFound": {
       "title": "Server am Index {{index}} nicht gefunden.",
       "description": "Möglicherweise wurde er gelöscht."
+    },
+    "fromAssets": {
+      "open": "Aus dem Asset-Katalog übernehmen",
+      "tooltip": "Durchsuche den Asset-Katalog nach einem Schema, Dataset oder einer Datenbank. Die Auswahl füllt Servertyp und Standort aus und verknüpft den Server mit diesem Asset.",
+      "label": "Aus dem Asset-Katalog übernehmen",
+      "placeholder": "Schemas, Datasets und Datenbanken suchen...",
+      "loading": "Suche läuft...",
+      "empty": "Keine passenden Server im Asset-Katalog",
+      "error": "Server konnten nicht geladen werden"
     },
     "field": {
       "required": "Erforderlich",

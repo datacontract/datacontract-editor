@@ -202,10 +202,14 @@ init({
     productUriTemplate: '/dataproducts/{externalId}'           // canonical product URL for lineage URIs (defaults to productDetailsUrlTemplate)
   },
   assets: {                          // Assets browse panel
-    url: '/api/server-assets',       // With servers: POST { servers } -> [{ server, type, assets: [{ externalId, name,
-                                     //   type, description, iconUrl, physicalName, properties: [...] }] }]
+    url: '/api/server-assets',       // With servers: POST { servers } -> [{ server, type, complete, assets: [{ externalId,
+                                     //   name, type, description, iconUrl, physicalName, properties: [...] }] }]
+                                     //   complete: false marks a server whose location is incomplete
     catalogUrl: '/api/assets',       // Without servers: GET (top level), ?parent=<externalId> (children) or
                                      //   ?query=<text> (search, 3+ characters) -> { assets: [{ ..., hasChildren }], truncated }
+                                     //   An incomplete server browses it with ?serverType=<type> (top level only)
+    serversUrl: '/api/asset-servers', // Server typeahead: GET ?query=<text>&serverType=<type> -> [{ assetExternalId,
+                                     //   name, qualifiedName, assetType, iconUrl, server: { type, ...location, customProperties } }]
     assetDetailsUrlTemplate: '/assets/{externalId}'            // "open details" target of tree assets
   },
 

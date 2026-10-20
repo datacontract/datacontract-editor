@@ -321,7 +321,7 @@ export function defaultStoreConfig(set, get) {
 			ai: DEFAULT_AI_CONFIG,
 			semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl } for the semantic ontology tree API; when semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched on load
 			dataProducts: null, // { upstreamUrl, productsUrl, contractsBaseUrl } for the data products browse panel
-			assets: null, // { url, catalogUrl, assetDetailsUrlTemplate } for the assets browse panel
+			assets: null, // { url, catalogUrl, serversUrl, assetDetailsUrlTemplate } for the assets browse panel and the server typeahead
 			autoValues: null, // { url } deriving the values of custom properties configured with `auto: true`
       managedTags: [], // [{tag: 'tag1', href: 'https://...'}, ...]
       allowUnmanagedTags: true,

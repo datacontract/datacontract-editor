@@ -762,7 +762,9 @@
       "error": "Les assets n’ont pas pu être chargés",
       "minQuery": "Saisissez au moins 3 caractères pour rechercher",
       "truncated": "D’autres assets existent. Recherchez celui dont vous avez besoin.",
-      "noCatalogAssets": "Aucun asset trouvé"
+      "noCatalogAssets": "Aucun asset trouvé",
+      "incomplete": "Tous les assets {{type}} sont affichés car l’emplacement du serveur est incomplet",
+      "noType": "Définissez le type de serveur pour voir ses assets"
     },
     "kind": {
       "product": "Data Product",
@@ -1186,6 +1188,15 @@
     "notFound": {
       "title": "Aucun serveur trouvé à l’index {{index}}.",
       "description": "Il a peut-être été supprimé."
+    },
+    "fromAssets": {
+      "open": "Remplir depuis le catalogue d’assets",
+      "tooltip": "Recherchez un schéma, un dataset ou une base de données dans le catalogue d’assets. La sélection remplit le type et l’emplacement du serveur et le relie à cet asset.",
+      "label": "Remplir depuis le catalogue d’assets",
+      "placeholder": "Rechercher des schémas, datasets et bases de données...",
+      "loading": "Recherche...",
+      "empty": "Aucun serveur correspondant dans le catalogue d’assets",
+      "error": "Les serveurs n’ont pas pu être chargés"
     },
     "field": {
       "required": "Obligatoire",

@@ -762,7 +762,9 @@
       "error": "Assets kunde inte laddas",
       "minQuery": "Skriv minst 3 tecken för att söka",
       "truncated": "Det finns fler assets. Sök efter den du behöver.",
-      "noCatalogAssets": "Inga assets hittades"
+      "noCatalogAssets": "Inga assets hittades",
+      "incomplete": "Visar alla {{type}}-assets eftersom serverns plats är ofullständig",
+      "noType": "Ange servertyp för att se dess assets"
     },
     "kind": {
       "product": "Data Product",
@@ -1186,6 +1188,15 @@
     "notFound": {
       "title": "Servern hittades inte på index {{index}}.",
       "description": "Den kan ha tagits bort."
+    },
+    "fromAssets": {
+      "open": "Fyll i från asset-katalogen",
+      "tooltip": "Sök i asset-katalogen efter ett schema, dataset eller en databas. Valet fyller i servertyp och plats och kopplar servern till den asseten.",
+      "label": "Fyll i från asset-katalogen",
+      "placeholder": "Sök scheman, dataset och databaser...",
+      "loading": "Söker...",
+      "empty": "Inga matchande servrar i asset-katalogen",
+      "error": "Servrar kunde inte laddas"
     },
     "field": {
       "required": "Obligatorisk",

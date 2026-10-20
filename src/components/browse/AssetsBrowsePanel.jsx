@@ -52,13 +52,89 @@ function propertyNode(prop, id, detailsUrl) {
 }
 
 /**
+ * Loaded slices of the asset catalog, keyed by the caller: e.g. 'top',
+ * 'top:<serverType>', 'parent:<externalId>' and 'query:<text>'. Every key is
+ * requested once; a failed request is forgotten, so asking again retries it.
+ */
+function useCatalogSlices(url) {
+  const [slices, setSlices] = useState({});
+  const requested = useRef(new Set());
+
+  const loadSlice = useCallback(async (key, params) => {
+    if (!url || requested.current.has(key)) return;
+    requested.current.add(key);
+    setSlices((prev) => ({ ...prev, [key]: { status: 'loading' } }));
+    try {
+      const result = await fetchCatalogAssets(url, params);
+      setSlices((prev) => ({ ...prev, [key]: { status: 'ready', ...result } }));
+    } catch (error) {
+      console.error('Error fetching catalog assets:', error);
+      requested.current.delete(key);
+      setSlices((prev) => ({ ...prev, [key]: { status: 'error' } }));
+    }
+  }, [url]);
+
+  return { slices, loadSlice };
+}
+
+/**
+ * Tree nodes for one catalog slice. Assets with children expand lazily: their
+ * node carries `lazyParent`, and the children come from the slice
+ * 'parent:<externalId>' once it is loaded. Ids follow the path through the
+ * tree, so an asset found twice keeps two expansion states.
+ */
+function buildCatalogNodes(slice, path, slices, assetDetailsUrlTemplate, t) {
+  if (!slice || slice.status === 'loading') return [infoNode(`${path}-loading`, t('browsePanel.loading'))];
+  if (slice.status === 'error') return [infoNode(`${path}-error`, t('browsePanel.assets.error'))];
+  if (slice.assets.length === 0) return [infoNode(`${path}-empty`, t('browsePanel.assets.noCatalogAssets'))];
+  const assetNode = (asset) => {
+    const id = `${path}/${asset.externalId}`;
+    const detailsUrl = resolveDetailsUrl(assetDetailsUrlTemplate, asset.externalId);
+    return {
+      externalId: id,
+      name: asset.name || asset.externalId || 'unnamed',
+      description: asset.description,
+      kind: 'asset',
+      iconUrl: asset.iconUrl,
+      meta: { externalId: asset.externalId, type: asset.type, qualifiedName: asset.qualifiedName, physicalName: asset.physicalName },
+      detailsUrl,
+      lazyParent: asset.hasChildren ? asset.externalId : null,
+      children: asset.hasChildren
+        ? buildCatalogNodes(slices[`parent:${asset.externalId}`], id, slices, assetDetailsUrlTemplate, t)
+        : (asset.properties || []).map((prop, pi) => propertyNode(prop, `${id}-${pi}`, detailsUrl)),
+    };
+  };
+  return [
+    ...slice.assets.map(assetNode),
+    ...(slice.truncated ? [infoNode(`${path}-truncated`, t('browsePanel.assets.truncated'))] : []),
+  ];
+}
+
+/**
  * Normalize the host response into generic tree nodes (server > asset >
  * property), reusing the semanticTree field names so filterTree and
- * collectExpandableIds work unchanged.
+ * collectExpandableIds work unchanged. An incomplete server holds the catalog
+ * of its server type instead of the tables at its location.
  */
-function buildServerNodes(entries, assetDetailsUrlTemplate, t) {
+function buildServerNodes(entries, slices, assetDetailsUrlTemplate, t) {
   return (entries || []).map((entry, si) => {
     const serverId = `server-${si}`;
+    if (entry.complete === false) {
+      return {
+        externalId: serverId,
+        name: entry.server || entry.type || 'unnamed',
+        kind: 'server',
+        meta: { type: entry.type },
+        children: [
+          infoNode(`${serverId}-incomplete`, entry.type
+            ? t('browsePanel.assets.incomplete', { type: entry.type })
+            : t('browsePanel.assets.noType')),
+          ...(entry.type
+            ? buildCatalogNodes(slices[`top:${entry.type}`], serverId, slices, assetDetailsUrlTemplate, t)
+            : []),
+        ],
+      };
+    }
     const assets = (entry.assets || []).map((asset, ai) => {
       const assetId = `${serverId}-a${ai}`;
       const detailsUrl = resolveDetailsUrl(assetDetailsUrlTemplate, asset.externalId);
@@ -102,16 +178,18 @@ export default function AssetsBrowsePanel() {
   if (serverList.length === 0 && catalogUrl) {
     return <CatalogAssets url={catalogUrl} assetDetailsUrlTemplate={assetDetailsUrlTemplate} />;
   }
-  return <ServerAssets url={url} assetDetailsUrlTemplate={assetDetailsUrlTemplate} serverList={serverList} />;
+  return <ServerAssets url={url} catalogUrl={catalogUrl} assetDetailsUrlTemplate={assetDetailsUrlTemplate} serverList={serverList} />;
 }
 
 /**
  * The assets available on the servers of the edited contract: one section per
  * server, listing the tables the host finds at the server's location. The
  * servers of the current document are posted, so the list follows unsaved
- * server edits.
+ * server edits. A server the host reports as incomplete (its location does not
+ * point at one schema yet) browses all assets of its server type instead, when
+ * the host offers the catalog.
  */
-function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
+function ServerAssets({ url, catalogUrl, assetDetailsUrlTemplate, serverList }) {
   const { t } = useTranslation();
   // Stable key: yamlParts is re-parsed on every edit, also when the servers did not change.
   const serversKey = JSON.stringify(serverList);
@@ -121,6 +199,14 @@ function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
   const [expandedNodes, setExpandedNodes] = useState(() => new Set());
   const [treeFilter, setTreeFilter] = useState('');
   const generation = useRef(0);
+  const { slices, loadSlice } = useCatalogSlices(catalogUrl);
+
+  // The catalog of each incomplete server's type loads with the response.
+  useEffect(() => {
+    state.entries
+      .filter((entry) => entry.complete === false && entry.type)
+      .forEach((entry) => loadSlice(`top:${entry.type}`, { serverType: entry.type }));
+  }, [state.entries, loadSlice]);
 
   useEffect(() => {
     if (!url) return undefined;
@@ -147,8 +233,8 @@ function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
   }, [url, serversKey]);
 
   const nodes = useMemo(
-    () => buildServerNodes(state.entries, assetDetailsUrlTemplate, t),
-    [state.entries, assetDetailsUrlTemplate, t]
+    () => buildServerNodes(state.entries, slices, assetDetailsUrlTemplate, t),
+    [state.entries, slices, assetDetailsUrlTemplate, t]
   );
 
   const filteredNodes = useMemo(
@@ -163,11 +249,15 @@ function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
   );
 
   const toggleNode = (node) => {
+    const expanding = !expandedNodes.has(node.externalId);
     setExpandedNodes((prev) => {
       const next = new Set(prev);
       if (next.has(node.externalId)) next.delete(node.externalId); else next.add(node.externalId);
       return next;
     });
+    if (expanding && node.lazyParent) {
+      loadSlice(`parent:${node.lazyParent}`, { parent: node.lazyParent });
+    }
   };
 
   const emptyText = () => {
@@ -209,28 +299,11 @@ function ServerAssets({ url, assetDetailsUrlTemplate, serverList }) {
 function CatalogAssets({ url, assetDetailsUrlTemplate }) {
   const { t } = useTranslation();
   const [treeFilter, setTreeFilter] = useState('');
-  // Loaded slices of the catalog: 'top', 'parent:<externalId>' and 'query:<text>'.
-  const [slices, setSlices] = useState({});
+  const { slices, loadSlice } = useCatalogSlices(url);
   const [expandedNodes, setExpandedNodes] = useState(() => new Set());
-  const requested = useRef(new Set());
 
   const query = treeFilter.trim();
   const rootKey = !query ? 'top' : query.length >= MIN_QUERY_LENGTH ? `query:${query}` : null;
-
-  const loadSlice = useCallback(async (key, params) => {
-    if (requested.current.has(key)) return;
-    requested.current.add(key);
-    setSlices((prev) => ({ ...prev, [key]: { status: 'loading' } }));
-    try {
-      const result = await fetchCatalogAssets(url, params);
-      setSlices((prev) => ({ ...prev, [key]: { status: 'ready', ...result } }));
-    } catch (error) {
-      console.error('Error fetching catalog assets:', error);
-      // Forget the failed request, so collapsing and expanding again retries it.
-      requested.current.delete(key);
-      setSlices((prev) => ({ ...prev, [key]: { status: 'error' } }));
-    }
-  }, [url]);
 
   useEffect(() => {
     if (!rootKey) return undefined;
@@ -244,36 +317,9 @@ function CatalogAssets({ url, assetDetailsUrlTemplate }) {
   }, [rootKey, query, loadSlice]);
 
   const nodes = useMemo(() => {
-    const sliceNodes = (slice, path) => {
-      if (!slice || slice.status === 'loading') return [infoNode(`${path}-loading`, t('browsePanel.loading'))];
-      if (slice.status === 'error') return [infoNode(`${path}-error`, t('browsePanel.assets.error'))];
-      if (slice.assets.length === 0) return [infoNode(`${path}-empty`, t('browsePanel.assets.noCatalogAssets'))];
-      return [
-        ...slice.assets.map((asset) => assetNode(asset, path)),
-        ...(slice.truncated ? [infoNode(`${path}-truncated`, t('browsePanel.assets.truncated'))] : []),
-      ];
-    };
-    // Ids follow the path through the tree, so an asset found twice keeps two expansion states.
-    const assetNode = (asset, path) => {
-      const id = `${path}/${asset.externalId}`;
-      const detailsUrl = resolveDetailsUrl(assetDetailsUrlTemplate, asset.externalId);
-      return {
-        externalId: id,
-        name: asset.name || asset.externalId || 'unnamed',
-        description: asset.description,
-        kind: 'asset',
-        iconUrl: asset.iconUrl,
-        meta: { externalId: asset.externalId, type: asset.type, qualifiedName: asset.qualifiedName, physicalName: asset.physicalName },
-        detailsUrl,
-        lazyParent: asset.hasChildren ? asset.externalId : null,
-        children: asset.hasChildren
-          ? sliceNodes(slices[`parent:${asset.externalId}`], id)
-          : (asset.properties || []).map((prop, pi) => propertyNode(prop, `${id}-${pi}`, detailsUrl)),
-      };
-    };
     const rootSlice = rootKey ? slices[rootKey] : null;
     if (rootSlice?.status !== 'ready') return [];
-    return sliceNodes(rootSlice, rootKey);
+    return buildCatalogNodes(rootSlice, rootKey, slices, assetDetailsUrlTemplate, t);
   }, [slices, rootKey, assetDetailsUrlTemplate, t]);
 
   const toggleNode = (node) => {

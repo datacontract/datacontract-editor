@@ -1,6 +1,8 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
+import AssetServerTypeahead from './AssetServerTypeahead.jsx';
+import { mergeAssetServer } from '../../lib/mergeAssetServer.js';
 import { isSafeKey } from '../../utils/safeProperty.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -68,6 +70,9 @@ const ServerEditor = ({ serverIndex }) => {
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 	const schemaData = useEditorStore((state) => state.schemaData);
+	const assetServersUrl = useEditorStore((state) => state.editorConfig?.assets?.serversUrl);
+	const [showAssetTypeahead, setShowAssetTypeahead] = useState(false);
+	const closeAssetTypeahead = useCallback(() => setShowAssetTypeahead(false), []);
 
   // Get customization config for servers level
   const { customProperties: customPropertyConfigs, customSections } = useCustomization('servers');
@@ -226,6 +231,15 @@ const ServerEditor = ({ serverIndex }) => {
     }
   };
 
+  // Fill the server from an asset catalog suggestion (see mergeAssetServer)
+  const applyAssetServer = (suggestion) => {
+    const currentServer = servers?.[serverIndex];
+    if (!currentServer || !suggestion?.server) return;
+    const updatedServers = [...servers];
+    updatedServers[serverIndex] = mergeAssetServer(currentServer, suggestion.server);
+    setValue('servers', updatedServers);
+  };
+
   // Remove the server
   const removeServer = () => {
     try {
@@ -285,6 +299,9 @@ const ServerEditor = ({ serverIndex }) => {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {!isServerHidden && (
+                  // relative: the asset search overlay anchors below this row
+                  <div className="relative flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
                   <ValidatedInput
                     name="server"
                     label={serverOverride?.title || t('server.field.server.label')}
@@ -300,6 +317,39 @@ const ServerEditor = ({ serverIndex }) => {
                     validationKey={`servers.${serverIndex}.server`}
                     validationSection="Servers"
                   />
+                  </div>
+                  {assetServersUrl && (
+                    // mt-5 lines the button up with the input below the label
+                    <div className="mt-5 flex-shrink-0">
+                    <Tooltip className="flex" content={t('server.fromAssets.tooltip')}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAssetTypeahead((shown) => !shown)}
+                      aria-expanded={showAssetTypeahead}
+                      data-asset-typeahead-toggle
+                      className={`flex rounded-md p-1.5 ring-1 ring-inset transition-colors ${showAssetTypeahead ? 'ring-indigo-600 text-indigo-600 bg-indigo-50' : 'ring-gray-300 text-gray-500 hover:text-indigo-600 hover:ring-indigo-400'}`}
+                    >
+                      <span className="sr-only">{t('server.fromAssets.open')}</span>
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <ellipse cx="10" cy="5" rx="7" ry="3" />
+                        <path d="M3 5v6c0 1.66 3.13 3 7 3" />
+                        <path d="M3 11v6c0 1.66 3.13 3 7 3" />
+                        <circle cx="17.5" cy="16.5" r="3" />
+                        <path d="m21 20-1.4-1.4" />
+                      </svg>
+                    </button>
+                    </Tooltip>
+                    </div>
+                  )}
+                  {assetServersUrl && showAssetTypeahead && (
+                    <AssetServerTypeahead
+                      url={assetServersUrl}
+                      serverType={servers[serverIndex].type}
+                      onSelect={applyAssetServer}
+                      onClose={closeAssetTypeahead}
+                    />
+                  )}
+                  </div>
                 )}
                 {!isEnvironmentHidden && (
                   <div>
