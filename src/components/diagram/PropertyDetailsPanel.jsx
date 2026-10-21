@@ -193,7 +193,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
 
   const relationshipTypeOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'relationships.type', 'property') ||
-           ['foreignKey', 'references', 'mapsTo'];
+           ['foreignKey'];
   }, [jsonSchema]);
 
   const updateField = useCallback((field, value) => {

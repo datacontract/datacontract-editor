@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import Combobox from './Combobox.jsx';
@@ -15,7 +15,7 @@ import { isExternalReference, isFullyQualifiedReference, resolveReference } from
  *
  * @param {Array} value - Array of relationship objects
  * @param {Function} onChange - Callback when array changes
- * @param {Array} relationshipTypeOptions - Options for relationship type dropdown
+ * @param {Array} relationshipTypeOptions - Suggested relationship types (any other string can be typed)
  * @param {boolean} showFrom - Whether to show the 'from' field (required for schema-level, hidden for property-level)
  */
 // Returns true if `item.to` matches the given reference string (handles
@@ -140,6 +140,7 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
 
 export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove, siblingIds = [], isFocusMatch = false, focusNonce = null, defaultExpanded = null }) => {
   const { t } = useTranslation();
+  const typeOptionsListId = useId();
   const [isExpanded, setIsExpanded] = useState(
     defaultExpanded !== null
       ? defaultExpanded
@@ -302,16 +303,21 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
           <div className="grid grid-cols-12 gap-2 items-end">
             <div className="col-span-11">
               <label className="block text-xs font-medium text-gray-700 mb-0.5">{t('relationship.type.label')}</label>
-              <select
+              {/* Free text with suggestions: ODCS defines the type as a string, so values such as
+                  `many-to-one` are kept and editable, not only the suggested ones. */}
+              <input
+                type="text"
+                list={typeOptionsListId}
                 value={item.type || ''}
                 onChange={(e) => onUpdate(index, 'type', e.target.value)}
+                placeholder={t('enum.selectOrType')}
                 className={inputClasses}
-              >
-                <option value="">{t('relationship.select')}</option>
+              />
+              <datalist id={typeOptionsListId}>
                 {relationshipTypeOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                  <option key={opt} value={opt} />
                 ))}
-              </select>
+              </datalist>
             </div>
             <button
               type="button"
