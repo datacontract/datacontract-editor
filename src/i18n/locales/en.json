@@ -757,7 +757,10 @@
       "error": "Assets could not be loaded",
       "minQuery": "Type at least 3 characters to search",
       "truncated": "More assets exist. Search to find the one you need.",
-      "noCatalogAssets": "No assets found"
+      "serverTruncated": "Only the first {{count}} tables are shown",
+      "noCatalogAssets": "No assets found",
+      "incomplete": "Showing all {{type}} assets because the server location is incomplete",
+      "noType": "Set the server type to see its assets"
     },
     "kind": {
       "product": "Data Product",
@@ -1177,6 +1180,15 @@
     "notFound": {
       "title": "Server not found at index {{index}}.",
       "description": "It may have been deleted."
+    },
+    "fromAssets": {
+      "open": "Fill from asset catalog",
+      "tooltip": "Search the asset catalog for a schema, dataset or database. Picking one fills in the server type and location.",
+      "label": "Fill from asset catalog",
+      "placeholder": "Search schemas, datasets and databases...",
+      "loading": "Searching...",
+      "empty": "No matching servers in the asset catalog",
+      "error": "Servers could not be loaded"
     },
     "field": {
       "required": "Required",
