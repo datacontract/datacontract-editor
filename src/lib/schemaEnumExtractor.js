@@ -126,6 +126,35 @@ const resolvePropertyCandidates = (schema, propertyPath, context) => {
 export const hasSchemaProperty = (schema, propertyPath, context = 'property') =>
   resolvePropertyCandidates(schema, propertyPath, context).length > 0;
 
+/** The first value of [key] declared by [def] itself or by anything it references or composes. */
+const findKeyword = (schema, def, key, seen = new Set()) => {
+  if (!def || typeof def !== 'object' || seen.has(def)) return undefined;
+  seen.add(def);
+
+  if (def[key] !== undefined) return def[key];
+  if (def.$ref) {
+    const viaRef = findKeyword(schema, resolveRef(schema, def.$ref), key, seen);
+    if (viaRef !== undefined) return viaRef;
+  }
+  for (const branch of branchesOf(def)) {
+    const viaBranch = findKeyword(schema, branch, key, seen);
+    if (viaBranch !== undefined) return viaBranch;
+  }
+  return undefined;
+};
+
+/**
+ * The description and pattern the schema declares for a property, following `$ref`s, so `id`
+ * (a bare `$ref` to `StableId`) gets the text and pattern of the definition it points to.
+ * @returns {{description?: string, pattern?: string}|null} - null when the schema lacks the property
+ */
+export const getSchemaPropertyInfo = (schema, propertyPath, context = 'property') => {
+  const frontier = resolvePropertyCandidates(schema, propertyPath, context);
+  if (frontier.length === 0) return null;
+  const firstOf = (key) => frontier.map((def) => findKeyword(schema, def, key)).find((v) => v !== undefined);
+  return { description: firstOf('description'), pattern: firstOf('pattern') };
+};
+
 /**
  * Get all enum fields from the schema for a given context
  * @param {Object} schema - The JSON schema object

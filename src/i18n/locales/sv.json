@@ -436,7 +436,8 @@
       "relationships": "Relationer",
       "customProperties": "Anpassade egenskaper",
       "enumValues": "Tillåtna värden",
-      "synonyms": "Synonymer"
+      "synonyms": "Synonymer",
+      "advanced": "Avancerat"
     },
     "semantics": {
       "semanticConcept": "Semantiskt begrepp",
@@ -596,6 +597,10 @@
       },
       "vectorNormalized": {
         "label": "Normaliserad"
+      },
+      "id": {
+        "label": "ID",
+        "patternMessage": "Detta ID innehåller ett tecken som inte är tillåtet."
       }
     },
     "option": {
@@ -1142,6 +1147,10 @@
       },
       "context": {
         "label": "Kontext"
+      },
+      "id": {
+        "label": "ID",
+        "patternMessage": "Detta ID innehåller ett tecken som inte är tillåtet."
       }
     },
     "advancedMetadata": "Avancerad metadata",

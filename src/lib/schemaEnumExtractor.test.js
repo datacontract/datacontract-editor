@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import odcsSchema from '../utils/fixtures/odcs-json-schema-v3.1.0.json';
 import odcsSchema320 from '../utils/fixtures/odcs-json-schema-v3.2.0.json';
-import { getAllSchemaEnums, getSchemaEnumValues, hasSchemaEnum, hasSchemaProperty } from './schemaEnumExtractor.js';
+import { getAllSchemaEnums, getSchemaEnumValues, getSchemaPropertyInfo, hasSchemaEnum, hasSchemaProperty } from './schemaEnumExtractor.js';
 
 describe('getSchemaEnumValues against the ODCS 3.1.0 schema', () => {
   it('reads a property-level enum from $defs.SchemaBaseProperty', () => {
@@ -121,5 +121,20 @@ describe('getAllSchemaEnums', () => {
   it('terminates on recursive definitions', () => {
     const schemaEnums = getAllSchemaEnums(odcsSchema, 'schema');
     expect(schemaEnums.logicalType).toEqual(['object']);
+  });
+});
+
+describe('getSchemaPropertyInfo', () => {
+  it('follows the id $ref to the StableId description and pattern on schemas and properties', () => {
+    for (const context of ['schema', 'property']) {
+      const info = getSchemaPropertyInfo(odcsSchema, 'id', context);
+      expect(info.description).toMatch(/^Stable technical identifier for references/);
+      expect(info.pattern).toBe('^[A-Za-z0-9_-]+$');
+    }
+  });
+
+  it('returns null when the schema does not define the property', () => {
+    expect(getSchemaPropertyInfo(odcsSchema, 'doesNotExist', 'property')).toBeNull();
+    expect(getSchemaPropertyInfo(null, 'id', 'property')).toBeNull();
   });
 });

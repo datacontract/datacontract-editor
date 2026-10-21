@@ -436,7 +436,8 @@
       "relationships": "Relations",
       "customProperties": "Propriétés personnalisées",
       "enumValues": "Valeurs autorisées",
-      "synonyms": "Synonymes"
+      "synonyms": "Synonymes",
+      "advanced": "Avancé"
     },
     "semantics": {
       "semanticConcept": "Semantic Concept",
@@ -596,6 +597,10 @@
       },
       "vectorNormalized": {
         "label": "Normalisé"
+      },
+      "id": {
+        "label": "ID",
+        "patternMessage": "Cet ID contient un caractère non autorisé."
       }
     },
     "option": {
@@ -1142,6 +1147,10 @@
       },
       "context": {
         "label": "Contexte"
+      },
+      "id": {
+        "label": "ID",
+        "patternMessage": "Cet ID contient un caractère non autorisé."
       }
     },
     "advancedMetadata": "Métadonnées avancées",

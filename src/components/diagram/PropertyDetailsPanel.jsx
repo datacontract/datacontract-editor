@@ -22,7 +22,7 @@ import { useSchemaProperty } from '../../hooks/useSchemaCapability.js';
 import Tooltip from '../ui/Tooltip.jsx';
 import {SparkleButton} from '../../ai/index.js';
 import {useEditorStore} from '../../store.js';
-import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
+import {getSchemaEnumValues, getSchemaPropertyInfo} from '../../lib/schemaEnumExtractor.js';
 import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
 import {CustomContentAfter, CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
 import {DefinitionSelectionModal} from '../ui/DefinitionSelectionModal.jsx';
@@ -95,6 +95,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   // Check hidden status for standard properties
   const isNameHidden = useIsPropertyHidden('schema.properties', 'name');
   const isBusinessNameHidden = useIsPropertyHidden('schema.properties', 'businessName');
+  const isIdHidden = useIsPropertyHidden('schema.properties', 'id');
   const isPhysicalNameHidden = useIsPropertyHidden('schema.properties', 'physicalName');
   const isLogicalTypeHidden = useIsPropertyHidden('schema.properties', 'logicalType');
   const isPhysicalTypeHidden = useIsPropertyHidden('schema.properties', 'physicalType');
@@ -117,6 +118,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
   // Get overrides for standard properties
   const nameOverride = useStandardPropertyOverride('schema.properties', 'name');
   const businessNameOverride = useStandardPropertyOverride('schema.properties', 'businessName');
+  const idOverride = useStandardPropertyOverride('schema.properties', 'id');
   const physicalNameOverride = useStandardPropertyOverride('schema.properties', 'physicalName');
   const classificationOverride = useStandardPropertyOverride('schema.properties', 'classification');
   const encryptedNameOverride = useStandardPropertyOverride('schema.properties', 'encryptedName');
@@ -189,6 +191,9 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
       }
     }
   }, [property.customProperties, onUpdate]);
+
+  // Stable ids only exist from ODCS 3.1 on; the hint and pattern come from the loaded schema
+  const idSchemaInfo = useMemo(() => getSchemaPropertyInfo(jsonSchema, 'id', 'property'), [jsonSchema]);
 
   const relationshipTypeOptions = useMemo(() => {
     return getSchemaEnumValues(jsonSchema, 'relationships.type', 'property') ||
@@ -292,6 +297,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
     authoritativeDefinitions: filteredAuthoritativeDefinitions?.length || 0,
     relationships: property.relationships?.length || 0,
     customProperties: property.customProperties?.length || 0,
+    advanced: property.id ? 1 : 0,
   };
 
   const isTransformationsSectionEmpty = isStandardSectionEmpty(
@@ -1520,6 +1526,38 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         </Disclosure>
       </div>
       {renderCustomSectionsAfter('relationships')}
+
+      {/* Advanced Section */}
+      {idSchemaInfo && !isIdHidden && (
+        <Disclosure>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
+                <SectionLabel label={t('diagram.section.advanced')} count={sectionCounts.advanced} />
+                <ChevronRightIcon
+                  className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
+                <ValidatedInput
+                  name="propertyId"
+                  label={idOverride?.title || t('diagram.field.id.label')}
+                  value={property.id || ''}
+                  onChange={(e) => updateField('id', e.target.value || undefined)}
+                  required={idOverride?.required ?? false}
+                  hint={idOverride?.description || idSchemaInfo.description}
+                  placeholder={idOverride?.placeholder}
+                  pattern={idOverride?.pattern || idSchemaInfo.pattern}
+                  patternMessage={idOverride?.patternMessage || t('diagram.field.id.patternMessage')}
+                  minLength={idOverride?.minLength}
+                  maxLength={idOverride?.maxLength}
+                  className="font-mono"
+                />
+              </DisclosurePanel>
+            </>
+          )}
+        </Disclosure>
+      )}
 
       {/* Custom Sections from Customization */}
       <CustomSections

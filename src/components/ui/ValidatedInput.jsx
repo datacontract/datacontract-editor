@@ -32,6 +32,7 @@ const ValidatedInput = forwardRef(({
   validationSection,
   skipInternalValidation = false,
   inheritedValue,
+  hint,
   onBlur,
   ...props
 }, ref) => {
@@ -152,6 +153,9 @@ const ValidatedInput = forwardRef(({
           {message}
         </p>
       ))}
+      {hint && (
+        <p className="mt-1 text-xs text-gray-500">{hint}</p>
+      )}
     </div>
   );
 });
