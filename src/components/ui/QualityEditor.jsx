@@ -5,6 +5,7 @@ import { getSchemaEnumValues } from '../../lib/schemaEnumExtractor.js';
 import ValidatedCombobox from './ValidatedCombobox.jsx';
 import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
+import StableIdField from './StableIdField.jsx';
 
 /**
  * QualityEditor - Custom component for editing ODCS 3.1.0 quality rules
@@ -65,6 +66,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText 
           onUpdate={updateRule}
           onRemove={removeRule}
           context={context}
+          siblingIds={rules.filter((_, i) => i !== index).map((r) => r?.id).filter(Boolean)}
         />
       ))}
 
@@ -79,7 +81,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText 
   );
 };
 
-const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context }) => {
+const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
@@ -520,6 +522,14 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                     />
                   </div>
                 </div>
+
+                <StableIdField
+                  name={`quality-${context}-id-${index}`}
+                  definition="DataQuality"
+                  value={rule.id}
+                  onChange={(id) => onUpdate(index, 'id', id)}
+                  siblingIds={siblingIds}
+                />
               </div>
             )}
           </div>

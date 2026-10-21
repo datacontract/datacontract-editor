@@ -5,6 +5,7 @@ import TagsInput from '../components/ui/TagsInput.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
+import { StableIdAdvancedSection } from '../components/ui/StableIdField.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
@@ -271,6 +272,17 @@ const Team = () => {
                 onChange={(value) => updateTeamField('authoritativeDefinitions', value)}
               />
 
+              {/* Advanced: stable id, only the team object (not the legacy member array) has one */}
+              {!Array.isArray(team) && (
+                <StableIdAdvancedSection
+                  name="team-id"
+                  definition="Team"
+                  customizationLevel="team"
+                  value={team?.id}
+                  onChange={(id) => updateTeamField('id', id)}
+                />
+              )}
+
               {/* Team Members */}
               <div>
                 {/* Display existing members */}
@@ -283,6 +295,7 @@ const Team = () => {
                         index={index}
                         onUpdate={updateMember}
                         onRemove={removeMember}
+                        siblingIds={members.filter((_, i) => i !== index).map((m) => m?.id).filter(Boolean)}
                       />
                     ))}
                   </div>

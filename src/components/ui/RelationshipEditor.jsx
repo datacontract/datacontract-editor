@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import Combobox from './Combobox.jsx';
 import CustomPropertiesEditor from './CustomPropertiesEditor.jsx';
+import { StableIdAdvancedSection } from './StableIdField.jsx';
 import LinkIcon from './icons/LinkIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import { parseYaml } from '../../utils/yaml.js';
@@ -128,6 +129,7 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
           showFrom={showFrom}
           onUpdate={handleUpdate}
           onRemove={handleRemove}
+          siblingIds={value.filter((_, i) => i !== index).map((r) => r?.id).filter(Boolean)}
           isFocusMatch={relationshipMatchesTo(item, focusTo)}
           focusNonce={focusNonce}
         />
@@ -136,7 +138,7 @@ const RelationshipEditor = ({ value = [], onChange, relationshipTypeOptions = ['
   );
 };
 
-export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove, isFocusMatch = false, focusNonce = null, defaultExpanded = null }) => {
+export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaPropertySuggestions, validPaths, showFrom, onUpdate, onRemove, siblingIds = [], isFocusMatch = false, focusNonce = null, defaultExpanded = null }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(
     defaultExpanded !== null
@@ -405,6 +407,14 @@ export const RelationshipCard = ({ item, index, relationshipTypeOptions, schemaP
             value={item.customProperties}
             onChange={(v) => onUpdate(index, 'customProperties', v)}
             showDescription={true}
+          />
+
+          <StableIdAdvancedSection
+            name={`relationship-id-${index}`}
+            definition="RelationshipBase"
+            value={item.id}
+            onChange={(id) => onUpdate(index, 'id', id)}
+            siblingIds={siblingIds}
           />
         </div>
       )}

@@ -4,6 +4,7 @@ import { Tooltip } from '../ui/index.js';
 import { isSafeKey } from '../../utils/safeProperty.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
+import { StableIdAdvancedSection } from '../ui/StableIdField.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import { useEditorStore } from '../../store.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
@@ -85,6 +86,7 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
                 updateRole={updateRole}
                 removeRole={removeRole}
                 roleInputRefs={roleInputRefs}
+                siblingIds={roles.filter((_, i) => i !== index).map((r) => r?.id).filter(Boolean)}
               />
             )
           )}
@@ -102,7 +104,7 @@ const RolesList = ({ roles = [], onUpdate, className = '', serverName = null }) 
   );
 };
 
-const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) => {
+const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs, siblingIds }) => {
   const { t } = useTranslation();
   const yamlParts = useEditorStore((state) => state.yamlParts);
 
@@ -316,6 +318,17 @@ const RoleItem = ({ roleItem, index, updateRole, removeRole, roleInputRefs }) =>
                     managedProperties={customPropertyConfigs.map(c => c.property)}
                   />
                 </div>
+
+                {/* Advanced: stable id */}
+                <StableIdAdvancedSection
+                  className="sm:col-span-2"
+                  name={`role-id-${index}`}
+                  definition="Role"
+                  customizationLevel="roles"
+                  value={roleItem.id}
+                  onChange={(id) => updateRole(index, 'id', id)}
+                  siblingIds={siblingIds}
+                />
               </div>
             </div>
   );

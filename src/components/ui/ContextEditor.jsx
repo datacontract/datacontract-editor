@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import StableIdRow from './StableIdRow.jsx';
 
 const inputClasses =
   'block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4';
@@ -53,9 +54,9 @@ const ContextEditor = ({ value, onChange }) => {
     commit({ ...context, verifiedStatements: updated });
   };
 
-  const updateConstraint = (index, fieldValue) => {
+  const updateConstraint = (index, field, fieldValue) => {
     const updated = [...constraints];
-    updated[index] = { ...updated[index], constraint: fieldValue || undefined };
+    updated[index] = { ...updated[index], [field]: fieldValue || undefined };
     commit({ ...context, constraints: updated });
   };
 
@@ -81,28 +82,41 @@ const ContextEditor = ({ value, onChange }) => {
         <p className="text-xs text-gray-500 mb-2">{t('contextEditor.statements.help')}</p>
         <div className="space-y-2">
           {statements.map((statement, index) => (
-            <div key={index} className="flex gap-2 items-start">
-              <div className="flex-1 space-y-1">
-                <input
-                  type="text"
-                  value={statement?.question || ''}
-                  onChange={(e) => updateStatement(index, 'question', e.target.value)}
-                  className={inputClasses}
-                  placeholder={t('contextEditor.statements.question.placeholder')}
-                />
-                <input
-                  type="text"
-                  value={statement?.answer || ''}
-                  onChange={(e) => updateStatement(index, 'answer', e.target.value)}
-                  className={inputClasses}
-                  placeholder={t('contextEditor.statements.answer.placeholder')}
-                />
-              </div>
-              <RemoveButton
-                title={t('contextEditor.statements.remove')}
-                onClick={() => commit({ ...context, verifiedStatements: statements.filter((_, i) => i !== index) })}
-              />
-            </div>
+            <StableIdRow
+              key={index}
+              name={`context-statement-id-${index}`}
+              definition="Context"
+              path="verifiedStatements.id"
+              value={statement?.id}
+              onChange={(id) => updateStatement(index, 'id', id)}
+              siblingIds={statements.filter((_, i) => i !== index).map((s) => s?.id).filter(Boolean)}
+            >
+              {(advancedButton) => (
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1 space-y-1">
+                    <input
+                      type="text"
+                      value={statement?.question || ''}
+                      onChange={(e) => updateStatement(index, 'question', e.target.value)}
+                      className={inputClasses}
+                      placeholder={t('contextEditor.statements.question.placeholder')}
+                    />
+                    <input
+                      type="text"
+                      value={statement?.answer || ''}
+                      onChange={(e) => updateStatement(index, 'answer', e.target.value)}
+                      className={inputClasses}
+                      placeholder={t('contextEditor.statements.answer.placeholder')}
+                    />
+                  </div>
+                  {advancedButton}
+                  <RemoveButton
+                    title={t('contextEditor.statements.remove')}
+                    onClick={() => commit({ ...context, verifiedStatements: statements.filter((_, i) => i !== index) })}
+                  />
+                </div>
+              )}
+            </StableIdRow>
           ))}
           <button
             type="button"
@@ -121,19 +135,32 @@ const ContextEditor = ({ value, onChange }) => {
         <p className="text-xs text-gray-500 mb-2">{t('contextEditor.constraints.help')}</p>
         <div className="space-y-2">
           {constraints.map((entry, index) => (
-            <div key={index} className="flex gap-2 items-start">
-              <input
-                type="text"
-                value={entry?.constraint || ''}
-                onChange={(e) => updateConstraint(index, e.target.value)}
-                className={inputClasses}
-                placeholder={t('contextEditor.constraints.placeholder')}
-              />
-              <RemoveButton
-                title={t('contextEditor.constraints.remove')}
-                onClick={() => commit({ ...context, constraints: constraints.filter((_, i) => i !== index) })}
-              />
-            </div>
+            <StableIdRow
+              key={index}
+              name={`context-constraint-id-${index}`}
+              definition="Context"
+              path="constraints.id"
+              value={entry?.id}
+              onChange={(id) => updateConstraint(index, 'id', id)}
+              siblingIds={constraints.filter((_, i) => i !== index).map((c) => c?.id).filter(Boolean)}
+            >
+              {(advancedButton) => (
+                <div className="flex gap-2 items-start">
+                  <input
+                    type="text"
+                    value={entry?.constraint || ''}
+                    onChange={(e) => updateConstraint(index, 'constraint', e.target.value)}
+                    className={inputClasses}
+                    placeholder={t('contextEditor.constraints.placeholder')}
+                  />
+                  {advancedButton}
+                  <RemoveButton
+                    title={t('contextEditor.constraints.remove')}
+                    onClick={() => commit({ ...context, constraints: constraints.filter((_, i) => i !== index) })}
+                  />
+                </div>
+              )}
+            </StableIdRow>
           ))}
           <button
             type="button"

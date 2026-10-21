@@ -39,6 +39,15 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
 		setValue(fullPath, value);
 	}
 
+	// Ids of the other properties in the same array, for the stable id uniqueness check
+	const siblingIds = useEditorStore(useShallow((state) => {
+		const lastBracketIndex = propertyPath?.lastIndexOf('[') ?? -1;
+		if (lastBracketIndex === -1) return [];
+		const siblings = state.getValue(propertyPath.substring(0, lastBracketIndex));
+		const index = parseInt(propertyPath.substring(lastBracketIndex + 1), 10);
+		return Array.isArray(siblings) ? siblings.filter((_, i) => i !== index).map((p) => p?.id).filter(Boolean) : [];
+	}));
+
 	const removeProperty = (pathToRemove) => {
 		// Extract parent array path and index
 		// e.g., "schema[0].properties[2]" -> parent: "schema[0].properties", index: 2
@@ -157,6 +166,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
             focusSection={focusSection}
             focusNonce={focusNonce}
             focusRelationshipTo={focusRelationshipTo}
+            siblingIds={siblingIds}
           />
         </div>
       </div>

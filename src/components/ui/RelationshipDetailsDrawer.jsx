@@ -160,6 +160,7 @@ const RelationshipDetailsDrawer = ({ open, onClose, sourcePropertyPath, relation
             showFrom={false}
             onUpdate={handleUpdate}
             onRemove={handleRemove}
+            siblingIds={(relationships || []).filter((_, i) => i !== relationshipIndex).map((r) => r?.id).filter(Boolean)}
             defaultExpanded={true}
           />
         </div>

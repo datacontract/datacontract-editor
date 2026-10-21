@@ -8,6 +8,7 @@ import {useShallow} from "zustand/react/shallow";
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import { useSchemaProperty } from '../hooks/useSchemaCapability.js';
+import { StableIdAdvancedSection } from '../components/ui/StableIdField.jsx';
 
 const ServiceLevelAgreement = () => {
 	const { t } = useTranslation();
@@ -287,6 +288,14 @@ const ServiceLevelAgreement = () => {
                             />
                           </div>
                         )}
+                        <StableIdAdvancedSection
+                          className="sm:col-span-2"
+                          name={`sla-id-${index}`}
+                          definition="ServiceLevelAgreementProperty"
+                          value={sla?.id}
+                          onChange={(id) => updateSLA(index, 'id', id)}
+                          siblingIds={slaProperties.filter((_, i) => i !== index).map((s) => s?.id).filter(Boolean)}
+                        />
                       </div>
                     </div>
                   ))}

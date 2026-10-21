@@ -5,6 +5,7 @@ import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import ExternalLinkIcon from './icons/ExternalLinkIcon.jsx';
 import Tooltip from './Tooltip.jsx';
 import { toAbsoluteUrl, isExternalUrl } from '../../lib/urlUtils.js';
+import { StableIdAdvancedSection } from './StableIdField.jsx';
 
 /**
  * AuthoritativeDefinitionsEditor component for editing authoritative definitions
@@ -51,6 +52,7 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
           key={index}
           item={item}
           index={index}
+          siblingIds={value.filter((_, i) => i !== index).map((d) => d?.id).filter(Boolean)}
           onUpdate={handleUpdate}
           onRemove={handleRemove}
         />
@@ -59,7 +61,7 @@ const AuthoritativeDefinitionsEditor = ({ value = [], onChange }) => {
   );
 };
 
-const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
+const AuthoritativeDefinitionCard = ({ item, index, siblingIds, onUpdate, onRemove }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!item.type && !item.url);
 
@@ -177,6 +179,14 @@ const AuthoritativeDefinitionCard = ({ item, index, onUpdate, onRemove }) => {
               rows={2}
             />
           </div>
+
+          <StableIdAdvancedSection
+            name={`auth-def-id-${index}`}
+            definition="AuthoritativeDefinitions"
+            value={item.id}
+            onChange={(id) => onUpdate(index, 'id', id)}
+            siblingIds={siblingIds}
+          />
         </div>
       )}
     </div>

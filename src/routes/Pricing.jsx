@@ -3,6 +3,7 @@ import { Tooltip } from '../components/ui/index.js';
 import QuestionMarkCircleIcon from '../components/ui/icons/QuestionMarkCircleIcon.jsx';
 import {useShallow} from "zustand/react/shallow";
 import {useTranslation} from 'react-i18next';
+import { StableIdAdvancedSection } from '../components/ui/StableIdField.jsx';
 
 const Pricing = () => {
   const { t } = useTranslation();
@@ -124,6 +125,13 @@ const Pricing = () => {
                   />
                 </div>
               </div>
+
+              <StableIdAdvancedSection
+                name="priceId"
+                definition="Pricing"
+                value={price?.id}
+                onChange={(id) => updateField('id', id)}
+              />
             </div>
           </div>
         </div>

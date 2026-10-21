@@ -6,6 +6,7 @@ import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
 import ValidatedCombobox from '../ui/ValidatedCombobox.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
+import { StableIdAdvancedSection } from '../ui/StableIdField.jsx';
 import QuestionMarkCircleIcon from '../ui/icons/QuestionMarkCircleIcon.jsx';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 import RolesList from '../features/RolesList.jsx';
@@ -198,6 +199,7 @@ const ServerEditor = ({ serverIndex }) => {
 
         // Server-level properties to preserve (common to all server types)
         const serverLevelProps = {
+          id: currentServer.id,
           server: currentServer.server,
           environment: currentServer.environment,
           description: currentServer.description,
@@ -1972,6 +1974,17 @@ const ServerEditor = ({ serverIndex }) => {
                     managedProperties={customPropertyConfigs.map(c => c.property)}
                   />
                 </div>
+
+                {/* Advanced: stable id */}
+                <StableIdAdvancedSection
+                  className="sm:col-span-2"
+                  name={`server-id-${serverIndex}`}
+                  definition="Server"
+                  customizationLevel="servers"
+                  value={servers[serverIndex].id}
+                  onChange={(id) => updateServer('id', id)}
+                  siblingIds={servers.filter((_, i) => i !== serverIndex).map((s) => s?.id).filter(Boolean)}
+                />
               </div>
           </div>
         </div>

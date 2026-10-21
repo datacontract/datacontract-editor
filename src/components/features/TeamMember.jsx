@@ -5,6 +5,7 @@ import TagsInput from '../ui/TagsInput.jsx';
 import CustomPropertiesEditor from '../ui/CustomPropertiesEditor.jsx';
 import AuthoritativeDefinitionsEditor from '../ui/AuthoritativeDefinitionsEditor.jsx';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
+import { StableIdAdvancedSection } from '../ui/StableIdField.jsx';
 import { useEditorStore } from '../../store.js';
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride } from '../../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.jsx';
@@ -15,8 +16,9 @@ import { CustomSections, UngroupedCustomProperties } from '../ui/CustomSection.j
  * @param {number} index - The index of the member in the array
  * @param {Function} onUpdate - Callback to update a member field (index, field, value)
  * @param {Function} onRemove - Callback to remove the member (index)
+ * @param {string[]} [siblingIds] - Ids of the other members, for the stable id uniqueness check
  */
-const TeamMember = ({ member, index, onUpdate, onRemove }) => {
+const TeamMember = ({ member, index, onUpdate, onRemove, siblingIds = [] }) => {
   const { t } = useTranslation();
   const yamlParts = useEditorStore((state) => state.yamlParts);
 
@@ -292,6 +294,16 @@ const TeamMember = ({ member, index, onUpdate, onRemove }) => {
         <AuthoritativeDefinitionsEditor
           value={member.authoritativeDefinitions || []}
           onChange={(value) => onUpdate(index, 'authoritativeDefinitions', value)}
+        />
+
+        {/* Advanced: stable id */}
+        <StableIdAdvancedSection
+          name={`member-${index}-id`}
+          definition="TeamMember"
+          customizationLevel="team.members"
+          value={member.id}
+          onChange={(id) => onUpdate(index, 'id', id)}
+          siblingIds={siblingIds}
         />
       </div>
     </div>

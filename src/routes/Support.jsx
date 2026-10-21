@@ -8,10 +8,11 @@ import supportIcons from '../assets/support-icons/supportIcons.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
 import { CustomSections, UngroupedCustomProperties } from '../components/ui/CustomSection.jsx';
+import { StableIdAdvancedSection } from '../components/ui/StableIdField.jsx';
 import { useTranslation } from 'react-i18next';
 
 // Support Item component with customization support
-const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOptions }) => {
+const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOptions, siblingIds }) => {
   const { t } = useTranslation();
   const yamlParts = useEditorStore((state) => state.yamlParts);
 
@@ -279,6 +280,16 @@ const SupportItem = ({ item, index, onUpdate, onRemove, toolOptions, scopeOption
             validationSection="Support"
           />
         </div>
+
+        <StableIdAdvancedSection
+          className="sm:col-span-2"
+          name={`support-id-${index}`}
+          definition="SupportItem"
+          customizationLevel="support"
+          value={item.id}
+          onChange={(id) => onUpdate(index, 'id', id)}
+          siblingIds={siblingIds}
+        />
       </div>
     </div>
   );
@@ -364,6 +375,7 @@ const Support = () => {
                       onRemove={removeSupportItem}
                       toolOptions={toolOptions}
                       scopeOptions={scopeOptions}
+                      siblingIds={support.filter((_, i) => i !== index).map((s) => s.id).filter(Boolean)}
                     />
                   ))}
                 </div>

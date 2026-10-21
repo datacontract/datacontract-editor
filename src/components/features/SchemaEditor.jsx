@@ -2,7 +2,9 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useEditorStore} from '../../store.js';
 import {isSafeKey} from '../../utils/safeProperty.js';
-import {getSchemaEnumValues, getSchemaPropertyInfo} from '../../lib/schemaEnumExtractor.js';
+import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
+import StableIdField from '../ui/StableIdField.jsx';
+import {useIsStableIdShown} from '../../hooks/useStableId.js';
 import TagsInput from '../ui/TagsInput.jsx';
 import ChevronRightIcon from "../ui/icons/ChevronRightIcon.jsx";
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
@@ -87,7 +89,6 @@ const SchemaEditor = ({schemaIndex}) => {
 	const isPhysicalNameHidden = useIsPropertyHidden('schema', 'physicalName');
 	const isDescriptionHidden = useIsPropertyHidden('schema', 'description');
 	const isBusinessNameHidden = useIsPropertyHidden('schema', 'businessName');
-	const isIdHidden = useIsPropertyHidden('schema', 'id');
 	const isDataGranularityDescriptionHidden = useIsPropertyHidden('schema', 'dataGranularityDescription');
 	const isTagsHidden = useIsPropertyHidden('schema', 'tags');
 	const isLogicalTypeHidden = useIsPropertyHidden('schema', 'logicalType');
@@ -98,7 +99,6 @@ const SchemaEditor = ({schemaIndex}) => {
 	const physicalNameOverride = useStandardPropertyOverride('schema', 'physicalName');
 	const descriptionOverride = useStandardPropertyOverride('schema', 'description');
 	const businessNameOverride = useStandardPropertyOverride('schema', 'businessName');
-	const idOverride = useStandardPropertyOverride('schema', 'id');
 	const logicalTypeOverride = useStandardPropertyOverride('schema', 'logicalType');
 	const dataGranularityDescriptionOverride = useStandardPropertyOverride('schema', 'dataGranularityDescription');
 
@@ -337,8 +337,7 @@ const SchemaEditor = ({schemaIndex}) => {
 		};
 	}, [selectedProperty]);
 
-	// Stable ids only exist from ODCS 3.1 on; the hint and pattern come from the loaded schema
-	const idSchemaInfo = useMemo(() => getSchemaPropertyInfo(jsonSchema, 'id', 'schema'), [jsonSchema]);
+	const isIdShown = useIsStableIdShown('schema', 'schema');
 
 	const relationshipTypeOptions = useMemo(() => {
 		return getSchemaEnumValues(jsonSchema, 'relationships.type', 'schema') ||
@@ -532,23 +531,17 @@ const SchemaEditor = ({schemaIndex}) => {
 												<DisclosurePanel className="px-3 pt-3 pb-2">
 													<div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
 														{/* ID Field */}
-														{idSchemaInfo && !isIdHidden && (
+														{isIdShown && (
 															<div className="sm:col-span-2">
-																<ValidatedInput
+																<StableIdField
 																	name={`schema-id-${schemaIndex}`}
-																	label={idOverride?.title || t('schema.field.id.label')}
-																	value={schema[schemaIndex].id || ''}
-																	onChange={(e) => e.target.value
-																		? setValue(`schema[${schemaIndex}].id`, e.target.value)
+																	definition="schema"
+																	customizationLevel="schema"
+																	value={schema[schemaIndex].id}
+																	onChange={(id) => id
+																		? setValue(`schema[${schemaIndex}].id`, id)
 																		: removeValue(`schema[${schemaIndex}].id`)}
-																	required={idOverride?.required ?? false}
-																	hint={idOverride?.description || idSchemaInfo.description}
-																	placeholder={idOverride?.placeholder}
-																	pattern={idOverride?.pattern || idSchemaInfo.pattern}
-																	patternMessage={idOverride?.patternMessage || t('schema.field.id.patternMessage')}
-																	minLength={idOverride?.minLength}
-																	maxLength={idOverride?.maxLength}
-																	className="font-mono"
+																	siblingIds={schema.filter((_, i) => i !== schemaIndex).map((s) => s.id).filter(Boolean)}
 																/>
 															</div>
 														)}
