@@ -157,7 +157,17 @@
       "label": "Tags",
       "placeholder": "Tag hinzufügen..."
     },
-    "addMember": "+ Team-Mitglied hinzufügen"
+    "addMember": "+ Team-Mitglied hinzufügen",
+    "selector": {
+      "label": "Owner",
+      "placeholder": "Team auswählen...",
+      "search": "Teams durchsuchen...",
+      "noResults": "Keine Teams gefunden",
+      "unknown": "Dieses Team kannst du nicht zuweisen. Wähle ein Team aus der Liste.",
+      "managedHint": "Beschreibung, Tags und Mitglieder kommen vom ausgewählten Team.",
+      "overridesPresent": "Dieser Data Contract setzt eigene Team-Felder, deshalb werden sie unten angezeigt.",
+      "overrideFields": "Felder überschreiben"
+    }
   },
   "support": {
     "heading": "Support",

@@ -178,7 +178,11 @@ init({
   showDelete: true,
 
   // Data
-  teams: [{ id: 'team-1', name: 'Team 1' }],
+  teams: [                           // Team picker for team.name; other team fields move behind "Override fields"
+    { id: 'sales', name: 'Sales', type: 'Domain', selectable: false },
+    { id: 'team-1', name: 'Team 1', description: 'Owns orders', type: 'Team',
+      parentId: 'sales', icon: '/icons/team-1.png' },  // id is written to team.name
+  ],
   domains: [{ id: 'domain-1', name: 'Domain 1' }],
 
   // Features

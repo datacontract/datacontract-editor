@@ -157,7 +157,17 @@
       "label": "Tags",
       "placeholder": "Ajouter un tag..."
     },
-    "addMember": "+ Ajouter un membre"
+    "addMember": "+ Ajouter un membre",
+    "selector": {
+      "label": "Propriétaire",
+      "placeholder": "Sélectionner une équipe...",
+      "search": "Rechercher des équipes...",
+      "noResults": "Aucune équipe trouvée",
+      "unknown": "Vous ne pouvez pas attribuer cette équipe. Sélectionnez une équipe dans la liste.",
+      "managedHint": "La description, les tags et les membres proviennent de l'équipe sélectionnée.",
+      "overridesPresent": "Ce contrat définit ses propres champs d'équipe, ils sont donc affichés ci-dessous.",
+      "overrideFields": "Remplacer les champs"
+    }
   },
   "support": {
     "heading": "Support",

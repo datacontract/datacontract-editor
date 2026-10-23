@@ -157,7 +157,17 @@
       "label": "Tags",
       "placeholder": "Add a tag..."
     },
-    "addMember": "+ Add Team Member"
+    "addMember": "+ Add Team Member",
+    "selector": {
+      "label": "Owner",
+      "placeholder": "Select a team...",
+      "search": "Search teams...",
+      "noResults": "No teams found",
+      "unknown": "This is not one of the teams you can assign. Select a team from the list.",
+      "managedHint": "Description, tags and members are taken from the selected team.",
+      "overridesPresent": "This contract sets team fields of its own, so they are shown below.",
+      "overrideFields": "Override fields"
+    }
   },
   "support": {
     "heading": "Support",

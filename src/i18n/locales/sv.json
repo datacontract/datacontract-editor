@@ -157,7 +157,17 @@
       "label": "Tags",
       "placeholder": "Lägg till en Tag..."
     },
-    "addMember": "+ Lägg till teammedlem"
+    "addMember": "+ Lägg till teammedlem",
+    "selector": {
+      "label": "Ägare",
+      "placeholder": "Välj ett team...",
+      "search": "Sök team...",
+      "noResults": "Inga team hittades",
+      "unknown": "Det här är inte ett team som du kan tilldela. Välj ett team i listan.",
+      "managedHint": "Beskrivning, taggar och medlemmar hämtas från det valda teamet.",
+      "overridesPresent": "Det här datakontraktet anger egna teamfält, därför visas de nedan.",
+      "overrideFields": "Åsidosätt fält"
+    }
   },
   "support": {
     "heading": "Support",

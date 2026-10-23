@@ -144,7 +144,12 @@ const DEFAULT_CONFIG = {
   dataProductsUsingContract: [],
 
   // Optional lists for dropdowns (if not provided, text fields are used)
-  teams: null,         // Array of {id: string, name: string} or null
+  // Teams the contract can be assigned to. When set, the Team section shows a searchable team
+  // picker (written to team.name) and hides the other team fields behind "Override fields".
+  // [{ id, name, description?, type?, parentId?, icon?, selectable? }]: id is the value written to
+  // team.name, parentId nests an entry under another entry's id, icon is an image URL, and
+  // selectable: false shows an entry for structure (e.g. a parent domain) without letting it be picked.
+  teams: null,
   domains: null,       // Array of {id: string, name: string} or null
 
   // Custom backend

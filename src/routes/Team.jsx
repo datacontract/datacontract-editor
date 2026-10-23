@@ -1,10 +1,12 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useEditorStore } from '../store.js';
 import { isSafeKey } from '../utils/safeProperty.js';
 import TagsInput from '../components/ui/TagsInput.jsx';
 import AuthoritativeDefinitionsEditor from '../components/ui/AuthoritativeDefinitionsEditor.jsx';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
 import TeamMember from '../components/features/TeamMember.jsx';
+import TeamSelector from '../components/features/TeamSelector.jsx';
+import { hasTeamOverrides } from '../utils/teamTree.js';
 import { StableIdAdvancedSection } from '../components/ui/StableIdField.jsx';
 import {useShallow} from "zustand/react/shallow";
 import { useCustomization, useIsPropertyHidden, useStandardPropertyOverride, convertEnumToOptions } from '../hooks/useCustomization.js';
@@ -35,6 +37,15 @@ const Team = () => {
   const nameOverride = useStandardPropertyOverride('team', 'name');
   const descriptionOverride = useStandardPropertyOverride('team', 'description');
   const nameOptions = convertEnumToOptions(nameOverride?.enum);
+
+  // With a team list from the host, the team is picked from it and its details (description,
+  // members, ...) come from the host. The other fields only show on request or when the contract
+  // already sets them, so values in the contract are never hidden.
+  const teamDirectory = editorConfig?.teams?.length > 0 ? editorConfig.teams : null;
+  const usesTeamSelector = !!teamDirectory && !isNameHidden;
+  const hasOverrides = hasTeamOverrides(team, customPropertyConfigs.map(c => c.property));
+  const [overridesRequested, setOverridesRequested] = useState(false);
+  const showOverrideFields = !usesTeamSelector || hasOverrides || overridesRequested;
 
   // Convert array format to object lookup for UI components
   const customPropertiesLookup = useMemo(() => {
@@ -168,19 +179,45 @@ const Team = () => {
 
             <div className="space-y-4">
               {/* Team Name */}
-              {!isNameHidden && (
+              {usesTeamSelector && (
+                <div className="space-y-2">
+                  <TeamSelector
+                    name="teamName"
+                    label={nameOverride?.title || t('team.selector.label')}
+                    tooltip={nameOverride?.description}
+                    required={nameOverride?.required}
+                    teams={teamDirectory}
+                    value={team?.name || ''}
+                    onChange={(selectedValue) => updateTeamField('name', selectedValue)}
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs leading-4 text-gray-500">
+                      {hasOverrides ? t('team.selector.overridesPresent') : t('team.selector.managedHint')}
+                    </p>
+                    {!hasOverrides && (
+                      <button
+                        type="button"
+                        aria-pressed={overridesRequested}
+                        onClick={() => setOverridesRequested(!overridesRequested)}
+                        className={`shrink-0 rounded-md px-2 py-1 text-xs font-medium leading-4 ring-1 ring-inset ${
+                          overridesRequested
+                            ? 'bg-indigo-50 text-indigo-700 ring-indigo-600'
+                            : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {t('team.selector.overrideFields')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!usesTeamSelector && !isNameHidden && (
                 (() => {
-                  // Build options from customization enum or editorConfig.teams
-                  const teamOptions = nameOptions ||
-                    (editorConfig?.teams?.length > 0
-                      ? editorConfig.teams.map(t => ({ id: t.id, name: t.name }))
-                      : null);
-
-                  return teamOptions ? (
+                  return nameOptions ? (
                     <ValidatedCombobox
                       name="teamName"
                       label={nameOverride?.title || t('team.name.label')}
-                      options={teamOptions}
+                      options={nameOptions}
                       value={team?.name || ''}
                       onChange={(selectedValue) => updateTeamField('name', selectedValue || undefined)}
                       placeholder={nameOverride?.placeholder || t('team.name.placeholder')}
@@ -210,7 +247,7 @@ const Team = () => {
               )}
 
               {/* Team Description */}
-              {!isDescriptionHidden && (
+              {showOverrideFields && !isDescriptionHidden && (
                 <ValidatedTextarea
                   name="team-description"
                   label={descriptionOverride?.title || t('team.description.label')}
@@ -226,7 +263,7 @@ const Team = () => {
               )}
 
               {/* Team Tags */}
-              {!isTagsHidden && (
+              {showOverrideFields && !isTagsHidden && (
                 <TagsInput
                   label={t('team.tags.label')}
                   value={team?.tags}
@@ -259,57 +296,61 @@ const Team = () => {
                 validationSection="Team"
               />
 
-              {/* Team Custom Properties (raw key-value editor) */}
-              <CustomPropertiesEditor
-                value={team?.customProperties}
-                onChange={(value) => updateTeamField('customProperties', value)}
-                managedProperties={customPropertyConfigs.map(c => c.property)}
-              />
-
-              {/* Team Authoritative Definitions */}
-              <AuthoritativeDefinitionsEditor
-                value={team?.authoritativeDefinitions}
-                onChange={(value) => updateTeamField('authoritativeDefinitions', value)}
-              />
-
-              {/* Advanced: stable id, only the team object (not the legacy member array) has one */}
-              {!Array.isArray(team) && (
-                <StableIdAdvancedSection
-                  name="team-id"
-                  definition="Team"
-                  customizationLevel="team"
-                  value={team?.id}
-                  onChange={(id) => updateTeamField('id', id)}
+              {showOverrideFields && (
+                <>
+                {/* Team Custom Properties (raw key-value editor) */}
+                <CustomPropertiesEditor
+                  value={team?.customProperties}
+                  onChange={(value) => updateTeamField('customProperties', value)}
+                  managedProperties={customPropertyConfigs.map(c => c.property)}
                 />
-              )}
 
-              {/* Team Members */}
-              <div>
-                {/* Display existing members */}
-                {members.length > 0 && (
-                  <div className="space-y-3 mb-2">
-                    {members.map((member, index) => (
-                      <TeamMember
-                        key={index}
-                        member={member}
-                        index={index}
-                        onUpdate={updateMember}
-                        onRemove={removeMember}
-                        siblingIds={members.filter((_, i) => i !== index).map((m) => m?.id).filter(Boolean)}
-                      />
-                    ))}
-                  </div>
+                {/* Team Authoritative Definitions */}
+                <AuthoritativeDefinitionsEditor
+                  value={team?.authoritativeDefinitions}
+                  onChange={(value) => updateTeamField('authoritativeDefinitions', value)}
+                />
+
+                {/* Advanced: stable id, only the team object (not the legacy member array) has one */}
+                {!Array.isArray(team) && (
+                  <StableIdAdvancedSection
+                    name="team-id"
+                    definition="Team"
+                    customizationLevel="team"
+                    value={team?.id}
+                    onChange={(id) => updateTeamField('id', id)}
+                  />
                 )}
 
-                {/* Always show add button */}
-                <button
-                  type="button"
-                  onClick={addMember}
-                  className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
-                >
-                  {t('team.addMember')}
-                </button>
-              </div>
+                {/* Team Members */}
+                <div>
+                  {/* Display existing members */}
+                  {members.length > 0 && (
+                    <div className="space-y-3 mb-2">
+                      {members.map((member, index) => (
+                        <TeamMember
+                          key={index}
+                          member={member}
+                          index={index}
+                          onUpdate={updateMember}
+                          onRemove={removeMember}
+                          siblingIds={members.filter((_, i) => i !== index).map((m) => m?.id).filter(Boolean)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Always show add button */}
+                  <button
+                    type="button"
+                    onClick={addMember}
+                    className="w-full px-2 py-1 border-2 border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+                  >
+                    {t('team.addMember')}
+                  </button>
+                </div>
+                </>
+              )}
             </div>
           </div>
         </div>
