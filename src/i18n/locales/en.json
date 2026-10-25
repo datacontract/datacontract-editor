@@ -802,6 +802,8 @@
       "businessName": "Business name",
       "qualifiedName": "Qualified name"
     },
+    "shared": "shared",
+    "sharedTooltip": "Shared property: one definition used by several concepts, so it appears under each of them",
     "linkedTo": "Linked in data contract: {{properties}}",
     "search": "Search...",
     "loading": "Loading...",

@@ -802,6 +802,8 @@
       "businessName": "Business Name",
       "qualifiedName": "Qualifizierter Name"
     },
+    "shared": "geteilt",
+    "sharedTooltip": "Geteilte Eigenschaft: eine Definition, die von mehreren Konzepten verwendet wird und daher unter jedem von ihnen erscheint",
     "linkedTo": "Verknüpft im Data Contract: {{properties}}",
     "search": "Suchen...",
     "loading": "Wird geladen...",

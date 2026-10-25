@@ -802,6 +802,8 @@
       "businessName": "Nom métier",
       "qualifiedName": "Nom qualifié"
     },
+    "shared": "partagée",
+    "sharedTooltip": "Propriété partagée : une définition utilisée par plusieurs concepts, elle apparaît donc sous chacun d’eux",
     "linkedTo": "Lié dans le Data Contract : {{properties}}",
     "search": "Rechercher...",
     "loading": "Chargement...",

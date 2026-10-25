@@ -802,6 +802,8 @@
       "businessName": "Affärsnamn",
       "qualifiedName": "Kvalificerat namn"
     },
+    "shared": "delad",
+    "sharedTooltip": "Delad egenskap: en definition som används av flera koncept och därför visas under vart och ett av dem",
     "linkedTo": "Länkad i Data Contract: {{properties}}",
     "search": "Sök...",
     "loading": "Laddar...",

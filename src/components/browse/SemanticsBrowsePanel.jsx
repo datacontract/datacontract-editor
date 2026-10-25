@@ -154,6 +154,18 @@ function SemanticTreeNode({ node, depth, idPath, expandedNodes, toggleNode, link
           </LinkedBadge>
         )}
         <span className="flex-1" />
+        {/* Same mark as Entropy Data's concept page: a shared property sits under every concept
+            that uses it, so a search hits it several times; the mark explains why. */}
+        {node.elementType === 'shared_property' && (
+          <span className="flex-shrink-0 flex items-center mr-2">
+            <Tooltip content={t('browsePanel.sharedTooltip')}>
+              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                <LinkIcon className="size-3" />
+                {t('browsePanel.shared')}
+              </span>
+            </Tooltip>
+          </span>
+        )}
         {node.logicalType && (
           <span className="text-xs text-gray-500 font-mono flex-shrink-0">{node.logicalType}</span>
         )}
