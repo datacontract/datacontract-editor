@@ -872,12 +872,12 @@
     "operator": {
       "label": "Operator",
       "placeholder": "Operator auswählen…",
-      "mustBe": "Muss sein (=)",
-      "mustNotBe": "Darf nicht sein (≠)",
-      "mustBeGreaterThan": "Muss größer sein als (>)",
-      "mustBeGreaterOrEqualTo": "Muss größer oder gleich sein (≥)",
-      "mustBeLessThan": "Muss kleiner sein als (<)",
-      "mustBeLessOrEqualTo": "Muss kleiner oder gleich sein (≤)"
+      "mustBe": "Ist gleich (=)",
+      "mustNotBe": "Ist ungleich (≠)",
+      "mustBeGreaterThan": "Größer als (>)",
+      "mustBeGreaterOrEqualTo": "Gleich oder größer als (≥)",
+      "mustBeLessThan": "Kleiner als (<)",
+      "mustBeLessOrEqualTo": "Gleich oder kleiner als (≤)"
     },
     "type": {
       "label": "Typ",
