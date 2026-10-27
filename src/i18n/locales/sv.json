@@ -934,7 +934,7 @@
       "placeholder": "Sök efter namn eller ID",
       "idPlaceholder": "Kontrollens ID",
       "open": "Öppna Custom Quality Check",
-      "onlyOnProperty": "endast på en egenskap",
+      "onlyOnProperty": "Endast tillåten på en egenskap",
       "arguments": "Argument",
       "argumentName": "Argumentnamn",
       "addArgument": "+ Lägg till argument",

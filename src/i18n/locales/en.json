@@ -934,7 +934,7 @@
       "placeholder": "Search by name or ID",
       "idPlaceholder": "ID of the check",
       "open": "Open the custom quality check",
-      "onlyOnProperty": "only on a property",
+      "onlyOnProperty": "Only allowed on a property",
       "arguments": "Arguments",
       "argumentName": "Argument name",
       "addArgument": "+ Add argument",

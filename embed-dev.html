@@ -338,7 +338,7 @@ servers:
         customQualityChecks: [
             {
                 id: 'between', name: 'Value range', description: '${column} is between ${arguments.min} and ${arguments.max}.',
-                dimension: 'conformity', href: 'https://example.com/customqualitychecks/between',
+                dimension: 'conformity', href: 'https://example.com/customqualitychecks/between', team: 'team-3',
                 arguments: [{ name: 'min', type: 'any', required: true }, { name: 'max', type: 'any', required: true }],
                 usesColumn: true, expectedResult: { comparator: 'mustBe', value: 0 },
             },

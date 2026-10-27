@@ -20,6 +20,7 @@ import ChevronDownIcon from './icons/ChevronDownIcon.jsx';
 import ChevronRightIcon from './icons/ChevronRightIcon.jsx';
 import ExclamationCircleIcon from './icons/ExclamationCircleIcon.jsx';
 import ExternalLinkIcon from './icons/ExternalLinkIcon.jsx';
+import TeamIcon from './icons/TeamIcon.jsx';
 import StableIdField from './StableIdField.jsx';
 
 const TrashIcon = () => (
@@ -93,6 +94,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
   const { t } = useTranslation();
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const customQualityChecks = useEditorStore((state) => state.editorConfig?.customQualityChecks ?? null);
+  const teams = useEditorStore((state) => state.editorConfig?.teams ?? null);
   const resolvedLabel = label || t('quality.label');
 
   // Get dynamic enum values from schema
@@ -161,6 +163,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
           context={context}
           siblingIds={rules.filter((_, i) => i !== index).map((r) => r?.id).filter(Boolean)}
           customQualityChecks={customQualityChecks}
+          teams={teams}
           tableName={tableName}
           columnName={columnName}
         />
@@ -177,7 +180,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
   );
 };
 
-const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, tableName, columnName }) => {
+const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, teams, tableName, columnName }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
@@ -244,6 +247,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
     search: `${option.name ?? ''} ${option.id}`,
     description: fillDescription(option, {}),
     disabled: Boolean(option.usesColumn) && context !== 'property',
+    team: option.team ? (teams?.find((team) => team.id === option.team) ?? { id: option.team }) : null,
   }));
   const declaredArguments = check?.arguments ?? null;
   const undeclaredArgumentNames = declaredArguments
@@ -423,13 +427,22 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                   displayValue={(option) => (option.name === option.id ? option.id : `${option.name} · ${option.id}`)}
                   hasError={problemsFor('check').length > 0}
                   renderOption={(option) => (
-                    <div className={option.disabled ? 'opacity-50' : ''}>
-                      <div className="flex items-baseline gap-2">
+                    <div>
+                      <div className={`flex items-baseline gap-2 ${option.disabled ? 'opacity-50' : ''}`}>
                         <span className="truncate font-medium">{option.name}</span>
                         {option.name !== option.id && <span className="font-mono text-[11px] opacity-75">{option.id}</span>}
-                        {option.disabled && <span className="ml-auto whitespace-nowrap text-[11px] opacity-75">{t('quality.customQualityCheck.onlyOnProperty')}</span>}
+                        {option.team && (
+                          <span className="ml-auto flex max-w-40 shrink-0 items-center gap-1 self-center text-[11px] opacity-75">
+                            {option.team.icon
+                              ? <img src={option.team.icon} alt="" className="size-3.5 shrink-0 object-contain" />
+                              : <TeamIcon className="size-3.5 shrink-0" />}
+                            <span className="truncate">{option.team.name || option.team.id}</span>
+                          </span>
+                        )}
                       </div>
-                      {option.description && <div className="mt-0.5 truncate opacity-75">{option.description}</div>}
+                      {option.disabled
+                        ? <div className="mt-0.5 text-red-600">{t('quality.customQualityCheck.onlyOnProperty')}</div>
+                        : option.description && <div className="mt-0.5 truncate opacity-75">{option.description}</div>}
                     </div>
                   )}
                 />

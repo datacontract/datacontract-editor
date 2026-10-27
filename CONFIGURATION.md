@@ -188,6 +188,7 @@ init({
     { id: 'between', name: 'Value range',     // id is written to implementation.check, matched regardless of case
       description: '${column} is between ${arguments.min} and ${arguments.max}.',
       dimension: 'conformity', href: 'https://example.com/checks/between',
+      team: 'team-1',                                             // owning team's id, looked up in teams
       arguments: [{ name: 'min', type: 'any', required: true },   // type: any, number or identifier
                   { name: 'max', type: 'any', required: true }],
       usesColumn: true,                                           // only works on a property
