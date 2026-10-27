@@ -184,6 +184,15 @@ init({
       parentId: 'sales', icon: '/icons/team-1.png' },  // id is written to team.name
   ],
   domains: [{ id: 'domain-1', name: 'Domain 1' }],
+  customQualityChecks: [             // Offered for quality rules of type "Custom (pre-defined)"
+    { id: 'between', name: 'Value range',     // id is written to implementation.check, matched regardless of case
+      description: '${column} is between ${arguments.min} and ${arguments.max}.',
+      dimension: 'conformity', href: 'https://example.com/checks/between',
+      arguments: [{ name: 'min', type: 'any', required: true },   // type: any, number or identifier
+                  { name: 'max', type: 'any', required: true }],
+      usesColumn: true,                                           // only works on a property
+      expectedResult: { comparator: 'mustBe', value: 0 } },       // null when each rule sets its own
+  ],
 
   // Features
   tests: { ... },

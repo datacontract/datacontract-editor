@@ -335,6 +335,21 @@ servers:
 
         managedTags: [{ tag: "pii"}, { tag: "example", href: "https://example.com"}],
 
+        customQualityChecks: [
+            {
+                id: 'between', name: 'Value range', description: '${column} is between ${arguments.min} and ${arguments.max}.',
+                dimension: 'conformity', href: 'https://example.com/customqualitychecks/between',
+                arguments: [{ name: 'min', type: 'any', required: true }, { name: 'max', type: 'any', required: true }],
+                usesColumn: true, expectedResult: { comparator: 'mustBe', value: 0 },
+            },
+            {
+                id: 'recent_rows', name: 'Recent rows', description: 'Rows that arrived within the last ${arguments.days} days.',
+                dimension: 'timeliness', href: 'https://example.com/customqualitychecks/recent_rows',
+                arguments: [{ name: 'timestamp_column', type: 'identifier', required: true }, { name: 'days', type: 'number', required: false, default: 1 }],
+                usesColumn: false, expectedResult: { comparator: 'mustBeGreaterThan', value: 0 },
+            },
+        ],
+
         // =====================================================================
         // AI Configuration - OpenAI-compatible endpoint
         // =====================================================================

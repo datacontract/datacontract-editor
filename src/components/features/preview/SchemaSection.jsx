@@ -1,11 +1,11 @@
 import {createElement, Fragment, memo} from 'react';
-import {useTranslation} from 'react-i18next';
+import {Trans, useTranslation} from 'react-i18next';
 import Tags from '../../ui/Tags.jsx';
 import Tooltip from '../../ui/Tooltip.jsx';
 import LockClosedIcon from '../../ui/icons/LockClosedIcon.jsx';
 import QuestionMarkCircleIcon from '../../ui/icons/QuestionMarkCircleIcon.jsx';
 import InfoIcon from '../../ui/icons/InfoIcon.jsx';
-import {getQualityCheckIcon} from '../../ui/icons/QualityCheckIcons.jsx';
+import {getQualityCheckIcon, normalizeQualityDimension} from '../../ui/icons/QualityCheckIcons.jsx';
 import AuthoritativeDefinitionsPreview from '../../ui/AuthoritativeDefinitionsPreview.jsx';
 import CustomPropertiesPreview from '../../ui/CustomPropertiesPreview.jsx';
 import {ContextDisclosure} from './ContextSection.jsx';
@@ -22,31 +22,91 @@ import {
 	resolveQualityCheckRows,
 	resolveTypeDetailRows,
 } from "../../../utils/previewSchemaUtils.js";
+import {
+	argumentsOf,
+	checkIdOf,
+	customQualityCheckProblems,
+	fillCheckDescription,
+	findCustomQualityCheck,
+	formatArguments,
+	isPreDefinedRule,
+} from "../../../utils/customQualityChecks.js";
 
 const pillClassName = 'inline-flex items-center rounded-md bg-gray-50 px-1 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10';
 const deprecatedPillClassName = 'inline-flex items-center rounded-md bg-amber-50 px-1 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20';
 
 const formatCustomValue = (value) => (value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value));
 
-// A quality check as a pill; the tooltip lists its description and every configured field
-const QualityCheckPill = ({ qualityCheck }) => {
+// A quality check as a pill with the details Entropy Data's contract page shows in its tooltip. A rule that uses a
+// custom quality check shows the check's name, description, dimension and expected result unless it sets its own.
+const QualityCheckPill = ({ qualityCheck: rule, tableName, columnName }) => {
 	const { t } = useTranslation();
-	const rows = resolveQualityCheckRows(qualityCheck);
+	const customQualityChecks = useEditorStore((state) => state.editorConfig?.customQualityChecks ?? null);
+	let qualityCheck = rule;
+	let title = rule.name;
+	let customRows = [];
+	let check = null;
+	let problem = null;
+	if (isPreDefinedRule(rule)) {
+		const { engine, implementation, ...ownFields } = rule; // eslint-disable-line no-unused-vars
+		const id = checkIdOf(rule);
+		const args = argumentsOf(rule);
+		check = findCustomQualityCheck(customQualityChecks, id);
+		const hasOwnExpectedResult = Object.keys(ownFields).some((key) => key.startsWith('must'));
+		qualityCheck = {
+			dimension: check?.dimension,
+			...(check?.expectedResult && !hasOwnExpectedResult ? { [check.expectedResult.comparator]: check.expectedResult.value } : {}),
+			...ownFields,
+			description: rule.description || fillCheckDescription(check, args, { table: tableName, column: columnName }),
+		};
+		title = rule.name || check?.name || (id ? `${check?.id ?? id}(${formatArguments(args)})` : '');
+		problem = customQualityCheckProblems(rule, customQualityChecks, columnName ? 'property' : 'schema')[0] ?? null;
+		customRows = [
+			['qualityCustomQualityCheck', check?.id ?? id],
+			['qualityCheckArguments', Object.keys(args).length > 0 ? formatArguments(args) : undefined],
+			['qualityError', problem ? t(`quality.customQualityCheck.problem.${problem.key}`, problem.values) : undefined],
+		];
+	}
+	const dimension = normalizeQualityDimension(qualityCheck.dimension);
+	const rows = resolveQualityCheckRows(qualityCheck, customRows);
 	const tooltipContent = (
 		<div className="space-y-1">
-			{qualityCheck.description && <div>{qualityCheck.description}</div>}
-			{rows.map(({ key, value }) => (
-				<div key={key} className="text-gray-300 break-words">{t(`preview.schema.${key}`, { value })}</div>
-			))}
+			{qualityCheck.description && <div className="font-medium">{qualityCheck.description}</div>}
+			{rows.map(({ key, value }) => {
+				if (key === 'qualityCheckArguments') {
+					return (
+						<div key={key} className="text-gray-300 break-words">
+							<Trans i18nKey="preview.schema.qualityCheckArguments" values={{ value }} components={{ mono: <span className="font-mono" /> }} />
+						</div>
+					);
+				}
+				const shown = key === 'qualityDimension' && dimension ? t(`preview.schema.dimensionLabels.${dimension}`) : value;
+				return (
+					<div key={key} className={`${key === 'qualityError' ? 'text-red-300' : 'text-gray-300'} break-words`}>
+						{t(`preview.schema.${key}`, { value: shown })}
+					</div>
+				);
+			})}
 		</div>
+	);
+	const badgeClassName = `inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-1 mt-1 ${problem
+		? 'bg-red-50 text-red-700 ring-red-600/20'
+		: 'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20'}`;
+	const badgeContent = (
+		<>
+			{createElement(getQualityCheckIcon(qualityCheck), { className: 'w-3 h-3' })}
+			{title || t('preview.schema.qualityCheck')}
+		</>
 	);
 	return (
 		<Tooltip content={tooltipContent}>
-			<span
-				className="inline-flex items-center gap-1 rounded-md bg-fuchsia-50 px-2 py-1 text-xs font-medium text-fuchsia-700 ring-1 ring-inset ring-fuchsia-600/20 mr-1 mt-1">
-				{createElement(getQualityCheckIcon(qualityCheck), { className: 'w-3 h-3' })}
-				{qualityCheck.name || t('preview.schema.qualityCheck')}
-			</span>
+			{check?.href ? (
+				<a href={check.href} target="_blank" rel="noopener noreferrer" className={`${badgeClassName} cursor-pointer hover:underline`}>
+					{badgeContent}
+				</a>
+			) : (
+				<span className={badgeClassName}>{badgeContent}</span>
+			)}
 		</Tooltip>
 	);
 };
@@ -317,7 +377,7 @@ const SchemaProperty = ({ property, propertyName, schemaName, indent = 0 }) => {
 							<RelationshipPill key={rIdx} relationship={relationship} />
 						))}
 						{property.quality && Array.isArray(property.quality) && property.quality.map((qualityCheck, qIdx) => (
-							<QualityCheckPill key={qIdx} qualityCheck={qualityCheck} />
+							<QualityCheckPill key={qIdx} qualityCheck={qualityCheck} tableName={schemaName} columnName={propertyName} />
 						))}
 					</div>
 				</td>
@@ -409,7 +469,7 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							{schema && schema.quality && schema.quality.length > 0 && (
 								<div className="mt-2">
 									{schema.quality.map((qualityCheck, idx) => (
-										<QualityCheckPill key={idx} qualityCheck={qualityCheck} />
+										<QualityCheckPill key={idx} qualityCheck={qualityCheck} tableName={schemaName} />
 									))}
 								</div>
 							)}

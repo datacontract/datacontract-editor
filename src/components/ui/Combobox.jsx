@@ -117,6 +117,7 @@ const ComboboxComponent = ({
             <ComboboxOption
               key={option.id || option.value || index}
               value={acceptAnyInput ? (option.id ?? option.value ?? option.name ?? option.label ?? option) : option}
+              disabled={option?.disabled}
               className="cursor-default px-3 py-2 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white data-focus:outline-hidden"
             >
               {renderOption ? (

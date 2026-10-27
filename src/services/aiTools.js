@@ -69,7 +69,7 @@ export const VALIDATE_CONTRACT_TOOL = {
  */
 export const READ_CUSTOMIZATIONS_TOOL = {
   name: 'readCustomizations',
-  description: 'Reads the editor customizations configuration. Returns available teams, domains, server types, and other custom settings configured for this editor instance.',
+  description: 'Reads the editor customizations configuration. Returns available teams, domains, server types, the organization\'s custom quality checks (use one with a quality rule of type custom, engine datacontract-cli and implementation { check: <id>, arguments }), and other custom settings configured for this editor instance.',
   parameters: {
     type: 'object',
     properties: {},
@@ -169,6 +169,7 @@ async function handleReadCustomizations(args, context) {
   return {
     teams: editorConfig.teams || null,
     domains: editorConfig.domains || null,
+    customQualityChecks: editorConfig.customQualityChecks || null,
     customizations: editorConfig.customizations || null,
     tests: {
       enabled: editorConfig.tests?.enabled ?? true,

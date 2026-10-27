@@ -884,7 +884,8 @@
       "text": "Texte",
       "library": "Library (métrique)",
       "sql": "SQL",
-      "custom": "Personnalisé"
+      "preDefined": "Personnalisé (prédéfini)",
+      "custom": "Personnalisé (spécifique au fournisseur)"
     },
     "name": {
       "label": "Nom",
@@ -927,6 +928,32 @@
     "implementation": {
       "label": "Implémentation",
       "placeholder": "Bloc de configuration spécifique au fournisseur"
+    },
+    "customQualityCheck": {
+      "label": "Custom Quality Check",
+      "placeholder": "Rechercher par nom ou ID",
+      "idPlaceholder": "ID du contrôle",
+      "open": "Ouvrir le Custom Quality Check",
+      "onlyOnProperty": "uniquement sur une propriété",
+      "arguments": "Arguments",
+      "argumentName": "Nom de l'argument",
+      "addArgument": "+ Ajouter un argument",
+      "removeArgument": "Supprimer l'argument {{argument}}",
+      "defaultValue": "{{value}} (par défaut)",
+      "invalidYaml": "YAML non valide : {{message}}",
+      "dimensionFromCheck": "{{dimension}} (du contrôle)",
+      "hasProblem": "Cette règle a un problème",
+      "problems_one": "{{count}} problème",
+      "problems_other": "{{count}} problèmes",
+      "problem": {
+        "required": "Obligatoire",
+        "unknownCheck": "Ce Custom Quality Check n'est pas défini dans Entropy Data.",
+        "columnCheckOnSchema": "Ce Custom Quality Check fait référence à la colonne : utilisez-le donc sur une propriété.",
+        "notANumber": "Doit être un nombre.",
+        "notAnIdentifier": "Doit être le nom d'une colonne ou d'une table.",
+        "undeclaredArgument": "{{check}} n'a pas d'argument {{argument}}.",
+        "noExpectedResult": "Choisissez un opérateur : le Custom Quality Check n'a pas de résultat attendu."
+      }
     },
     "value": {
       "label": "Valeur",
@@ -1375,12 +1402,21 @@
       "no": "Non",
       "qualityType": "Type : {{value}}",
       "qualityDimension": "Dimension : {{value}}",
+      "dimensionLabels": {
+        "accuracy": "Exactitude",
+        "completeness": "Complétude",
+        "conformity": "Conformité",
+        "consistency": "Cohérence",
+        "coverage": "Couverture",
+        "timeliness": "Actualité",
+        "uniqueness": "Unicité"
+      },
+      "dimensions": "Dimensions : {{value}}",
       "qualityMetric": "Métrique : {{value}}",
       "mustBeGreaterThan": "Doit être > {{value}}",
       "mustBeLessThan": "Doit être < {{value}}",
       "mustBe": "Doit être {{value}}",
       "qualityCheck": "Contrôle de qualité",
-      "dimensions": "Dimensions : {{value}}",
       "elementType": "Type d’élément : {{value}}",
       "distanceMetric": "Métrique de distance : {{value}}",
       "normalized": "Normalisé : {{value}}",
@@ -1403,6 +1439,9 @@
       "qualityScheduler": "Scheduler : {{value}}",
       "qualityUnit": "Unité : {{value}}",
       "qualityTags": "Tags : {{value}}",
+      "qualityCustomQualityCheck": "Custom Quality Check : {{value}}",
+      "qualityCheckArguments": "Arguments : <mono>{{value}}</mono>",
+      "qualityError": "Erreur : {{value}}",
       "mustNotBe": "Ne doit pas être {{value}}",
       "mustBeGreaterOrEqualTo": "Doit être >= {{value}}",
       "mustBeLessOrEqualTo": "Doit être <= {{value}}",
