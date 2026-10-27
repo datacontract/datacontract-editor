@@ -94,7 +94,6 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
   const { t } = useTranslation();
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const customQualityChecks = useEditorStore((state) => state.editorConfig?.customQualityChecks ?? null);
-  const teams = useEditorStore((state) => state.editorConfig?.teams ?? null);
   const resolvedLabel = label || t('quality.label');
 
   // Get dynamic enum values from schema
@@ -163,7 +162,6 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
           context={context}
           siblingIds={rules.filter((_, i) => i !== index).map((r) => r?.id).filter(Boolean)}
           customQualityChecks={customQualityChecks}
-          teams={teams}
           tableName={tableName}
           columnName={columnName}
         />
@@ -180,7 +178,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
   );
 };
 
-const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, teams, tableName, columnName }) => {
+const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, tableName, columnName }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
@@ -247,7 +245,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
     search: `${option.name ?? ''} ${option.id}`,
     description: fillDescription(option, {}),
     disabled: Boolean(option.usesColumn) && context !== 'property',
-    team: option.team ? (teams?.find((team) => team.id === option.team) ?? { id: option.team }) : null,
+    team: option.team ?? null,
   }));
   const declaredArguments = check?.arguments ?? null;
   const undeclaredArgumentNames = declaredArguments
