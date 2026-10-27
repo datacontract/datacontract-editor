@@ -184,7 +184,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
   const [selectedOperator, setSelectedOperator] = useState(null);
   const [isAddingArgument, setIsAddingArgument] = useState(false);
   // Clearing the name deletes the key; the field must not vanish while it is being edited.
-  const [hadName] = useState(() => rule.name !== undefined);
+  const [hadName, setHadName] = useState(() => rule.name !== undefined);
   const ruleType = rule.type || 'library';
   const preDefined = isPreDefinedRule(rule);
 
@@ -388,7 +388,10 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                   <input
                     type="text"
                     value={rule.name || ''}
-                    onChange={(e) => onUpdate(index, 'name', e.target.value)}
+                    onChange={(e) => {
+                      setHadName(true);
+                      onUpdate(index, 'name', e.target.value);
+                    }}
                     className="w-full rounded border border-gray-300 bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
                     placeholder={check?.name || t('quality.name.placeholder')}
                   />
