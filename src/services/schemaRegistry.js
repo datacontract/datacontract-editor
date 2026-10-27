@@ -8,6 +8,7 @@
  */
 import { useEditorStore } from '../store.js';
 import { mergeCustomizationsIntoSchema } from '../utils/mergeCustomizationsIntoSchema.js';
+import { relaxRelationshipType } from '../utils/relaxRelationshipType.js';
 import { compareApiVersions } from '../lib/apiVersion.js';
 
 /** Used when neither the host nor the store provides a schema URL. */
@@ -140,6 +141,7 @@ export function loadSchema(url = activeSchemaUrl()) {
         }
         return response.json();
       })
+      .then(relaxRelationshipType)
       .catch((error) => {
         schemaPromises.delete(key);
         throw error;
