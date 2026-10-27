@@ -23,6 +23,7 @@ import Tooltip from '../ui/Tooltip.jsx';
 import {SparkleButton} from '../../ai/index.js';
 import {useEditorStore} from '../../store.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
+import {countCustomQualityCheckProblems} from '../../utils/customQualityChecks.js';
 import {StableIdAdvancedSection} from '../ui/StableIdField.jsx';
 import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
 import {CustomContentAfter, CustomSections, UngroupedCustomProperties} from '../ui/CustomSection.jsx';
@@ -43,14 +44,22 @@ const countFilled = (values) => values.filter((v) => {
 }).length;
 
 // Section header label with a badge showing how many fields are filled
-const SectionLabel = ({ label, count }) => (
-  <span className="flex items-center gap-1.5">
-    <span>{label}</span>
-    {count > 0 && (
-      <span className="rounded-full bg-indigo-100 px-1.5 text-[10px] font-semibold leading-4 text-indigo-700">{count}</span>
-    )}
-  </span>
-);
+const SectionLabel = ({ label, count, problemCount = 0 }) => {
+  const { t } = useTranslation();
+  return (
+    <span className="flex items-center gap-1.5">
+      <span>{label}</span>
+      {count > 0 && (
+        <span className="rounded-full bg-indigo-100 px-1.5 text-[10px] font-semibold leading-4 text-indigo-700">{count}</span>
+      )}
+      {problemCount > 0 && (
+        <span className="rounded-full bg-red-100 px-1.5 text-[10px] font-semibold leading-4 text-red-700">
+          {t('quality.customQualityCheck.problems', { count: problemCount })}
+        </span>
+      )}
+    </span>
+  );
+};
 
 const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo, siblingIds = [] }) => {
   const { t } = useTranslation();
@@ -1447,7 +1456,11 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
         {({ open }) => (
           <>
             <DisclosureButton className="flex w-full items-center justify-between rounded bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500/75">
-              <SectionLabel label={t('diagram.section.dataQuality')} count={sectionCounts.dataQuality} />
+              <SectionLabel
+                label={t('diagram.section.dataQuality')}
+                count={sectionCounts.dataQuality}
+                problemCount={countCustomQualityCheckProblems(property.quality, editorConfig?.customQualityChecks, 'property')}
+              />
               <ChevronRightIcon
                 className={`h-3 w-3 text-gray-500 transition-transform ${open ? 'rotate-90' : ''}`}
               />
@@ -1457,6 +1470,8 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 value={property.quality}
                 onChange={(value) => updateField('quality', value)}
                 context="property"
+                columnName={property.name}
+                showProblemCount={false}
               />
             </DisclosurePanel>
           </>

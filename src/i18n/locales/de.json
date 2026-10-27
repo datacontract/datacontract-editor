@@ -884,7 +884,8 @@
       "text": "Text",
       "library": "Library (Metrik)",
       "sql": "SQL",
-      "custom": "Benutzerdefiniert"
+      "preDefined": "Benutzerdefiniert (vordefiniert)",
+      "custom": "Benutzerdefiniert (herstellerspezifisch)"
     },
     "name": {
       "label": "Name",
@@ -927,6 +928,32 @@
     "implementation": {
       "label": "Implementierung",
       "placeholder": "Anbieterspezifischer Konfigurationsblock"
+    },
+    "customQualityCheck": {
+      "label": "Custom Quality Check",
+      "placeholder": "Nach Name oder ID suchen",
+      "idPlaceholder": "ID des Checks",
+      "open": "Custom Quality Check öffnen",
+      "onlyOnProperty": "nur auf einer Eigenschaft",
+      "arguments": "Argumente",
+      "argumentName": "Argumentname",
+      "addArgument": "+ Argument hinzufügen",
+      "removeArgument": "Argument {{argument}} entfernen",
+      "defaultValue": "{{value}} (Standard)",
+      "invalidYaml": "Kein gültiges YAML: {{message}}",
+      "dimensionFromCheck": "{{dimension}} (aus dem Check)",
+      "hasProblem": "Diese Regel hat ein Problem",
+      "problems_one": "{{count}} Problem",
+      "problems_other": "{{count}} Probleme",
+      "problem": {
+        "required": "Erforderlich",
+        "unknownCheck": "Dieser Custom Quality Check ist in Entropy Data nicht definiert.",
+        "columnCheckOnSchema": "Dieser Custom Quality Check bezieht sich auf die Spalte, verwende ihn also auf einer Eigenschaft.",
+        "notANumber": "Muss eine Zahl sein.",
+        "notAnIdentifier": "Muss der Name einer Spalte oder Tabelle sein.",
+        "undeclaredArgument": "{{check}} hat kein Argument {{argument}}.",
+        "noExpectedResult": "Wähle einen Operator: Der Custom Quality Check hat kein erwartetes Ergebnis."
+      }
     },
     "value": {
       "label": "Wert",

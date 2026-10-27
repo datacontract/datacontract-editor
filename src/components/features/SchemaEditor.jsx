@@ -730,6 +730,7 @@ const SchemaEditor = ({schemaIndex}) => {
 															// TODO: Implement update
 															onChange={(value) => setValue(`schema[${schemaIndex}].quality`, value)}
 															context="schema"
+															tableName={schema[schemaIndex].name}
 														/>
 													</div>
 

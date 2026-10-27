@@ -317,6 +317,7 @@ export function defaultStoreConfig(set, get) {
 			showDelete: true, // Show Delete button in EMBEDDED mode
 			teams: null,
 			domains: null,
+			customQualityChecks: null,
 			tests: DEFAULT_TESTS_CONFIG,
 			ai: DEFAULT_AI_CONFIG,
 			semantics: null, // { baseUrl, pageParam, queryParam, definitionAcceptHeader, batchResolveUrl } for the semantic ontology tree API; when semantics.batchResolveUrl is set, authoritativeDefinitions are batch-fetched on load

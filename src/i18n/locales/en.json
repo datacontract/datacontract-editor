@@ -884,7 +884,8 @@
       "text": "Text",
       "library": "Library (Metric)",
       "sql": "SQL",
-      "custom": "Custom"
+      "preDefined": "Custom (pre-defined)",
+      "custom": "Custom (vendor-specific)"
     },
     "name": {
       "label": "Name",
@@ -927,6 +928,32 @@
     "implementation": {
       "label": "Implementation",
       "placeholder": "Vendor-specific configuration block"
+    },
+    "customQualityCheck": {
+      "label": "Custom quality check",
+      "placeholder": "Search by name or ID",
+      "idPlaceholder": "ID of the check",
+      "open": "Open the custom quality check",
+      "onlyOnProperty": "only on a property",
+      "arguments": "Arguments",
+      "argumentName": "Argument name",
+      "addArgument": "+ Add argument",
+      "removeArgument": "Remove argument {{argument}}",
+      "defaultValue": "{{value}} (default)",
+      "invalidYaml": "Not valid YAML: {{message}}",
+      "dimensionFromCheck": "{{dimension}} (from the check)",
+      "hasProblem": "This rule has a problem",
+      "problems_one": "{{count}} problem",
+      "problems_other": "{{count}} problems",
+      "problem": {
+        "required": "Required",
+        "unknownCheck": "This custom quality check is not defined in Entropy Data.",
+        "columnCheckOnSchema": "This custom quality check refers to the column, so use it on a property.",
+        "notANumber": "Must be a number.",
+        "notAnIdentifier": "Must be the name of one column or table.",
+        "undeclaredArgument": "{{check}} has no argument {{argument}}.",
+        "noExpectedResult": "Choose an operator: the custom quality check has no expected result."
+      }
     },
     "value": {
       "label": "Value",

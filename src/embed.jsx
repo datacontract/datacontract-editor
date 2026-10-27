@@ -152,6 +152,13 @@ const DEFAULT_CONFIG = {
   teams: null,
   domains: null,       // Array of {id: string, name: string} or null
 
+  // The organization's custom quality checks, offered for quality rules of type "Custom (pre-defined)"
+  // (type: custom, engine: datacontract-cli). [{ id, name?, description?, dimension?, href?,
+  // arguments: [{ name, type: 'any'|'number'|'identifier', required, default? }], usesColumn,
+  // expectedResult: { comparator, value } | null }]: id is written to implementation.check and matched
+  // regardless of case; usesColumn marks checks that only work on a property. null = no list.
+  customQualityChecks: null,
+
   // Custom backend
   backend: null,
 
@@ -359,6 +366,7 @@ function createConfiguredStore(config) {
 				dataProductsUsingContract: config.dataProductsUsingContract,
 				teams: config.teams,
 				domains: config.domains,
+				customQualityChecks: config.customQualityChecks,
 				tests: config.tests,
 				customizations: config.customizations,
 				ai: config.ai,

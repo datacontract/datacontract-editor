@@ -884,7 +884,8 @@
       "text": "Text",
       "library": "Bibliotek (mått)",
       "sql": "SQL",
-      "custom": "Anpassad"
+      "preDefined": "Anpassad (fördefinierad)",
+      "custom": "Anpassad (leverantörsspecifik)"
     },
     "name": {
       "label": "Namn",
@@ -927,6 +928,32 @@
     "implementation": {
       "label": "Implementation",
       "placeholder": "Leverantörsspecifikt konfigurationsblock"
+    },
+    "customQualityCheck": {
+      "label": "Custom Quality Check",
+      "placeholder": "Sök efter namn eller ID",
+      "idPlaceholder": "Kontrollens ID",
+      "open": "Öppna Custom Quality Check",
+      "onlyOnProperty": "endast på en egenskap",
+      "arguments": "Argument",
+      "argumentName": "Argumentnamn",
+      "addArgument": "+ Lägg till argument",
+      "removeArgument": "Ta bort argumentet {{argument}}",
+      "defaultValue": "{{value}} (standard)",
+      "invalidYaml": "Ogiltig YAML: {{message}}",
+      "dimensionFromCheck": "{{dimension}} (från kontrollen)",
+      "hasProblem": "Den här regeln har ett problem",
+      "problems_one": "{{count}} problem",
+      "problems_other": "{{count}} problem",
+      "problem": {
+        "required": "Obligatorisk",
+        "unknownCheck": "Den här Custom Quality Check är inte definierad i Entropy Data.",
+        "columnCheckOnSchema": "Den här Custom Quality Check refererar till kolumnen, så använd den på en egenskap.",
+        "notANumber": "Måste vara ett tal.",
+        "notAnIdentifier": "Måste vara namnet på en kolumn eller tabell.",
+        "undeclaredArgument": "{{check}} har inget argument {{argument}}.",
+        "noExpectedResult": "Välj en operator: Custom Quality Check har inget förväntat resultat."
+      }
     },
     "value": {
       "label": "Värde",
