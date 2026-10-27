@@ -207,8 +207,8 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
   const handleTypeChange = (newType) => {
     if (newType === 'preDefined') {
       onUpdate(index, { type: 'custom', engine: 'datacontract-cli' });
-    } else if (newType === 'custom' && preDefined) {
-      onUpdate(index, 'engine', undefined);
+    } else if (preDefined) {
+      onUpdate(index, { type: newType, engine: undefined });
     } else {
       onUpdate(index, 'type', newType);
     }
