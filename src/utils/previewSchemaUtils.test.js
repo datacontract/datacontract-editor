@@ -198,7 +198,7 @@ describe('previewSchemaUtils - resolveTypeDetailRows', () => {
 });
 
 describe('previewSchemaUtils - resolveQualityCheckRows', () => {
-  it('lists the lines Entropy Data shows, in its order', () => {
+  it('lists the lines Entropy Data shows, then every other field the quality editor sets', () => {
     const rows = resolveQualityCheckRows({
       name: 'Orders arrive daily',
       description: 'At least one order per day',
@@ -208,6 +208,9 @@ describe('previewSchemaUtils - resolveQualityCheckRows', () => {
       mustBeBetween: [1, 10],
       dimension: 'completeness',
       severity: 'error',
+      businessImpact: 'operational',
+      schedule: '0 6 * * *',
+      scheduler: 'cron',
       unit: 'rows',
       tags: ['daily'],
     });
@@ -216,7 +219,29 @@ describe('previewSchemaUtils - resolveQualityCheckRows', () => {
       { key: 'qualityDimension', value: 'completeness' },
       { key: 'mustBeGreaterThan', value: '0' },
       { key: 'mustBeBetween', value: '1, 10' },
+      { key: 'qualityQuery', value: 'SELECT COUNT(*) FROM orders' },
+      { key: 'qualitySeverity', value: 'error' },
+      { key: 'qualityBusinessImpact', value: 'operational' },
+      { key: 'qualitySchedule', value: '0 6 * * *' },
+      { key: 'qualityScheduler', value: 'cron' },
+      { key: 'qualityUnit', value: 'rows' },
+      { key: 'qualityTags', value: 'daily' },
     ]);
+  });
+
+  it('formats library arguments and vendor-specific custom checks', () => {
+    expect(resolveQualityCheckRows({ metric: 'invalidValues', arguments: { validValues: ['a', 'b'] }, mustBe: 0 }))
+      .toEqual([
+        { key: 'qualityMetric', value: 'invalidValues' },
+        { key: 'mustBe', value: '0' },
+        { key: 'qualityArguments', value: 'validValues: a, b' },
+      ]);
+    expect(resolveQualityCheckRows({ type: 'custom', engine: 'soda', implementation: 'checks for t' }))
+      .toEqual([
+        { key: 'qualityType', value: 'custom' },
+        { key: 'qualityEngine', value: 'soda' },
+        { key: 'qualityImplementation', value: 'checks for t' },
+      ]);
   });
 
   it('puts custom rows after the type', () => {
