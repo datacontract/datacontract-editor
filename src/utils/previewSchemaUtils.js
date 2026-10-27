@@ -103,32 +103,21 @@ const formatQualityValue = (value) => {
 
 /**
  * The detail rows of a quality check, as `{key, value}` pairs where `key` names an i18n entry
- * under `preview.schema`. Lists every field the quality editor sets (type, dimension, metric,
- * rule, arguments, query, engine, implementation, severity, business impact, method, schedule,
- * scheduler, unit, tags) and every comparison operator. The description is rendered separately.
+ * under `preview.schema`: the lines Entropy Data's contract page shows (type, then `customRows`,
+ * dimension, metric, expected result). The description is rendered separately.
  *
  * @param {Object} check - DataQuality object
+ * @param {Array<[string, *]>} customRows - [key, value] pairs shown after the type
  * @returns {Array<{key: string, value: string}>}
  */
-export function resolveQualityCheckRows(check) {
+export function resolveQualityCheckRows(check, customRows = []) {
 	if (!check || typeof check !== 'object') return [];
 	const fields = [
 		['qualityType', check.type],
+		...customRows,
 		['qualityDimension', check.dimension],
 		['qualityMetric', check.metric],
-		['qualityRule', check.rule],
-		['qualityArguments', check.arguments],
-		['qualityQuery', check.query],
-		['qualityEngine', check.engine],
-		['qualityImplementation', check.implementation],
-		['qualitySeverity', check.severity],
-		['qualityBusinessImpact', check.businessImpact],
-		['qualityMethod', check.method],
-		['qualitySchedule', check.schedule],
-		['qualityScheduler', check.scheduler],
-		['qualityUnit', check.unit],
 		...QUALITY_OPERATORS.map((operator) => [operator, check[operator]]),
-		['qualityTags', check.tags],
 	];
 	return fields
 		.filter(([, value]) => value !== undefined && value !== null && value !== '' && !(Array.isArray(value) && value.length === 0))
