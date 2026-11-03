@@ -31,6 +31,7 @@ if (monaco?.languages && !monaco.languages.getLanguages().some((l) => l.id === O
  * @param {Function} onChange - Called with the parsed value when it is valid
  * @param {'object'|'array'|'yaml'} kind - Accepted YAML shape (see above)
  * @param {number} height - Editor height in pixels
+ * @param {boolean} readOnly - Show the YAML without letting the user edit it
  */
 const emptyFor = (kind) => (kind === 'array' ? [] : kind === 'yaml' ? undefined : {});
 
@@ -49,7 +50,7 @@ const toYaml = (value, kind) => {
   }
 };
 
-const ObjectYamlEditor = ({ value, onChange, kind = 'object', height = 180 }) => {
+const ObjectYamlEditor = ({ value, onChange, kind = 'object', height = 180, readOnly = false }) => {
   const { t } = useTranslation();
   const [text, setText] = useState(() => toYaml(value, kind));
   const [error, setError] = useState(null);
@@ -129,6 +130,8 @@ const ObjectYamlEditor = ({ value, onChange, kind = 'object', height = 180 }) =>
         onMount={handleMount}
         theme="vs-light"
         options={{
+          readOnly,
+          domReadOnly: readOnly,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           fontSize: 12,

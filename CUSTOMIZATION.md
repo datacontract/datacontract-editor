@@ -157,12 +157,17 @@ dataContract:
         condition: "expression"         # Conditional display expression
         positionAfter: "description"    # Render inline after this property (standard or custom)
         hidden: true                    # Hide from form UI and preview (still editable in YAML editor)
+        readOnly: true                  # Show in the form UI but do not let the user edit it (still editable in YAML editor)
         auto: true                      # Empty means the host derives the value (select/multiselect, root level); or { hint }
 ```
 
 ### Hiding properties from the form UI
 
 Set `hidden: true` to keep a custom property out of the form-based editor and the preview/display view. The property still round-trips through the YAML untouched — Monaco YAML editing shows and edits it normally. Use this for fields managed externally (API/automation) that non-technical users should not see or edit. Mirrors the `hidden` semantics already supported on standard properties.
+
+### Read-only properties
+
+Set `readOnly: true` to show a custom property in the form-based editor without letting the user change it. Text inputs become read-only, selects, multiselects, booleans and tag lists are disabled, and the YAML editor of a `yaml` property opens in read-only mode. The value still round-trips through the YAML untouched, and Monaco YAML editing stays open. Use this for values set by the host (API/automation) that users should see but not edit.
 
 ### Auto values derived by the host
 

@@ -115,7 +115,7 @@ const FieldLabel = ({ title, property }) => {
  * Text field sub-component
  */
 const TextField = ({ config, value, onChange, errors }) => {
-  const { property, title, placeholder, description, required } = config;
+  const { property, title, placeholder, description, required, readOnly } = config;
 
   return (
     <ValidatedInput
@@ -126,6 +126,7 @@ const TextField = ({ config, value, onChange, errors }) => {
       required={required}
       tooltip={description}
       placeholder={placeholder}
+      readOnly={readOnly === true}
       externalErrors={errors}
       skipInternalValidation
     />
@@ -143,6 +144,7 @@ const TextareaField = ({ config, value, onChange, errors }) => {
     placeholder,
     description,
     required,
+    readOnly,
     rows = 3,
   } = config;
   const hasError = errors && errors.length > 0;
@@ -174,7 +176,8 @@ const TextareaField = ({ config, value, onChange, errors }) => {
         onChange={(e) => onChange(e.target.value || undefined)}
         rows={rows}
         placeholder={placeholder}
-        className={`w-full rounded border bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs ${
+        readOnly={readOnly === true}
+        className={`w-full rounded border bg-white px-2 py-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 read-only:bg-gray-50 read-only:text-gray-500 read-only:ring-gray-200 read-only:cursor-not-allowed text-xs ${
           hasError ? 'border-red-300 ring-red-300' : 'border-gray-300'
         }`}
       />
@@ -198,6 +201,7 @@ const NumberField = ({ config, value, onChange, errors }) => {
     placeholder,
     description,
     required,
+    readOnly,
     minimum,
     maximum,
     step,
@@ -245,7 +249,8 @@ const NumberField = ({ config, value, onChange, errors }) => {
         max={maximum}
         step={step || (type === 'integer' ? 1 : 'any')}
         placeholder={placeholder}
-        className={`w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4 ${
+        readOnly={readOnly === true}
+        className={`w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 read-only:bg-gray-50 read-only:text-gray-500 read-only:ring-gray-200 read-only:cursor-not-allowed text-xs leading-4 ${
           hasError ? 'ring-red-300' : 'ring-gray-300'
         }`}
       />
@@ -269,6 +274,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
     placeholder,
     description,
     required,
+    readOnly,
     enum: enumOptions,
   } = config;
 
@@ -291,6 +297,7 @@ const SelectField = ({ config, value, onChange, errors }) => {
       onChange={(val) => onChange(val || undefined)}
       placeholder={placeholder || t('customProperty.select')}
       required={required}
+      disabled={readOnly === true}
       tooltip={description}
       externalErrors={errors}
       skipInternalValidation
@@ -361,6 +368,7 @@ const AutoValueField = ({ config, value, onChange, errors }) => {
     title,
     description,
     required,
+    readOnly,
     type,
     auto,
     enum: enumOptions,
@@ -429,6 +437,7 @@ const AutoValueField = ({ config, value, onChange, errors }) => {
   const autoChoice = (
     <button
       type="button"
+      disabled={readOnly === true}
       aria-pressed={isAuto}
       onClick={() => onChange(undefined)}
       className={`${choiceClassName(isAuto)} gap-2`}
@@ -473,6 +482,7 @@ const AutoValueField = ({ config, value, onChange, errors }) => {
           <button
             key={opt.id}
             type="button"
+            disabled={readOnly === true}
             aria-pressed={selectedValues.includes(opt.id)}
             onClick={() => choose(opt.id)}
             className={choiceClassName(selectedValues.includes(opt.id))}
@@ -485,6 +495,7 @@ const AutoValueField = ({ config, value, onChange, errors }) => {
           <button
             key={v}
             type="button"
+            disabled={readOnly === true}
             aria-pressed="true"
             onClick={() => choose(v)}
             className={choiceClassName(true)}
@@ -524,6 +535,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
     placeholder,
     description,
     required,
+    readOnly,
     enum: enumOptions,
   } = config;
   const hasError = errors && errors.length > 0;
@@ -576,8 +588,9 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
           <button
             key={opt.value}
             type="button"
+            disabled={readOnly === true}
             onClick={() => toggleOption(opt.value)}
-            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset transition-colors ${
+            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset transition-colors disabled:cursor-not-allowed disabled:hover:bg-gray-50 ${
               selectedValues.includes(opt.value)
                 ? 'bg-indigo-100 text-indigo-700 ring-indigo-600/20'
                 : 'bg-gray-50 text-gray-600 ring-gray-500/10 hover:bg-gray-100'
@@ -606,7 +619,7 @@ const MultiselectField = ({ config, value, onChange, errors }) => {
  */
 const BooleanField = ({ config, value, onChange }) => {
   const { t } = useTranslation();
-  const { property, title, description } = config;
+  const { property, title, description, readOnly } = config;
 
   return (
     <div>
@@ -626,6 +639,7 @@ const BooleanField = ({ config, value, onChange }) => {
       <div className="grid grid-cols-1">
         <select
           id={property}
+          disabled={readOnly === true}
           value={value === true ? 'true' : value === false ? 'false' : ''}
           onChange={(e) => {
             const newValue =
@@ -636,7 +650,7 @@ const BooleanField = ({ config, value, onChange }) => {
                   : undefined;
             onChange(newValue);
           }}
-          className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs"
+          className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs"
         >
           <option value="">{t('customProperty.boolean.notSet')}</option>
           <option value="false">{t('customProperty.boolean.false')}</option>
@@ -656,7 +670,7 @@ const BooleanField = ({ config, value, onChange }) => {
  */
 const DateField = ({ config, value, onChange, errors }) => {
   const { t } = useTranslation();
-  const { property, title, placeholder, description, required, type } = config;
+  const { property, title, placeholder, description, required, type, readOnly } = config;
   const hasError = errors && errors.length > 0;
   const inputType = type === 'datetime' ? 'datetime-local' : 'date';
 
@@ -687,7 +701,8 @@ const DateField = ({ config, value, onChange, errors }) => {
         value={value || ''}
         onChange={(e) => onChange(e.target.value || undefined)}
         placeholder={placeholder}
-        className={`w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4 ${
+        readOnly={readOnly === true}
+        className={`w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 read-only:bg-gray-50 read-only:text-gray-500 read-only:ring-gray-200 read-only:cursor-not-allowed text-xs leading-4 ${
           hasError ? 'ring-red-300' : 'ring-gray-300'
         }`}
       />
@@ -704,7 +719,7 @@ const DateField = ({ config, value, onChange, errors }) => {
  * URL field sub-component
  */
 const UrlField = ({ config, value, onChange, errors }) => {
-  const { property, title, placeholder, description, required } = config;
+  const { property, title, placeholder, description, required, readOnly } = config;
 
   return (
     <ValidatedInput
@@ -716,6 +731,7 @@ const UrlField = ({ config, value, onChange, errors }) => {
       required={required}
       tooltip={description}
       placeholder={placeholder || 'https://example.com'}
+      readOnly={readOnly === true}
       externalErrors={errors}
       skipInternalValidation
     />
@@ -726,7 +742,7 @@ const UrlField = ({ config, value, onChange, errors }) => {
  * Email field sub-component
  */
 const EmailField = ({ config, value, onChange, errors }) => {
-  const { property, title, placeholder, description, required } = config;
+  const { property, title, placeholder, description, required, readOnly } = config;
 
   return (
     <ValidatedInput
@@ -738,6 +754,7 @@ const EmailField = ({ config, value, onChange, errors }) => {
       required={required}
       tooltip={description}
       placeholder={placeholder || 'user@example.com'}
+      readOnly={readOnly === true}
       externalErrors={errors}
       skipInternalValidation
     />
@@ -748,7 +765,7 @@ const EmailField = ({ config, value, onChange, errors }) => {
  * Array field sub-component (uses Tags component)
  */
 const ArrayField = ({ config, value, onChange, errors }) => {
-  const { property, title, placeholder, description } = config;
+  const { property, title, placeholder, description, readOnly } = config;
   const hasError = errors && errors.length > 0;
 
   return (
@@ -759,6 +776,7 @@ const ArrayField = ({ config, value, onChange, errors }) => {
         onChange={(val) => onChange(val && val.length > 0 ? val : undefined)}
         placeholder={placeholder}
         tooltip={description}
+        disabled={readOnly === true}
       />
       {hasError &&
         errors.map((err, i) => (
@@ -778,7 +796,7 @@ const ArrayField = ({ config, value, onChange, errors }) => {
  */
 const YamlField = ({ config, value, onChange, errors }) => {
   const { t } = useTranslation();
-  const { property, title, description, required } = config;
+  const { property, title, description, required, readOnly } = config;
 
   return (
     <div>
@@ -800,6 +818,7 @@ const YamlField = ({ config, value, onChange, errors }) => {
       <ObjectYamlEditor
         kind="yaml"
         value={value}
+        readOnly={readOnly === true}
         onChange={(val) => onChange(val === null || val === undefined ? undefined : val)}
       />
       {errors?.map((err, i) => (
@@ -833,6 +852,8 @@ const CustomPropertyField = ({
   const { t } = useTranslation();
   const { type = 'text', condition, hidden } = config;
 
+  // readOnly:true is handled by each field: the value stays visible but not editable here, while
+  // Monaco YAML editing stays open, like `hidden`.
   // hidden:true hides the property from form-style UIs (managed externally via API/YAML).
   // Monaco YAML editing remains unfiltered — this component does not drive that surface.
   // Mirrors the `hidden` semantics on standard properties.

@@ -12,7 +12,8 @@ const TagsInput = ({
                      allowUnmanagedTags = true,
                      placeholder,
                      tooltip,
-                     className = ''
+                     className = '',
+                     disabled = false
                    }) => {
   const { t } = useTranslation();
   const resolvedLabel = label === undefined ? t('tags.label') : label;
@@ -94,17 +95,19 @@ const TagsInput = ({
                           clipRule="evenodd"></path>
                   </svg>
                   {existingTag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(index)}
-                    className="ml-0.5 hover:text-red-600 transition-colors"
-                    aria-label={t('tags.removeTag', { tag: existingTag })}
-                  >
-                    <span className="sr-only">{t('tags.remove')}</span>
-                    <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                      <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
-                    </svg>
-                  </button>
+                  {!disabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(index)}
+                      className="ml-0.5 hover:text-red-600 transition-colors"
+                      aria-label={t('tags.removeTag', { tag: existingTag })}
+                    >
+                      <span className="sr-only">{t('tags.remove')}</span>
+                      <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                        <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
+                      </svg>
+                    </button>
+                  )}
                 </span>
               );
 
@@ -117,17 +120,19 @@ const TagsInput = ({
                     <circle cx="3" cy="3" r="3"></circle>
                   </svg>
                   {existingTag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(index)}
-                    className="ml-0.5 hover:text-red-600 transition-colors"
-                    aria-label={t('tags.removeTag', { tag: existingTag })}
-                  >
-                    <span className="sr-only">{t('tags.remove')}</span>
-                    <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-                      <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
-                    </svg>
-                  </button>
+                  {!disabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(index)}
+                      className="ml-0.5 hover:text-red-600 transition-colors"
+                      aria-label={t('tags.removeTag', { tag: existingTag })}
+                    >
+                      <span className="sr-only">{t('tags.remove')}</span>
+                      <svg className="w-2 h-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+                        <path strokeLinecap="round" strokeWidth={1.5} d="M1 1l6 6m0-6L1 7"/>
+                      </svg>
+                    </button>
+                  )}
                 </span>
               );
             })}
@@ -136,10 +141,11 @@ const TagsInput = ({
 
         {/* Add new tag input */}
         <div className="flex gap-2">
-          <Combobox onChange={handleAdd} immediate={suggestedTags && suggestedTags.length <= 15}>
+          <Combobox onChange={handleAdd} immediate={suggestedTags && suggestedTags.length <= 15} disabled={disabled}>
             <div className="relative flex-1">
               <ComboboxInput
                 ref={inputRef}
+                disabled={disabled}
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -152,7 +158,7 @@ const TagsInput = ({
                   });
                 }}
                 placeholder={resolvedPlaceholder}
-                className="w-full rounded-md bg-white border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                className="w-full rounded-md bg-white border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 text-xs leading-4"
               />
               {managedTagsMap.size > 0 && <ComboboxOptions
                 className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md bg-white py-1 text-xs shadow-lg outline outline-black/5 data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0">
@@ -190,7 +196,7 @@ const TagsInput = ({
           <button
             type="button"
             onClick={() => handleAdd(newTag)}
-            disabled={!canTagBeAdded(newTag)}
+            disabled={disabled || !canTagBeAdded(newTag)}
             className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-300 transition-colors"
           >
             {t('tags.add')}
