@@ -13,6 +13,7 @@ import {
   formatArguments,
   isPreDefinedRule,
 } from '../../utils/customQualityChecks.js';
+import { coerceValuesToLogicalType } from '../../utils/qualityValueTypes.js';
 import Combobox from './Combobox.jsx';
 import ValidatedCombobox from './ValidatedCombobox.jsx';
 import ObjectYamlEditor from './ObjectYamlEditor.jsx';
@@ -90,7 +91,7 @@ const ArgumentValueField = ({ value, type, onChange, placeholder, hasError, aria
  * QualityEditor - Custom component for editing ODCS 3.1.0 quality rules
  * Provides a smart interface that shows relevant fields based on quality type
  */
-const QualityEditor = ({ value, onChange, context = 'property', label, helpText, tableName, columnName, showProblemCount = true }) => {
+const QualityEditor = ({ value, onChange, context = 'property', label, helpText, tableName, columnName, logicalType, showProblemCount = true }) => {
   const { t } = useTranslation();
   const jsonSchema = useEditorStore((state) => state.schemaData);
   const customQualityChecks = useEditorStore((state) => state.editorConfig?.customQualityChecks ?? null);
@@ -164,6 +165,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
           customQualityChecks={customQualityChecks}
           tableName={tableName}
           columnName={columnName}
+          logicalType={logicalType}
         />
       ))}
 
@@ -178,7 +180,7 @@ const QualityEditor = ({ value, onChange, context = 'property', label, helpText,
   );
 };
 
-const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, tableName, columnName }) => {
+const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, context, siblingIds, customQualityChecks, tableName, columnName, logicalType }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdditionalDetailsExpanded, setIsAdditionalDetailsExpanded] = useState(false);
@@ -614,7 +616,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                     value={rule.arguments?.missingValues?.join('\n') || ''}
                     onChange={(e) => {
                       const values = e.target.value.split('\n');
-                      const updatedArguments = values.length > 0 && values.some(v => v.trim() !== '') ? { ...rule.arguments, missingValues: values } : undefined;
+                      const updatedArguments = values.length > 0 && values.some(v => v.trim() !== '') ? { ...rule.arguments, missingValues: coerceValuesToLogicalType(values, logicalType) } : undefined;
                       onUpdate(index, 'arguments', updatedArguments);
                     }}
                     rows={3}
@@ -637,7 +639,7 @@ const QualityRuleCard = ({ rule, index, dimensionOptions, onUpdate, onRemove, co
                         const values = e.target.value.split('\n');
                         let updatedArguments = { ...rule.arguments };
                         if (values.length > 0 && values.some(v => v.trim() !== '')) {
-                          updatedArguments.validValues = values;
+                          updatedArguments.validValues = coerceValuesToLogicalType(values, logicalType);
                           delete updatedArguments.pattern;
                         } else {
                           delete updatedArguments.validValues;
