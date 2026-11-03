@@ -1470,6 +1470,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 value={property.quality}
                 onChange={(value) => updateField('quality', value)}
                 context="property"
+                logicalType={property.logicalType}
                 columnName={property.name}
                 showProblemCount={false}
               />
