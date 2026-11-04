@@ -1661,6 +1661,7 @@
   "enumValues": {
     "add": "+ Ajouter une valeur",
     "remove": "Retirer la valeur",
+    "inherited": "Hérité de la définition liée",
     "value": {
       "placeholder": "Valeur"
     },

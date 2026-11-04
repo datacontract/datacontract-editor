@@ -1230,7 +1230,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                 />
               </DisclosureButton>
               <DisclosurePanel className="px-2 pt-2 pb-1 text-xs text-gray-500 space-y-2">
-                <EnumValuesEditor value={property.enum} onChange={(value) => updateField('enum', value)} />
+                <EnumValuesEditor value={property.enum} onChange={(value) => updateField('enum', value)} inherited={definitionData?.enum} />
               </DisclosurePanel>
             </>
           )}
