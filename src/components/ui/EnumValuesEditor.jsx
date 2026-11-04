@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import StableIdRow from './StableIdRow.jsx';
+import OverrideInheritedButton from './OverrideInheritedButton.jsx';
 
 const inputClasses =
   'block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4';
@@ -8,10 +9,25 @@ const inputClasses =
  * Editor for a property's `enum` — the allowed values a property may take (ODCS 3.2.0+).
  * Each entry needs a `value`; `label` and `description` are optional, and any other keys an
  * entry already carries (id, tags, customProperties, …) are preserved untouched.
+ *
+ * `inherited` holds the entries of the linked definition. They are listed, not editable, while the
+ * property has no entries of its own — the way the other inherited fields show theirs as a
+ * placeholder — and the override button copies them in. Entries are copied without their ids: an
+ * id identifies an entry within the definition, not within this property.
  */
-const EnumValuesEditor = ({ value = [], onChange }) => {
+const EnumValuesEditor = ({ value = [], onChange, inherited }) => {
   const { t } = useTranslation();
   const entries = Array.isArray(value) ? value : [];
+  const inheritedEntries = !entries.length && Array.isArray(inherited) && inherited.length ? inherited : null;
+
+  const copyInherited = () =>
+    onChange(
+      inheritedEntries.map(({ value: entryValue, label, description }) => ({
+        value: entryValue,
+        ...(label ? { label } : {}),
+        ...(description ? { description } : {}),
+      })),
+    );
 
   const update = (index, field, fieldValue) => {
     const updated = [...entries];
@@ -26,6 +42,23 @@ const EnumValuesEditor = ({ value = [], onChange }) => {
 
   return (
     <div className="space-y-2">
+      {inheritedEntries && (
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-gray-500">{t('enumValues.inherited')}</span>
+            <OverrideInheritedButton inheritedValue={inheritedEntries} onOverride={copyInherited} />
+          </div>
+          <ul className="space-y-1">
+            {inheritedEntries.map((entry, index) => (
+              <li key={index} className="text-xs text-blue-400">
+                <span className="font-mono">{String(entry?.value ?? '')}</span>
+                {entry?.label && <span className="ml-2">{entry.label}</span>}
+                {entry?.description && <span className="ml-2 text-blue-300">{entry.description}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {entries.map((entry, index) => (
         <StableIdRow
           key={index}

@@ -1661,6 +1661,7 @@
   "enumValues": {
     "add": "+ Wert hinzufügen",
     "remove": "Wert entfernen",
+    "inherited": "Aus der verknüpften Definition übernommen",
     "value": {
       "placeholder": "Wert"
     },

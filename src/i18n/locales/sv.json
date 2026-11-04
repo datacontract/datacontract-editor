@@ -1661,6 +1661,7 @@
   "enumValues": {
     "add": "+ Lägg till värde",
     "remove": "Ta bort värde",
+    "inherited": "Ärvd från den länkade definitionen",
     "value": {
       "placeholder": "Värde"
     },
