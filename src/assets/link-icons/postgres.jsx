@@ -5,7 +5,7 @@ export default () => <svg
     version="1.1"
     preserveAspectRatio="xMidYMid"
     xmlns="http://www.w3.org/2000/svg"
-    xmlns:svg="http://www.w3.org/2000/svg">
+   >
   <g
       id="g5"
       transform="matrix(1,0,0,0.99318278,4.4874084,-22.767296)">

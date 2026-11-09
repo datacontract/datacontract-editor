@@ -1,5 +1,5 @@
 export default () => <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 43 43"
-     style={{enableBackground: 'new 0 0 43 43'}} xml:space="preserve">
+     style={{enableBackground: 'new 0 0 43 43'}} xmlSpace="preserve">
     <g>
   <path style={{fillRule: 'evenodd', clipRule: 'evenodd', fill: '#173361'}} d="M30.8,22.7c1.1-0.1,2.2-0.1,3.3-0.2v-0.8c-1.1-0.1-2.2-0.1-3.3-0.2l-3.3-0.1c-1.9-0.1-3.9-0.1-5.8-0.1
 		c0-1.9,0-3.9-0.1-5.8l-0.1-3.3c-0.1-1.1-0.1-2.2-0.2-3.3h-0.9c-0.1,1.1-0.1,2.2-0.2,3.3l-0.1,3.3c0,0.9,0,1.8,0,2.7

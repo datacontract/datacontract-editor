@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IconResolver } from './IconResolver.jsx';
 import iconResolverSource from './IconResolver.jsx?raw';
 
@@ -56,11 +56,22 @@ const switchCases = [...iconResolverSource.matchAll(/case '([^']+)':/g)].map((ma
 const defaultMarkup = renderToStaticMarkup(<IconResolver url="https://unknown.example.com" />);
 
 describe('link icons', () => {
-  it.each(Object.keys(iconModules))('%s exports a component that renders an svg', (path) => {
+  // React reports invalid SVG markup such as `stop-color` instead of `stopColor` via console.error,
+  // and only once per attribute name per process, so render and check in the same test.
+  let consoleError;
+  beforeEach(() => {
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    consoleError.mockRestore();
+  });
+
+  it.each(Object.keys(iconModules))('%s exports a component that renders an svg without React warnings', (path) => {
     const Icon = iconModules[path].default;
 
     expect(typeof Icon).toBe('function');
     expect(renderToStaticMarkup(<Icon className="h-4 w-4" />)).toContain('<svg');
+    expect(consoleError.mock.calls.map((args) => args.join(' '))).toEqual([]);
   });
 });
 
