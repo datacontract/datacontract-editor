@@ -140,6 +140,18 @@ describe('loadSchema', () => {
     expect(fetchMock).toHaveBeenCalledWith('/a.json');
   });
 
+  it('lets relationships use any string type (issue #33)', async () => {
+    const odcsLike = {
+      $defs: { RelationshipBase: { properties: { type: { type: 'string', default: 'foreignKey', enum: ['foreignKey'] } } } },
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okResponse(odcsLike)));
+
+    const schema = await loadSchema('/odcs.json');
+
+    expect(schema.$defs.RelationshipBase.properties.type.enum).toBeUndefined();
+    expect(schema.$defs.RelationshipBase.properties.type.default).toBe('foreignKey');
+  });
+
   it('caches per URL', async () => {
     const fetchMock = vi.fn((url) => Promise.resolve(okResponse({ url })));
     vi.stubGlobal('fetch', fetchMock);

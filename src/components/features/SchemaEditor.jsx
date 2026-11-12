@@ -341,7 +341,7 @@ const SchemaEditor = ({schemaIndex}) => {
 
 	const relationshipTypeOptions = useMemo(() => {
 		return getSchemaEnumValues(jsonSchema, 'relationships.type', 'schema') ||
-			['foreignKey', 'references', 'mapsTo'];
+			['foreignKey'];
 	}, [jsonSchema]);
 
 	// Schema type options for the combobox
