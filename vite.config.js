@@ -44,7 +44,16 @@ function devConfigPlugin() {
   };
 }
 
-export default defineConfig(({ mode }) => ({
+// The module name that the `shared-monaco` build imports Monaco from. The host page maps it to
+// its own Monaco with an import map.
+const SHARED_MONACO = 'monaco-shared'
+
+// `vite build --mode shared-monaco` builds the same library without Monaco, monaco-yaml and the
+// workers: `#monaco` becomes the external module `monaco-shared`. A host that embeds several
+// Monaco editors uses it to load Monaco once. That build does not run standalone.
+export default defineConfig(({ mode }) => {
+  const sharedMonaco = mode === 'shared-monaco'
+  return {
   plugins: [
     tailwindcss(),
     react(),
@@ -59,7 +68,8 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
-      'path': 'path-browserify'
+      'path': 'path-browserify',
+      '#monaco': sharedMonaco ? SHARED_MONACO : resolve(__dirname, 'src/lib/monaco-bundled.js'),
     }
   },
   worker: {
@@ -85,6 +95,7 @@ export default defineConfig(({ mode }) => ({
       fileName: () => `datacontract-editor.es.js`
     },
     rollupOptions: {
+      external: sharedMonaco ? [SHARED_MONACO] : [],
       output: {
         exports: 'named',
         assetFileNames: (assetInfo) => {
@@ -93,6 +104,8 @@ export default defineConfig(({ mode }) => ({
         },
         // Split Monaco into its own chunk for stable caching
         manualChunks: (id) => {
+          // Without Monaco the chunk would hold only the small React wrapper of Monaco
+          if (sharedMonaco) return;
           if (/node_modules\/(monaco-editor|@monaco-editor|monaco-yaml|vscode-|yaml-language-server|jsonc-parser)/.test(id)) {
             return 'monaco';
           }
@@ -120,4 +133,4 @@ export default defineConfig(({ mode }) => ({
       'monaco-yaml'
     ]
   }
-}))
+}})

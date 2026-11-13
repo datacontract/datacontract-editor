@@ -1,54 +1,11 @@
 import { loader } from '@monaco-editor/react';
+// `#monaco` is src/lib/monaco-bundled.js, or the Monaco of the host page in the `shared-monaco`
+// build (see vite.config.js). Everything from monaco-editor and monaco-yaml comes through it.
+import { monaco, configureMonacoYaml, yamlConf, yamlTokens } from '#monaco';
 
-// Import the editor core (all editor features, no languages) instead of the
-// `monaco-editor` barrel, which would pull in every basic-language and the
-// json/css/html/ts language services. We only ever edit YAML.
-import * as monaco from 'monaco-editor/esm/vs/editor/edcore.main.js';
-import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution.js';
-
-// Configure Monaco Editor web workers for Vite
-// Uses new URL() + import.meta.url pattern (Vite recommended)
-if (typeof window !== 'undefined') {
-  window.MonacoEnvironment = {
-    getWorker(_, label) {
-      if (label === 'yaml') {
-        return new Worker(new URL('./yaml.worker.js', import.meta.url), { type: 'module' });
-      }
-      return new Worker(
-        new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url),
-        { type: 'module' }
-      );
-    },
-  };
-}
-
-// The `monaco-editor` barrel patches `editor.createWebWorker` so it also accepts
-// the legacy `{ label, moduleId, createData }` signature, which is what
-// monaco-yaml (via monaco-worker-manager) still uses. `edcore.main.js` ships
-// without that patch, so re-apply it here — otherwise the YAML worker is never
-// spawned and every language-service request fails with
-// "Missing requestHandler or method: doValidation".
-const createWebWorkerFromDescriptor = monaco.editor.createWebWorker;
-monaco.editor.createWebWorker = function createWebWorker(options) {
-  if (options.worker !== undefined) {
-    return createWebWorkerFromDescriptor(options);
-  }
-  const worker = Promise.resolve(
-    window.MonacoEnvironment.getWorker('workerMain.js', options.label ?? 'monaco-editor-worker')
-  ).then((w) => {
-    w.postMessage('ignore');
-    w.postMessage(options.createData);
-    return w;
-  });
-  return createWebWorkerFromDescriptor({
-    worker,
-    host: options.host,
-    keepIdleModels: options.keepIdleModels,
-  });
-};
-
+// Give @monaco-editor/react this Monaco instance. Without this it loads one from a CDN.
 loader.config({ monaco });
 
 loader.init();
 
-export { monaco };
+export { monaco, configureMonacoYaml, yamlConf, yamlTokens };

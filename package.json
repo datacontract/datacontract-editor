@@ -20,6 +20,7 @@
     "dev:custom": "vite --mode custom",
     "build": "vite build --mode production",
     "build:debug": "vite build --mode debug",
+    "build:shared-monaco": "vite build --mode shared-monaco",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview",

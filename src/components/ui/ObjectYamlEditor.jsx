@@ -1,8 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
-import { conf as yamlConf, language as yamlTokens } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml.js';
-import { monaco } from '../../lib/monaco-workers.js';
+import { monaco, yamlConf, yamlTokens } from '../../lib/monaco-workers.js';
 import { parseYaml, stringifyYaml } from '../../utils/yaml.js';
 
 // A dedicated YAML language for free-form value editing. It reuses YAML syntax
