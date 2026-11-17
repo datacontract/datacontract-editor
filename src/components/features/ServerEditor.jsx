@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import AssetServerTypeahead from './AssetServerTypeahead.jsx';
 import { mergeAssetServer } from '../../lib/mergeAssetServer.js';
+import { applyServerDefaults } from '../../lib/applyServerDefaults.js';
+import { fetchServerDefaults } from '../../lib/serverAssetsApi.js';
 import { isSafeKey } from '../../utils/safeProperty.js';
 import { Combobox, Tooltip } from '../ui/index.js';
 import ValidatedInput from '../ui/ValidatedInput.jsx';
@@ -72,6 +74,7 @@ const ServerEditor = ({ serverIndex }) => {
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 	const schemaData = useEditorStore((state) => state.schemaData);
 	const assetServersUrl = useEditorStore((state) => state.editorConfig?.assets?.serversUrl);
+	const serverDefaultsUrl = useEditorStore((state) => state.editorConfig?.assets?.serverDefaultsUrl);
 	const [showAssetTypeahead, setShowAssetTypeahead] = useState(false);
 	const closeAssetTypeahead = useCallback(() => setShowAssetTypeahead(false), []);
 
@@ -228,8 +231,29 @@ const ServerEditor = ({ serverIndex }) => {
       }
 
 			setValue('servers', updatedServers);
+      if (field === 'type' && value && serverDefaultsUrl) {
+        fillServerDefaults(value);
+      }
     } catch (error) {
       console.error('Error updating server:', error);
+    }
+  };
+
+  // Fill the empty fields of a server whose type was just picked with what the host knows for that
+  // type. The answer arrives later, so it applies to the servers as they are then, and only while
+  // this server still has that type.
+  const fillServerDefaults = async (type) => {
+    try {
+      const defaults = await fetchServerDefaults(serverDefaultsUrl, type);
+      if (Object.keys(defaults).length === 0) return;
+      const latestServers = useEditorStore.getState().getValue('servers');
+      const latestServer = latestServers?.[serverIndex];
+      if (!latestServer || latestServer.type !== type) return;
+      const updatedServers = [...latestServers];
+      updatedServers[serverIndex] = applyServerDefaults(latestServer, defaults);
+      setValue('servers', updatedServers);
+    } catch (error) {
+      console.error('Error fetching server defaults:', error);
     }
   };
 

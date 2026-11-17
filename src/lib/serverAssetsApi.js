@@ -81,6 +81,26 @@ export async function fetchAssetServers(url, { query, serverType } = {}, signal)
   return Array.isArray(data) ? data : [];
 }
 
+/**
+ * GET the fields a server of `serverType` starts with once the user picks
+ * that type, e.g. the host and port of the organization's one Dremio cluster.
+ *
+ * Expected response shape: { <field>: <value>, ... }, an empty object when
+ * the host knows nothing for the type.
+ *
+ * @param {string} url - Full URL of the server defaults endpoint
+ * @param {string} serverType - The picked server type
+ * @returns {Promise<Object>}
+ */
+export async function fetchServerDefaults(url, serverType) {
+  const response = await fetch(withParams(url, { serverType }), { headers: { Accept: 'application/json' } });
+  if (!response.ok) {
+    throw new Error(`Server defaults fetch failed: ${response.status} ${response.statusText}`);
+  }
+  const data = await response.json();
+  return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+}
+
 function withParams(url, values) {
   const params = new URLSearchParams();
   Object.entries(values).forEach(([name, value]) => {

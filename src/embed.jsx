@@ -116,7 +116,7 @@ const DEFAULT_CONFIG = {
   // load lazily from `${contractsBaseUrl}/{externalId}/contracts`.
   dataProducts: null,
 
-  // Assets browse panel: { url, catalogUrl, serversUrl, assetDetailsUrlTemplate }. While the
+  // Assets browse panel: { url, catalogUrl, serversUrl, serverDefaultsUrl, assetDetailsUrlTemplate }. While the
   // document has servers, the editor POSTs { servers } to url and expects
   // [{ server, type, assets: [{ externalId, name, type, description, iconUrl,
   // physicalName, properties: [...] }] }], one entry per posted server.
@@ -129,6 +129,9 @@ const DEFAULT_CONFIG = {
   // serversUrl feeds the server typeahead: GET ?query=<text>
   // returns [{ assetExternalId, name, qualifiedName, assetType, iconUrl, server }],
   // and picking one fills the server's type and location (never an assetId).
+  // serverDefaultsUrl (optional): GET ?serverType=<type> once the user picks a
+  // server's type returns { <field>: <value> }, e.g. { host, port }, which
+  // fills the fields of that server that are still empty.
   assets: null,
 
   // Derived ("Auto") values for custom properties configured with `auto: true`: { url }.
