@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Contract Editor - Multi-repo GitHub Example</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        #editor {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="editor"></div>
+
+    <script type="module">
+        // The example consumes the editor bundle built in the repository root.
+        import { init } from '../../dist/datacontract-editor.es.js';
+        import '../../dist/datacontract-editor.css';
+        import { ServerFileStorageBackend } from '../../src/services/ServerFileStorageBackend.js';
+
+        const editorRoot = document.getElementById('editor');
+
+        const renderMessage = (title, message) => {
+            const messageRoot = document.createElement('div');
+            messageRoot.id = 'instructions';
+
+            const heading = document.createElement('h1');
+            heading.textContent = title;
+            messageRoot.appendChild(heading);
+
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message;
+            messageRoot.appendChild(paragraph);
+
+            editorRoot.replaceWith(messageRoot);
+        };
+
+        const normalizeServerBaseUrl = (value) => {
+            const serverUrl = new URL(value, window.location.origin);
+            if (!['http:', 'https:'].includes(serverUrl.protocol)) {
+                throw new Error('The server URL must use http or https.');
+            }
+            return serverUrl.toString().replace(/\/+$/, '');
+        };
+
+        const start = async () => {
+            // Targets one GitHub file via the repository-qualified adapter route:
+            // /?owner=my-org&repo=my-contracts&path=contracts/orders/datacontract.yaml&branch=main
+            const params = new URLSearchParams(window.location.search);
+            const owner = params.get('owner')?.trim();
+            const repo = params.get('repo')?.trim();
+            const branch = params.get('branch')?.trim() || 'main';
+            const path = params.get('path');
+
+            if (!owner || !repo || !path?.trim()) {
+                renderMessage(
+                    'Missing repository parameters',
+                    'Provide owner, repo, and path query parameters. Example: /?owner=my-org&repo=my-contracts&path=contracts/orders/datacontract.yaml&branch=main'
+                );
+                return;
+            }
+
+            let serverBaseUrl;
+            try {
+                serverBaseUrl = normalizeServerBaseUrl(params.get('server') || 'http://localhost:4001');
+            } catch (error) {
+                renderMessage('Invalid server parameter', error.message);
+                return;
+            }
+
+            const backend = new ServerFileStorageBackend(
+                `${serverBaseUrl}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}`
+            );
+            // Keep the requested path when the contract does not exist yet.
+            backend.setCurrentFilename(path);
+
+            let yaml;
+            try {
+                yaml = await backend.loadYamlFile(path);
+            } catch (error) {
+                const isNotFound = error.message.startsWith('Failed to load file from server: File not found:');
+                if (!isNotFound) {
+                    renderMessage('Unable to load the data contract', error.message);
+                    return;
+                }
+
+                console.warn(`Could not load ${owner}/${repo}@${branch}:${path} -- starting from a blank template.`);
+                const contractId = path.replace(/\.ya?ml$/i, '');
+                yaml = [
+                    'apiVersion: "v3.1.0"',
+                    'kind: "DataContract"',
+                    `id: ${JSON.stringify(contractId)}`,
+                    'version: "0.0.1"',
+                    'status: "draft"',
+                ].join('\n') + '\n';
+            }
+
+            init({
+                container: '#editor',
+                mode: 'EMBEDDED',
+                showDelete: false,
+                backend,
+                yaml,
+                initialView: 'form',
+            });
+        };
+
+        start().catch((error) => {
+            console.error('Failed to start the GitHub example:', error);
+            renderMessage('Unable to start the editor', error.message);
+        });
+    </script>
+</body>
+
+</html>
