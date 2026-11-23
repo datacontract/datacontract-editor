@@ -23,6 +23,7 @@ import Tooltip from '../ui/Tooltip.jsx';
 import {SparkleButton} from '../../ai/index.js';
 import {useEditorStore} from '../../store.js';
 import {getSchemaEnumValues} from '../../lib/schemaEnumExtractor.js';
+import {logicalTypeUpdates} from '../../lib/logicalTypeUpdates.js';
 import {countCustomQualityCheckProblems} from '../../utils/customQualityChecks.js';
 import {StableIdAdvancedSection} from '../ui/StableIdField.jsx';
 import {useCustomization, useIsPropertyHidden, useStandardPropertyOverride} from '../../hooks/useCustomization.js';
@@ -422,7 +423,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   propertyPath="logicalType"
                   context="property"
                   value={property.logicalType || ''}
-                  onChange={(value) => updateField('logicalType', value || undefined)}
+                  onChange={(value) => Object.entries(logicalTypeUpdates(property, value)).forEach(([field, fieldValue]) => updateField(field, fieldValue))}
                   label={logicalTypeOverride?.title || t('diagram.field.logicalType.label')}
                   placeholder={logicalTypeOverride?.placeholder}
                   required={logicalTypeOverride?.required ?? false}
@@ -453,7 +454,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                   value={property.items?.logicalType || ''}
                   onChange={(value) => {
                     const items = property.items || {};
-                    updateField('items', { ...items, logicalType: value || undefined });
+                    updateField('items', { ...items, ...logicalTypeUpdates(items, value) });
                   }}
                   label={t('diagram.field.arrayItemType.label')}
                   placeholder={t('diagram.field.arrayItemType.placeholder')}
@@ -468,7 +469,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     propertyPath="logicalType"
                     context="property"
                     value={property.map?.key?.logicalType || ''}
-                    onChange={(value) => updateField('map', { ...property.map, key: { ...property.map?.key, logicalType: value || undefined } })}
+                    onChange={(value) => updateField('map', { ...property.map, key: { ...property.map?.key, ...logicalTypeUpdates(property.map?.key, value) } })}
                     label={t('diagram.field.mapKeyType.label')}
                     fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   />
@@ -476,7 +477,7 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
                     propertyPath="logicalType"
                     context="property"
                     value={property.map?.value?.logicalType || ''}
-                    onChange={(value) => updateField('map', { ...property.map, value: { ...property.map?.value, logicalType: value || undefined } })}
+                    onChange={(value) => updateField('map', { ...property.map, value: { ...property.map?.value, ...logicalTypeUpdates(property.map?.value, value) } })}
                     label={t('diagram.field.mapValueType.label')}
                     fallbackOptions={['string', 'date', 'timestamp', 'time', 'number', 'integer', 'object', 'array', 'boolean']}
                   />

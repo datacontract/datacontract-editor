@@ -2,6 +2,7 @@ import {useCallback} from 'react';
 import {useEditorStore} from '../../../store.js';
 import {useShallow} from "zustand/react/shallow";
 import {buildPropertyPath, buildPropertiesArrayPath} from '../../../utils/schemaPathBuilder.js';
+import {logicalTypeUpdates} from '../../../lib/logicalTypeUpdates.js';
 import {useCustomization} from '../../../hooks/useCustomization.js';
 
 /**
@@ -103,7 +104,12 @@ export function useSchemaOperations(schemaIndex) {
             }
 
             const pathStr = buildPropertyPath(schemaIndex, propPath, field);
-            setValue(pathStr, value);
+            const updates = field === 'logicalType'
+                ? logicalTypeUpdates(getValue(pathStr.slice(0, -'.logicalType'.length)), value)
+                : { [field]: value };
+            Object.entries(updates).forEach(([name, fieldValue]) => {
+                setValue(buildPropertyPath(schemaIndex, propPath, name), fieldValue);
+            });
 
             // Auto-initialize items object when logicalType is set to 'array'
             if (field === 'logicalType' && value === 'array') {
@@ -117,14 +123,6 @@ export function useSchemaOperations(schemaIndex) {
                 }
             }
 
-            // Remove items when logicalType is changed from 'array' to something else
-            if (field === 'logicalType' && value !== 'array') {
-                const itemsPath = buildPropertyPath(schemaIndex, propPath, 'items');
-                const currentItems = getValue(itemsPath);
-                if (currentItems) {
-                    setValue(itemsPath, undefined);
-                }
-            }
         } catch (error) {
             console.error('Error updating property:', error);
         }

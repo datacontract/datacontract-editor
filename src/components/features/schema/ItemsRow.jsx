@@ -3,6 +3,7 @@ import {Tooltip} from '../../ui/index.js';
 import ChevronRightIcon from "../../ui/icons/ChevronRightIcon.jsx";
 import {getLogicalTypeIcon} from './propertyIcons.js';
 import {TypeSelector} from '../../ui/TypeSelector';
+import {logicalTypeUpdates} from '../../../lib/logicalTypeUpdates.js';
 
 /**
  * Component to render array items as a special node
@@ -71,7 +72,7 @@ const ItemsRow = ({
                         <div className="flex-shrink-0" style={{width: 'var(--prop-type-w, 7rem)'}} onClick={(e) => e.stopPropagation()}>
                             <TypeSelector
                                 logicalType={items?.logicalType}
-                                onLogicalTypeChange={(value) => updateItems('logicalType', value || undefined)}
+                                onLogicalTypeChange={(value) => Object.entries(logicalTypeUpdates(items, value)).forEach(([field, fieldValue]) => updateItems(field, fieldValue))}
                                 physicalType={items?.physicalType}
                                 onPhysicalTypeChange={(value) => updateItems('physicalType', value || undefined)}
                             />
@@ -157,7 +158,7 @@ const ItemsRow = ({
                     schemaIdx={schemaIdx}
                     depth={depth + 1}
                     propPath={itemsPath}
-                    updateItems={updateItems}
+                    updateItems={(field, value) => updateItems(`items.${field}`, value)}
                     togglePropertyExpansion={togglePropertyExpansion}
                     updateProperty={updateProperty}
                     addSubProperty={addSubProperty}

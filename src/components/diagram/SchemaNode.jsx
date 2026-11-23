@@ -4,6 +4,7 @@ import { Handle, Position, NodeToolbar, useReactFlow, useStore } from '@xyflow/r
 import KeyIcon from '../ui/icons/KeyIcon.jsx';
 import SemanticIcon from '../ui/icons/SemanticIcon.jsx';
 import { TypeSelector } from '../ui/TypeSelector';
+import { logicalTypeUpdates } from '../../lib/logicalTypeUpdates.js';
 import { getLogicalTypeIcon } from '../features/schema/propertyIcons';
 import { useInheritedDefinition } from '../../hooks/useInheritedDefinition.js';
 import { isSemanticAuthDef } from '../../utils/authDefTypes.js';
@@ -740,7 +741,7 @@ const SchemaNode = ({ data, id, selected }) => {
                       )}
                       <TypeSelector
                         logicalType={prop.logicalType}
-                        onLogicalTypeChange={(value) => handleUpdateProperty(index, { logicalType: value || undefined })}
+                        onLogicalTypeChange={(value) => handleUpdateProperty(index, logicalTypeUpdates(prop, value))}
                         physicalType={prop.physicalType}
                         onPhysicalTypeChange={(value) => handleUpdateProperty(index, { physicalType: value || undefined })}
                         fallbackLogicalType={inheritedLogicalType}
@@ -781,7 +782,7 @@ const SchemaNode = ({ data, id, selected }) => {
                       <TypeSelector
                         logicalType={prop.items.logicalType}
                         onLogicalTypeChange={(value) => handleUpdateProperty(index, {
-                          items: { ...prop.items, logicalType: value || undefined }
+                          items: { ...prop.items, ...logicalTypeUpdates(prop.items, value) }
                         })}
                         physicalType={prop.items.physicalType}
                         onPhysicalTypeChange={(value) => handleUpdateProperty(index, {
@@ -896,7 +897,7 @@ const SchemaNode = ({ data, id, selected }) => {
                               const updatedItemProperties = [...(updatedItems.properties || [])];
                               updatedItemProperties[itemPropIndex] = {
                                 ...updatedItemProperties[itemPropIndex],
-                                logicalType: value || undefined
+                                ...logicalTypeUpdates(itemProp, value)
                               };
                               updatedItems.properties = updatedItemProperties;
                               handleUpdateProperty(index, { items: updatedItems });
@@ -951,7 +952,7 @@ const SchemaNode = ({ data, id, selected }) => {
                           onLogicalTypeChange={(value) => handleUpdateProperty(index, {
                             items: {
                               ...prop.items,
-                              items: { ...prop.items.items, logicalType: value || undefined }
+                              items: { ...prop.items.items, ...logicalTypeUpdates(prop.items.items, value) }
                             }
                           })}
                           physicalType={prop.items.items.physicalType}
@@ -1044,7 +1045,7 @@ const SchemaNode = ({ data, id, selected }) => {
                     <div className="flex items-center gap-2 ml-2" onClick={(e) => e.stopPropagation()}>
                       <TypeSelector
                         logicalType={nestedProp.logicalType}
-                        onLogicalTypeChange={(value) => handleUpdateNestedProperty(index, nestedIndex, { logicalType: value || undefined })}
+                        onLogicalTypeChange={(value) => handleUpdateNestedProperty(index, nestedIndex, logicalTypeUpdates(nestedProp, value))}
                         physicalType={nestedProp.physicalType}
                         onPhysicalTypeChange={(value) => handleUpdateNestedProperty(index, nestedIndex, { physicalType: value || undefined })}
                       />
