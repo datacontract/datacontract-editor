@@ -62,7 +62,7 @@ const SectionLabel = ({ label, count, problemCount = 0 }) => {
   );
 };
 
-const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo, siblingIds = [] }) => {
+const PropertyDetailsPanel = ({ property, propertyPath, onUpdate, onDelete, focusSection, focusNonce, focusRelationshipTo, siblingIds = [] }) => {
   const { t } = useTranslation();
   const relationshipsSectionRef = useRef(null);
   const [relationshipsHighlight, setRelationshipsHighlight] = useState(false);
@@ -362,10 +362,12 @@ const PropertyDetailsPanel = ({ property, onUpdate, onDelete, focusSection, focu
               {/* Property Name */}
               {!isNameHidden && (
                 <ValidatedInput
+                  key={propertyPath}
                   name="propertyName"
                   label={nameOverride?.title || t('diagram.field.propertyName.label')}
                   value={property.name || ''}
                   onChange={(e) => updateField('name', e.target.value)}
+                  commitOnBlur
                   required={nameOverride?.required ?? true}
                   tooltip={nameOverride?.description}
                   placeholder={nameOverride?.placeholder || "property_name"}

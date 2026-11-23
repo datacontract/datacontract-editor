@@ -14,6 +14,7 @@ import {getValueWithPath, setOverrideStore, setValueWithPath, removeValueWithPat
 import { createAuthoritativeDefinitionsSlice } from './lib/authoritativeDefinitionsSlice.js';
 import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { viewSwitch } from './lib/viewSwitch.js';
+import { keepReferenceTargets } from './lib/keepReferenceTargets.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/index.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
@@ -212,6 +213,11 @@ function createConfiguredStore(config) {
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+			},
+			setName: (path, name) => {
+				const { yamlParts } = get();
+				const newYamlParts = keepReferenceTargets(yamlParts, setValueWithPath(yamlParts, `${path}.name`, name.trim()));
 				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 			},
 			removeValue: (path) => {

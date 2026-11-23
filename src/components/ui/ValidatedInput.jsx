@@ -34,13 +34,19 @@ const ValidatedInput = forwardRef(({
   inheritedValue,
   hint,
   onBlur,
+  commitOnBlur = false,
   ...props
 }, ref) => {
   const { t } = useTranslation();
 
   // Buffer keystrokes locally; committing to the store re-serializes the
   // whole document, so it only happens after a typing pause or on blur
-  const [displayValue, handleBufferedChange, flush] = useBufferedField(value, onChange, name);
+  // (with commitOnBlur: only on blur or Enter, and Escape cancels)
+  const [displayValue, handleBufferedChange, flush, discard] = useBufferedField(value, onChange, name, commitOnBlur ? null : undefined);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') flush();
+    else if (e.key === 'Escape') discard();
+  };
   const handleBlur = (e) => {
     flush();
     onBlur?.(e);
@@ -142,6 +148,7 @@ const ValidatedInput = forwardRef(({
         value={displayValue}
         onChange={handleBufferedChange}
         onBlur={handleBlur}
+        onKeyDown={commitOnBlur ? handleKeyDown : undefined}
         className={`mt-1 block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ${ringClass} ${placeholderClassName} focus:ring-2 focus:ring-inset disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 read-only:bg-gray-50 read-only:text-gray-500 read-only:ring-gray-200 read-only:cursor-not-allowed text-xs leading-4 ${className}`}
         placeholder={placeholder}
         aria-invalid={hasError}

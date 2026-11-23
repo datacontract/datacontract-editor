@@ -55,6 +55,7 @@ const SchemaEditor = ({schemaIndex}) => {
 		addSubProperty
 	} = useSchemaOperations(schemaIndex);
 	const [expandedProperties, setExpandedProperties] = useState(new Set()); // Track expanded property paths for nested items
+	const setName = useEditorStore((state) => state.setName);
 	const isBrowsePanelOpen = useEditorStore((state) => state.isBrowsePanelOpen);
 	const openBrowsePanel = useEditorStore((state) => state.openBrowsePanel);
 
@@ -471,10 +472,12 @@ const SchemaEditor = ({schemaIndex}) => {
 									{/* Name Field */}
 									{!isNameHidden && (
 										<ValidatedInput
+											key={schemaIndex}
 											name={`schema-name-${schemaIndex}`}
 											label={nameOverride?.title || t('schema.field.name.label')}
 											value={schema[schemaIndex].name || ''}
-											onChange={(e) => setValue(`schema[${schemaIndex}].name`, e.target.value)}
+											onChange={(e) => setName(`schema[${schemaIndex}]`, e.target.value)}
+											commitOnBlur
 											required={nameOverride?.required ?? true}
 											tooltip={nameOverride?.description || t('schema.field.name.tooltip')}
 											placeholder={nameOverride?.placeholder || 'schema_name'}
@@ -837,7 +840,7 @@ const SchemaEditor = ({schemaIndex}) => {
 										<div className="rounded-b-md @container" ref={setPropertiesDropRef}>
 													{schema[schemaIndex].properties.map((property, propIndex) => (
 														<PropertyRow
-															key={`prop-${propIndex}`}
+															key={`prop-${schemaIndex}-${propIndex}`}
 															property={property}
 															propIndex={propIndex}
 															schemaIdx={schemaIndex}

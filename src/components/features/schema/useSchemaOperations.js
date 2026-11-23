@@ -12,6 +12,7 @@ import {useCustomization} from '../../../hooks/useCustomization.js';
 export function useSchemaOperations(schemaIndex) {
     const getValue = useEditorStore(useShallow((state) => state.getValue));
     const setValue = useEditorStore(useShallow((state) => state.setValue));
+    const setName = useEditorStore(useShallow((state) => state.setName));
     const schema = useEditorStore(useShallow((state) => state.getValue('schema')));
     const {standardProperties, customProperties} = useCustomization('schema.properties');
 
@@ -77,16 +78,16 @@ export function useSchemaOperations(schemaIndex) {
                 return;
             }
 
-            const currentProperties = schema[schemaIndex].properties || [];
+            const currentProperties = getValue(`schema[${schemaIndex}].properties`) || [];
             const propIndex = propPath[propPath.length - 1];
 
             // Update the current property name
             if (typeof propIndex === 'number' && currentProperties[propIndex]) {
-                setValue(`schema[${schemaIndex}].properties[${propIndex}].name`, newName?.trim() || '');
+                setName(`schema[${schemaIndex}].properties[${propIndex}]`, newName || '');
             }
 
             // Add the new property
-            const newProperties = [...currentProperties, buildDefaultProperty()];
+            const newProperties = [...(getValue(`schema[${schemaIndex}].properties`) || []), buildDefaultProperty()];
             setValue(`schema[${schemaIndex}].properties`, newProperties);
 
             // Return the new property index for auto-edit
@@ -94,12 +95,17 @@ export function useSchemaOperations(schemaIndex) {
         } catch (error) {
             console.error('Error saving and adding next property:', error);
         }
-    }, [schema, schemaIndex, setValue, buildDefaultProperty]);
+    }, [schema, schemaIndex, getValue, setValue, setName, buildDefaultProperty]);
 
     // Update property field (supports nested properties via propPath)
     const updateProperty = useCallback((schemaIdx, propPath, field, value) => {
         try {
             if (!schema || !schema[schemaIndex]) {
+                return;
+            }
+
+            if (field === 'name') {
+                setName(buildPropertyPath(schemaIndex, propPath), value);
                 return;
             }
 
@@ -126,7 +132,7 @@ export function useSchemaOperations(schemaIndex) {
         } catch (error) {
             console.error('Error updating property:', error);
         }
-    }, [schema, schemaIndex, setValue, getValue]);
+    }, [schema, schemaIndex, setValue, setName, getValue]);
 
     // Remove property from schema
     const removeProperty = useCallback((schemaIdx, propIdx) => {

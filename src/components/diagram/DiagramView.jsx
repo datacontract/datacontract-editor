@@ -25,6 +25,7 @@ import { getLayoutedElements, getGridPosition, buildReferencedByName } from './l
 import PropertyDetailsDrawer from '../ui/PropertyDetailsDrawer.jsx';
 import RelationshipDetailsDrawer from '../ui/RelationshipDetailsDrawer.jsx';
 import Tooltip from '../ui/Tooltip.jsx';
+import { keepReferenceTargets } from '../../lib/keepReferenceTargets.js';
 import { resolveReference, referencesProperty } from '../../lib/relationshipReferences.js';
 import { groupEdges } from './edgeGrouping.js';
 import { getCardinality } from './cardinality.js';
@@ -631,9 +632,10 @@ const DiagramViewInner = () => {
 
     if (updatedSchemas[schemaIndex]) {
       updatedSchemas[schemaIndex] = updatedSchema;
-      updateSchemas(updatedSchemas);
+      const updatedData = keepReferenceTargets(parsedData, { ...parsedData, schema: updatedSchemas });
+      setYaml(stringifyYaml(updatedData));
     }
-  }, [parsedData, updateSchemas]);
+  }, [parsedData, setYaml]);
 
   // Handle deleting a schema
   const handleDeleteSchema = useCallback((nodeId) => {

@@ -6,13 +6,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * clone + YAML re-serialization, editor-wide re-render), so it only runs after
  * a typing pause, on blur (via the returned flush), or on unmount.
  *
+ * A `delay` of null disables the commit on a typing pause. Key such a field by its path, so
+ * that swapping it unmounts it and commits a pending edit.
+ *
  * External value changes (undo, AI edits) still flow in whenever no local
  * edit is pending. `fieldKey` identifies the underlying field (e.g. the input
  * name); when it changes, a pending edit belongs to the previous field and is
  * discarded rather than committed to the wrong path — in practice a blur has
  * already flushed it before the field can be swapped.
  *
- * Returns [localValue, handleChange, flush].
+ * Returns [localValue, handleChange, flush, discard].
  */
 const useBufferedField = (value, onChange, fieldKey, delay = 300) => {
   const [localValue, setLocalValue] = useState(value ?? '');
@@ -42,10 +45,16 @@ const useBufferedField = (value, onChange, fieldKey, delay = 300) => {
       setLocalValue(event.target.value);
       pendingEventRef.current = event;
       clearTimer();
-      timerRef.current = setTimeout(flush, delay);
+      if (delay !== null) timerRef.current = setTimeout(flush, delay);
     },
     [delay, flush]
   );
+
+  const discard = () => {
+    clearTimer();
+    pendingEventRef.current = null;
+    setLocalValue(value ?? '');
+  };
 
   const previousKeyRef = useRef(fieldKey);
   useEffect(() => {
@@ -65,7 +74,7 @@ const useBufferedField = (value, onChange, fieldKey, delay = 300) => {
   // Commit a pending edit when the field unmounts (e.g. navigating away)
   useEffect(() => flush, [flush]);
 
-  return [localValue, handleChange, flush];
+  return [localValue, handleChange, flush, discard];
 };
 
 export default useBufferedField;

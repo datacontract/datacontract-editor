@@ -33,7 +33,12 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
 	const property = useEditorStore(useShallow((state) => state.getValue(propertyPath)));
 	const getValue = useEditorStore(useShallow((state) => state.getValue));
 	const setValue = useEditorStore(useShallow((state) => state.setValue));
+	const setName = useEditorStore((state) => state.setName);
 	const setProperty = (fieldPath, value) => {
+		if (fieldPath === 'name') {
+			setName(propertyPath, value);
+			return;
+		}
 		// fieldPath is relative to property, so we need to prefix with propertyPath
 		const fullPath = `${propertyPath}.${fieldPath}`;
 		setValue(fullPath, value);
@@ -161,6 +166,7 @@ const PropertyDetailsDrawer = function PropertyDetailsDrawer({ open, onClose, pr
         <div className="relative flex-1 px-3 py-3 overflow-y-auto">
           <PropertyDetailsPanel
             property={property}
+            propertyPath={propertyPath}
             onUpdate={setProperty}
             onDelete={() => removeProperty(propertyPath)}
             focusSection={focusSection}

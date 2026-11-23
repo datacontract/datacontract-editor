@@ -10,6 +10,7 @@ import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {toAbsoluteUrl} from "../../../lib/urlUtils.js";
 import DefinitionIcon from "../../ui/icons/DefinitionIcon.jsx";
+import useBufferedField from '../../../hooks/useBufferedField.js';
 import {useDefinition} from '../../../hooks/useDefinition.js';
 import {isSemanticAuthDef} from '../../../utils/authDefTypes.js';
 import {useEditorStore} from '../../../store.js';
@@ -88,7 +89,6 @@ const PropertyRow = ({
 	} : {};
 
 	const [editingPropertyName, setEditingPropertyName] = useState(false);
-	const [editedPropertyName, setEditedPropertyName] = useState('');
 	const inputRef = useRef(null);
 
 	// Get definition data using hook
@@ -123,7 +123,6 @@ const PropertyRow = ({
 	// Auto-edit when this is a newly added property
 	useEffect(() => {
 		if (autoEditNewProperty && depth === 0) {
-			setEditedPropertyName(property.name || '');
 			setEditingPropertyName(true);
 			// Also select this property to show details drawer
 			const currentPath = [...propPath, propIndex];
@@ -142,6 +141,13 @@ const PropertyRow = ({
 
 	const currentPath = [...propPath, propIndex];
 	const pathKey = `${schemaIdx}-${currentPath.join('-')}`;
+	// Commits on blur only: half-typed names must not reach the references to this property.
+	const [editedPropertyName, handleNameChange, flushName, discardName] = useBufferedField(
+		property.name,
+		(e) => updateProperty(schemaIdx, currentPath, 'name', e.target.value),
+		pathKey,
+		null,
+	);
 	const isExpanded = expandedProperties.has(pathKey);
 
 	// Determine effective logical type: use property's logicalType if set, otherwise use definition's
@@ -220,19 +226,16 @@ const PropertyRow = ({
 							<input
 								type="text"
 								value={editedPropertyName}
-								onChange={(e) => {
-									const newName = e.target.value;
-									setEditedPropertyName(newName);
-									// Update YAML immediately so drawer syncs in real-time
-									updateProperty(schemaIdx, currentPath, 'name', newName);
-								}}
+								onChange={handleNameChange}
 								onBlur={() => {
+									flushName();
 									setEditingPropertyName(false);
 								}}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										e.preventDefault();
 										e.stopPropagation();
+										flushName();
 										// Check if this is the last property at top level (depth === 0)
 										const isLastProperty = depth === 0 && propIndex === totalPropertiesCount - 1;
 										if (isLastProperty && onSaveAndAddNext) {
@@ -243,8 +246,7 @@ const PropertyRow = ({
 									} else if (e.key === 'Escape') {
 										e.preventDefault();
 										e.stopPropagation();
-										// Restore original value on escape
-										updateProperty(schemaIdx, currentPath, 'name', property.name || '');
+										discardName();
 										setEditingPropertyName(false);
 									}
 								}}
@@ -273,7 +275,6 @@ const PropertyRow = ({
 									onClick={(e) => {
 										e.stopPropagation();
 										onSelectProperty(currentPath, property);
-										setEditedPropertyName(property?.name || '');
 										setEditingPropertyName(true);
 									}}
 									title={property.name || (inheritedName ? `Inherited: ${inheritedName}` : 'Click to edit')}

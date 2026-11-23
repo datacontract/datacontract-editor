@@ -91,6 +91,46 @@ export const resolveReference = (reference, schemas, schemaNames) => {
   return { schemaIndex, propertyIndex };
 };
 
+const resolveNames = (reference, properties) => {
+  if (!Array.isArray(properties)) return null;
+  const exact = properties.findIndex((p) => p != null && String(p.name ?? '') === reference);
+  if (exact !== -1) return [exact];
+  for (const [index, property] of properties.entries()) {
+    if (!property?.name || !reference.startsWith(`${property.name}.`)) continue;
+    const rest = resolveNames(reference.slice(String(property.name).length + 1), property.properties);
+    if (rest !== null) return [index, ...rest];
+  }
+  return null;
+};
+
+/**
+ * Resolves a reference to the indices of the schema and the (nested) properties on the way to its
+ * target, or null when it is not in this contract.
+ */
+export const resolveReferencePath = (reference, schemas) => {
+  if (typeof reference !== 'string' || !reference || !Array.isArray(schemas)) return null;
+  if (!isFullyQualifiedReference(reference)) {
+    const [schemaName, rest] = splitSchemaReference(reference, schemaNamesOf(schemas));
+    const schemaIndex = schemas.findIndex((s) => s != null && s.name === schemaName);
+    if (schemaIndex === -1 || reference === schemaName) return schemaIndex === -1 ? null : [schemaIndex];
+    const names = resolveNames(rest, schemas[schemaIndex].properties);
+    return names && [schemaIndex, ...names];
+  }
+
+  if (isExternalReference(reference)) return null;
+  const segments = reference.replace(/^#?\/*/, '').split('/');
+  const path = [];
+  let siblings = schemas;
+  for (let i = 0; i < segments.length; i += 2) {
+    if (segments[i] !== (i === 0 ? 'schema' : 'properties') || !segments[i + 1]) return null;
+    const index = findIndexByIdOrName(siblings, segments[i + 1]);
+    if (index === -1) return null;
+    path.push(index);
+    siblings = siblings[index].properties;
+  }
+  return path;
+};
+
 /**
  * Whether a relationship's `to` (a reference, or an array of them for composite keys)
  * points at the given property.

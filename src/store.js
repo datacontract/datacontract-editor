@@ -11,6 +11,7 @@ import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
 import { createTestActions } from './services/testRunner.js';
 import { viewSwitch } from './lib/viewSwitch.js';
+import { keepReferenceTargets } from './lib/keepReferenceTargets.js';
 
 // Storage backend instance - can be set via setFileStorageBackend
 let fileStorageBackend = new LocalFileStorageBackend();
@@ -132,6 +133,11 @@ export function defaultStoreConfig(set, get) {
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
+			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+		},
+		setName: (path, name) => {
+			const { yamlParts } = get();
+			const newYamlParts = keepReferenceTargets(yamlParts, setValueWithPath(yamlParts, `${path}.name`, name.trim()));
 			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
 		},
 		removeValue: (path) => {
