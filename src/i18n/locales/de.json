@@ -375,7 +375,11 @@
       "zoom": "Nutze das Mausrad zum Zoomen",
       "shortcutsPrefix": "Drücke",
       "shortcutsFit": "um die Ansicht anzupassen,",
-      "shortcutsLayout": "für automatisches Layout"
+      "shortcutsLayout": "für automatisches Layout",
+      "shortcutsUndo": "zum Rückgängigmachen,",
+      "shortcutsRedo": "zum Wiederholen",
+      "undoKeys": "Strg/Cmd+Z",
+      "redoKeys": "Strg/Cmd+Umschalt+Z"
     },
     "coach": {
       "title": "Eine Beziehung zeichnen",

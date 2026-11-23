@@ -9,6 +9,7 @@ import { isSafeKey } from './utils/safeProperty.js';
 import { createAuthoritativeDefinitionsSlice, initialAuthoritativeDefinitionsState } from './lib/authoritativeDefinitionsSlice.js';
 import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
+import { createDiagramHistorySlice } from './components/diagram/diagramHistorySlice.js';
 import { createTestActions } from './services/testRunner.js';
 import { viewSwitch } from './lib/viewSwitch.js';
 import { keepReferenceTargets } from './lib/keepReferenceTargets.js';
@@ -124,6 +125,7 @@ export function defaultStoreConfig(set, get) {
 			try {
 				const yamlParts = Yaml.parse(newYaml);
 				set({yaml: newYaml, baselineYaml: newYaml, isDirty: false, yamlParts, yamlParseError: null, yamlParseErrorPos: null});
+				get().resetDiagramHistory();
 				get().collectAndFetchAuthoritativeDefinitions();
         // eslint-disable-next-line no-unused-vars
 			} catch(e) {
@@ -238,6 +240,7 @@ export function defaultStoreConfig(set, get) {
 
 				// Set the loaded file info so subsequent saves update the same file
 				get().setYaml(yamlContent);
+				get().resetDiagramHistory();
 				set({
 					baselineYaml: yamlContent,
 					lastSaveInfo: filename ? {
@@ -342,6 +345,7 @@ export function defaultStoreConfig(set, get) {
 		...authoritativeDefinitionsSlice,
 		...createAutoValuesSlice(set, get),
 		...createBrowsePanelSlice(set),
+		...createDiagramHistorySlice(set, get),
 		...actions,
 	};
 }
@@ -429,6 +433,11 @@ useEditorStore.setState = (state) => {
 useEditorStore.getState = () => {
 	const store = overrideStore || defaultEditorStore;
 	return store.getState();
+};
+
+useEditorStore.subscribe = (listener) => {
+	const store = overrideStore || defaultEditorStore;
+	return store.subscribe(listener);
 };
 
 /**

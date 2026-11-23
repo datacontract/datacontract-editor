@@ -47,7 +47,7 @@ const Modal = ({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/75 transition-opacity"

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
@@ -29,6 +29,7 @@ import { keepReferenceTargets } from '../../lib/keepReferenceTargets.js';
 import { resolveReference, referencesProperty } from '../../lib/relationshipReferences.js';
 import { groupEdges } from './edgeGrouping.js';
 import { getCardinality } from './cardinality.js';
+import { staysInPlace } from './staysInPlace.js';
 
 
 const PREVIEW_EDGE_STYLE = { stroke: '#d946ef', strokeWidth: 2.5 };
@@ -321,6 +322,15 @@ const defaultEdgeOptions = {
   style: { strokeWidth: 2, stroke: '#b1b1b7' },
 };
 
+const NON_TEXT_INPUT_TYPES = ['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file'];
+
+// Whether the element undoes typing on its own. A combobox with a closed list counts as a dropdown.
+const hasNativeUndo = (element) => {
+  if (element?.getAttribute('role') === 'combobox') return element.getAttribute('aria-expanded') === 'true';
+  if (element?.tagName === 'INPUT') return !NON_TEXT_INPUT_TYPES.includes(element.type);
+  return element?.tagName === 'TEXTAREA' || !!element?.isContentEditable || !!element?.closest('.monaco-editor');
+};
+
 const getStorageKey = (contractId) => `diagram-positions-${contractId}`;
 
 const getDiagramPositions = (contractId) => {
@@ -412,6 +422,12 @@ const DiagramViewInner = () => {
   // Set by collapse-toggle handlers so the auto-layout effect below knows a
   // user-initiated collapse change just occurred (vs. hydration from storage).
   const userToggledCollapseRef = useRef(false);
+  const nodesRef = useRef(nodes);
+  const isActionRecordedRef = useRef(false);
+  const lastStepKindRef = useRef(null);
+  const focusedFieldRef = useRef(null); // { element, isRecorded }
+  const isDraggingNodesRef = useRef(false);
+  const restoredPositionsRef = useRef(null);
 
   // Track selected property for drawer
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -422,6 +438,11 @@ const DiagramViewInner = () => {
 
   // Per-schema collapse state: 'full' | 'keys' | 'header'. Keyed by schema name.
   const [collapseState, setCollapseState] = useState({});
+  const collapseStateRef = useRef(collapseState);
+  useLayoutEffect(() => {
+    nodesRef.current = nodes;
+    collapseStateRef.current = collapseState;
+  }, [nodes, collapseState]);
 
   // Relationships between the same two tables are bundled into one edge.
   // Clicking a bundle expands it until the user clicks the pane.
@@ -466,10 +487,78 @@ const DiagramViewInner = () => {
     setCollapseState(getDiagramCollapseState(contractId));
   }, [contractId]);
 
+  const getDiagramState = useCallback((yaml) => ({
+    yaml,
+    positions: Object.fromEntries(nodesRef.current.map((n) => [n.id, n.position])),
+    collapse: collapseStateRef.current,
+  }), []);
+
+  // Whatever changes until the next task or user input belongs to the same step
+  const startAction = useCallback((stepKind) => {
+    lastStepKindRef.current = stepKind;
+    isActionRecordedRef.current = true;
+    setTimeout(() => { isActionRecordedRef.current = false; }, 0);
+  }, []);
+
+  // Must be called before the change. `stepKind` is 'edit', 'layout' or 'keyboardMove'.
+  const recordStep = useCallback((stepKind, yamlBefore = useEditorStore.getState().yaml) => {
+    if (isActionRecordedRef.current) return;
+    const continuesKeyboardMove = stepKind === 'keyboardMove' && lastStepKindRef.current === 'keyboardMove';
+    startAction(stepKind);
+    if (continuesKeyboardMove) return;
+    const field = focusedFieldRef.current;
+    if (stepKind === 'edit' && field?.element.isConnected) {
+      if (field.isRecorded) return;
+      field.isRecorded = true;
+    }
+    useEditorStore.getState().recordDiagramStep(getDiagramState(yamlBefore));
+  }, [getDiagramState, startAction]);
+
+  useEffect(() => {
+    useEditorStore.getState().resumeDiagramHistory();
+    const unsubscribe = useEditorStore.subscribe((state, previous) => {
+      if (state.yaml !== previous.yaml) recordStep('edit', previous.yaml);
+    });
+    return () => {
+      unsubscribe();
+      useEditorStore.getState().pauseDiagramHistory();
+    };
+  }, [recordStep]);
+
+  // All commits of a text field are one step, including the one on blur
+  useEffect(() => {
+    const handleFocusIn = ({ target }) => {
+      const isField = (hasNativeUndo(target) || target.getAttribute('role') === 'combobox')
+        && target.closest('[data-drawer-panel], .react-flow, [data-headlessui-portal]');
+      focusedFieldRef.current = isField ? { element: target, isRecorded: false } : null;
+    };
+    const handleFocusOut = () => {
+      focusedFieldRef.current = null;
+    };
+    const handleUserInput = () => {
+      isActionRecordedRef.current = false;
+      const field = focusedFieldRef.current;
+      if (field && !hasNativeUndo(field.element)) field.isRecorded = false;
+    };
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+    document.addEventListener('pointerdown', handleUserInput, true);
+    document.addEventListener('pointerup', handleUserInput, true);
+    document.addEventListener('keydown', handleUserInput, true);
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener('pointerdown', handleUserInput, true);
+      document.removeEventListener('pointerup', handleUserInput, true);
+      document.removeEventListener('keydown', handleUserInput, true);
+    };
+  }, []);
+
   // Global collapse toggle: if any schema is in 'full' mode, set them all
   // to 'keys'; otherwise expand them all back to 'full'.
   const handleToggleCollapseAll = useCallback(() => {
     if (!parsedData?.schema) return;
+    recordStep('layout');
     const names = parsedData.schema.map((s) => s?.name).filter(Boolean);
     userToggledCollapseRef.current = true;
     setCollapseState((prev) => {
@@ -480,10 +569,11 @@ const DiagramViewInner = () => {
       saveDiagramCollapseState(contractId, next);
       return next;
     });
-  }, [parsedData, contractId]);
+  }, [parsedData, contractId, recordStep]);
 
   const handleToggleCollapse = useCallback((schemaName, explicitMode) => {
     if (!schemaName) return;
+    recordStep('layout');
     userToggledCollapseRef.current = true;
     setCollapseState((prev) => {
       const nextMode = explicitMode && COLLAPSE_MODES.includes(explicitMode)
@@ -493,7 +583,7 @@ const DiagramViewInner = () => {
       saveDiagramCollapseState(contractId, next);
       return next;
     });
-  }, [contractId]);
+  }, [contractId, recordStep]);
 
   // Update YAML with modified schemas
   const updateSchemas = useCallback((updatedSchemas) => {
@@ -506,6 +596,11 @@ const DiagramViewInner = () => {
 
   // Handle node changes — debounce-save positions to localStorage
   const handleNodesChange = useCallback((changes) => {
+    const move = changes.find((c) => c.type === 'position');
+    if (move) {
+      if (!isDraggingNodesRef.current) recordStep(move.dragging ? 'layout' : 'keyboardMove');
+      isDraggingNodesRef.current = !!move.dragging;
+    }
     onNodesChange(changes);
     const hasPositionChange = changes.some(c => c.type === 'position' && c.position);
     if (hasPositionChange && contractId) {
@@ -514,7 +609,7 @@ const DiagramViewInner = () => {
         setNodes(cur => { saveDiagramPositions(contractId, cur); return cur; });
       }, 500);
     }
-  }, [onNodesChange, contractId, setNodes]);
+  }, [onNodesChange, contractId, setNodes, recordStep]);
 
   // Handle adding a new property to a schema
   const handleAddProperty = useCallback((nodeId, newProperty) => {
@@ -1118,7 +1213,7 @@ const DiagramViewInner = () => {
   // main thread, so we defer via setTimeout to let the UI paint feedback
   // (cursor change, button press state) before the layout runs.
   const [isLayouting, setIsLayouting] = useState(false);
-  const handleAutoLayout = useCallback(() => {
+  const handleAutoLayout = useCallback(({ isStep }) => {
     if (!parsedData?.schema || !nodes.length) return;
 
     setIsLayouting(true);
@@ -1129,6 +1224,12 @@ const DiagramViewInner = () => {
         collapseState,
         referencedByName,
       });
+
+      const movesNodes = nodesRef.current.some((node, index) => {
+        const position = layoutedSchemas[index]?.position;
+        return position && (position.x !== node.position.x || position.y !== node.position.y);
+      });
+      if (isStep && movesNodes) recordStep('layout');
 
       setNodes(currentNodes => {
         const updated = currentNodes.map((node, index) => ({
@@ -1154,7 +1255,7 @@ const DiagramViewInner = () => {
         });
       }
     }, 0);
-  }, [parsedData, contractId, nodes, setNodes, reactFlowInstance, collapseState]);
+  }, [parsedData, contractId, nodes, setNodes, reactFlowInstance, collapseState, recordStep]);
 
   // After a user toggles collapse mode (per-schema or toolbar "all"), re-run
   // auto-layout so node positions reflect the new rendered heights. The ref
@@ -1162,7 +1263,7 @@ const DiagramViewInner = () => {
   useEffect(() => {
     if (!userToggledCollapseRef.current) return;
     userToggledCollapseRef.current = false;
-    handleAutoLayout();
+    handleAutoLayout({ isStep: false });
   }, [collapseState, handleAutoLayout]);
 
   // Clear the selection (tables and relationships), close the drawers and
@@ -1192,7 +1293,7 @@ const DiagramViewInner = () => {
         reactFlowInstance?.fitView({ padding: 0.5, duration: 400 });
       } else if (event.key === 'l' || event.key === 'L') {
         event.preventDefault();
-        handleAutoLayout();
+        handleAutoLayout({ isStep: true });
       } else if (event.key === 'Escape') {
         handleDeselectAll();
       }
@@ -1201,8 +1302,77 @@ const DiagramViewInner = () => {
     return () => document.removeEventListener('keydown', handleShortcut);
   }, [currentView, reactFlowInstance, handleAutoLayout, handleDeselectAll]);
 
+  useEffect(() => {
+    const handleUndoRedo = (event) => {
+      if (event.altKey || !(event.metaKey || event.ctrlKey)) return;
+      const key = event.key.toLowerCase();
+      const isRedo = (key === 'z' && event.shiftKey) || (key === 'y' && event.ctrlKey && !event.shiftKey);
+      if (!isRedo && key !== 'z') return;
+      if (hasNativeUndo(document.activeElement)) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+
+      event.preventDefault();
+      if (isDraggingNodesRef.current) return;
+      const { yaml: currentYaml, undoDiagramStep, redoDiagramStep } = useEditorStore.getState();
+      const step = (isRedo ? redoDiagramStep : undoDiagramStep)(getDiagramState(currentYaml));
+      if (!step) return;
+
+      const nodesBefore = nodesRef.current;
+      startAction(null);
+
+      if (step.yaml !== useEditorStore.getState().yaml) {
+        restoredPositionsRef.current = step.positions;
+        setYaml(step.yaml);
+        useEditorStore.setState({ isDirty: step.yaml !== useEditorStore.getState().baselineYaml });
+
+        const restoredData = parseYaml(step.yaml);
+        setSelectedProperty((selected) =>
+          selected && staysInPlace(parsedData, restoredData, selected.propertyPath) ? selected : null);
+        setSelectedRelationship((selected) =>
+          selected && staysInPlace(parsedData, restoredData, `${selected.sourcePropertyPath}.relationships[${selected.relationshipIndex}]`) ? selected : null);
+      } else {
+        setNodes((currentNodes) => {
+          const restored = currentNodes.map((n) => ({ ...n, position: step.positions[n.id] || n.position }));
+          saveDiagramPositions(contractId, restored);
+          return restored;
+        });
+      }
+      setCollapseState(step.collapse);
+      saveDiagramCollapseState(contractId, step.collapse);
+
+      // Two frames until the nodes are rebuilt and measured
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const container = diagramContainerRef.current?.getBoundingClientRect();
+        if (!container || !reactFlowInstance) return;
+        const { zoom } = reactFlowInstance.getViewport();
+        const affected = nodesRef.current
+          .filter((node) => {
+            const before = nodesBefore.find((n) => n.data.schema?.name === node.data.schema?.name);
+            return !before
+              || before.position.x !== node.position.x
+              || before.position.y !== node.position.y
+              || before.data.collapseMode !== node.data.collapseMode
+              || JSON.stringify(before.data.schema) !== JSON.stringify(node.data.schema);
+          })
+          .map(({ position, measured }) => ({ ...position, width: measured?.width ?? 250, height: measured?.height ?? 100 }));
+        const isVisible = ({ x, y, width, height }) => {
+          const topLeft = reactFlowInstance.flowToScreenPosition({ x, y });
+          return topLeft.x < container.right && topLeft.x + width * zoom > container.left
+            && topLeft.y < container.bottom && topLeft.y + height * zoom > container.top;
+        };
+        if (affected.length === 0 || affected.some(isVisible)) return;
+        const [{ x, y, width, height }] = affected;
+        reactFlowInstance.setCenter(x + width / 2, y + height / 2, { zoom, duration: 400 });
+      }));
+    };
+    document.addEventListener('keydown', handleUndoRedo);
+    return () => document.removeEventListener('keydown', handleUndoRedo);
+  }, [getDiagramState, startAction, parsedData, contractId, setYaml, setNodes, reactFlowInstance]);
+
   // Convert schemas to nodes and edges
   useEffect(() => {
+    const restoredPositions = restoredPositionsRef.current;
+    restoredPositionsRef.current = null;
     if (!parsedData?.schema || !Array.isArray(parsedData.schema)) {
       setNodes([]);
       hasInitialLayout.current = false;
@@ -1231,7 +1401,7 @@ const DiagramViewInner = () => {
         return {
         id: `schema-${index}`,
         type: 'schemaNode',
-        position: savedPos || dagrePos || getGridPosition(index),
+        position: restoredPositions?.[`schema-${index}`] || savedPos || dagrePos || getGridPosition(index),
         data: {
           schema,
           onAddProperty: handleAddProperty,
@@ -1272,6 +1442,10 @@ const DiagramViewInner = () => {
       const names = new Set(schemaNodes.map((n) => n.data?.schema?.name));
       const result = schemaNodes.map(sn => {
         const name = sn.data?.schema?.name;
+        if (restoredPositions?.[sn.id]) {
+          const selected = currentNodes.some((n) => n.selected && n.data?.schema?.name === name);
+          return { ...sn, selected, position: restoredPositions[sn.id] };
+        }
         if (name && posMap[name]) {
           return { ...sn, position: posMap[name] };
         }
@@ -1623,7 +1797,7 @@ const DiagramViewInner = () => {
 						className="contents"
 						content={<span>{t('diagram.controls.autoLayout')} <span className="opacity-60">(L)</span><br/><span className="opacity-70">{t('diagram.controls.autoLayoutHint')}</span></span>}
 					>
-						<ControlButton onClick={handleAutoLayout}>
+						<ControlButton onClick={() => handleAutoLayout({ isStep: true })}>
 							{/* fill via inline style: React Flow's stylesheet sets fill: currentColor on
 							    control-button svgs, which would override the fill="none" attribute */}
 							<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ fill: 'none' }} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -1704,6 +1878,7 @@ const DiagramViewInner = () => {
                 <li>{t('diagram.help.collapse')}</li>
                 <li>{t('diagram.help.zoom')}</li>
                 <li>{t('diagram.help.shortcutsPrefix')} <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">F</kbd> {t('diagram.help.shortcutsFit')}, <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">L</kbd> {t('diagram.help.shortcutsLayout')}</li>
+                <li>{t('diagram.help.shortcutsPrefix')} <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">{t('diagram.help.undoKeys')}</kbd> {t('diagram.help.shortcutsUndo')} <kbd className="px-1 rounded bg-white border border-blue-300 text-[10px]">{t('diagram.help.redoKeys')}</kbd> {t('diagram.help.shortcutsRedo')}</li>
               </ul>
             </div>
           </Panel>

@@ -53,6 +53,7 @@ function App({ storageBackend = null, editorConfig = null }) {
                 // Decode base64 YAML
                 const decodedYaml = decodeURIComponent(escape(atob(encodedData)));
                 setYaml(decodedYaml);
+                useEditorStore.getState().resetDiagramHistory();
 
                 // Remove the query parameter from URL to clean it up
                 const newUrl = window.location.pathname + window.location.hash;

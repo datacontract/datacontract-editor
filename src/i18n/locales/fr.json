@@ -375,7 +375,11 @@
       "zoom": "Utilisez la molette de la souris pour zoomer",
       "shortcutsPrefix": "Appuyez sur",
       "shortcutsFit": "pour ajuster la vue,",
-      "shortcutsLayout": "pour la disposition automatique"
+      "shortcutsLayout": "pour la disposition automatique",
+      "shortcutsUndo": "pour annuler,",
+      "shortcutsRedo": "pour rétablir",
+      "undoKeys": "Ctrl/Cmd+Z",
+      "redoKeys": "Ctrl/Cmd+Maj+Z"
     },
     "coach": {
       "title": "Tracer une relation",

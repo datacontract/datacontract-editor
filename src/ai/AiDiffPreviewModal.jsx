@@ -112,7 +112,7 @@ export default function AiDiffPreviewModal() {
 	const handleCancel = () => cleanupAndClose(false);
 
 	return createPortal(
-		<div className="fixed inset-0 z-[9999] overflow-hidden">
+		<div role="dialog" aria-modal="true" className="fixed inset-0 z-[9999] overflow-hidden">
 			{/* Backdrop */}
 			<div
 				className="fixed inset-0 bg-black/50 transition-opacity"

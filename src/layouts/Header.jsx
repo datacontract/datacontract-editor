@@ -130,6 +130,7 @@ const Header = () => {
 
 			const store = useEditorStore.getState();
 			store.setYaml(newYaml);
+			store.resetDiagramHistory();
 			store.setView('form');
 			if (!store.isPreviewVisible) {
 				store.togglePreview();

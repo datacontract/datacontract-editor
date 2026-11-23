@@ -375,7 +375,11 @@
       "zoom": "Use mouse wheel to zoom",
       "shortcutsPrefix": "Press",
       "shortcutsFit": "to fit view,",
-      "shortcutsLayout": "to auto-layout"
+      "shortcutsLayout": "to auto-layout",
+      "shortcutsUndo": "to undo,",
+      "shortcutsRedo": "to redo",
+      "undoKeys": "Ctrl/Cmd+Z",
+      "redoKeys": "Ctrl/Cmd+Shift+Z"
     },
     "coach": {
       "title": "Draw a relationship",

@@ -375,7 +375,11 @@
       "zoom": "Använd mushjulet för att zooma",
       "shortcutsPrefix": "Tryck",
       "shortcutsFit": "för att anpassa vyn,",
-      "shortcutsLayout": "för automatisk layout"
+      "shortcutsLayout": "för automatisk layout",
+      "shortcutsUndo": "för att ångra,",
+      "shortcutsRedo": "för att göra om",
+      "undoKeys": "Ctrl/Cmd+Z",
+      "redoKeys": "Ctrl/Cmd+Skift+Z"
     },
     "coach": {
       "title": "Rita en relation",

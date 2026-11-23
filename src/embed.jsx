@@ -16,6 +16,7 @@ import { createAutoValuesSlice } from './lib/autoValuesSlice.js';
 import { viewSwitch } from './lib/viewSwitch.js';
 import { keepReferenceTargets } from './lib/keepReferenceTargets.js';
 import { createBrowsePanelSlice } from './components/browse/browsePanelSlice.js';
+import { createDiagramHistorySlice } from './components/diagram/diagramHistorySlice.js';
 import { registerTool, unregisterTool, clearTools } from './ai/index.js'
 import { toolTemplates, createTool, registerBuiltInTools } from './services/aiTools.js'
 import { DEFAULT_AI_CONFIG } from './config/defaults.js'
@@ -207,6 +208,7 @@ function createConfiguredStore(config) {
 			},
 			loadYaml: (newYaml) => {
 				get().setYaml(newYaml);
+				get().resetDiagramHistory();
 				set({ baselineYaml: newYaml, isDirty: false });
 				get().collectAndFetchAuthoritativeDefinitions();
 			},
@@ -277,6 +279,7 @@ function createConfiguredStore(config) {
 				try {
 					const yamlContent = await storageBackend.loadYamlFile();
 					get().setYaml(yamlContent);
+					get().resetDiagramHistory();
 					set({ baselineYaml: yamlContent });
 					return yamlContent;
 				} catch (error) {
@@ -384,6 +387,7 @@ function createConfiguredStore(config) {
 			...authoritativeDefinitionsSlice,
 			...createAutoValuesSlice(set, get),
 			...createBrowsePanelSlice(set),
+			...createDiagramHistorySlice(set, get),
 			...actions,
 		};
 	};
