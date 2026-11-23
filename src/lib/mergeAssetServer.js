@@ -21,8 +21,15 @@ export function mergeAssetServer(current, suggested) {
   } = suggested || {};
   const suggestedProperties = (suggestedCustomProperties || []).filter((p) => p?.property !== 'assetId');
   const currentProperties = Array.isArray(current?.customProperties) ? current.customProperties : [];
+  // What serverForApiVersion wrote for the type this replaces
+  const customType = current?.type === 'custom' && currentProperties.find((item) => item?.property === 'customType')?.value;
+  const replaced = [
+    ...suggestedProperties.map((p) => p.property),
+    ...(customType ? ['customType'] : []),
+    ...(customType === 'iceberg' ? ['catalogUrl', 'namespace'] : []),
+  ];
   const customProperties = [
-    ...currentProperties.filter((item) => !suggestedProperties.some((p) => p.property === item?.property)),
+    ...currentProperties.filter((item) => !replaced.includes(item?.property)),
     ...suggestedProperties,
   ];
 

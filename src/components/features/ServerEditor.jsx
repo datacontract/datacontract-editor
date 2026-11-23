@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
 import AssetServerTypeahead from './AssetServerTypeahead.jsx';
 import { mergeAssetServer } from '../../lib/mergeAssetServer.js';
+import { serverForApiVersion } from '../../lib/forApiVersion.js';
 import { applyServerDefaults } from '../../lib/applyServerDefaults.js';
 import { fetchServerDefaults } from '../../lib/serverAssetsApi.js';
 import { isSafeKey } from '../../utils/safeProperty.js';
@@ -36,7 +37,6 @@ const typeOptions = [
     { id: 'denodo', name: 'denodo' },
     { id: 'dremio', name: 'dremio' },
     { id: 'duckdb', name: 'duckdb' },
-    { id: 'gcs', name: 'gcs' },
     { id: 'glue', name: 'glue' },
     { id: 'hive', name: 'hive' },
     { id: 'impala', name: 'impala' },
@@ -73,6 +73,7 @@ const ServerEditor = ({ serverIndex }) => {
 	const setValue = useEditorStore(useShallow((state) => state.setValue))
 	const yamlParts = useEditorStore((state) => state.yamlParts);
 	const schemaData = useEditorStore((state) => state.schemaData);
+	const apiVersion = useEditorStore((state) => state.getValue('apiVersion'));
 	const assetServersUrl = useEditorStore((state) => state.editorConfig?.assets?.serversUrl);
 	const serverDefaultsUrl = useEditorStore((state) => state.editorConfig?.assets?.serverDefaultsUrl);
 	const [showAssetTypeahead, setShowAssetTypeahead] = useState(false);
@@ -262,7 +263,7 @@ const ServerEditor = ({ serverIndex }) => {
     const currentServer = servers?.[serverIndex];
     if (!currentServer || !suggestion?.server) return;
     const updatedServers = [...servers];
-    updatedServers[serverIndex] = mergeAssetServer(currentServer, suggestion.server);
+    updatedServers[serverIndex] = mergeAssetServer(currentServer, serverForApiVersion(suggestion.server, apiVersion));
     setValue('servers', updatedServers);
   };
 
@@ -1255,21 +1256,21 @@ const ServerEditor = ({ serverIndex }) => {
 
                 {servers[serverIndex].type === 'kinesis' && (
                   <>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <label className="block text-xs font-medium leading-4 text-gray-900">
+                    {/* ODCS has no stream here: shown only so that an existing one can be cleared */}
+                    {servers[serverIndex].stream && (
+                      <div>
+                        <label className="block text-xs font-medium leading-4 text-gray-900 mb-1">
                           {t('server.field.stream.label')}
                         </label>
-                        <span className="text-xs leading-4 text-gray-500">{t('server.field.required')}</span>
+                        <input
+                          type="text"
+                          value={servers[serverIndex].stream || ''}
+                          onChange={(e) => updateServer('stream', e.target.value)}
+                          className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
+                          placeholder="my-stream"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        value={servers[serverIndex].stream || ''}
-                        onChange={(e) => updateServer('stream', e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 pl-2 pr-3 text-gray-900 bg-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 text-xs leading-4"
-                        placeholder="my-stream"
-                      />
-                    </div>
+                    )}
                     <ValidatedInput
                       name="format"
                       label={t('server.field.format.label')}

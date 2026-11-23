@@ -1,5 +1,6 @@
 import { resolveAuthDefType, isSemanticAuthDef } from '../../utils/authDefTypes.js';
 import { nodeToDefinition } from './semanticTreeUtils.js';
+import { propertyForApiVersion } from '../../lib/forApiVersion.js';
 
 /**
  * Build an ODCS schema property from a semantic tree node.
@@ -42,8 +43,8 @@ const COPIED_PROPERTY_FIELDS = [
  *
  * Upstream properties are COPIED (there is no definition URL to inherit
  * from), but their semantic authoritativeDefinitions are carried over so
- * concept links survive the hop downstream. Nested properties and array
- * items are copied recursively.
+ * concept links survive the hop downstream. Nested properties, array items
+ * and map keys and values are copied recursively.
  *
  * When `origin` describes where the property came from
  * ({dataProductName, contractExternalId, contractTitle, schemaName,
@@ -72,6 +73,14 @@ export function buildPropertyFromContractProperty(prop, origin = null) {
   if (prop.items && typeof prop.items === 'object') {
     copy.items = buildPropertyFromContractProperty(prop.items);
     delete copy.items.name;
+  }
+  if (prop.map || prop.logicalType === 'map') {
+    copy.map = {
+      key: buildPropertyFromContractProperty(prop.map?.key),
+      value: buildPropertyFromContractProperty(prop.map?.value),
+    };
+    delete copy.map.key.name;
+    delete copy.map.value.name;
   }
 
   if (origin) {
@@ -139,12 +148,13 @@ function buildTransformDescription(origin, propertyName) {
 /**
  * Build the property object for a browse drag payload.
  * @param {Object} data - active.data.current of the drag ({source: 'browse', kind, node|property})
+ * @param {string} [apiVersion] - the document's ODCS version, which the property has to fit
  */
-export function buildPropertyFromBrowseDrag(data) {
+export function buildPropertyFromBrowseDrag(data, apiVersion) {
   if (data?.kind === 'semantics') return buildPropertyFromSemanticNode(data.node);
-  if (data?.kind === 'dataProduct') return buildPropertyFromContractProperty(data.property, data.origin);
+  if (data?.kind === 'dataProduct') return propertyForApiVersion(buildPropertyFromContractProperty(data.property, data.origin), apiVersion);
   // A column of the contract's own server: the physical column itself, so no lineage
-  if (data?.kind === 'asset') return buildPropertyFromContractProperty(data.property);
+  if (data?.kind === 'asset') return propertyForApiVersion(buildPropertyFromContractProperty(data.property), apiVersion);
   return null;
 }
 

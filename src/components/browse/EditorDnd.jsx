@@ -163,7 +163,7 @@ export default function EditorDndProvider({ children }) {
         }
         return;
       }
-      const property = buildPropertyFromBrowseDrag(active.data.current);
+      const property = buildPropertyFromBrowseDrag(active.data.current, getValue('apiVersion'));
       if (property) {
         const insertedIndex = insertPropertyAt(getValue, setValue, target.schemaIndex, target.index, property);
         markInsertedProperty(target.schemaIndex, insertedIndex);

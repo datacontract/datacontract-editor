@@ -12,3 +12,7 @@ export const compareApiVersions = (a, b) => {
   const [b0 = 0, b1 = 0, b2 = 0] = parts(b);
   return a0 - b0 || a1 - b1 || a2 - b2;
 };
+
+/** Whether [apiVersion] is older than [version]. A document without one counts as current. */
+export const isBeforeApiVersion = (apiVersion, version) =>
+  Boolean(apiVersion) && compareApiVersions(apiVersion, version) < 0;
