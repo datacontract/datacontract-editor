@@ -634,8 +634,19 @@ const DiagramViewInner = () => {
       updatedSchemas[schemaIndex] = updatedSchema;
       const updatedData = keepReferenceTargets(parsedData, { ...parsedData, schema: updatedSchemas });
       setYaml(stringifyYaml(updatedData));
+
+      const previousName = parsedData.schema[schemaIndex].name;
+      if (updatedSchema.name !== previousName) {
+        setCollapseState((prev) => {
+          const { [previousName]: mode, ...others } = prev;
+          if (!mode) return prev; // Enter and the blur after it both save the name
+          const next = { ...others, [updatedSchema.name]: mode };
+          saveDiagramCollapseState(contractId, next);
+          return next;
+        });
+      }
     }
-  }, [parsedData, setYaml]);
+  }, [parsedData, setYaml, contractId]);
 
   // Handle deleting a schema
   const handleDeleteSchema = useCallback((nodeId) => {
@@ -1258,10 +1269,16 @@ const DiagramViewInner = () => {
         return schemaNodes;
       }
 
+      const names = new Set(schemaNodes.map((n) => n.data?.schema?.name));
       const result = schemaNodes.map(sn => {
         const name = sn.data?.schema?.name;
         if (name && posMap[name]) {
           return { ...sn, position: posMap[name] };
+        }
+        const renamedNode = currentNodes.length === schemaNodes.length
+          && currentNodes.find((n) => n.id === sn.id && !names.has(n.data?.schema?.name));
+        if (renamedNode) {
+          return { ...sn, position: renamedNode.position };
         }
         // New node: place to the right of existing nodes, vertically centered
         let maxRight = -Infinity;
