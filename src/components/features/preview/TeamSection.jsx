@@ -123,21 +123,21 @@ const TeamSection = () => {
 				<div className="px-4 py-4 sm:px-6">
 					{/* Authoritative Definitions Section */}
 					{team.authoritativeDefinitions && Array.isArray(team.authoritativeDefinitions) && team.authoritativeDefinitions.length > 0 && (
-						<div className="flex flex-wrap gap-2 mb-6">
+						<div className="flex flex-wrap gap-2 mb-5">
+							{/* Compact chips, icon left and text right, as Entropy Data shows links */}
 							{team.authoritativeDefinitions.map((def, index) => (
 								<a
 									key={index}
 									href={def.url}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="flex flex-col text-center rounded-md bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:ring-indigo-300 transition-colors"
-									style={{minWidth: '120px'}}
+									className="inline-flex items-center gap-2 rounded-md bg-white pl-2.5 pr-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
 									title={def.description}
 								>
-									<div className="mx-auto w-8 h-8 mb-2 text-gray-500">
+									<span className="size-5 shrink-0">
 										<IconResolver url={def.url} type={def.type} className="w-full h-full"/>
-									</div>
-									<div className="text-xs font-medium">{def.type}</div>
+									</span>
+									<span>{def.type}</span>
 								</a>
 							))}
 						</div>
