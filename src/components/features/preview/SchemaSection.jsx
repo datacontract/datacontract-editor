@@ -440,6 +440,12 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 							{schema.deprecated && (
 								<span className={`${deprecatedPillClassName} ml-1 px-2`}>{t('preview.schema.deprecated')}</span>
 							)}
+							{/* The table's links, such as the asset it stands for, sit beside its name, where one looks for them. */}
+							{Array.isArray(schema.authoritativeDefinitions) && schema.authoritativeDefinitions.length > 0 && (
+								<span className="ml-1 inline-flex align-middle font-normal">
+									<AuthoritativeDefinitionsPreview definitions={schema.authoritativeDefinitions} />
+								</span>
+							)}
 							{schema.description ? (
 								<div className="text-sm font-normal text-gray-500">{schema.description}</div>
 							) : schemaDefinition?.description ? (
@@ -451,11 +457,6 @@ const SchemaTable = memo(({ schemaName, schema }) => {
 								<div className="text-sm font-normal text-gray-500">{t('preview.schema.granularity', { value: schema.dataGranularityDescription })}</div>
 							)}
 							<SynonymsLine synonyms={schema.synonyms} className="text-sm font-normal text-gray-500" />
-							{Array.isArray(schema.authoritativeDefinitions) && schema.authoritativeDefinitions.length > 0 && (
-								<div className="mt-1 font-normal">
-									<AuthoritativeDefinitionsPreview definitions={schema.authoritativeDefinitions} />
-								</div>
-							)}
 							<CustomPropertiesPreview properties={schema.customProperties} pillClassName="mr-1 mt-1" hiddenPropertyNames={hiddenNames} customPropertyConfigs={customPropertyConfigs}/>
               {schema && schema.tags && schema.tags.length > 0 && <Tags tags={schema.tags}/>}
 							{Array.isArray(schema.relationships) && schema.relationships.length > 0 && (
