@@ -129,7 +129,7 @@ describe('getSchemaPropertyInfo', () => {
     for (const context of ['schema', 'property']) {
       const info = getSchemaPropertyInfo(odcsSchema, 'id', context);
       expect(info.description).toMatch(/^Stable technical identifier for references/);
-      expect(info.pattern).toBe('^[A-Za-z0-9_-]+$');
+      expect(info.pattern).toBe('^[^\\s.#/\\\\@!%&^]+$');
     }
   });
 
