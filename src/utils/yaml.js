@@ -78,9 +78,23 @@ export function updateYaml(previousYaml, value, options = {}) {
   if (!previousYaml || !previousYaml.trim()) return stringifyYaml(value, options);
   const doc = YAML.parseDocument(previousYaml);
   if (doc.errors.length > 0) return stringifyYaml(value, options);
+  if (sameData(doc, doc.contents, value)) return previousYaml;
+  keepTrailingCommentInPlace(doc, previousYaml);
   doc.contents = merged(doc, doc.contents, value);
   const raw = doc.toString({ ...defaultOptions, ...options });
   return applyYamlFormat(raw);
+}
+
+// The yaml library prints a comment at the end of a document after a blank line. Where the source
+// has none, the comment moves to the contents, which print it right after their last item.
+function keepTrailingCommentInPlace(doc, yaml) {
+  if (!doc.comment || !YAML.isCollection(doc.contents) || doc.contents.comment) return;
+  const lines = yaml.replace(/\s+$/, "").split("\n");
+  let index = lines.length - 1;
+  while (index >= 0 && /^\s*#/.test(lines[index])) index--;
+  if (index < 0 || lines[index].trim() === "") return;
+  doc.contents.comment = doc.comment;
+  doc.comment = null;
 }
 
 function isPlainObject(value) {
@@ -122,7 +136,9 @@ function mergedMap(doc, map, value) {
   return map;
 }
 
-// Items keep their node, and so their comments, when they move: matched by `id` or `name`, else by position.
+// Items keep their node, and so their comments, when they move: matched by `id` or `name`. An item
+// that matches none, such as a renamed one, takes the item at its position, unless another item
+// still names that one.
 function mergedSeq(doc, seq, value) {
   const identity = (data) => (isPlainObject(data) ? data.id ?? data.name : undefined);
   const unused = [...seq.items];
@@ -141,11 +157,13 @@ function mergedSeq(doc, seq, value) {
     }
     return undefined;
   });
+  const named = new Set(value.map(identity).filter((key) => key !== undefined));
   seq.items = value.map((child, index) => {
     let item = matches[index];
-    if (!item && identity(child) === undefined) {
+    if (!item) {
       const atPosition = seq.items[index];
-      if (atPosition && unused.includes(atPosition) && (!YAML.isMap(atPosition) || identity(atPosition.toJS(doc)) === undefined)) {
+      const itsKey = YAML.isMap(atPosition) ? identity(atPosition.toJS(doc)) : undefined;
+      if (atPosition && unused.includes(atPosition) && (itsKey === undefined || !named.has(itsKey))) {
         take(atPosition);
         item = atPosition;
       }

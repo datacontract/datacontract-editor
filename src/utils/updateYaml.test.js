@@ -90,6 +90,57 @@ describe('updateYaml keeps comments of a document whose values change', () => {
     expect(parseYaml(yaml)).toEqual(value);
   });
 
+  it('keeps the comments inside a schema when the schema is renamed', () => {
+    const { value, yaml } = changed((v) => { v.schema[0].name = 'purchase_orders'; });
+
+    expect(parseYaml(yaml)).toEqual(value);
+    expect(yaml).toContain('# the main table');
+    expect(yaml).toContain('# the key');
+    expect(yaml).toContain('# when the cohort starts');
+  });
+
+  it('keeps the comment of a property when the property is renamed', () => {
+    const { value, yaml } = changed((v) => { v.schema[0].properties[0].name = 'client_id'; });
+
+    expect(parseYaml(yaml)).toEqual(value);
+    expect(yaml).toMatch(/client_id"? # the key/);
+  });
+
+  it('gives a new item inserted before the others no comment of theirs', () => {
+    const { value, yaml } = changed((v) => { v.schema[0].properties.unshift({ name: 'cohort_id', logicalType: 'string' }); });
+
+    expect(parseYaml(yaml)).toEqual(value);
+    expect(yaml).toMatch(/customer_id"? # the key/);
+    expect(yaml.indexOf('# when the cohort starts')).toBeLessThan(yaml.indexOf('start_date'));
+    expect(yaml.indexOf('cohort_id')).toBeLessThan(yaml.indexOf('# the key'));
+  });
+
+  it('keeps a comment at the end of the document where it is', () => {
+    const previous = 'id: "x"\nname: "n"\n# end of contract\n';
+    const value = parseYaml(previous);
+    value.name = 'm';
+
+    expect(updateYaml(previous, value)).toBe('id: "x"\nname: "m"\n# end of contract\n');
+  });
+
+  it('keeps the blank line before a comment at the end of the document', () => {
+    const previous = 'id: "x"\nname: "n"\n\n# end of contract\n';
+    const value = parseYaml(previous);
+    value.name = 'm';
+
+    expect(updateYaml(previous, value)).toBe('id: "x"\nname: "m"\n\n# end of contract\n');
+  });
+
+  it('gives back the same text when a value is changed and changed back', () => {
+    const previous = `${contract}# end of contract\n`;
+    const value = parseYaml(previous);
+    value.name = 'Other';
+    const changedYaml = updateYaml(previous, value);
+    value.name = 'Customer Cohorts';
+
+    expect(updateYaml(changedYaml, value)).toBe(previous);
+  });
+
   it('writes the whole value when the previous YAML is empty or invalid', () => {
     expect(parseYaml(updateYaml('', { id: 'x' }))).toEqual({ id: 'x' });
     expect(parseYaml(updateYaml('id: [unclosed', { id: 'x' }))).toEqual({ id: 'x' });
