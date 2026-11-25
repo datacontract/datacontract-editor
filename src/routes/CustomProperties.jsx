@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store.js';
 import CustomPropertiesEditor from '../components/ui/CustomPropertiesEditor.jsx';
-import { stringifyYaml, parseYaml } from '../utils/yaml.js';
+import { updateYaml, parseYaml } from '../utils/yaml.js';
 import { useCustomization } from '../hooks/useCustomization.js';
 import {useTranslation} from 'react-i18next';
 
@@ -45,7 +45,7 @@ const CustomProperties = () => {
         delete parsed.customProperties;
       }
 
-      const newYaml = stringifyYaml(parsed);
+      const newYaml = updateYaml(yaml, parsed);
       setYaml(newYaml);
     } catch (error) {
       console.error('Error updating YAML:', error);

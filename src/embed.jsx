@@ -24,7 +24,7 @@ import './index.css'
 import './App.css'
 import './components/diagram/DiagramStyles.css'
 import * as Yaml from "yaml";
-import { parseYaml, stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
+import { parseYaml, updateYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { createTestActions } from './services/testRunner.js';
 import { mergePersistedEmbedState } from './lib/embedPersistence.js';
@@ -215,16 +215,16 @@ function createConfiguredStore(config) {
 			getValue: (path) => getValueWithPath(get().yamlParts, path),
 			setValue: (path, value) => {
 				const newYamlParts = setValueWithPath(get().yamlParts, path, value);
-				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+				set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 			},
 			setName: (path, name) => {
 				const { yamlParts } = get();
 				const newYamlParts = keepReferenceTargets(yamlParts, setValueWithPath(yamlParts, `${path}.name`, name.trim()));
-				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+				set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 			},
 			removeValue: (path) => {
 				const newYamlParts = removeValueWithPath(get().yamlParts, path);
-				set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+				set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 			},
 			markClean: () => set({ isDirty: false }),
 			clearSaveInfo: () => set({ lastSaveInfo: null }),
