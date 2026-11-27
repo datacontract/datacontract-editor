@@ -7,6 +7,7 @@ import {
   collectExpandableIds,
   filterTree,
   isSelectableNode,
+  nodeSelectionKey,
   nodeToDefinition,
 } from '../browse/semanticTreeUtils.js';
 
@@ -23,8 +24,8 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const { getSemanticTree } = useDefinition();
 
   const [selectedDefinition, setSelectedDefinition] = useState(null);
-  // Track selected externalId separately for tree highlighting (URLs may not be unique across elements)
-  const [selectedExternalId, setSelectedExternalId] = useState(null);
+  // The selected row for the highlight: a shared property is a row on its own and one under each concept that has it
+  const [selectedKey, setSelectedKey] = useState(null);
 
   const [tree, setTree] = useState([]);
   const [isLoadingTree, setIsLoadingTree] = useState(false);
@@ -36,7 +37,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   useEffect(() => {
     if (!isOpen) return;
     setSelectedDefinition(null);
-    setSelectedExternalId(null);
+    setSelectedKey(null);
     setExpandedNodes(new Set());
     setTreeFilter('');
     setTree([]);
@@ -79,7 +80,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
   const selectTreeNode = useCallback((node) => {
     if (!isSelectableNode(node)) return;
     setSelectedDefinition(nodeToDefinition(node));
-    setSelectedExternalId(node.externalId);
+    setSelectedKey(nodeSelectionKey(node));
   }, []);
 
   const filteredTree = treeFilter ? filterTree(tree, treeFilter) : tree;
@@ -149,7 +150,7 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
                 <div className="px-4 py-2">
                   {filteredTree.map((node) => (
                     <TreeNode key={node.externalId} node={node} expandedNodes={expandedNodes} toggleNode={toggleNode}
-                      selectedExternalId={selectedExternalId} onSelect={selectTreeNode} depth={0} />
+                      selectedKey={selectedKey} onSelect={selectTreeNode} depth={0} />
                   ))}
                 </div>
               )}
@@ -175,11 +176,11 @@ export function DefinitionSelectionModal({ isOpen, onClose, onSelect }) {
 
 /* ── Sub-components ── */
 
-function TreeNode({ node, expandedNodes, toggleNode, selectedExternalId, onSelect, depth }) {
+function TreeNode({ node, expandedNodes, toggleNode, selectedKey, onSelect, depth }) {
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.externalId);
   const isSelectable = isSelectableNode(node);
-  const isSelected = isSelectable && selectedExternalId === node.externalId;
+  const isSelected = isSelectable && selectedKey === nodeSelectionKey(node);
   const isParent = node.elementType === 'entity' || node.elementType === 'namespace' || node.elementType === 'group';
 
   return (
@@ -211,7 +212,7 @@ function TreeNode({ node, expandedNodes, toggleNode, selectedExternalId, onSelec
       {isParent && isExpanded && hasChildren && (
         <div>{node.children.map((child) => (
           <TreeNode key={child.externalId} node={child} expandedNodes={expandedNodes} toggleNode={toggleNode}
-            selectedExternalId={selectedExternalId} onSelect={onSelect} depth={depth + 1} />
+            selectedKey={selectedKey} onSelect={onSelect} depth={depth + 1} />
         ))}</div>
       )}
     </div>

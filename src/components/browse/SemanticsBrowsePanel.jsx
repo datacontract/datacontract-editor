@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDraggable } from '@dnd-kit/core';
 import { useDefinition } from '../../hooks/useDefinition.js';
 import { ElementIcon, EmptyState, LoadingSpinner } from './semanticTree.jsx';
-import { collectExpandableIds, filterTree, isSelectableNode, nodeLinkUrls } from './semanticTreeUtils.js';
+import { collectExpandableIds, collectStandaloneIds, filterTree, isSelectableNode, nodeLinkUrls } from './semanticTreeUtils.js';
 import { BrowseSearchInput, LinkIcon, LinkedBadge, TreeChevron } from './browsePanelParts.jsx';
 import { Tooltip } from '../ui/index.js';
 import { useLinkedAuthDefUrls } from './useContractLinks.js';
@@ -57,6 +57,10 @@ export default function SemanticsBrowsePanel() {
     });
   };
 
+  // From the whole tree, not the filtered one: a row under a concept must not take over the links of a property
+  // whose own row the filter only hides
+  const standaloneIds = useMemo(() => collectStandaloneIds(tree), [tree]);
+
   const filteredTree = useMemo(
     () => (treeFilter ? filterTree(tree, treeFilter) : tree),
     [tree, treeFilter]
@@ -85,6 +89,7 @@ export default function SemanticsBrowsePanel() {
             expandedNodes={effectiveExpandedNodes}
             toggleNode={toggleNode}
             linkedUrls={linkedUrls}
+            standaloneIds={standaloneIds}
             setHoveredContractLink={setHoveredContractLink}
           />
         ))}
@@ -116,12 +121,12 @@ function SemanticNodeTooltip({ node, t }) {
   );
 }
 
-function SemanticTreeNode({ node, depth, idPath, expandedNodes, toggleNode, linkedUrls, setHoveredContractLink }) {
+function SemanticTreeNode({ node, depth, idPath, expandedNodes, toggleNode, linkedUrls, standaloneIds, setHoveredContractLink }) {
   const { t } = useTranslation();
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.externalId);
   const selectable = isSelectableNode(node);
-  const absUrls = selectable ? [...new Set(nodeLinkUrls(node).map(toAbsoluteUrl).filter(Boolean))] : [];
+  const absUrls = selectable ? [...new Set(nodeLinkUrls(node, standaloneIds).map(toAbsoluteUrl).filter(Boolean))] : [];
   const linkedProperties = absUrls.map((url) => linkedUrls.get(url)).find(Boolean) || null;
 
   // Reverse cross-highlight: a linked property row is hovered in the schema editor
@@ -186,6 +191,7 @@ function SemanticTreeNode({ node, depth, idPath, expandedNodes, toggleNode, link
           expandedNodes={expandedNodes}
           toggleNode={toggleNode}
           linkedUrls={linkedUrls}
+          standaloneIds={standaloneIds}
           setHoveredContractLink={setHoveredContractLink}
         />
       ))}
