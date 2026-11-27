@@ -13,7 +13,7 @@ Configuration via Vite build-time environment variables.
 cp .env.example .env.local
 
 # Edit with your values
-VITE_AI_PROVIDER=openai           # 'openai' or 'anthropic'
+VITE_AI_PROVIDER=openai           # 'openai', 'openai-responses' or 'anthropic'
 VITE_AI_ENDPOINT=https://api.openai.com/v1/chat/completions
 VITE_AI_API_KEY=sk-xxx
 VITE_AI_MODEL=gpt-4o
@@ -43,7 +43,7 @@ docker run -p 4173:4173 \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AI_ENABLED` | `false` | Enable AI assistant |
-| `AI_PROVIDER` | `openai` | `openai` or `anthropic` |
+| `AI_PROVIDER` | `openai` | `openai`, `openai-responses` or `anthropic` |
 | `AI_ENDPOINT` | - | API endpoint URL |
 | `AI_API_KEY` | - | API key for the endpoint |
 | `AI_MODEL` | `gpt-4o` | Model name (provider-specific) |
@@ -85,7 +85,7 @@ Configuration via JavaScript when embedding in another application.
     yaml: '...',
     ai: {
       enabled: true,
-      provider: 'openai',  // or 'anthropic'
+      provider: 'openai',  // or 'openai-responses' or 'anthropic'
       endpoint: 'https://api.openai.com/v1/chat/completions',
       apiKey: 'sk-xxx',
     },
@@ -100,7 +100,7 @@ Configuration via JavaScript when embedding in another application.
 ```javascript
 ai: {
   enabled: true,                    // Enable/disable AI assistant
-  provider: 'openai',              // 'openai' or 'anthropic'
+  provider: 'openai',              // 'openai', 'openai-responses' or 'anthropic'
   endpoint: 'https://...',          // API endpoint (required)
   apiKey: 'sk-xxx',                 // API key (required)
   model: 'gpt-4o',                  // Model name (provider-specific)
@@ -115,9 +115,12 @@ ai: {
 | Provider | `provider` | Default Model | Endpoint |
 |----------|------------|---------------|----------|
 | OpenAI (and compatible) | `openai` | `gpt-4o` | `https://api.openai.com/v1/chat/completions` |
+| OpenAI Responses API | `openai-responses` | `gpt-4o` | `https://api.openai.com/v1/responses` |
 | Anthropic | `anthropic` | `claude-sonnet-4-20250514` | `https://api.anthropic.com/v1/messages` |
 
 The `openai` provider works with any OpenAI-compatible API: OpenAI, Azure OpenAI, Ollama, OpenRouter, LiteLLM, vLLM, etc.
+
+The `openai-responses` provider speaks the OpenAI Responses API, which newer OpenAI reasoning models (gpt-6.1-sol, gpt-6.2) need to call tools. It works with OpenAI and with the v1 API of Azure OpenAI (`https://{resource}.openai.azure.com/openai/v1/responses`, with the deployment name as `model`). Requests are stateless (`store: false`).
 
 **Auth Header:**
 
