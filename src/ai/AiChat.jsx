@@ -440,7 +440,10 @@ export default function AiChat() {
 								</>
 							) : (
 								<>
-									<div><span className="text-gray-400">endpoint:</span> https://api.openai.com/v1/chat/completions</div>
+									{aiConfig.provider === 'openai-responses' && (
+										<div><span className="text-gray-400">provider:</span> openai-responses</div>
+									)}
+									<div><span className="text-gray-400">endpoint:</span> {aiConfig.provider === 'openai-responses' ? 'https://api.openai.com/v1/responses' : 'https://api.openai.com/v1/chat/completions'}</div>
 									<div><span className="text-gray-400">apiKey:</span> sk-...</div>
 									<div><span className="text-gray-400">model:</span> gpt-4o</div>
 								</>

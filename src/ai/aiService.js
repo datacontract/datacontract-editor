@@ -3,6 +3,7 @@
  *
  * Delegates to provider adapters for API-specific logic:
  * - OpenAI-compatible (OpenAI, Azure, OpenRouter, local LLMs)
+ * - OpenAI Responses API (OpenAI, Azure OpenAI v1)
  * - Anthropic (Claude)
  */
 
@@ -10,6 +11,7 @@ import { DEFAULT_AI_CONFIG } from '../config/defaults.js';
 import { isSafeKey } from '../utils/safeProperty.js';
 import * as openaiProvider from './providers/openai.js';
 import * as anthropicProvider from './providers/anthropic.js';
+import * as openaiResponsesProvider from './providers/openaiResponses.js';
 
 /**
  * Get the provider adapter based on config
@@ -19,6 +21,9 @@ import * as anthropicProvider from './providers/anthropic.js';
 function getProvider(config) {
   if (config.provider === 'anthropic') {
     return anthropicProvider;
+  }
+  if (config.provider === 'openai-responses') {
+    return openaiResponsesProvider;
   }
   return openaiProvider;
 }
