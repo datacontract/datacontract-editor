@@ -181,6 +181,8 @@ init({
   showDelete: true,
 
   // Data
+  idFollowsName: false,              // New, unsaved contract: the ID follows the name as a slug
+                                     // ("My Orders" -> "my-orders") until the user types an ID
   teams: [                           // Team picker for team.name; other team fields move behind "Override fields"
     { id: 'sales', name: 'Sales', type: 'Domain', selectable: false },
     { id: 'team-1', name: 'Team 1', description: 'Owns orders', type: 'Team',

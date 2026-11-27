@@ -148,6 +148,11 @@ const DEFAULT_CONFIG = {
   // locked, since renaming would break those references. [{name, externalId}, ...]
   dataProductsUsingContract: [],
 
+  // For a contract that is not saved yet: the ID (`id`) follows the name typed in the form, as a
+  // slug ("My Orders" -> "my-orders"), until the user types an ID of their own. Leave it off for
+  // saved contracts, since a new ID breaks links to them.
+  idFollowsName: false,
+
   // Optional lists for dropdowns (if not provided, text fields are used)
   // Teams the contract can be assigned to. When set, the Team section shows a searchable team
   // picker (written to team.name) and hides the other team fields behind "Override fields".
@@ -376,6 +381,7 @@ function createConfiguredStore(config) {
         managedTags: config.managedTags,
         allowUnmanagedTags: config.allowUnmanagedTags,
 				dataProductsUsingContract: config.dataProductsUsingContract,
+				idFollowsName: config.idFollowsName,
 				teams: config.teams,
 				domains: config.domains,
 				customQualityChecks: config.customQualityChecks,
