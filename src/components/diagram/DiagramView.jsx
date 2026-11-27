@@ -16,7 +16,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './DiagramStyles.css';
-import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
+import { updateYaml, parseYaml } from '../../utils/yaml.js';
 import { createSchemaStub } from '../../utils/schemaStub.js';
 import { useEditorStore } from '../../store.js';
 import SchemaNode from './SchemaNode.jsx';
@@ -590,9 +590,9 @@ const DiagramViewInner = () => {
     if (!parsedData) return;
 
     const newData = { ...parsedData, schema: updatedSchemas };
-    const newYaml = stringifyYaml(newData);
+    const newYaml = updateYaml(yaml, newData);
     setYaml(newYaml);
-  }, [parsedData, setYaml]);
+  }, [parsedData, setYaml, yaml]);
 
   // Handle node changes — debounce-save positions to localStorage
   const handleNodesChange = useCallback((changes) => {
@@ -728,7 +728,7 @@ const DiagramViewInner = () => {
     if (updatedSchemas[schemaIndex]) {
       updatedSchemas[schemaIndex] = updatedSchema;
       const updatedData = keepReferenceTargets(parsedData, { ...parsedData, schema: updatedSchemas });
-      setYaml(stringifyYaml(updatedData));
+      setYaml(updateYaml(yaml, updatedData));
 
       const previousName = parsedData.schema[schemaIndex].name;
       if (updatedSchema.name !== previousName) {
@@ -741,7 +741,7 @@ const DiagramViewInner = () => {
         });
       }
     }
-  }, [parsedData, setYaml, contractId]);
+  }, [parsedData, setYaml, contractId, yaml]);
 
   // Handle deleting a schema
   const handleDeleteSchema = useCallback((nodeId) => {

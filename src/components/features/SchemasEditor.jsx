@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
-import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
+import { updateYaml, parseYaml } from '../../utils/yaml.js';
 import { createSchemaStub } from '../../utils/schemaStub.js';
 
 const SchemasEditor = () => {
@@ -42,7 +42,7 @@ const SchemasEditor = () => {
 
       parsed.schema.push(createSchemaStub(parsed.schema.length));
 
-      const newYaml = stringifyYaml(parsed);
+      const newYaml = updateYaml(yaml, parsed);
       setYaml(newYaml);
 
       // Navigate to the new schema

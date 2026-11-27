@@ -2,7 +2,7 @@ import {create} from 'zustand'
 import {devtools, persist} from 'zustand/middleware'
 import {LocalFileStorageBackend} from './services/LocalFileStorageBackend.js'
 import * as Yaml from "yaml";
-import { stringifyYaml, setYamlFormatConfig } from './utils/yaml.js';
+import { updateYaml, setYamlFormatConfig } from './utils/yaml.js';
 import { DEFAULT_AI_CONFIG, DEFAULT_TESTS_CONFIG } from './config/defaults.js';
 import { getStorageConfig } from './utils/persistence.js';
 import { isSafeKey } from './utils/safeProperty.js';
@@ -135,16 +135,16 @@ export function defaultStoreConfig(set, get) {
 		getValue: (path) => getValueWithPath(get().yamlParts, path),
 		setValue: (path, value) => {
 			const newYamlParts = setValueWithPath(get().yamlParts, path, value);
-			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+			set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 		},
 		setName: (path, name) => {
 			const { yamlParts } = get();
 			const newYamlParts = keepReferenceTargets(yamlParts, setValueWithPath(yamlParts, `${path}.name`, name.trim()));
-			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+			set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 		},
 		removeValue: (path) => {
 			const newYamlParts = removeValueWithPath(get().yamlParts, path);
-			set({yamlParts: newYamlParts, yaml: stringifyYaml(newYamlParts), isDirty: true})
+			set({yamlParts: newYamlParts, yaml: updateYaml(get().yaml, newYamlParts), isDirty: true})
 		},
 		clearSaveInfo: () => set({lastSaveInfo: null}),
 		addNotification: (notification) => {

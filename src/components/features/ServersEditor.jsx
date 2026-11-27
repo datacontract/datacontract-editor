@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useEditorStore } from '../../store.js';
-import { stringifyYaml, parseYaml } from '../../utils/yaml.js';
+import { updateYaml, parseYaml } from '../../utils/yaml.js';
 import serverIcons from '../../assets/server-icons/serverIcons.jsx';
 
 const ServersEditor = () => {
@@ -46,7 +46,7 @@ const ServersEditor = () => {
         type: ''
       });
 
-      const newYaml = stringifyYaml(parsed);
+      const newYaml = updateYaml(yaml, parsed);
       setYaml(newYaml);
 
       // Navigate to the new server
