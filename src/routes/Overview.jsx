@@ -17,6 +17,7 @@ import {
 import {CustomSections, UngroupedCustomProperties} from '../components/ui/CustomSection.jsx';
 import {compareApiVersions} from '../lib/apiVersion.js';
 import {odcsUpgradeSteps, upgradeOdcsDocument} from '../lib/odcsMigrations.js';
+import {idFollowingName} from '../lib/idFromName.js';
 import {useOdcsVersions} from '../hooks/useSchemaCapability.js';
 
 const Overview = () => {
@@ -36,7 +37,11 @@ const Overview = () => {
 	const getValue = useEditorStore((state) => state.getValue);
 	const setValue = useEditorStore((state) => state.setValue);
 	const setId = (newValue) => setValue('id', newValue);
-	const setName = (newValue) => setValue('name', newValue);
+	const setName = (newValue) => {
+		const nextId = idFollowsName ? idFollowingName(getValue('id'), getValue('name'), newValue, idOverride?.pattern) : undefined;
+		setValue('name', newValue);
+		if (nextId !== undefined) setValue('id', nextId);
+	};
 	const setVersion = (newValue) => setValue('version', newValue);
 	const setStatus = (newValue) => setValue('status', newValue);
 	const setDomain = (newValue) => setValue('domain', newValue);
@@ -116,6 +121,9 @@ const Overview = () => {
 	};
 	const versionOverride = useStandardPropertyOverride('root', 'version');
 	const idOverride = useStandardPropertyOverride('root', 'id');
+	// A host creating a new contract lets its ID follow the name until the user types an ID of
+	// their own. Never for a saved contract: renaming its ID would break links to it.
+	const idFollowsName = Boolean(editorConfig.idFollowsName) && !isIdLocked && !isIdHidden;
 	const statusOverride = useStandardPropertyOverride('root', 'status');
 	const domainOverride = useStandardPropertyOverride('root', 'domain');
 	const tenantOverride = useStandardPropertyOverride('root', 'tenant');
